@@ -45,6 +45,22 @@ jobs:
             CODE_SIGNING_ALLOWED=NO \
             build 2>&1 | tee "$RUNNER_TEMP/mushiverse-ios-build.log"
           echo "### iOS Simulator build: SUCCEEDED (unsigned)" >> "$GITHUB_STEP_SUMMARY"
+      - name: Verify and package compiled simulator app
+        run: |
+          APP="$RUNNER_TEMP/mushiverse-derived/Build/Products/Debug-iphonesimulator/App.app"
+          test -d "$APP"
+          test -f "$APP/Info.plist"
+          /usr/libexec/PlistBuddy -c 'Print :CFBundleIdentifier' "$APP/Info.plist"
+          /usr/libexec/PlistBuddy -c 'Print :CFBundleExecutable' "$APP/Info.plist" > /dev/null
+          echo "### Verified: unsigned iOS Simulator .app exists" >> "$GITHUB_STEP_SUMMARY"
+          echo "This artifact is for Simulator only, not a signed iPhone install or TestFlight upload." >> "$GITHUB_STEP_SUMMARY"
+      - name: Save compiled simulator app
+        uses: actions/upload-artifact@v4
+        with:
+          name: mushiverse-ios-simulator-app
+          path: ${{ runner.temp }}/mushiverse-derived/Build/Products/Debug-iphonesimulator/App.app/
+          if-no-files-found: error
+          retention-days: 7
       - name: Save compile log on failure
         if: failure()
         run: |
