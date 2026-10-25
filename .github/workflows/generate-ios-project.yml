@@ -1,0 +1,39 @@
+name: Generate iOS Xcode project
+on:
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  generate-native:
+    runs-on: macos-latest
+    timeout-minutes: 35
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+          cache-dependency-path: package-lock.json
+      - name: Install dependencies
+        run: npm install --no-audit --no-fund
+      - name: Prepare local web bundle
+        run: |
+          npm run build:web
+          node scripts/verify-web.mjs
+      - name: Generate Capacitor iOS project
+        run: npx cap add ios
+      - name: Check native project files
+        run: |
+          test -f ios/App/App.xcodeproj/project.pbxproj
+          test -f ios/App/Podfile
+          echo "Xcode project generated; NOT signed, archived or tested" >> "$GITHUB_STEP_SUMMARY"
+          echo "Replace prototype bundle ID and validate native permissions before App Store submission." >> "$GITHUB_STEP_SUMMARY"
+      - name: Save Xcode project for follow-up work
+        uses: actions/upload-artifact@v4
+        with:
+          name: mushiverse-ios-unsigned-project
+          path: |
+            ios/
+            capacitor.config.json
+            package.json
+          retention-days: 7
