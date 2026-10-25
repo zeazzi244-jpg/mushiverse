@@ -32,7 +32,7 @@ jobs:
           test -f ios/App/App.xcodeproj/project.pbxproj
           echo 'Native project exists; dependency manager may be Swift Package Manager or CocoaPods.'
           echo "Xcode project generated; unsigned simulator compilation runs next; NOT signed or archived" >> "$GITHUB_STEP_SUMMARY"
-          echo "Replace prototype bundle ID and validate native permissions before App Store submission." >> "$GITHUB_STEP_SUMMARY"
+          echo "Verify camera/privacy declarations and Apple signing before App Store submission." >> "$GITHUB_STEP_SUMMARY"
       - name: Compile unsigned iOS Simulator app
         run: |
           set -o pipefail
@@ -50,7 +50,10 @@ jobs:
           APP="$RUNNER_TEMP/mushiverse-derived/Build/Products/Debug-iphonesimulator/App.app"
           test -d "$APP"
           test -f "$APP/Info.plist"
-          /usr/libexec/PlistBuddy -c 'Print :CFBundleIdentifier' "$APP/Info.plist"
+          ACTUAL_ID=$(/usr/libexec/PlistBuddy -c 'Print :CFBundleIdentifier' "$APP/Info.plist")
+          EXPECTED_ID=$(node -p "require('./capacitor.config.json').appId")
+          echo "Compiled Bundle ID: $ACTUAL_ID"
+          test "$ACTUAL_ID" = "$EXPECTED_ID"
           /usr/libexec/PlistBuddy -c 'Print :CFBundleExecutable' "$APP/Info.plist" > /dev/null
           echo "### Verified: unsigned iOS Simulator .app exists" >> "$GITHUB_STEP_SUMMARY"
           echo "This artifact is for Simulator only, not a signed iPhone install or TestFlight upload." >> "$GITHUB_STEP_SUMMARY"
