@@ -1,0 +1,26 @@
+name: Web bundle integrity
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'index.html'
+      - 'package.json'
+      - 'capacitor.config.json'
+      - 'scripts/**'
+      - '.github/workflows/web-bundle-check.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  verify-web-bundle:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Generate web bundle
+        run: npm run build:web
+      - name: Check bundle integrity
+        run: node scripts/verify-web.mjs
