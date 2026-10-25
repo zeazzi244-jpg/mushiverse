@@ -1,0 +1,9 @@
+{
+  "appId": "com.mushiverse.prototype",
+  "appName": "MUSHIVERSE",
+  "webDir": "www",
+  "bundledWebRuntime": false,
+  "ios": {
+    "contentInset": "automatic"
+  }
+}
