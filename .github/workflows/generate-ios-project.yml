@@ -30,10 +30,11 @@ jobs:
       - name: Check native project files
         run: |
           test -f ios/App/App.xcodeproj/project.pbxproj
-          test -f ios/App/Podfile
+          echo 'Native project exists; dependency manager may be Swift Package Manager or CocoaPods.'
           echo "Xcode project generated; NOT signed, archived or tested" >> "$GITHUB_STEP_SUMMARY"
           echo "Replace prototype bundle ID and validate native permissions before App Store submission." >> "$GITHUB_STEP_SUMMARY"
       - name: Save Xcode project for follow-up work
+        if: always()
         uses: actions/upload-artifact@v4
         with:
           name: mushiverse-ios-unsigned-project
@@ -41,4 +42,5 @@ jobs:
             ios/
             capacitor.config.json
             package.json
+          if-no-files-found: warn
           retention-days: 7
