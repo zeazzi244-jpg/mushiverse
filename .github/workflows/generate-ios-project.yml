@@ -1,6 +1,13 @@
 name: Generate iOS Xcode project
 on:
   workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - 'package.json'
+      - 'capacitor.config.json'
+      - 'scripts/build-web.mjs'
+      - '.github/workflows/generate-ios-project.yml'
 permissions:
   contents: read
 jobs:
