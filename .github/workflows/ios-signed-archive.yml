@@ -14,7 +14,7 @@ jobs:
       ASC_KEY_ID: ${{ secrets.ASC_KEY_ID }}
       ASC_ISSUER_ID: ${{ secrets.ASC_ISSUER_ID }}
       ASC_API_KEY_P8_BASE64: ${{ secrets.ASC_API_KEY_P8_BASE64 }}
-      APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
+      APPLE_TEAM_ID: 7Q5539YU7V
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -24,7 +24,7 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          for name in ASC_KEY_ID ASC_ISSUER_ID ASC_API_KEY_P8_BASE64 APPLE_TEAM_ID; do
+          for name in ASC_KEY_ID ASC_ISSUER_ID ASC_API_KEY_P8_BASE64; do
             if [[ -z "${!name:-}" ]]; then echo "::error::Missing $name in repository Actions secrets"; exit 1; fi
           done
           test "$(node -p "require('./capacitor.config.json').appId")" = "com.rikuto.mushiverse"
