@@ -20,7 +20,25 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
+      - name: Syntax-check build and release scripts
+        run: |
+          node --check scripts/build-web.mjs
+          node --check scripts/verify-web.mjs
+          node --check scripts/check-ios-release.mjs
       - name: Generate web bundle
         run: npm run build:web
       - name: Check bundle integrity
         run: node scripts/verify-web.mjs
+      - name: Report native iOS readiness (informational)
+        if: always()
+        shell: bash
+        run: |
+          if npm run ios:check > ios-readiness.txt 2>&1; then
+            echo "### iOS structural preflight: PASS" >> "$GITHUB_STEP_SUMMARY"
+          else
+            echo "### iOS structural preflight: BLOCKED (expected until native setup)" >> "$GITHUB_STEP_SUMMARY"
+          fi
+          echo 'Preflight checks structure only; no signed build or App Store submission.' >> "$GITHUB_STEP_SUMMARY"
+          echo '~~~' >> "$GITHUB_STEP_SUMMARY"
+          cat ios-readiness.txt >> "$GITHUB_STEP_SUMMARY"
+          echo '~~~' >> "$GITHUB_STEP_SUMMARY"
