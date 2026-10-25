@@ -1,0 +1,22 @@
+# Dependencies and generated build outputs
+node_modules/
+www/
+dist/
+build/
+.DS_Store
+*.log
+.env
+.env.*
+!.env.example
+# Apple signing material — never commit these
+*.p12
+*.p8
+*.mobileprovision
+*.cer
+*.key
+*.pem
+# Xcode local state (keep shared project/schemes committed)
+ios/Pods/
+ios/**/xcuserdata/
+ios/**/.build/
+ios/**/DerivedData/
