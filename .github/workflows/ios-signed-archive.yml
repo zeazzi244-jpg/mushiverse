@@ -40,6 +40,8 @@ jobs:
           npm run build:web
           node scripts/verify-web.mjs
           npx cap add ios
+      - name: Run iOS release structure checks
+        run: npm run ios:check
       - name: Declare iOS camera and location permissions
         shell: bash
         run: |
