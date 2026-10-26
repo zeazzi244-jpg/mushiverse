@@ -1,27 +1,37 @@
-# MUSHIVERSE iOS native setup (pre-build)
-Status: configuration added; iOS project NOT generated, signed, built, or uploaded.
+# MUSHIVERSE iOS release status and next actions
 
-## Before generating iOS
-1. Confirm the real **Bundle ID** in App Store Connect and replace `com.mushiverse.prototype` in `capacitor.config.json`. This is an explicit temporary placeholder, **not** a registered bundle identifier.
-2. Verify Node.js 22+, Capacitor 8 and macOS with Xcode 26+ are available through a controlled Mac / remote Mac environment. An iPhone by itself cannot run Xcode.
-3. Install dependencies: `npm install`.
-4. Bundle current web files: `npm run build:web`.
-5. Generate native project: `npm run ios:add`. **Commit generated ios project** after checking it locally.
-6. Inspect network assumptions, login redirects, camera permissions, photos, current-location requests, safety workflows, and legal disclosures. WebKit behavior and deep links must be tested separately.
-7. Open in Xcode, set Team + automatic signing, shared scheme, app icon and meaningful native capabilities. Test on iPhone.
-8. Set up App Store Connect/Xcode Cloud only after the Xcode project exists; archive and upload to TestFlight.
+## Verified configuration
+- App Store Connect app: ムシバース (iOS 1.0, previously observed as 提出準備中).
+- Registered Bundle ID: `com.rikuto.mushiverse` in `capacitor.config.json`.
+- Apple Developer Team ID is configured in the GitHub manual signing workflow.
+- Unsigned iOS Simulator compilation previously passed in GitHub Actions; this is not an iPhone/TestFlight build.
+- Generated iOS project lives in temporary GitHub Actions artifacts, not in the repository.
+- Native camera, photo and when-in-use location privacy descriptions are added during GitHub Actions build. The simulator workflow checks that they survive into the built app.
+- **No signed IPA, TestFlight distribution or App Store approval has been confirmed.**
 
-## Technical caveats
-- `www` is generated and should not be edited directly.
-- Local JavaScript data is not secure storage for paid currency or authoritative rankings.
-- Any third-party assets loaded at runtime can require an internet connection. The static bundle by itself does not guarantee offline operation.
-- Do not enable premium payment or present TestFlight as complete before device validation.
-- Apple review rule 4.2 requires utility beyond repackaged website; use real iOS features and provide a polished native experience.
-- Add camera and photo access explanations to generated iOS Info.plist if required; permission strings must reflect actual functionality.
-- Never commit API secrets, Apple certificates, provisioning profiles or private keys.
+## GitHub workflows
+1. `.github/workflows/generate-ios-project.yml`: macOS, web bundle, native project generation, unsigned simulator compilation and privacy/Bundle ID checks. May run automatically on matching pushes.
+2. `.github/workflows/ios-signing-preflight.yml`: manual credential presence/format verification; this does not test Apple authorization.
+3. `.github/workflows/ios-signed-archive.yml`: manual signing/archive/IPA export. **Do not trigger before secrets are configured.** The workflow does not upload to TestFlight.
 
-References:
-https://capacitorjs.com/docs/ios
-https://capacitorjs.com/docs/getting-started
-https://developer.apple.com/documentation/xcode/setting-up-your-project-to-use-xcode-cloud
-https://developer.apple.com/app-store/review/guidelines/
+## Missing credentials — GitHub Actions repository secrets
+- `ASC_KEY_ID`: App Store Connect API key identifier.
+- `ASC_ISSUER_ID`: App Store Connect API issuer identifier.
+- `ASC_API_KEY_P8_BASE64`: base64 of the original Apple .p8 API private-key file (encode locally, do not paste into GitHub source, issues or chat).
+- The Team ID is already configured separately; no `APPLE_TEAM_ID` secret is required by the current workflows.
+
+Generate the API key through App Store Connect account access settings with adequate roles. Set secrets only in GitHub repository Settings -> Secrets and variables -> Actions. Never commit private keys, certificates or provisioning profiles.
+
+## Remaining critical work
+1. Confirm fresh simulator build is green after privacy edits.
+2. Provision App Store Connect credentials in repository Actions secrets; verify the GitHub repo owner/account and permissions. Then run preflight.
+3. Run manual signed archive and fix signing/provisioning issues. Verify actual IPA output. This is not yet TestFlight distribution.
+4. Add an approved App Store Connect upload mechanism or upload through a controlled Mac, and validate processing in TestFlight.
+5. Test real iPhone capture, photos, map permission, auth, payments, offline/network states and notification behavior.
+6. Review user generated content moderation, reporting/blocking, privacy policy, App Store metadata, and Apple IAP compliance before submission.
+
+## Caveats
+- An iPhone alone cannot operate Xcode. GitHub's macOS runner can compile/attempt automatic signing.
+- Web frontend state is not authoritative for paid coin balances or ranked collection counts; these require server-side checks.
+- Permission strings must match actual APIs and uses; having plist keys does not mean native access works.
+- No task should be called finished merely because a workflow file exists.
