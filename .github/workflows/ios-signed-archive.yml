@@ -48,9 +48,17 @@ jobs:
           set -euo pipefail
           PLIST="ios/App/App/Info.plist"
           test -f "$PLIST"
-          /usr/libexec/PlistBuddy -c "Add :NSCameraUsageDescription string '昆虫の採集記録を撮影して投稿するためにカメラを使用します。'" "$PLIST"
-          /usr/libexec/PlistBuddy -c "Add :NSLocationWhenInUseUsageDescription string '採集場所を地図に表示するため、使用中のみ位置情報を利用します。'" "$PLIST"
-          /usr/libexec/PlistBuddy -c "Add :NSPhotoLibraryUsageDescription string '採集記録に添付する写真を選ぶために写真ライブラリを使用します。'" "$PLIST"
+          set_usage() {
+            local key="$1" description="$2"
+            if /usr/libexec/PlistBuddy -c "Print :$key" "$PLIST" >/dev/null 2>&1; then
+              /usr/libexec/PlistBuddy -c "Set :$key $description" "$PLIST"
+            else
+              /usr/libexec/PlistBuddy -c "Add :$key string $description" "$PLIST"
+            fi
+          }
+          set_usage NSCameraUsageDescription "昆虫の採集記録を撮影して投稿するためにカメラを使用します。"
+          set_usage NSLocationWhenInUseUsageDescription "採集場所を地図に表示するため、使用中のみ位置情報を利用します。"
+          set_usage NSPhotoLibraryUsageDescription "採集記録に添付する写真を選ぶために写真ライブラリを使用します。"
       - name: Archive signed iPhone app
         shell: bash
         run: |
