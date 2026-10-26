@@ -27,6 +27,8 @@ jobs:
           node scripts/verify-web.mjs
       - name: Generate Capacitor iOS project
         run: npx cap add ios
+      - name: Run iOS release structure checks
+        run: npm run ios:check
       - name: Declare iOS camera and location permissions
         shell: bash
         run: |
