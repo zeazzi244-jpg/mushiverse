@@ -40,6 +40,15 @@ jobs:
           npm run build:web
           node scripts/verify-web.mjs
           npx cap add ios
+      - name: Declare iOS camera and location permissions
+        shell: bash
+        run: |
+          set -euo pipefail
+          PLIST="ios/App/App/Info.plist"
+          test -f "$PLIST"
+          /usr/libexec/PlistBuddy -c "Add :NSCameraUsageDescription string '昆虫の採集記録を撮影して投稿するためにカメラを使用します。'" "$PLIST"
+          /usr/libexec/PlistBuddy -c "Add :NSLocationWhenInUseUsageDescription string '採集場所を地図に表示するため、使用中のみ位置情報を利用します。'" "$PLIST"
+          /usr/libexec/PlistBuddy -c "Add :NSPhotoLibraryUsageDescription string '採集記録に添付する写真を選ぶために写真ライブラリを使用します。'" "$PLIST"
       - name: Archive signed iPhone app
         shell: bash
         run: |
