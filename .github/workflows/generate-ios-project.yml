@@ -64,6 +64,11 @@ jobs:
           echo "Compiled Bundle ID: $ACTUAL_ID"
           test "$ACTUAL_ID" = "$EXPECTED_ID"
           /usr/libexec/PlistBuddy -c 'Print :CFBundleExecutable' "$APP/Info.plist" > /dev/null
+          for key in NSCameraUsageDescription NSLocationWhenInUseUsageDescription NSPhotoLibraryUsageDescription; do
+            VALUE=$(/usr/libexec/PlistBuddy -c "Print :$key" "$APP/Info.plist")
+            test -n "$VALUE" || { echo "::error::Missing $key in compiled app"; exit 1; }
+            echo "Verified privacy key: $key"
+          done
           echo "### Verified: unsigned iOS Simulator .app exists" >> "$GITHUB_STEP_SUMMARY"
           echo "This artifact is for Simulator only, not a signed iPhone install or TestFlight upload." >> "$GITHUB_STEP_SUMMARY"
       - name: Save compiled simulator app
