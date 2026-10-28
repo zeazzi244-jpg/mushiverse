@@ -1,10 +1,12 @@
 name: iOS signed archive (manual)
 on:
   workflow_dispatch:
-  push:
-    branches: [main]
-    paths:
-      - '.github/workflows/ios-signed-archive.yml'
+    inputs:
+      upload_to_testflight:
+        description: 'Upload to App Store Connect (requires separate owner authorization)'
+        type: boolean
+        required: true
+        default: false
 permissions:
   contents: read
 jobs:
@@ -112,6 +114,7 @@ jobs:
           if-no-files-found: error
           retention-days: 1
       - name: Upload IPA to App Store Connect for TestFlight
+        if: ${{ inputs.upload_to_testflight }}
         shell: bash
         run: |
           set -euo pipefail
