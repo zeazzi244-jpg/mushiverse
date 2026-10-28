@@ -34,6 +34,8 @@ final class MushiverseCoinStore: ObservableObject {
     func start() async {
         guard !isStarted else { return }
         isStarted = true
+        lifecycleGeneration += 1
+        let generation = lifecycleGeneration
         // Restarting the shop must not leave a second StoreKit updates listener active.
         updatesTask?.cancel()
         updatesTask = nil
@@ -44,6 +46,7 @@ final class MushiverseCoinStore: ObservableObject {
             }
         }
         await loadProducts()
+        guard isStarted, lifecycleGeneration == generation else { return }
         await retryUnfinishedPurchases()
     }
 
@@ -61,6 +64,7 @@ final class MushiverseCoinStore: ObservableObject {
 
     func stop() {
         isStarted = false
+        lifecycleGeneration += 1
         updatesTask?.cancel()
         updatesTask = nil
     }
