@@ -20,3 +20,7 @@ ios/Pods/
 ios/**/xcuserdata/
 ios/**/.build/
 ios/**/DerivedData/
+
+# Browser test output
+playwright-report/
+test-results/

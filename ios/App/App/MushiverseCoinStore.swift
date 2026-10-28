@@ -2,10 +2,13 @@ import Foundation
 import StoreKit
 import Combine
 
-/// Native iOS component. Not wired to the GitHub Pages web app yet.
+/// StoreKit 2 coin store used by the Capacitor native shop.
 /// The backend endpoint must verify Apple's signed transaction before crediting coins.
 @MainActor
 final class MushiverseCoinStore: ObservableObject {
+    // Compile-time release gate. Never enable from JavaScript, remote config or localStorage.
+    static let purchasesEnabled = false
+
     static let productIDs: Set<String> = [
         "mushiverse.coins.100",
         "mushiverse.coins.550",
@@ -91,6 +94,10 @@ final class MushiverseCoinStore: ObservableObject {
     }
 
     func purchase(_ product: Product) async {
+        guard Self.purchasesEnabled else {
+            lastError = "現在は販売準備中です。購入はできません。"
+            return
+        }
         guard isStarted, !Task.isCancelled, Self.productIDs.contains(product.id), product.type == .consumable, products.contains(where: { $0.id == product.id }), !isPurchasing, !isRetrying else { return }
         isPurchasing = true
         lastError = nil

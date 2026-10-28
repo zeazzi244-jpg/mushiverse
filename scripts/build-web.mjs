@@ -14,3 +14,8 @@ for(const name of readdirSync(root)){
  }else if(assets.has(extname(name).toLowerCase()) && !['package.json','capacitor.config.json'].includes(name)) copyFileSync(src,dst);
 }
 console.log('Web bundle generated at www/ — check offline/network features before native submission.');
+
+// Package boot dependencies locally so a CDN outage does not disable login or map controls.
+const vendor=join(out,'assets','vendor');mkdirSync(vendor,{recursive:true});
+copyFileSync(join(root,'node_modules/@supabase/supabase-js/dist/umd/supabase.js'),join(vendor,'supabase.js'));
+cpSync(join(root,'node_modules/leaflet/dist'),join(vendor,'leaflet'),{recursive:true});
