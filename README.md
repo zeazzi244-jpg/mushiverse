@@ -1,5 +1,7 @@
 # MUSHIVERSE / ムシバース
 
+共通引き継ぎ資料: [開発状況](docs/DEVELOPMENT_STATUS.md)。開発のたびに変更・テスト・進捗・未完了・本人操作を更新します。
+
 昆虫採集SNSのWeb + Capacitor iOSアプリ。**App Store未公開・購入機能停止中**。
 
 最新の調査、修正、残作業とiPhoneからの設定手順: [公開準備レポート](docs/RELEASE_STATUS_2026-10-28.md)。
