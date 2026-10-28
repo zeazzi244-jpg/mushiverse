@@ -27,7 +27,9 @@ final class MushiverseCoinStore: ObservableObject {
     }
 
     func start() async {
+        // Restarting the shop must not leave a second StoreKit updates listener active.
         updatesTask?.cancel()
+        updatesTask = nil
         updatesTask = Task { [weak self] in
             for await result in Transaction.updates {
                 guard let self else { break }
