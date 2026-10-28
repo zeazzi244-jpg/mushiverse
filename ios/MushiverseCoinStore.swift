@@ -33,7 +33,7 @@ final class MushiverseCoinStore: ObservableObject {
     }
 
     func start() async {
-        guard !isStarted else { return }
+        guard !isStarted, !Task.isCancelled else { return }
         isStarted = true
         lifecycleGeneration += 1
         let generation = lifecycleGeneration
