@@ -3954,7 +3954,7 @@ function initGacha(){const nav=document.querySelector('.nav button[data-tab="gac
 function initLocation(){const b=$('mv86Locate');if(!b)return;let marker=null,circle=null;
  b.onclick=()=>{const status=$('mv86LocationStatus');if(!navigator.geolocation){status.textContent='この端末では位置情報を利用できません';return}
  b.disabled=true;status.textContent='位置情報を確認しています…';
- navigator.geolocation.getCurrentPosition(pos=>{b.disabled=false;const map=window.mv86InsectMap;if(!map||!window.L){status.textContent='地図を表示してからもう一度押してください';return}const lat=pos.coords.latitude,lng=pos.coords.longitude;if(marker)map.removeLayer(marker);if(circle)map.removeLayer(circle);marker=L.circleMarker([lat,lng],{radius:8,color:'#0967bb',weight:3,fillColor:'#53aaf0',fillOpacity:1}).addTo(map).bindPopup('📍 現在地（この端末のみ）');circle=L.circle([lat,lng],{radius:Math.min(pos.coords.accuracy||0,5000),color:'#4393d3',fillOpacity:.08,weight:1}).addTo(map);map.setView([lat,lng],14);status.textContent='青い点が現在地です。位置情報は投稿・保存・送信されません。';},err=>{b.disabled=false;status.textContent=err.code===1?'位置情報の利用が許可されていません':'現在地を取得できませんでした。もう一度お試しください。';},{enableHighAccuracy:false,timeout:15000,maximumAge:0});};
+ navigator.geolocation.getCurrentPosition(pos=>{b.disabled=false;const map=window.mv86InsectMap;if(!map||!window.L){status.textContent='地図を表示してからもう一度押してください';return}const lat=pos.coords.latitude,lng=pos.coords.longitude;if(marker)map.removeLayer(marker);if(circle)map.removeLayer(circle);marker=L.circleMarker([lat,lng],{radius:8,color:'#0967bb',weight:3,fillColor:'#53aaf0',fillOpacity:1}).addTo(map).bindPopup('📍 現在地（この端末のみ）');circle=L.circle([lat,lng],{radius:Math.min(pos.coords.accuracy||0,5000),color:'#4393d3',fillOpacity:.08,weight:1}).addTo(map);map.setView([lat,lng],14);status.textContent='青い点が現在地です。採集記録には投稿・保存しません。地図表示のため地図提供元と通信します。';},err=>{b.disabled=false;status.textContent=err.code===1?'位置情報の利用が許可されていません':'現在地を取得できませんでした。もう一度お試しください。';},{enableHighAccuracy:false,timeout:15000,maximumAge:0});};
 }
 function cleanup(){const root=$('profile');if(!root)return;const old=$('mv83ProfileToggle')||$('mv85ProfileToggle');if(old)old.remove();const oldIntro=$('mv83ProfileIntro')||$('mv85ProfileIntro');if(oldIntro)oldIntro.remove();}
 function start(){for(const node of Array.from(document.body.childNodes)){if(node.nodeType===3&&node.textContent.includes('\\n'))node.textContent=node.textContent.replace(/\\n/g,'');}cleanup();initProfile();initGacha();initLocation();}
@@ -4144,7 +4144,7 @@ function collection(){
 function init(){
  const mount=byId('collection')||byId('gacha');if(!mount||byId('mv104Ranking'))return;
  const panel=document.createElement('section');panel.id='mv104Ranking';
- panel.innerHTML='<h2>🏆 ガチャカード収集ランキング TOP 50</h2><div id="mv104MyRate"></div><div class="mv104Progress"><div class="mv104Bar" id="mv104Bar"></div></div><p class="mv104Help">ガチャで獲得した異なる昆虫100種類の収集率です。ランキング参加者の表示名と収集数は全ユーザーに公開されます。参加は任意です。</p><div class="mv104Actions"><input id="mv104Name" type="text" maxlength="24" placeholder="公開するユーザーネーム" aria-label="ランキングに公開するユーザーネーム"><button type="button" id="mv104Join">ランキングに登録・更新</button><button type="button" id="mv104Leave">参加を取り消す</button></div><button type="button" id="mv104Refresh">ランキング更新</button><p id="mv104Status" role="status"></p><ol id="mv104List"></ol>';
+ panel.innerHTML='<h2>🏆 ガチャカード収集ランキング TOP 50</h2><div id="mv104MyRate"></div><div class="mv104Progress"><div class="mv104Bar" id="mv104Bar"></div></div><p class="mv104Help">端末の保存データに基づく参考ランキングです。収集数はサーバーで検証されていません。参加者の表示名と収集数は全ユーザーに公開されます。参加は任意です。</p><div class="mv104Actions"><input id="mv104Name" type="text" maxlength="24" placeholder="公開するユーザーネーム" aria-label="ランキングに公開するユーザーネーム"><button type="button" id="mv104Join">ランキングに登録・更新</button><button type="button" id="mv104Leave">参加を取り消す</button></div><button type="button" id="mv104Refresh">ランキング更新</button><p id="mv104Status" role="status"></p><ol id="mv104List"></ol>';
  mount.append(panel);
  byId('mv104Join').addEventListener('click',publish);
  byId('mv104Leave').addEventListener('click',leave);
@@ -4221,7 +4221,7 @@ async function syncOptedInRanking(){
  syncBusy=true;
  try{
   const {data,error}=await db.from('gacha_collection_leaderboard').select('user_id,unique_species').eq('user_id',user.id).maybeSingle();
-  if(error||!data)return; // Never enroll a player automatically.
+  if(error||!data||window.user?.id!==user.id)return; // Never enroll a player automatically.
   const current=collection();
   if(Number(data.unique_species)===current)return;
   const result=await db.from('gacha_collection_leaderboard').update({unique_species:current,total_species:TOTAL,updated_at:new Date().toISOString()}).eq('user_id',user.id);

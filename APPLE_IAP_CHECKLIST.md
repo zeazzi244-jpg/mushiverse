@@ -1,3 +1,5 @@
+> 最新の引き継ぎ状況は [2026-10-28公開準備レポート](docs/RELEASE_STATUS_2026-10-28.md) を参照。以下は過去の調査・計画を含み、現在の完了証明ではありません。
+
 # Apple coin purchase release checklist
 
 Current state: coin shop buttons are disabled. The web app cannot perform StoreKit purchases by itself.

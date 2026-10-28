@@ -59,3 +59,10 @@ test('account switch clears private profile and refreshes records and follower c
   await page.evaluate(()=>window.testSwitchUser(null));
   await expect(page.locator('#mv86Posts')).toHaveText('—');
 });
+test('network reconnect does not crash the core app',async({page})=>{
+  const errors=await setup(page);
+  await page.evaluate(()=>{window.dispatchEvent(new Event('offline'));window.dispatchEvent(new Event('online'))});
+  await page.locator('.nav [data-tab="collection"]').click();
+  await expect(page.locator('#collectionList')).toContainText('カブトムシ');
+  expect(errors).toEqual([]);
+});
