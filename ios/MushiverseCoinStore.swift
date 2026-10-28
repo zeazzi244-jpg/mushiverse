@@ -94,6 +94,10 @@ final class MushiverseCoinStore: ObservableObject {
             let expectedAccount = try await appAccountToken()
             guard transaction.appAccountToken == expectedAccount else { throw PurchaseError.accountMismatch }
             guard !token.isEmpty else { throw PurchaseError.unauthorized }
+            // Never send an Apple transaction or access token to an untrusted endpoint.
+            guard creditEndpoint.scheme == "https", creditEndpoint.host?.lowercased() == "jhowxtdemlsmetcwhekr.supabase.co", creditEndpoint.path == "/functions/v1/credit-apple-gacha-coins" else {
+                throw PurchaseError.serverRejected
+            }
             var request = URLRequest(url: creditEndpoint)
             request.httpMethod = "POST"
             request.setValue("Bearer " + token, forHTTPHeaderField: "Authorization")
