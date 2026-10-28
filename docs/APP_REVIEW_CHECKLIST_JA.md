@@ -12,7 +12,7 @@ App Store原稿は [APP_STORE_DRAFT_JA.md](APP_STORE_DRAFT_JA.md)、データ申
 - 主言語: 日本語。カテゴリ候補: ライフスタイル/教育。年齢区分、権利、運営者、連絡先、配信国は本人が確定。
 - 有料ガチャは停止中。説明文/スクリーンショットに「購入可能」と書かない。外部決済への誘導・Premiumの旧画面も実機で点検し、IAP審査を終えるまで販売機能を提出しない。
 
-候補URLは現在の公開mainを指す。PR内の内容をそのまま公開済みと扱わず、マージ/公開の別途許可後に到達性と文面を再確認する。
+2026-10-28にcontact/privacy/termsのHTTP 200を確認。候補URLは現在の公開mainを指す。PR内の内容をそのまま公開済みと扱わず、マージ/公開の別途許可後に到達性と文面を再確認する。
 
 ## 審査メモ候補（英語、最終機能と一致させる）
 
@@ -57,8 +57,8 @@ TestFlightの最終ビルドをiPhoneで撮影。架空の安全な観察デー�
 ## 本人のiPhoneで行う設定（順序）
 
 1. Safariで developer.apple.com/account と appstoreconnect.apple.com を開き、Developer登録/本人確認と契約・税務/銀行情報の状態を確認。
-2. App Store ConnectでBundle ID `com.rikuto.mushiverse` のアプリとConsumable商品 `mushiverse.coins.100` / `.550` / `.1200`、価格・地域を確認。
-3. GitHubリポジトリ > Settings > Secrets and variables > Actionsで `ASC_KEY_ID`、`ASC_ISSUER_ID`、`ASC_API_KEY_P8_BASE64` を登録/確認。App Store Connect API用のP-256 p8をbase64にした値を使用し、チャットへ貼らない。Apple IAPサーバー検証用の鍵と用途を混同しない。
+2. App Store ConnectでBundle ID `com.rikuto.mushiverse` のアプリとConsumable商品 `mushiverse.coins.100` / `.550` / `.1200`、価格・地域を確認。Developer MembershipのTeam IDが署名ワークフローの `7Q5539YU7V` と一致するか確認する（今回の読み取りAPI試験ではTeam ID/配布証明書/Provisioningは未確認）。
+3. **今回のCIで既存3鍵の形式・Apple API認証・対象アプリ参照を確認済み。再登録不要。** 将来鍵を更新する場合のみ、GitHubリポジトリ > Settings > Secrets and variables > Actionsで `ASC_KEY_ID`、`ASC_ISSUER_ID`、`ASC_API_KEY_P8_BASE64` を登録/確認。App Store Connect API用のP-256 p8をbase64にした値を使用し、チャットへ貼らない。Apple IAPサーバー検証用の鍵と用途を混同しない。
 4. 自動の「iOS signing readiness」の結果を確認。未登録なら不足名が表示される。成功しても配布証明書/Provisioning/署名IPA成功ではない。公開ワークフローを実行する前に成果物・送信先と許可範囲を確認。
 5. 配布準備完了後にTestFlightをiPhoneへ入れ、上記の実機確認を実施。現時点ではアップロード/申請は実行していない。
 6. App Privacy、年齢区分、運営情報、正式アイコン、審査アカウントを確定する。Appleへの提出は別途許可後。

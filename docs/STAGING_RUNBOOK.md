@@ -14,6 +14,10 @@ PR #2には追加課金のない **ローカル/CIの使い捨て検証環境** 
 - テストユーザーはランダム生成し、finallyでAuth削除。ローカルの取引トゥームストーンは環境破棄まで保持。
 - ローカルAPI/サービス鍵はプロセスメモリだけで子プロセスへ渡す。キーを表示/保存/成果物化しない。CLI startのログにも開発用鍵が含まれ得るため、CIログへcatしない。
 
+## 確認済み結果
+
+`9409972ffb80bda651ab1e36bd4c195ee1520283` の [CI統合試験](https://github.com/zeazzi244-jpg/mushiverse/actions/runs/40741493880) が成功（8ステップ、失敗0）。CIで実Auth/REST/DBを起動し、試験後に破棄した。ローカル作業環境ではDocker daemonのレイヤー領域不足（no space left on device）でDBイメージ展開に失敗したため起動を停止し、同じ構成をGitHub CIで検証した。ローカル起動成功とは記録しない。
+
 ## 再現
 
 Dockerが使えるマシン/CIで実行（所有者のiPhoneにCLIを入れる必要はない）。Supabase CLIは検証用に2.90.0を固定した。2.122.0のnpm CLIは現在の制限付き作業環境で `/home/agent/.supabase` の書込に失敗したため、2.90.0の公式配布バイナリを公開checksum照合後に使用している。更新は別途互換検証する。

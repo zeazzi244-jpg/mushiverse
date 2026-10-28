@@ -19,25 +19,26 @@ Capacitor Xcodeプロジェクトと停止状態のStoreKit 2ショップを統�
 
 ## テスト結果・証跡
 
-今回のソース検証対象: `ede14e6af98840afc39ad2c61fc866f9c1b3ad7f`。以下のCIを実行。結果を記録する後続コミットはこの資料のみの変更。
+今回のソース検証対象: `9409972ffb80bda651ab1e36bd4c195ee1520283`。以下のCIを実行。証跡を記録する後続コミットは資料のみの変更。
 
 |検証|結果/限界|
 |---|---|
-|Chromium/WebKit CI|32/32成功。Supabaseはモック、iPhoneの実機ではない|
-|Appleポリシー/購入HTTP|15件/13件成功。有効なApple購入を使った試験ではない|
-|Postgres台帳|9シナリオ成功（Node集計10は親テストを含む）。PGlite上の実SQL、別接続の同時実行は未確認|
-|消費API/端末の再試行|11件/5件成功。認証・環境・価格の偽装、未知応答、連打、アカウント切替を確認|
-|Apple通知/返金ポリシー|6件成功。偽署名拒否・停止・未対応部分返金/消費要求の拒否を確認。有効なApple通知は未確認|
-|Xcode参照チェック|2件成功|
-|Web/JS/Deno|バンドル一致、61インラインJS構文、全3関数型検証、停止ゲートすべて成功|
-|依存/設定|本番向け依存audit指摘0件、全workflow YAML構文成功|
-|iOS Simulator CI|未署名コンパイル成功、Bundle ID・3権限説明を確認、成果物保存成功。署名IPA/実機検証とは別|
+|Chromium/WebKit CI|32/32成功。Supabaseモックを使うブラウザー試験、実機ではない|
+|単体/SQL/署名モック|64シナリオ成功（Node集計65はSQL親テストを含む）。PGlite台帳9、Appleポリシー15/購入HTTP13、消費API11/再試行5、通知6、Xcode参照2、署名3|
+|隔離Supabase統合CI|8ステップ成功。実Auth/JWT/session_id/REST/RPC/Postgres 17を使用。Apple署名境界だけを注入し、有効なApple JWS・実配備Edge gatewayは未検証|
+|同時実行|8件の同一購入、6件の同一draw再送、残高150に対する4件の50消費をHTTPから並行実行。付与1回、再送結果同一、3成功/1残高不足を確認|
+|署名設定事前検証CI|既存ASC鍵のP-256形式、短寿命ES256署名、Apple認証、Bundle IDのアプリ参照を確認。`read_only_api_verified`。Provisioning・証明書・署名IPA・アップロードは未実施|
+|Web/JS/Deno/構造|Webバンドル、61インラインJS、3関数と統合テストの型、停止ゲート、ios:sync/ios:check、全workflow YAML成功|
+|iOS Simulator CI|未署名ビルド・Bundle ID・カメラ/位置/写真の3権限説明・成果物保存成功。署名IPA/実機検証とは別|
+|URL|contact/privacy/termsの公開mainはHTTP 200。PRの新しい草案を公開したことにはならない|
 
-単体/SQL合計61シナリオ成功（Node集計62、親テスト1件を含む）。ローカルChromiumも16/16成功。ローカルWebKitはOSライブラリ不足のためCIで検証した。
+- [今回のWeb CI: 成功](https://github.com/zeazzi244-jpg/mushiverse/actions/runs/40741493725)
+- [今回のiOS Simulator CI: 成功](https://github.com/zeazzi244-jpg/mushiverse/actions/runs/40741493717)
+- [隔離Supabase統合CI: 成功](https://github.com/zeazzi244-jpg/mushiverse/actions/runs/40741493880)
+- [Apple署名設定の読み取り専用事前検証: 成功](https://github.com/zeazzi244-jpg/mushiverse/actions/runs/40741493942)
+- 開始時に確認した `f9409303a1230bb4473396933dd366bffa2728f8`: [Web成功](https://github.com/zeazzi244-jpg/mushiverse/actions/runs/40719526147) / [Simulator成功](https://github.com/zeazzi244-jpg/mushiverse/actions/runs/40719526197)。今回の追加分の証拠には使用しない。
 
-- [今回のWeb/ブラウザー/台帳/型検証CI: 成功](https://github.com/zeazzi244-jpg/mushiverse/actions/runs/40718695770)
-- [今回のiOS Simulator CI: 成功](https://github.com/zeazzi244-jpg/mushiverse/actions/runs/40718695845)
-- 前回: `790d5950004cb3ee1beb2fbe683ad3f5f88ede9e`、[Web 30件成功](https://github.com/zeazzi244-jpg/mushiverse/actions/runs/40713793160)、[Simulator成功](https://github.com/zeazzi244-jpg/mushiverse/actions/runs/40713793260)。今回の追加分の証拠には使用しない。
+ローカルDockerはDBイメージのレイヤー領域不足で起動できず停止。GitHub CIの使い捨て環境で代替検証した。常設ホスト型ステージング/実機用URLは未作成。
 
 再現: `npm ci` → `npm run verify:web` → `npm test` → `npm run test:e2e`（事前に `npx playwright install --with-deps chromium webkit`）。iOS: `npm run ios:sync && npm run ios:check`。実際のコンパイルはmacOS CI。
 
@@ -58,8 +59,8 @@ Capacitor Xcodeプロジェクトと停止状態のStoreKit 2ショップを統�
 |9|Xcode/StoreKitソース統合|確認済み|
 |10|macOSコンパイル|Simulator成功|
 |11|カメラ/写真/地図/ログイン実機|未実施|
-|12|ステージングDB/API統合|未実施|
-|13|Apple商品・鍵・契約設定|本人の確認が必要|
+|12|ステージングDB/API統合|隔離CI課金統合8項目成功。常設環境/Storage/UGC/Edge gatewayは未確認|
+|13|Apple商品・鍵・契約設定|ASC鍵/アプリ参照のみ確認。商品・契約・IAP鍵は未確認|
 |14|Sandbox購入・再送・不正取引|未実施|
 |15|購入コイン消費API/画面統合|停止状態の候補実装・ローカル試験済み。統合未確認|
 |16|返金通知・消費後返金|停止状態の候補実装・ローカル試験済み。Sandbox未確認|
@@ -68,18 +69,18 @@ Capacitor Xcodeプロジェクトと停止状態のStoreKit 2ショップを統�
 |19|署名IPA/TestFlight|未確認|
 |20|最終実機検証・App Store申請|未実施|
 
-## 今回の開発内容（第4回・検証中）
+## 今回の開発内容（第4回）
 
 - 開始時に最新 `f9409303a1230bb4473396933dd366bffa2728f8` の [Web CI成功](https://github.com/zeazzi244-jpg/mushiverse/actions/runs/40719526147) と [iOS CI成功](https://github.com/zeazzi244-jpg/mushiverse/actions/runs/40719526197) を確認。修正が必要なCI失敗はなかった。
 - 既存Supabaseは本番1件/開発ブランチなし/Freeと確認。本番は読み取り調査のみ。追加料金の同意なしにホスト型ステージングは作成していない。
-- [隔離ローカル/CI検証環境](STAGING_RUNBOOK.md) と実Auth/JWT/RPC/Postgresの統合テストを追加。Apple境界のみ合成データ、課金ゲートは変更なし。実行結果は確認後に追記。
+- [隔離ローカル/CI検証環境](STAGING_RUNBOOK.md) と実Auth/JWT/RPC/Postgresの統合テストを追加。Apple境界のみ合成データ、課金ゲートは変更なし。CIの8ステップ成功を確認。
 - 課金RPCアダプターを本体/統合テストで共有化。既存単体61シナリオと新規署名事前検証3件、Deno全関数/統合テスト型検証、Web停止チェック成功。
-- 読み取り専用のiOS署名設定事前検証をPR CIへ追加。キー不足はnot_configured、Apple API権限は別状態で記録し、署名IPA/Provisioning成功と混同しない。
+- 読み取り専用のiOS署名設定事前検証をPR CIへ追加し、既存ASC鍵で対象アプリのApple API参照成功。鍵の再登録は不要。署名IPA/Provisioning成功とは扱わない。
 - [App Privacy棚卸し](APP_PRIVACY_INVENTORY.md)、[審査/実機/本人操作パケット](APP_REVIEW_CHECKLIST_JA.md) を追加。AI画像のGoogle Gemini送信を配備済みコードから確認し、privacy.html草案へ追記。
 
 ## 未完了・次の担当者が進めること
 
-1. 消費API/UIと返金通知候補をステージングで統合確認する。部分返金・消費情報報告・定期照合/通知欠落回復と、購入カードの所持一覧/永続表示は未完成。ローカルSQLの直列実行だけで複数接続の競合を完了扱いしない。
+1. 課金のAuth/RPC/DB隔離統合8項目は成功。常設ステージングとEdge gateway/Storage/UIの統合は残る。部分返金・消費情報報告・定期照合/通知欠落回復と、購入カードの所持一覧/永続表示は未完成。CIの並行HTTP試験は成功したが、実運用の負荷/削除とのロック競合/タイムアウト試験は残る。
 2. ステージングで認証/セッション/RPC/Storage/Apple通信を統合検証する。既存の旧台帳は自動移行しない。
 3. Sandboxの有効な署名、OCSP、各商品購入、再配信、期限切れ認証、アカウント切替、返金/取消を実機で確認する。
 4. 通報/ブロック/アカウント削除、未使用画像の清掃、レート制限、複数DB接続の競合、台帳監視/照合を検証する。
@@ -90,12 +91,19 @@ Capacitor Xcodeプロジェクトと停止状態のStoreKit 2ショップを統�
 
 - Apple Developer本人確認、契約・税務/銀行情報、App Store Connect権限の確認。
 - Bundle ID `com.rikuto.mushiverse` とConsumable商品3種（100/550/1200コイン）の設定・価格・販売地域の確定。
-- Apple API鍵の権限とGitHub/SupabaseのSecrets登録の確認。既に登録済みなら再送不要。値をチャットへ送らない。
+- GitHubのASC API鍵3種は既存設定で認証/アプリ参照を確認済み、再登録・再送不要。別用途のApple IAP検証鍵/ルート証明書、Supabase Sandbox用Secretsは未確認。値をチャットへ送らない。
 - 署名配布後のiPhone/TestFlight/Sandbox操作、実際の権限許可/拒否/写真/地図/削除確認。
 - 運営者、プライバシー/年齢区分、ストア申告、価格/返金方針の最終判断。
 
+## 今回の読み取り監査
+
+Supabase security advisorsはWARN 3件（モデレーターSECURITY DEFINER RPC 2件、漏洩パスワード保護OFF 1件）、INFO 4件（RLSポリシーなし）。対象RPCはauth.uid()とmoderator_accountsの所属確認・空search_pathを持ち、moderator_accountsはRLS有効/ポリシーなしで通常クライアントから昇格不可。警告を消すために本番権限は変更していない。漏洩パスワード保護/運用権限は公開前に別途確認する。
+
 ## 更新の記録
 
+- 2026-10-28（第4回）: 最新CI成功を確認、隔離Supabase課金統合8項目成功、既存ASC鍵の参照権限確認、申請・Privacy資料を整備。常設ステージング未作成、本番/課金/マージ未変更。進捗50%を維持。
 - 2026-10-28: 共通引き継ぎファイルを開始。過去の作業を統合し、確認済み50%と未確認項目を分離した。停止状態の消費/返金候補、CORSと再送保護、手動アップロード保護を追加し、検証対象SHAとCI証跡を記録。進捗50%を維持。
+
+本人の操作手順は [申請パケットの本人手順](APP_REVIEW_CHECKLIST_JA.md#本人のiphoneで行う設定順序) にまとめた。常設ステージングを希望する場合は、利用組織と見積費用への同意を先に確認する。
 
 過去の詳細: [第2回レビュー](PR2_REVIEW_ROUND2.md)、[Apple設定候補](APPLE_BACKEND_SETUP.md)、[申請原稿](APP_STORE_DRAFT_JA.md)。本ファイルの最新記録を優先する。
