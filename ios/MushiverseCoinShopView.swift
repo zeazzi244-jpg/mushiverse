@@ -20,6 +20,7 @@ struct MushiverseCoinShopView: View {
                 Button("商品を再読み込み") {
                     Task { await store.loadProducts() }
                 }
+                .disabled(store.isPurchasing || store.isRetrying)
             }
 
             ForEach(store.products, id: \.id) { product in
