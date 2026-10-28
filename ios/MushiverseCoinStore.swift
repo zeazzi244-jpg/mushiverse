@@ -18,10 +18,12 @@ final class MushiverseCoinStore: ObservableObject {
     private var updatesTask: Task<Void, Never>?
     private let creditEndpoint: URL
     private let accessToken: () async throws -> String
+    private let appAccountToken: () async throws -> UUID
 
-    init(creditEndpoint: URL, accessToken: @escaping () async throws -> String) {
+    init(creditEndpoint: URL, accessToken: @escaping () async throws -> String, appAccountToken: @escaping () async throws -> UUID) {
         self.creditEndpoint = creditEndpoint
         self.accessToken = accessToken
+        self.appAccountToken = appAccountToken
     }
 
     func start() async {
@@ -57,7 +59,8 @@ final class MushiverseCoinStore: ObservableObject {
         isPurchasing = true
         defer { isPurchasing = false }
         do {
-            switch try await product.purchase() {
+            let accountID = try await appAccountToken()
+            switch try await product.purchase(options: [.appAccountToken(accountID)]) {
             case .success(let verification):
                 await process(verification)
             case .pending:
@@ -81,6 +84,8 @@ final class MushiverseCoinStore: ObservableObject {
               transaction.revocationDate == nil else { return }
         do {
             let token = try await accessToken()
+            let expectedAccount = try await appAccountToken()
+            guard transaction.appAccountToken == expectedAccount else { throw PurchaseError.accountMismatch }
             guard !token.isEmpty else { throw PurchaseError.unauthorized }
             var request = URLRequest(url: creditEndpoint)
             request.httpMethod = "POST"
@@ -122,5 +127,6 @@ final class MushiverseCoinStore: ObservableObject {
     private enum PurchaseError: Error {
         case unauthorized
         case serverRejected
+        case accountMismatch
     }
 }
