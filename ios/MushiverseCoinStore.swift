@@ -42,7 +42,14 @@ final class MushiverseCoinStore: ObservableObject {
             }
         }
         await loadProducts()
+        await retryUnfinishedPurchases()
+    }
+
+    /// Safely retry StoreKit transactions that were not acknowledged by our server.
+    /// The server must independently verify and deduplicate every transaction.
+    func retryUnfinishedPurchases() async {
         for await result in Transaction.unfinished {
+            if Task.isCancelled { break }
             await process(result)
         }
     }
