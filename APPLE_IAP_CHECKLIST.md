@@ -12,3 +12,13 @@ Required before enabling:
 7. Keep purchase buttons disabled until end-to-end testing succeeds.
 
 Do not expose a Supabase service-role key in frontend code.
+
+## Verified backend findings (2026-10-28)
+
+Supabase project mushi-log has coin wallet, credit, spend, and paid-draw tables. Its live credit RPC has three arguments (transaction ID, user ID, product ID), not the four-argument version in the checked-in migration. Do not apply that migration blindly.
+
+The deployed submit-apple-purchase-claim Edge Function only accepts premium product IDs and stores pending premium claims. It does not validate signed coin transactions or credit gacha coins. The native client expects a separate credit-apple-gacha-coins endpoint; do not enable purchase buttons until this authenticated endpoint is implemented and Apple-signed transaction verification is tested.
+
+The live credit, spend, and paid-draw RPCs deny execution to the authenticated database role. Keep service-role credentials exclusively on the server.
+
+Additional server requirements: validate the signed transaction against Apple trust, bundle ID, product ID, environment, revocation, and authenticated user's appAccountToken; reject wrong-account transactions; ensure a repeated transaction ID cannot credit a different account; return credited_or_previously_credited only for the same verified transaction and account; verify in Sandbox before enabling purchases.
