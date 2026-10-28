@@ -1,5 +1,7 @@
 import {existsSync,readFileSync} from 'node:fs';
-import {join} from 'node:path';
+import {join,resolve} from 'node:path';
+import xcode from 'xcode';
+import {validateSwiftSources} from './ios-project-paths.mjs';
 const config=JSON.parse(readFileSync('capacitor.config.json','utf8'));
 const problems=[];
 if(config.appId!=='com.rikuto.mushiverse')problems.push('Bundle ID does not match the App Store Connect app: com.rikuto.mushiverse');
@@ -11,6 +13,7 @@ const nativeRoot=join('ios','App','App');
 const projectPath=join('ios','App','App.xcodeproj','project.pbxproj');
 if(existsSync(projectPath)){
  const project=readFileSync(projectPath,'utf8');
+ const parsed=xcode.project(projectPath);parsed.parseSync();problems.push(...validateSwiftSources(parsed,resolve('ios/App')));
  for(const name of ['MushiverseCoinStore.swift','MushiverseCoinShopView.swift','MushiverseBridgeViewController.swift']){
   if(!existsSync(join(nativeRoot,name))||!project.includes(`${name} in Sources`))problems.push(`Native source is not in target: ${name}`);
  }

@@ -79,19 +79,11 @@
 				504EC3131FED79650016851F /* Info.plist */,
 				2FAD9762203C412B000D30F8 /* config.xml */,
 				50B271D01FEDC1A000F3C39B /* public */,
-			);
-			path = App;
-			sourceTree = "<group>";
-		};
-		A9A2E16B238641B1A8D08C51 /* Plugins */ = {
-			isa = PBXGroup;
-			children = (
 				3E1A1711A436402EB572F92D /* MushiverseCoinStore.swift */,
 				CC429C1A4C34467597004ECD /* MushiverseCoinShopView.swift */,
 				3C2E322FF2914038B59E6A88 /* MushiverseBridgeViewController.swift */,
 			);
-			name = Plugins;
-			path = undefined;
+			path = App;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
