@@ -35,7 +35,7 @@ struct MushiverseCoinShopView: View {
                     Button(product.displayPrice) {
                         Task { await store.purchase(product) }
                     }
-                    .disabled(!purchasesEnabled || store.isPurchasing)
+                    .disabled(!purchasesEnabled || store.isPurchasing || store.isRetrying)
                 }
                 .padding(.vertical, 8)
                 Divider()
@@ -53,7 +53,7 @@ struct MushiverseCoinShopView: View {
                     Button("未完了の購入を再確認") {
                         Task { await store.retryUnfinishedPurchases() }
                     }
-                    .disabled(store.isPurchasing)
+                    .disabled(store.isPurchasing || store.isRetrying)
                     .accessibilityHint("Appleで完了した購入のコイン付与を再確認します。新たな購入は行いません。")
                 }
             }
