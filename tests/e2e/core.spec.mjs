@@ -9,11 +9,12 @@ async function setup(page, { cards=0, failSave=false }={}) {
       (()=>{const callbacks=[];let user={id:'${A}',email:'test@example.invalid'};
       const now=new Date().toISOString();
       const rows=[{id:'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa',user_id:user.id,insect_name:'カブトムシ',category:'甲虫',prefecture:'東京都',municipality:'',observed_at:now,created_at:now,image_url:null}];
+      window.testRows=rows;window.testLeaders=[];window.testWrites=[];
       const auth={getUser:async()=>({data:{user},error:null}),getSession:async()=>({data:{session:user?{user,access_token:'test-token'}:null}}),onAuthStateChange:fn=>{callbacks.push(fn);return {data:{subscription:{unsubscribe(){}}}}},signOut:async()=>{window.testSwitchUser(null);return {error:null}}};
       window.testSwitchUser=id=>{user=id?{id,email:'test@example.invalid'}:null;callbacks.forEach(fn=>fn('SIGNED_IN',user?{user}:null))};
-      function from(table){let single=false,head=false;const filters=[];let proxy;const q={then(resolve,reject){let data=table==='insect_posts'?rows:[];for(const [k,v] of filters)data=data.filter(r=>r[k]===v);return Promise.resolve({data:head?null:single?(data[0]||null):data,count:data.length,error:null}).then(resolve,reject)}};
-      proxy=new Proxy(q,{get(o,k){if(k==='then')return o.then.bind(o);return (...args)=>{if(k==='eq')filters.push(args);if(k==='maybeSingle'||k==='single')single=true;if(k==='select'&&args[1]?.head)head=true;return proxy}}});return proxy}
-      window.supabase={createClient:()=>({auth,from,functions:{invoke:async()=>({data:{plan:'free',status:'free',ok:true,features:{}},error:null})},storage:{from:()=>({})}})};})()`});
+      function from(table){let single=false,head=false;const filters=[];let proxy,write=null;const q={then(resolve,reject){if(write)window.testWrites.push({table,...write});if(window.testQueryHook){const response=window.testQueryHook({table,filters,head,write});if(response)return Promise.resolve(response).then(resolve,reject)}let data=table==='insect_posts'?rows:table==='gacha_collection_leaderboard'?window.testLeaders:[];for(const [k,v] of filters)data=data.filter(r=>r[k]===v);return Promise.resolve({data:head?null:single?(data[0]||null):data,count:data.length,error:null}).then(resolve,reject)}};
+      proxy=new Proxy(q,{get(o,k){if(k==='then')return o.then.bind(o);return (...args)=>{if(['insert','upsert','update','delete'].includes(k))write={action:k,payload:args[0]};if(k==='eq')filters.push(args);if(k==='maybeSingle'||k==='single')single=true;if(k==='select'&&args[1]?.head)head=true;return proxy}}});return proxy}
+      window.supabase={createClient:()=>({auth,from,functions:{invoke:async()=>({data:{plan:'free',status:'free',ok:true,features:{}},error:null})},storage:{from:()=>({upload:async(path)=>{window.testWrites.push({action:'upload',path});if(window.testPauseUpload)await new Promise(resolve=>{window.testReleaseUpload=resolve});return {error:null}},remove:async(paths)=>{window.testWrites.push({action:'remove',paths});return {error:null}},getPublicUrl:path=>({data:{publicUrl:'https://example.invalid/'+path}})})}})};})()`});
     return route.fulfill({status:200,contentType:'application/json',body:'[]'});
   });
   await page.addInitScript(({A,cards,failSave})=>{
@@ -78,4 +79,51 @@ test('a slow map lookup cannot restore pins excluded by a newer filter',async({p
   release();
   await expect(page.locator('#areaRanking')).toContainText('地図に表示できる地域がまだありません');
   await expect(page.locator('#insectMap .leaflet-marker-icon')).toHaveCount(0);
+});
+test('drafts and selected photos cannot cross account boundaries',async({page})=>{
+  await setup(page);await page.locator('.nav [data-tab="post"]').click();
+  await page.locator('#species').fill('アカウントAの下書き');
+  await page.evaluate(B=>window.testSwitchUser(B),B);
+  await expect(page.locator('#species')).toHaveValue('');
+  await page.locator('#species').fill('アカウントBの下書き');
+  await page.evaluate(A=>window.testSwitchUser(A),A);
+  await expect(page.locator('#species')).toHaveValue('アカウントAの下書き');
+});
+test('two tabs can claim a free bonus only once',async({page,context})=>{
+  await setup(page);const second=await context.newPage();await setup(second);
+  await page.locator('.nav [data-tab="gacha"]').click();await second.locator('.nav [data-tab="gacha"]').click();
+  await Promise.all([page.locator('#mv77Claim').click(),second.locator('#mv77Claim').click()]);
+  await expect(page.locator('#mv77Coins')).toContainText('600');await expect(second.locator('#mv77Coins')).toContainText('600');
+  await expect(page.locator('#mv77Claim')).toBeDisabled();await expect(second.locator('#mv77Claim')).toBeDisabled();
+});
+test('switching account during photo upload prevents insert and double submit',async({page})=>{
+  await setup(page);await page.locator('.nav [data-tab="post"]').click();
+  await page.locator('#species').fill('テスト採集');
+  await page.locator('#photo').setInputFiles({name:'test.png',mimeType:'image/png',buffer:Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+jRZkAAAAASUVORK5CYII=','base64')});
+  await expect(page.locator('#aiIdentify')).toBeEnabled();
+  await page.evaluate(()=>{window.testPauseUpload=true;document.getElementById('recordForm').dispatchEvent(new Event('submit',{cancelable:true}))});
+  await expect.poll(()=>page.evaluate(()=>typeof window.testReleaseUpload)).toBe('function');
+  await page.evaluate(B=>{document.getElementById('recordForm').dispatchEvent(new Event('submit',{cancelable:true}));window.testSwitchUser(B);window.testReleaseUpload()},B);
+  await expect(page.locator('#toast')).toContainText('アカウントが変更');
+  const writes=await page.evaluate(()=>window.testWrites);
+  expect(writes.filter(x=>x.action==='upload')).toHaveLength(1);
+  expect(writes.filter(x=>x.table==='insect_posts'&&x.action==='insert')).toHaveLength(0);
+});
+test('late public profile response cannot overwrite a newer profile',async({page})=>{
+  const errors=await setup(page);await page.locator('.nav [data-tab="collection"]').click();
+  await page.evaluate(({A,B})=>{window.testLeaders=[{user_id:A,display_name:'利用者A',unique_species:1},{user_id:B,display_name:'利用者B',unique_species:2}];window.testQueryHook=({table,filters,head})=>{if(table==='insect_posts'&&!head&&filters.some(([key,id])=>key==='user_id'&&id===A))return new Promise(resolve=>{window.testReleaseProfile=()=>resolve({data:[{insect_name:'古いAの記録'}],error:null})})}}, {A,B});
+  await page.locator('#mv104Refresh').click();await page.locator('#mv104List button').filter({hasText:'利用者A'}).click();
+  await expect.poll(()=>page.evaluate(()=>typeof window.testReleaseProfile)).toBe('function');
+  await page.locator('#mv105PublicProfile button').first().click();
+  await page.locator('#mv104List button').filter({hasText:'利用者B'}).click();
+  await page.evaluate(()=>window.testReleaseProfile());
+  await expect(page.locator('#mv105PublicProfile h2')).toContainText('利用者B');
+  await expect(page.locator('#mv105PublicProfile')).not.toContainText('古いAの記録');expect(errors).toEqual([]);
+});
+test('hiding a post removes it from collection, map and popular record links',async({page})=>{
+  await setup(page);await page.locator('#feed [data-detail]').click();
+  await page.locator('[data-hide-post]').click();
+  await expect(page.locator('#ranking')).not.toContainText('カブトムシ');
+  await page.locator('.nav [data-tab="collection"]').click();await expect(page.locator('#collectionList')).not.toContainText('カブトムシ');
+  await page.locator('.nav [data-tab="map"]').click();await expect(page.locator('#insectMap .leaflet-marker-icon')).toHaveCount(0);
 });

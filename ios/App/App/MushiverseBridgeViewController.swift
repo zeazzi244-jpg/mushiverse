@@ -1,5 +1,6 @@
 import Capacitor
 import SwiftUI
+import UIKit
 
 final class MushiverseBridgeViewController: CAPBridgeViewController {
     override func capacitorDidLoad() {
@@ -8,14 +9,15 @@ final class MushiverseBridgeViewController: CAPBridgeViewController {
 }
 
 @objc(MushiverseCoinPlugin)
-final class MushiverseCoinPlugin: CAPPlugin, CAPBridgedPlugin {
+final class MushiverseCoinPlugin: CAPPlugin, CAPBridgedPlugin, UIAdaptivePresentationControllerDelegate {
     let identifier = "MushiverseCoinPlugin"
     let jsName = "MushiverseCoins"
     let pluginMethods: [CAPPluginMethod] = [
         CAPPluginMethod(name: "openShop", returnType: CAPPluginReturnPromise),
         CAPPluginMethod(name: "closeShop", returnType: CAPPluginReturnPromise)
     ]
-    private var shop: UIViewController?
+    private weak var shop: UIViewController?
+    private var store: MushiverseCoinStore?
 
     @objc func openShop(_ call: CAPPluginCall) {
         guard let token = call.getString("accessToken"), !token.isEmpty,
@@ -33,24 +35,39 @@ final class MushiverseCoinPlugin: CAPPlugin, CAPBridgedPlugin {
                 creditEndpoint: URL(string: "https://jhowxtdemlsmetcwhekr.supabase.co/functions/v1/credit-apple-gacha-coins")!,
                 accessToken: { token }, appAccountToken: { uuid }
             )
+            self.store = store
             let content = NavigationView {
                 ScrollView { MushiverseCoinShopView(store: store, purchasesEnabled: MushiverseCoinStore.purchasesEnabled) }
                     .toolbar {
                         ToolbarItem(placement: .confirmationAction) {
-                            Button("閉じる") { self.shop?.dismiss(animated: true) }
+                            Button("閉じる") { self.dismissShop() }
                         }
                     }
             }
             let controller = UIHostingController(rootView: content.navigationViewStyle(.stack))
             self.shop = controller
-            presenter.present(controller, animated: true) { call.resolve() }
+            controller.presentationController?.delegate = self
+            presenter.present(controller, animated: true) {
+                controller.presentationController?.delegate = self
+                call.resolve()
+            }
         }
+    }
+
+    @MainActor private func dismissShop() {
+        store?.stop()
+        store = nil
+        shop?.dismiss(animated: true)
+        shop = nil
+    }
+
+    func presentationControllerDidDismiss(_ presentationController: UIPresentationController) {
+        DispatchQueue.main.async { [weak self] in self?.dismissShop() }
     }
 
     @objc func closeShop(_ call: CAPPluginCall) {
         DispatchQueue.main.async { [weak self] in
-            self?.shop?.dismiss(animated: true)
-            self?.shop = nil
+            self?.dismissShop()
             call.resolve()
         }
     }

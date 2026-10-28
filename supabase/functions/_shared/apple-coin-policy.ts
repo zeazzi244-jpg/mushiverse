@@ -11,7 +11,7 @@ export function validateCoinTransaction(tx: Record<string, unknown>, userID: str
       typeof tx.transactionId !== "string" || !/^\d{6,64}$/.test(tx.transactionId) ||
       typeof tx.productId !== "string" || !Object.hasOwn(COIN_PRODUCTS, tx.productId) ||
       typeof tx.purchaseDate !== "number" || !Number.isFinite(tx.purchaseDate) || tx.purchaseDate <= 0 ||
-      typeof tx.signedDate !== "number" || !Number.isFinite(tx.signedDate) ||
+      typeof tx.signedDate !== "number" || !Number.isFinite(tx.signedDate) || tx.signedDate <= 0 ||
       tx.purchaseDate > now + 60_000 || tx.signedDate > now + 60_000 || tx.purchaseDate > tx.signedDate + 60_000) {
     throw new Error("invalid_apple_transaction");
   }

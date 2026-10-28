@@ -120,6 +120,8 @@ final class MushiverseCoinStore: ObservableObject {
     }
 
     private func process(_ result: VerificationResult<Transaction>) async {
+        guard Self.purchasesEnabled, isStarted, !Task.isCancelled else { return }
+        let generation = lifecycleGeneration
         guard case .verified(let transaction) = result else {
             lastError = "Appleによる購入確認に失敗しました"
             return
@@ -133,6 +135,7 @@ final class MushiverseCoinStore: ObservableObject {
         do {
             let token = try await accessToken()
             let expectedAccount = try await appAccountToken()
+            guard isStarted, lifecycleGeneration == generation, !Task.isCancelled else { return }
             guard transaction.appAccountToken == expectedAccount else { throw PurchaseError.accountMismatch }
             guard !token.isEmpty else { throw PurchaseError.unauthorized }
             // Never send an Apple transaction or access token to an untrusted endpoint.
@@ -153,7 +156,10 @@ final class MushiverseCoinStore: ObservableObject {
                 throw PurchaseError.serverRejected
             }
             let receipt = try JSONDecoder().decode(CreditResponse.self, from: data)
-            guard receipt.creditedOrPreviouslyCredited else {
+            guard isStarted, lifecycleGeneration == generation, !Task.isCancelled else { return }
+            guard receipt.creditedOrPreviouslyCredited,
+                  receipt.transactionID == String(transaction.id),
+                  receipt.productID == transaction.productID else {
                 throw PurchaseError.serverRejected
             }
             await transaction.finish()
@@ -173,8 +179,12 @@ final class MushiverseCoinStore: ObservableObject {
 
     private struct CreditResponse: Decodable {
         let creditedOrPreviouslyCredited: Bool
+        let transactionID: String
+        let productID: String
         enum CodingKeys: String, CodingKey {
             case creditedOrPreviouslyCredited = "credited_or_previously_credited"
+            case transactionID = "transaction_id"
+            case productID = "product_id"
         }
     }
 
