@@ -22,3 +22,35 @@ The deployed submit-apple-purchase-claim Edge Function only accepts premium prod
 The live credit, spend, and paid-draw RPCs deny execution to the authenticated database role. Keep service-role credentials exclusively on the server.
 
 Additional server requirements: validate the signed transaction against Apple trust, bundle ID, product ID, environment, revocation, and authenticated user's appAccountToken; reject wrong-account transactions; ensure a repeated transaction ID cannot credit a different account; return credited_or_previously_credited only for the same verified transaction and account; verify in Sandbox before enabling purchases.
+
+## Parallel release workstreams (2026-10-28)
+
+### Native app and signing
+- [ ] Confirm actual Xcode project/workspace and target membership for both `ios/MushiverseCoinStore.swift` and `ios/MushiverseCoinShopView.swift`. Source files in GitHub do not prove the app compiles or calls them.
+- [ ] Confirm deployment target supports StoreKit 2 and verify bundle ID against App Store Connect.
+- [ ] Connect authenticated Supabase session access token and a stable account-bound UUID for `appAccountToken`; test account changes.
+- [ ] Run a signed iPhone build and confirm product metadata comes from Apple, not hard-coded prices.
+
+### Apple verification and backend
+- [ ] Replace the fail-closed `credit-apple-gacha-coins` stub only after implementing trusted JWS certificate-chain and signature verification against Apple roots; reject untrusted certificates and malformed signatures.
+- [ ] Check transaction bundle ID, allowed product ID, consumable type, environment, appAccountToken binding, revocation, and relevant purchase dates.
+- [ ] Verify the Supabase authenticated user from the Bearer token, derive user ID server-side, and reject cross-account claims.
+- [ ] Make wallet credit atomic and idempotent, including duplicate requests and concurrent requests. Only same-user verified duplicates can return success.
+- [ ] Resolve the live 3-argument RPC versus checked-in 4-argument migration mismatch before deployment; do not blindly apply migrations.
+- [ ] Keep purchase buttons disabled until successful end-to-end Sandbox tests.
+
+### User flows and regression tests
+- [ ] Purchase each of the 100, 550 and 1200 coin products in Sandbox and verify the exact wallet delta.
+- [ ] Retry after lost connectivity or a 503 response; the transaction must remain unfinished until server acknowledgement.
+- [ ] Re-deliver the same Apple transaction through purchase completion, transaction updates and unfinished retries; credit only once.
+- [ ] Verify account switching, invalid tokens, forged transactions, mismatched bundle IDs, revoked transactions and unexpected products cannot credit coins.
+- [ ] Verify paid gacha draws debit the authoritative server wallet exactly once, including duplicate draw IDs and concurrent draws.
+- [ ] Verify free login coins, quest coins and existing local coins are not silently treated as purchased coins.
+- [ ] Check VoiceOver labels, loading states, Japanese error messages, and safe-area layout on iPhone.
+
+### App Store submission
+- [ ] Configure consumable IAP products and their review metadata in App Store Connect.
+- [ ] Prepare privacy policy, account deletion flow, screenshots, age rating, support contact, and review notes.
+- [ ] Upload and test a build through TestFlight; only then submit for Apple review.
+
+**Status:** These are outstanding release gates, not completed tests. Current StoreKit files are source-only until their integration into a build is verified.
