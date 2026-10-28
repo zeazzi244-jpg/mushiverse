@@ -4553,4 +4553,29 @@ function init(){apply();mount()}if(document.readyState==='loading')document.addE
 #profile:not(.mv86Expanded)>#mv128Settings{display:block!important;visibility:visible!important}
 @supports(padding:env(safe-area-inset-top)){body>header,body header:first-of-type{padding-top:max(15px,env(safe-area-inset-top,0px))!important}}
 </style>
+
+<style id="mv130-release-polish">
+/* Keep iPhone status bar clear even when the HUD sticks to the top. */
+.mv116Hud{top:env(safe-area-inset-top,0px)!important}
+@media (display-mode:standalone){.mv116Hud{top:env(safe-area-inset-top,0px)!important}}
+/* Do not let legacy collapsed-profile rules hide the real settings. */
+#profile:not(.mv86Expanded)>#mv128Settings{display:block!important}
+#profile #mv128Settings{order:0}
+</style>
+<script id="mv130-release-polish-script">
+(()=>{'use strict';
+function tidy(){
+ const root=document.getElementById('profile'),settings=document.getElementById('mv128Settings'),toggle=document.getElementById('mv86AdvancedToggle');
+ if(!root||!settings)return;
+ if(toggle){
+  toggle.textContent=root.classList.contains('mv86Expanded')?'▲ 詳細設定を閉じる':'⚙️ 詳細設定を表示';
+  if(!toggle.dataset.mv130Ready){toggle.dataset.mv130Ready='1';toggle.addEventListener('click',()=>requestAnimationFrame(tidy))}
+ }
+ const card=document.getElementById('mv86ProfileCard');
+ if(card&&card.nextElementSibling!==settings)card.insertAdjacentElement('afterend',settings);
+}
+if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',tidy,{once:true});else tidy();
+document.addEventListener('click',e=>{if(e.target.closest?.('[data-tab="profile"]'))requestAnimationFrame(tidy)},true);
+})();
+</script>
 </body></html>
