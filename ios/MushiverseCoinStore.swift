@@ -91,7 +91,7 @@ final class MushiverseCoinStore: ObservableObject {
     }
 
     func purchase(_ product: Product) async {
-        guard isStarted, !Task.isCancelled, Self.productIDs.contains(product.id), product.type == .consumable, !isPurchasing, !isRetrying else { return }
+        guard isStarted, !Task.isCancelled, Self.productIDs.contains(product.id), product.type == .consumable, products.contains(where: { $0.id == product.id }), !isPurchasing, !isRetrying else { return }
         isPurchasing = true
         lastError = nil
         defer { isPurchasing = false }
