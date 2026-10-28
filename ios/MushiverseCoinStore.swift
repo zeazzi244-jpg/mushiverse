@@ -16,6 +16,8 @@ final class MushiverseCoinStore: ObservableObject {
     @Published private(set) var isPurchasing = false
     @Published private(set) var lastError: String?
     private var updatesTask: Task<Void, Never>?
+    // A purchase can arrive through both purchase() and Transaction.updates.
+    private var processingTransactionIDs = Set<UInt64>()
     private let creditEndpoint: URL
     private let accessToken: () async throws -> String
     private let appAccountToken: () async throws -> UUID
@@ -84,6 +86,9 @@ final class MushiverseCoinStore: ObservableObject {
         }
         guard Self.productIDs.contains(transaction.productID),
               transaction.revocationDate == nil else { return }
+        // Do not send concurrent credit requests for the same transaction.
+        guard processingTransactionIDs.insert(transaction.id).inserted else { return }
+        defer { processingTransactionIDs.remove(transaction.id) }
         do {
             let token = try await accessToken()
             let expectedAccount = try await appAccountToken()
