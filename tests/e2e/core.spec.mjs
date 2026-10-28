@@ -151,3 +151,10 @@ for (const name of ['__proto__','constructor']) test('reserved species name does
   await expect(page.locator('#collectionList')).toContainText(name);
   expect(errors).toEqual([]);
 });
+test('paid draw controls stay disabled regardless of local tampering',async({page})=>{
+ const errors=await setup(page);await page.locator('.nav [data-tab="gacha"]').click();
+ await expect(page.locator('#paidDrawControls')).toBeVisible();
+ await page.evaluate(()=>{localStorage.setItem('APPLE_PAID_DRAWS_ENABLED','true');window.PURCHASED_DRAWS_RELEASE_APPROVED=true});
+ for(const button of await page.locator('#paidDrawControls button').all())await expect(button).toBeDisabled();
+ expect(errors).toEqual([]);
+});

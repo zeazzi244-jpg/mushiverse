@@ -1,37 +1,18 @@
-import { Buffer } from 'node:buffer';
+import { authenticateSupabaseAccount } from '../_shared/supabase-account.ts';
 import { createClient } from 'npm:@supabase/supabase-js@2.118.0';
-import { AppStoreServerAPIClient, Environment, SignedDataVerifier } from 'npm:@apple/app-store-server-library@3.1.0';
+import { appleServices } from '../_shared/apple-services.ts';
 import { validateCoinTransaction } from '../_shared/apple-coin-policy.ts';
 import { createAppleCreditHandler } from '../_shared/apple-credit-handler.ts';
 
-const uuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
 Deno.serve(createAppleCreditHandler({
   enabled: () => Deno.env.get('APPLE_COIN_CREDIT_ENABLED') === 'true',
   environment: () => Deno.env.get('APPLE_IAP_ENVIRONMENT') ?? '',
-  authenticate: async bearer => {
-    const url = Deno.env.get('SUPABASE_URL'), key = Deno.env.get('SUPABASE_ANON_KEY');
-    if (!url || !key) throw Error('unavailable');
-    const client = createClient(url, key, { global: { headers: { Authorization: bearer } }, auth: { persistSession: false } });
-    const { data, error } = await client.auth.getUser();
-    if (error || !data.user || data.user.is_anonymous) return null;
-    // Decode ONLY AFTER getUser has independently validated this JWT with Supabase Auth.
-    // The session ID is checked against auth.sessions again inside the atomic SQL operation.
-    const claims = JSON.parse(Buffer.from(bearer.replace(/^Bearer\s+/i, '').split('.')[1], 'base64url').toString('utf8'));
-    if (claims.sub !== data.user.id || typeof claims.session_id !== 'string' || !uuid.test(claims.session_id)) return null;
-    return { id: data.user.id, sessionID: claims.session_id };
-  },
+  authenticate: authenticateSupabaseAccount,
   verify: async (signed, account) => {
-    const env = Deno.env.get('APPLE_IAP_ENVIRONMENT');
-    const privateKey = Deno.env.get('APPLE_IAP_PRIVATE_KEY'), keyID = Deno.env.get('APPLE_IAP_KEY_ID'), issuerID = Deno.env.get('APPLE_IAP_ISSUER_ID');
-    const rootsJSON = Deno.env.get('APPLE_ROOT_CERTIFICATES_BASE64_JSON');
-    const appID = Number(Deno.env.get('APPLE_APP_ID'));
-    if ((env !== Environment.SANDBOX && env !== Environment.PRODUCTION) || !privateKey || !keyID || !issuerID || !rootsJSON || !Number.isSafeInteger(appID) || appID <= 0) throw Error('unavailable');
-    const roots = JSON.parse(rootsJSON);
-    if (!Array.isArray(roots) || !roots.length || roots.some(x => typeof x !== 'string' || !x)) throw Error('unavailable');
-    const verifier = new SignedDataVerifier(roots.map(x => Buffer.from(x, 'base64')), true, env, 'com.rikuto.mushiverse', appID);
+    const {environment:env,verifier,apple}=appleServices();
     const initial = await verifier.verifyAndDecodeTransaction(signed);
     const identity = validateCoinTransaction(initial as Record<string, unknown>, account.id, env);
-    const apple = new AppStoreServerAPIClient(privateKey, keyID, issuerID, 'com.rikuto.mushiverse', env);
     const current = await apple.getTransactionInfo(identity.transactionID);
     if (!current.signedTransactionInfo) throw Error('missing_transaction');
     const tx = await verifier.verifyAndDecodeTransaction(current.signedTransactionInfo);

@@ -6,9 +6,14 @@ root = Path(__file__).resolve().parents[1]
 store = (root / "ios/App/App/MushiverseCoinStore.swift").read_text(encoding="utf-8")
 shop = (root / "ios/App/App/MushiverseCoinShopView.swift").read_text(encoding="utf-8")
 backend = (root / "supabase/functions/credit-apple-gacha-coins/index.ts").read_text(encoding="utf-8")
+backend += (root / 'supabase/functions/_shared/apple-services.ts').read_text(encoding='utf-8')
+backend += (root / 'supabase/functions/_shared/supabase-account.ts').read_text(encoding='utf-8')
 handler = (root / "supabase/functions/_shared/apple-credit-handler.ts").read_text(encoding="utf-8")
 
 checks = {
+    "paid draw client gate is fixed off": "const PURCHASED_DRAWS_RELEASE_APPROVED=false" in (root / "assets/paid-shop.mjs").read_text(),
+    "paid draw server gate is independent": "APPLE_PAID_DRAWS_ENABLED" in (root / "supabase/functions/draw-purchased-gacha/index.ts").read_text(),
+    "notification server gate is independent": "APPLE_COIN_NOTIFICATIONS_ENABLED" in (root / "supabase/functions/apple-coin-notifications/index.ts").read_text(),
     "purchase UI has release gate": "!purchasesEnabled || store.isPurchasing || store.isRetrying" in shop,
     "shop shows preparation notice": "現在は販売準備中です" in shop,
     "only supported products": all(p in store for p in (

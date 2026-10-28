@@ -54,5 +54,32 @@ test('Postgres isolated coin ledger',async t=>{
  await db.exec(`delete from auth.users where id='${B}';insert into auth.users(id) values('${B}');insert into auth.sessions(id,user_id) values('${SB}','${B}')`);
  await assert.rejects(()=>credit('987654321',B));await assert.rejects(()=>draw('user-b-draw-1',1,B));assert.equal(await balance('Sandbox',B),0);
  });
+ await t.test('refunds are once-only; unspent coins debit and spent coins become debt',async()=>{
+ const before=await balance();await credit('666666661',A,'mushiverse.coins.100');
+ const id='10000000-0000-4000-8000-000000000001',ms=Date.now()-10000;
+ const status=(notification,transaction,refunded,time=ms)=>db.query('select public.apply_verified_apple_coin_status_v2($1,$2,$3,$4,$5,$6)',[notification,transaction,'mushiverse.coins.100','Sandbox',refunded,time]);
+ await db.exec('set role service_role');await status(id,'666666661',true);await status(id,'666666661',true);assert.equal(await balance(),before);
+ await db.exec('reset role');
+ // Exhaust this wallet, then refund a fully spent purchase.
+ await credit('666666662',A,'mushiverse.coins.100');
+ const all=await balance();for(let i=0;i<all/50;i++)await draw('refund-spend-'+i,1);
+ assert.equal(await balance(),0);
+ await status('10000000-0000-4000-8000-000000000002','666666662',true);
+ assert.equal(Number((await db.query('select debt from gacha_coin_wallets_v2 where user_id=$1 and environment=$2',[A,'Sandbox'])).rows[0].debt),100);
+ assert.equal((await draw('debt-must-not-draw',1)).rows[0].result.reason,'refund_review_required');
+ await credit('666666663',A,'mushiverse.coins.100');assert.equal(await balance(),0); // Pays debt before giving spendable coins.
+ await status('10000000-0000-4000-8000-000000000003','666666662',false,ms+1000);assert.equal(await balance(),100);
+ await status('10000000-0000-4000-8000-000000000004','666666662',true,ms-1000);assert.equal(await balance(),100); // Old status cannot undo reversal.
+ });
+ await t.test('notification before purchase blocks credit; reversal permits one later claim',async()=>{
+ const ms=Date.now()-5000;
+ const status=(id,refunded,time)=>db.query('select public.apply_verified_apple_coin_status_v2($1,$2,$3,$4,$5,$6)',[id,'777777771','mushiverse.coins.100','Sandbox',refunded,time]);
+ const before=await balance();await status('20000000-0000-4000-8000-000000000001',true,ms);
+ await assert.rejects(()=>credit('777777771',A,'mushiverse.coins.100'));
+ await status('20000000-0000-4000-8000-000000000002',false,ms+1);assert.equal(await balance(),before);
+ await credit('777777771',A,'mushiverse.coins.100');await credit('777777771',A,'mushiverse.coins.100');assert.equal(await balance(),before+100);
+ await assert.rejects(()=>db.query('select public.apply_verified_apple_coin_status_v2($1,$2,$3,$4,$5,$6)',['20000000-0000-4000-8000-000000000002','777777772','mushiverse.coins.100','Sandbox',true,ms]));
+ await db.exec('set role authenticated');await assert.rejects(()=>status('20000000-0000-4000-8000-000000000003',true,ms+2));await db.exec('reset role');
+ });
  }finally{await db.close()}
 });

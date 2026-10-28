@@ -11,6 +11,8 @@ Supabase Edge Functions Secretsでのみ管理する。フロントエンド・G
 |変数|内容|
 |---|---|
 |APPLE_COIN_CREDIT_ENABLED|未設定またはfalseを維持。検証前にtrueにしない|
+|APPLE_PAID_DRAWS_ENABLED|消費APIの独立停止ゲート。未設定/falseを維持|
+|APPLE_COIN_NOTIFICATIONS_ENABLED|Apple通知の独立停止ゲート。未設定/falseを維持|
 |APPLE_IAP_ENVIRONMENT|SandboxまたはProduction。クライアント値を採用しない|
 |APPLE_APP_ID|App Store Connectの数値Apple ID（Bundle IDではない）|
 |APPLE_IAP_PRIVATE_KEY|Apple App Store Server APIの権限を持つ秘密鍵PEM|
@@ -37,3 +39,13 @@ Supabase Edge Functions Secretsでのみ管理する。フロントエンド・G
 8. サーバーの秘密鍵・レート制限・ログに個人情報やJWSを出さないこと、削除ユーザーのトークンが拒否されることを確認し、最終リリース判定を記録する。
 
 JWSポリシーテストや型チェックの合格だけでは、Apple Sandboxの署名/ネットワーク/課金検証に合格したことにはならない。
+
+## PR #2: 停止状態の消費・返金候補
+
+`draw-purchased-gacha` は検証済みユーザー/有効セッションからのみ既定の1回50・10回450コインを消費する。端末は送信前にUUIDを保存し、応答を失った要求には同じUUIDで再問い合わせする。別ユーザーのJWTで送らない。Web Locksが使えない場合は消費しない。無料コイン/カードを購入台帳へ移さない。
+
+`apple-coin-notifications` はAppleからJWTなしで届くため、候補の `supabase/config.toml` でこの関数だけ `verify_jwt=false`。代わりにApple公式ライブラリが外側通知・内側取引・APIから取得した最新取引の署名を検証する。信用する環境はサーバー設定だけ。credit/drawのJWT認証は解除しない。
+
+返金候補SQLは購入と通知を同一取引ロックで直列化し、通知UUIDとApple状態時刻で重複/逆順を処理する。未使用分は残高から減算、消費済み分は負債とし、新規消費を停止する。後続の購入はまず負債へ充当する。返金取消は対応する元のコイン数のみ復元する。返金が購入の主張より先に届いた場合も後日の付与を拒否する。
+
+これらはローカル試験済みの配備候補であり、配備/有効化済みではない。部分返金、CONSUMPTION_REQUESTへの報告、Appleとの定期照合/通知欠落の回復、削除済みユーザーの保存期間・監視運用は未完成。部分返金を全額返金とみなして引き落とさず、未対応の消費情報要求を成功応答で無視しない。Apple SandboxでsignedDateの更新/返金取消の実データと複数DB接続の競合を検証するまでゲートを解除しない。
