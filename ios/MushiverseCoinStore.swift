@@ -55,9 +55,10 @@ final class MushiverseCoinStore: ObservableObject {
     func retryUnfinishedPurchases() async {
         guard isStarted, !isRetrying, !isPurchasing else { return }
         isRetrying = true
+        let generation = lifecycleGeneration
         defer { isRetrying = false }
         for await result in Transaction.unfinished {
-            if Task.isCancelled || !isStarted { break }
+            if Task.isCancelled || !isStarted || lifecycleGeneration != generation { break }
             await process(result)
         }
     }
