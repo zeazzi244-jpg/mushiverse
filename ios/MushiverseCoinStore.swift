@@ -54,7 +54,7 @@ final class MushiverseCoinStore: ObservableObject {
     /// Safely retry StoreKit transactions that were not acknowledged by our server.
     /// The server must independently verify and deduplicate every transaction.
     func retryUnfinishedPurchases() async {
-        guard isStarted, !isRetrying, !isPurchasing else { return }
+        guard isStarted, !isRetrying, !isPurchasing, !Task.isCancelled else { return }
         isRetrying = true
         let generation = lifecycleGeneration
         defer { isRetrying = false }
