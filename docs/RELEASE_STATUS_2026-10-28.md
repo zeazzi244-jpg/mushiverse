@@ -34,10 +34,11 @@ v2の付与は同一取引・同一ユーザー・同一商品・同一環境の
 
 - `npm run verify:web`: Webバンドル一致、61本のインラインJS構文、課金停止の静的チェック。
 - `npm test`: Apple検証後のポリシー15ケースと、PGliteによる実Postgresエンジンでの付与・消費・重複・権限・残高不足・結果整合性試験。
-- `npm run test:e2e`: iPhone相当の390×844表示で、6タブ、週間クエスト/記録描画、300枚超のガチャ、保存失敗、アカウント切替、通信復帰。Supabase応答はモック。実サービスへの投稿や実機試験ではない。
+- `npm run test:e2e`: iPhone相当の390×844表示で、6タブ、週間クエスト/記録描画、300枚超のガチャ、保存失敗、アカウント切替、通信復帰、マップの古い非同期結果の破棄。Supabase応答はモック。実サービスへの投稿や実機試験ではない。
 - `npx deno check --no-config --node-modules-dir=manual supabase/functions/credit-apple-gacha-coins/index.ts`: Edge Function型検証。
 - `npm run ios:sync && npm run ios:check`: ローカル資産とiOS構成確認。Xcodeコンパイル・署名とは別。
-- GitHub Actionsの初回Web CI成功を確認。WebKitプロジェクトも追加したが、ローカル環境ではOS共有ライブラリ不足で起動不可。CIで依存をインストールして実行する。macOSシミュレータビルドは結果を別途確認する。
+- GitHub ActionsのWeb CI成功を確認。`94c4c37` ではChromium/WebKit各5ケース（計10ケース）が合格。追加したマップ競合ケースはChromiumでローカル合格。WebKitはローカル環境のOS共有ライブラリ不足のためCIで実行する。macOSシミュレータビルドはGitHubのキュー待機中。
+- DenoでAPIをHTTP実行し、GET=405、認証なしPOST=401、設定なしPOST=503、no-storeを確認。これは有効なApple購入のテストではない。
 - npm audit: ランタイム依存には指摘なし。Capacitor CLIのxcode/uuid経由で中程度の指摘が残る（開発/ビルド依存）。修正済みとは扱わない。
 - Supabase本番は読み取り調査のみ。全publicテーブルでRLS有効。moderator用SECURITY DEFINER RPCは認証済みユーザーに実行権があるが、本体でmoderator_accountsの照合あり。アドバイザー警告を「無条件公開」とは断定しない。
 - Supabaseの漏洩パスワード保護が無効。ダッシュボードで有効化可否を確認する。

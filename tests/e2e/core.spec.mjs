@@ -66,3 +66,16 @@ test('network reconnect does not crash the core app',async({page})=>{
   await expect(page.locator('#collectionList')).toContainText('カブトムシ');
   expect(errors).toEqual([]);
 });
+test('a slow map lookup cannot restore pins excluded by a newer filter',async({page})=>{
+  await setup(page);
+  let release;
+  const pending=new Promise(resolve=>{release=resolve});
+  await page.route('**/AddressSearch**',async route=>{await pending;await route.fulfill({contentType:'application/json',body:JSON.stringify([{geometry:{coordinates:[139.7,35.69]}}])})});
+  await page.evaluate(()=>{window.records[0].municipality='新宿区'});
+  const requested=page.waitForRequest('**/AddressSearch**');
+  await page.locator('.nav [data-tab="map"]').click();await requested;
+  await page.locator('#mapCategory').selectOption('チョウ・ガ');
+  release();
+  await expect(page.locator('#areaRanking')).toContainText('地図に表示できる地域がまだありません');
+  await expect(page.locator('#insectMap .leaflet-marker-icon')).toHaveCount(0);
+});
