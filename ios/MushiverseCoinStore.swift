@@ -67,6 +67,7 @@ final class MushiverseCoinStore: ObservableObject {
     func stop() {
         isStarted = false
         lifecycleGeneration += 1
+        productLoadGeneration += 1
         updatesTask?.cancel()
         updatesTask = nil
     }
