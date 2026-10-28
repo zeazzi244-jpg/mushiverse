@@ -1856,7 +1856,7 @@ const runtimeErrorsV30=[];
 Object.defineProperty(window,'runtimeErrorsV30',{configurable:true,get:()=>runtimeErrorsV30});
 let renderingRuntimeErrorV70=false;
 function pushRuntimeErrorV30(msg){const m=String(msg||'').slice(0,180);if(!m)return;if(runtimeErrorsV30[0]?.message===m)return;runtimeErrorsV30.unshift({at:new Date().toISOString(),message:m});if(runtimeErrorsV30.length>5)runtimeErrorsV30.length=5;if(renderingRuntimeErrorV70)return;renderingRuntimeErrorV70=true;try{renderLaunchCandidateV30()}catch(e){console.warn('Diagnostics render failed:',e)}finally{renderingRuntimeErrorV70=false}}
-window.addEventListener('error',e=>pushRuntimeErrorV30(e?.message||'runtime error'));
+window.addEventListener('error',e=>{const loc=e?.filename?` (${String(e.filename).split('/').pop()}:${e.lineno||0}:${e.colno||0})`:'';pushRuntimeErrorV30((e?.message||'runtime error')+loc)});
 window.addEventListener('unhandledrejection',e=>pushRuntimeErrorV30(e?.reason?.message||e?.reason||'promise rejection'));
 async function detectGlobalDbV30(force=false){
  if(!db||globalDbCapabilityV30.checking)return;
