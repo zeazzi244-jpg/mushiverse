@@ -73,7 +73,7 @@ final class MushiverseCoinStore: ObservableObject {
     }
 
     func loadProducts() async {
-        guard !isPurchasing, !isRetrying else { return }
+        guard !isPurchasing, !isRetrying, !Task.isCancelled else { return }
         productLoadGeneration += 1
         let generation = productLoadGeneration
         do {
