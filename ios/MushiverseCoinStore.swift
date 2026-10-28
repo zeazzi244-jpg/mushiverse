@@ -118,6 +118,7 @@ final class MushiverseCoinStore: ObservableObject {
             return
         }
         guard Self.productIDs.contains(transaction.productID),
+              transaction.productType == .consumable,
               transaction.revocationDate == nil else { return }
         // Do not send concurrent credit requests for the same transaction.
         guard processingTransactionIDs.insert(transaction.id).inserted else { return }
