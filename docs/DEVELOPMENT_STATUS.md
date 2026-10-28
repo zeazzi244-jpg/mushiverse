@@ -19,19 +19,25 @@ Capacitor Xcodeプロジェクトと停止状態のStoreKit 2ショップを統�
 
 ## テスト結果・証跡
 
-前回CI確認済みのソース（今回の追加分を含まない履歴）: `790d5950004cb3ee1beb2fbe683ad3f5f88ede9e`。
+今回のソース検証対象: `ede14e6af98840afc39ad2c61fc866f9c1b3ad7f`。以下のCIを実行。結果を記録する後続コミットはこの資料のみの変更。
 
 |検証|結果/限界|
 |---|---|
-|Chromium/WebKit|30/30成功。Supabaseはモック、iPhoneの実機ではない|
-|Appleポリシー/HTTPハンドラー|15件/13件成功。有効なApple購入を使った試験ではない|
-|Postgres台帳|7シナリオ成功。PGlite上の実SQL、別接続の同時実行は未確認|
+|Chromium/WebKit CI|32/32成功。Supabaseはモック、iPhoneの実機ではない|
+|Appleポリシー/購入HTTP|15件/13件成功。有効なApple購入を使った試験ではない|
+|Postgres台帳|9シナリオ成功（Node集計10は親テストを含む）。PGlite上の実SQL、別接続の同時実行は未確認|
+|消費API/端末の再試行|11件/5件成功。認証・環境・価格の偽装、未知応答、連打、アカウント切替を確認|
+|Apple通知/返金ポリシー|6件成功。偽署名拒否・停止・未対応部分返金/消費要求の拒否を確認。有効なApple通知は未確認|
 |Xcode参照チェック|2件成功|
-|Web/JS/Deno|バンドル一致、61インラインJS構文、型検証、停止ゲートすべて成功|
-|iOS Simulator|未署名コンパイル、Bundle ID・権限説明確認成功。署名IPA/実機とは別|
+|Web/JS/Deno|バンドル一致、61インラインJS構文、全3関数型検証、停止ゲートすべて成功|
+|依存/設定|本番向け依存audit指摘0件、全workflow YAML構文成功|
+|iOS Simulator CI|未署名コンパイル成功、Bundle ID・3権限説明を確認、成果物保存成功。署名IPA/実機検証とは別|
 
-- [Web/ブラウザー/台帳/型検証CI](https://github.com/zeazzi244-jpg/mushiverse/actions/runs/40713793160)
-- [iOS Simulator CI](https://github.com/zeazzi244-jpg/mushiverse/actions/runs/40713793260)
+単体/SQL合計61シナリオ成功（Node集計62、親テスト1件を含む）。ローカルChromiumも16/16成功。ローカルWebKitはOSライブラリ不足のためCIで検証した。
+
+- [今回のWeb/ブラウザー/台帳/型検証CI: 成功](https://github.com/zeazzi244-jpg/mushiverse/actions/runs/40718695770)
+- [今回のiOS Simulator CI: 成功](https://github.com/zeazzi244-jpg/mushiverse/actions/runs/40718695845)
+- 前回: `790d5950004cb3ee1beb2fbe683ad3f5f88ede9e`、[Web 30件成功](https://github.com/zeazzi244-jpg/mushiverse/actions/runs/40713793160)、[Simulator成功](https://github.com/zeazzi244-jpg/mushiverse/actions/runs/40713793260)。今回の追加分の証拠には使用しない。
 
 再現: `npm ci` → `npm run verify:web` → `npm test` → `npm run test:e2e`（事前に `npx playwright install --with-deps chromium webkit`）。iOS: `npm run ios:sync && npm run ios:check`。実際のコンパイルはmacOS CI。
 
@@ -62,13 +68,13 @@ Capacitor Xcodeプロジェクトと停止状態のStoreKit 2ショップを統�
 |19|署名IPA/TestFlight|未確認|
 |20|最終実機検証・App Store申請|未実施|
 
-## 今回の作業（検証・保存中）
+## 今回の開発内容
 
 - 本ファイルを作成し、AGENTS.md/READMEから継続時に参照するようにする。
 - 購入コイン消費APIと停止状態の画面、送信前UUID保存、通信失敗後の同一要求再試行、Web Locks、アカウント/JWT固定を追加。無料残高・カードとは分離。
 - Apple公式署名検証による返金通知候補を追加。最新取引照合、返金前受信、重複/逆順通知、返金負債、新規消費停止、取消復元をSQLへ追加。部分返金・消費報告は未対応として安全に拒否。
 - 認証/Apple設定処理を共有化し、JSON読取のサイズ/時間制限を再利用。3つのサーバーゲートと2つのクライアント固定停止ゲートを維持。
-- ローカル: verify:web成功、単体/SQL 61シナリオ成功（Node集計62、SQL親テスト1件を含む）、Deno全3関数成功、ios:sync/ios:check成功。Chromium 16/16成功。最新GitHub CIは保存後に追記。
+- ローカル: verify:web成功、単体/SQL 61シナリオ成功（Node集計62、SQL親テスト1件を含む）、Deno全3関数成功、ios:sync/ios:check成功。Chromium 16/16成功。GitHub CIの証跡は上表を参照。
 - 署名ワークフローのpush自動実行を除き、TestFlightへのアップロードは手動・初期値OFFの明示入力が必要な候補へ変更。今回は署名/アップロードを実行していない。YAML構文検証成功。
 - CORSプリフライト対応、未知のDB応答で未完了IDを消さない保護、二重クリックの回帰試験を追加。
 - 各機能は停止ゲートを維持し、コード追加だけで公開済み/実購入検証済みとは扱わない。
@@ -92,6 +98,6 @@ Capacitor Xcodeプロジェクトと停止状態のStoreKit 2ショップを統�
 
 ## 更新の記録
 
-- 2026-10-28: 共通引き継ぎファイルを開始。過去の作業を統合し、確認済み50%と未確認項目を分離した。今回の最終テスト/CI結果は作業完了時に追記する。
+- 2026-10-28: 共通引き継ぎファイルを開始。過去の作業を統合し、確認済み50%と未確認項目を分離した。停止状態の消費/返金候補、CORSと再送保護、手動アップロード保護を追加し、検証対象SHAとCI証跡を記録。進捗50%を維持。
 
 過去の詳細: [第2回レビュー](PR2_REVIEW_ROUND2.md)、[Apple設定候補](APPLE_BACKEND_SETUP.md)、[申請原稿](APP_STORE_DRAFT_JA.md)。本ファイルの最新記録を優先する。
