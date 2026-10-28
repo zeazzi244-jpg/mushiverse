@@ -73,6 +73,8 @@ final class MushiverseCoinStore: ObservableObject {
 
     func loadProducts() async {
         guard !isPurchasing, !isRetrying else { return }
+        productLoadGeneration += 1
+        let generation = productLoadGeneration
         do {
             let fetched = try await Product.products(for: Self.productIDs)
                 .filter { $0.type == .consumable }
