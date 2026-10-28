@@ -13,11 +13,14 @@ on:
       - 'capacitor.config.json'
       - 'scripts/build-web.mjs'
       - '.github/workflows/generate-ios-project.yml'
+concurrency:
+  group: native-${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
 permissions:
   contents: read
 jobs:
   generate-native:
-    runs-on: macos-latest
+    runs-on: macos-26-intel
     timeout-minutes: 35
     steps:
       - uses: actions/checkout@v4
