@@ -29,7 +29,7 @@ checks = {
     "official Apple verifier and current status required": "new SignedDataVerifier" in backend and "apple.getTransactionInfo" in backend,
     "only versioned RPC may credit": "admin.rpc(\'credit_verified_gacha_purchase_v2\'" in backend,
     "backend requires authenticated user": "client.auth.getUser()" in backend,
-    "backend returns no-store": "cache-control\': \'no-store" in handler,
+    "backend returns no-store": "cache-control" in (root / "supabase/functions/_shared/billing-http.ts").read_text() and "no-store" in (root / "supabase/functions/_shared/billing-http.ts").read_text() and "billingJSON as json" in handler,
 }
 
 for name, ok in checks.items():

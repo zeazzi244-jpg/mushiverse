@@ -1,3 +1,4 @@
+import {billingJSON as json,billingPreflight} from './billing-http.ts';
 import { validateCoinTransaction } from './apple-coin-policy.ts';
 
 export type AuthenticatedAccount = { id: string; sessionID: string };
@@ -8,9 +9,7 @@ export type CreditDependencies = {
   credit: (tx: Record<string, unknown>, account: AuthenticatedAccount) => Promise<boolean>;
   environment: () => string;
 };
-const json = (data: Record<string, unknown>, status: number) => new Response(JSON.stringify(data), {
-  status, headers: { 'content-type': 'application/json; charset=utf-8', 'cache-control': 'no-store' },
-});
+
 
 // Bounded by bytes AND total time, including a stream that never finishes. No financial side effects.
 export async function readJSONBody(request: Request, timeoutMS = 5000, maxBytes = 32768): Promise<Record<string, unknown>> {
@@ -45,6 +44,7 @@ export async function readPurchaseBody(request: Request, timeoutMS = 5000): Prom
 
 export function createAppleCreditHandler(deps: CreditDependencies) {
   return async (request: Request): Promise<Response> => {
+    if (request.method === 'OPTIONS') return billingPreflight();
     if (request.method !== 'POST') return json({ error: 'method_not_allowed' }, 405);
     const bearer = request.headers.get('authorization') ?? '';
     if (bearer.length > 8192 || !/^Bearer\s+\S+$/i.test(bearer)) return json({ error: 'unauthorized' }, 401);
