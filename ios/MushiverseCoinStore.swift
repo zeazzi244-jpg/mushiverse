@@ -18,6 +18,7 @@ final class MushiverseCoinStore: ObservableObject {
     private var updatesTask: Task<Void, Never>?
     // A purchase can arrive through both purchase() and Transaction.updates.
     private var processingTransactionIDs = Set<UInt64>()
+    private var isStarted = false
     private let creditEndpoint: URL
     private let accessToken: () async throws -> String
     private let appAccountToken: () async throws -> UUID
@@ -29,6 +30,8 @@ final class MushiverseCoinStore: ObservableObject {
     }
 
     func start() async {
+        guard !isStarted else { return }
+        isStarted = true
         // Restarting the shop must not leave a second StoreKit updates listener active.
         updatesTask?.cancel()
         updatesTask = nil
@@ -45,6 +48,7 @@ final class MushiverseCoinStore: ObservableObject {
     }
 
     func stop() {
+        isStarted = false
         updatesTask?.cancel()
         updatesTask = nil
     }
@@ -52,15 +56,19 @@ final class MushiverseCoinStore: ObservableObject {
     func loadProducts() async {
         do {
             products = try await Product.products(for: Self.productIDs)
+                .filter { $0.type == .consumable }
                 .sorted { $0.price < $1.price }
+            lastError = nil
         } catch {
+            products = []
             lastError = "商品情報を読み込めませんでした"
         }
     }
 
     func purchase(_ product: Product) async {
-        guard Self.productIDs.contains(product.id), !isPurchasing else { return }
+        guard Self.productIDs.contains(product.id), product.type == .consumable, !isPurchasing else { return }
         isPurchasing = true
+        lastError = nil
         defer { isPurchasing = false }
         do {
             let accountID = try await appAccountToken()
@@ -99,6 +107,8 @@ final class MushiverseCoinStore: ObservableObject {
                 throw PurchaseError.serverRejected
             }
             var request = URLRequest(url: creditEndpoint)
+            request.timeoutInterval = 20
+            request.cachePolicy = .reloadIgnoringLocalCacheData
             request.httpMethod = "POST"
             request.setValue("Bearer " + token, forHTTPHeaderField: "Authorization")
             request.setValue("application/json", forHTTPHeaderField: "Content-Type")
