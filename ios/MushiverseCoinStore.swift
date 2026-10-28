@@ -72,11 +72,14 @@ final class MushiverseCoinStore: ObservableObject {
     func loadProducts() async {
         guard !isPurchasing, !isRetrying else { return }
         do {
-            products = try await Product.products(for: Self.productIDs)
+            let fetched = try await Product.products(for: Self.productIDs)
                 .filter { $0.type == .consumable }
                 .sorted { $0.price < $1.price }
+            guard !Task.isCancelled else { return }
+            products = fetched
             lastError = nil
         } catch {
+            guard !Task.isCancelled else { return }
             products = []
             lastError = "商品情報を読み込めませんでした"
         }
