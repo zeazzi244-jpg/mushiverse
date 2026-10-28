@@ -19,6 +19,7 @@ final class MushiverseCoinStore: ObservableObject {
     // A purchase can arrive through both purchase() and Transaction.updates.
     private var processingTransactionIDs = Set<UInt64>()
     private var isStarted = false
+    private var lifecycleGeneration = 0
     @Published private(set) var isRetrying = false
     private let creditEndpoint: URL
     private let accessToken: () async throws -> String
