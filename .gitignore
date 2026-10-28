@@ -24,3 +24,10 @@ ios/**/DerivedData/
 # Browser test output
 playwright-report/
 test-results/
+
+# Local staging and safe generated readiness reports
+supabase/.temp/
+supabase/.branches/
+signing-readiness.json
+staging/supabase/.temp/
+staging/supabase/.branches/

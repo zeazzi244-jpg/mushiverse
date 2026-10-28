@@ -1,5 +1,7 @@
 # App Store申請原稿（未提出）
 
+関連資料: [実機・申請チェック](APP_REVIEW_CHECKLIST_JA.md) / [App Privacy棚卸し](APP_PRIVACY_INVENTORY.md)。
+
 課金・安全機能の未完了を隠して提出しない。実装/実機検証の結果に応じて最終調整する。
 
 - App名候補: ムシバース - 昆虫採集の記録

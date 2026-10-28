@@ -68,16 +68,14 @@ Capacitor Xcodeプロジェクトと停止状態のStoreKit 2ショップを統�
 |19|署名IPA/TestFlight|未確認|
 |20|最終実機検証・App Store申請|未実施|
 
-## 今回の開発内容
+## 今回の開発内容（第4回・検証中）
 
-- 本ファイルを作成し、AGENTS.md/READMEから継続時に参照するようにする。
-- 購入コイン消費APIと停止状態の画面、送信前UUID保存、通信失敗後の同一要求再試行、Web Locks、アカウント/JWT固定を追加。無料残高・カードとは分離。
-- Apple公式署名検証による返金通知候補を追加。最新取引照合、返金前受信、重複/逆順通知、返金負債、新規消費停止、取消復元をSQLへ追加。部分返金・消費報告は未対応として安全に拒否。
-- 認証/Apple設定処理を共有化し、JSON読取のサイズ/時間制限を再利用。3つのサーバーゲートと2つのクライアント固定停止ゲートを維持。
-- ローカル: verify:web成功、単体/SQL 61シナリオ成功（Node集計62、SQL親テスト1件を含む）、Deno全3関数成功、ios:sync/ios:check成功。Chromium 16/16成功。GitHub CIの証跡は上表を参照。
-- 署名ワークフローのpush自動実行を除き、TestFlightへのアップロードは手動・初期値OFFの明示入力が必要な候補へ変更。今回は署名/アップロードを実行していない。YAML構文検証成功。
-- CORSプリフライト対応、未知のDB応答で未完了IDを消さない保護、二重クリックの回帰試験を追加。
-- 各機能は停止ゲートを維持し、コード追加だけで公開済み/実購入検証済みとは扱わない。
+- 開始時に最新 `f9409303a1230bb4473396933dd366bffa2728f8` の [Web CI成功](https://github.com/zeazzi244-jpg/mushiverse/actions/runs/40719526147) と [iOS CI成功](https://github.com/zeazzi244-jpg/mushiverse/actions/runs/40719526197) を確認。修正が必要なCI失敗はなかった。
+- 既存Supabaseは本番1件/開発ブランチなし/Freeと確認。本番は読み取り調査のみ。追加料金の同意なしにホスト型ステージングは作成していない。
+- [隔離ローカル/CI検証環境](STAGING_RUNBOOK.md) と実Auth/JWT/RPC/Postgresの統合テストを追加。Apple境界のみ合成データ、課金ゲートは変更なし。実行結果は確認後に追記。
+- 課金RPCアダプターを本体/統合テストで共有化。既存単体61シナリオと新規署名事前検証3件、Deno全関数/統合テスト型検証、Web停止チェック成功。
+- 読み取り専用のiOS署名設定事前検証をPR CIへ追加。キー不足はnot_configured、Apple API権限は別状態で記録し、署名IPA/Provisioning成功と混同しない。
+- [App Privacy棚卸し](APP_PRIVACY_INVENTORY.md)、[審査/実機/本人操作パケット](APP_REVIEW_CHECKLIST_JA.md) を追加。AI画像のGoogle Gemini送信を配備済みコードから確認し、privacy.html草案へ追記。
 
 ## 未完了・次の担当者が進めること
 

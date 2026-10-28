@@ -1,4 +1,4 @@
-import { createClient } from 'npm:@supabase/supabase-js@2.118.0';
+import { applyCoinStatus } from '../_shared/coin-ledger.ts';
 import { appleServices } from '../_shared/apple-services.ts';
 import { validateCoinStatus } from '../_shared/apple-coin-policy.ts';
 import { createAppleNotificationHandler, REFUND_TYPES } from '../_shared/apple-notification-handler.ts';
@@ -21,12 +21,5 @@ Deno.serve(createAppleNotificationHandler({
   // Current Apple state, not notification arrival order, decides refund vs reversal.
   return {notification:notification as Record<string,unknown>,transaction:tx as Record<string,unknown>};
  },
- apply:async(notificationID,tx,refunded)=>{
-  const url=Deno.env.get('SUPABASE_URL'),key=Deno.env.get('SUPABASE_SERVICE_ROLE_KEY');if(!url||!key)throw Error('unavailable');
-  const admin=createClient(url,key,{auth:{persistSession:false}});
-  const {data,error}=await admin.rpc('apply_verified_apple_coin_status_v2',{
-   p_notification_id:notificationID,p_transaction_id:tx.transactionId,p_product_id:tx.productId,
-   p_environment:tx.environment,p_refunded:refunded,p_status_ms:tx.signedDate,
-  });return !error&&data===true;
- },
+ apply:applyCoinStatus,
 }));
