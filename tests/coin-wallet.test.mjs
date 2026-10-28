@@ -9,10 +9,10 @@ test('Postgres isolated coin ledger',async t=>{
  try{
  await db.exec(`create role anon;create role authenticated;create role service_role bypassrls;create schema auth;
  create table auth.users(id uuid primary key,deleted_at timestamptz,banned_until timestamptz);
- create table auth.sessions(id uuid primary key,user_id uuid references auth.users(id) on delete cascade);
+ create table auth.sessions(id uuid primary key,user_id uuid references auth.users(id) on delete cascade,not_after timestamptz);
  create function auth.uid() returns uuid language sql stable as $$select nullif(current_setting('request.jwt.claim.sub',true),'')::uuid$$;
  grant usage on schema auth to authenticated;grant execute on function auth.uid() to authenticated;
- insert into auth.users(id) values('${A}'),('${B}');insert into auth.sessions values('${SA}','${A}'),('${SB}','${B}');`);
+ insert into auth.users(id) values('${A}'),('${B}');insert into auth.sessions(id,user_id) values('${SA}','${A}'),('${SB}','${B}');`);
  await db.exec(readFileSync('supabase/sql/coin-wallet-v2.sql','utf8'));
  const credit=(id,user=A,product='mushiverse.coins.1200',env='Sandbox',session=user===A?SA:SB)=>db.query('select public.credit_verified_gacha_purchase_v2($1,$2,$3,$4,$5) ok',[id,user,product,env,session]);
  const draw=(id,count=10,user=A,env='Sandbox',session=user===A?SA:SB)=>db.query('select public.draw_with_purchased_gacha_coins_v2($1,$2,$3,$4,$5) result',[id,user,count,env,session]);
@@ -42,11 +42,16 @@ test('Postgres isolated coin ledger',async t=>{
  await db.exec(`set role authenticated;set request.jwt.claim.sub='${B}'`);assert.equal((await db.query('select * from gacha_coin_wallets_v2')).rows.length,0);
  await assert.rejects(()=>credit('987654321'));await assert.rejects(()=>db.query('update gacha_coin_wallets_v2 set balance=99999'));await db.exec('reset role');
  });
+ await t.test('expired sessions cannot credit even before JWT expiry',async()=>{
+ await db.exec(`update auth.sessions set not_after=now()-interval '1 minute' where id='${SA}'`);
+ await assert.rejects(()=>credit('555555555'));await assert.rejects(()=>draw('expired-session-draw',1));
+ await db.exec(`update auth.sessions set not_after=null where id='${SA}'`);
+ });
  await t.test('revoked/banned/deleted sessions reject and deletion preserves replay tombstones',async()=>{
  await credit('987654321',B);await draw('user-b-draw-1',1,B);
  await db.exec(`delete from auth.sessions where id='${SB}'`);await assert.rejects(()=>credit('987654322',B));await assert.rejects(()=>draw('user-b-draw-2',1,B));
- await db.exec(`insert into auth.sessions values('${SB}','${B}');update auth.users set banned_until=now()+interval '1 day' where id='${B}'`);await assert.rejects(()=>credit('987654322',B));
- await db.exec(`delete from auth.users where id='${B}';insert into auth.users(id) values('${B}');insert into auth.sessions values('${SB}','${B}')`);
+ await db.exec(`insert into auth.sessions(id,user_id) values('${SB}','${B}');update auth.users set banned_until=now()+interval '1 day' where id='${B}'`);await assert.rejects(()=>credit('987654322',B));
+ await db.exec(`delete from auth.users where id='${B}';insert into auth.users(id) values('${B}');insert into auth.sessions(id,user_id) values('${SB}','${B}')`);
  await assert.rejects(()=>credit('987654321',B));await assert.rejects(()=>draw('user-b-draw-1',1,B));assert.equal(await balance('Sandbox',B),0);
  });
  }finally{await db.close()}

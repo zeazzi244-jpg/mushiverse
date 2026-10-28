@@ -13,7 +13,8 @@ BEGIN
  IF p_user_id IS NULL OR p_session_id IS NULL THEN RAISE EXCEPTION 'inactive_session'; END IF;
  PERFORM 1 FROM auth.sessions s JOIN auth.users u ON u.id=s.user_id
  WHERE s.id=p_session_id AND s.user_id=p_user_id AND u.deleted_at IS NULL
- AND (u.banned_until IS NULL OR u.banned_until<=now()) FOR SHARE OF s,u;
+ AND (u.banned_until IS NULL OR u.banned_until<=now())
+ AND (s.not_after IS NULL OR s.not_after>now()) FOR SHARE OF s,u;
  IF NOT FOUND THEN RAISE EXCEPTION 'inactive_session'; END IF;
 END;$$;
 REVOKE ALL ON FUNCTION mushiverse_billing_private.require_coin_session(uuid,uuid) FROM PUBLIC,anon,authenticated;
