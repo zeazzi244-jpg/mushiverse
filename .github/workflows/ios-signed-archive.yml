@@ -40,10 +40,10 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          npm install --no-audit --no-fund
+          npm ci --no-audit --no-fund
           npm run build:web
           node scripts/verify-web.mjs
-          npx cap add ios
+          npx cap sync ios
       - name: Run iOS release structure checks
         run: npm run ios:check
       - name: Declare iOS camera and location permissions

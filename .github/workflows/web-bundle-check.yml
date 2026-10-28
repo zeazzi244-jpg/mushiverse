@@ -3,11 +3,18 @@ on:
   push:
     branches: [main]
     paths:
+      - 'assets/**'
+      - 'tests/**'
+      - 'supabase/**'
+      - 'ios/**'
+      - 'playwright.config.mjs'
+      - 'package-lock.json'
       - 'index.html'
       - 'package.json'
       - 'capacitor.config.json'
       - 'scripts/**'
       - '.github/workflows/web-bundle-check.yml'
+  pull_request:
   workflow_dispatch:
 permissions:
   contents: read
@@ -20,6 +27,11 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
+      - run: npm ci --no-audit --no-fund
+      - run: npm test
+      - run: npm run verify:web
+      - run: npx playwright install --with-deps chromium
+      - run: npm run test:e2e
       - name: Syntax-check build and release scripts
         run: |
           node --check scripts/build-web.mjs

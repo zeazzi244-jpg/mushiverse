@@ -1,9 +1,14 @@
 name: Generate iOS Xcode project
 on:
+  pull_request:
   workflow_dispatch:
   push:
     branches: [main]
     paths:
+      - 'ios/**'
+      - 'index.html'
+      - 'assets/**'
+      - 'package-lock.json'
       - 'package.json'
       - 'capacitor.config.json'
       - 'scripts/build-web.mjs'
@@ -20,13 +25,13 @@ jobs:
         with:
           node-version: '22'
       - name: Install dependencies
-        run: npm install --no-audit --no-fund
+        run: npm ci --no-audit --no-fund
       - name: Prepare local web bundle
         run: |
           npm run build:web
           node scripts/verify-web.mjs
       - name: Generate Capacitor iOS project
-        run: npx cap add ios
+        run: npx cap sync ios
       - name: Run iOS release structure checks
         run: npm run ios:check
       - name: Declare iOS camera and location permissions
