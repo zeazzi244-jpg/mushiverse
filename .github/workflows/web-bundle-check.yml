@@ -34,6 +34,25 @@ jobs:
       - run: npm run verify:web
       - run: npx playwright install --with-deps chromium webkit
       - run: npm run test:e2e
+      - name: Summarize last browser actions on failure
+        if: failure()
+        shell: python
+        run: |
+          import glob,json,zipfile
+          for archive in glob.glob('test-results/**/trace.zip',recursive=True):
+              print('Trace:',archive)
+              with zipfile.ZipFile(archive) as trace:
+                  for name in trace.namelist():
+                      if not name.endswith('.trace'): continue
+                      events=[]
+                      for line in trace.read(name).decode('utf-8').splitlines():
+                          try: event=json.loads(line)
+                          except ValueError: continue
+                          if event.get('type')=='before':
+                              events.append({key:event.get(key) for key in ('callId','apiName','startTime')})
+                          elif event.get('type')=='after' and event.get('error'):
+                              events.append({'callId':event.get('callId'),'endTime':event.get('endTime'),'error':str(event['error'])[:500]})
+                      print(json.dumps(events[-15:],ensure_ascii=False))
       - name: Save browser failure traces
         if: failure()
         uses: actions/upload-artifact@v4
