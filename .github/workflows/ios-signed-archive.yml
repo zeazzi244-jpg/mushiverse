@@ -107,6 +107,22 @@ jobs:
           path: ${{ runner.temp }}/MushiverseIPA/*.ipa
           if-no-files-found: error
           retention-days: 1
+      - name: Upload IPA to App Store Connect for TestFlight
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p "$HOME/.appstoreconnect/private_keys"
+          chmod 700 "$HOME/.appstoreconnect/private_keys"
+          cp "$RUNNER_TEMP/AuthKey.p8" "$HOME/.appstoreconnect/private_keys/AuthKey_${ASC_KEY_ID}.p8"
+          chmod 600 "$HOME/.appstoreconnect/private_keys/AuthKey_${ASC_KEY_ID}.p8"
+          IPA="$(find "$RUNNER_TEMP/MushiverseIPA" -maxdepth 1 -name '*.ipa' -type f -print -quit)"
+          test -n "$IPA"
+          xcrun altool --upload-app --type ios --file "$IPA" --apiKey "$ASC_KEY_ID" --apiIssuer "$ASC_ISSUER_ID"
+          echo 'IPA submitted to App Store Connect; Apple processing and TestFlight acceptance are pending.' >> "$GITHUB_STEP_SUMMARY"
+      - name: Remove upload API key
+        if: always()
+        shell: bash
+        run: rm -f "$HOME/.appstoreconnect/private_keys/AuthKey_${ASC_KEY_ID}.p8"
       - name: Remove API key
         if: always()
         shell: bash
