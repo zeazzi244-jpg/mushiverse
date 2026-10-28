@@ -57,7 +57,7 @@ final class MushiverseCoinStore: ObservableObject {
         isRetrying = true
         defer { isRetrying = false }
         for await result in Transaction.unfinished {
-            if Task.isCancelled { break }
+            if Task.isCancelled || !isStarted { break }
             await process(result)
         }
     }
