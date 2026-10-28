@@ -1,6 +1,6 @@
 import { test, expect } from '@playwright/test';
 const A='11111111-1111-4111-8111-111111111111',B='22222222-2222-4222-8222-222222222222';
-async function setup(page, { cards=0, failSave=false,initialLoadFailure=false }={}) {
+async function setup(page, { cards=0, failSave=false,initialLoadFailure=false,insectName='カブトムシ' }={}) {
   const errors=[];page.on('pageerror',e=>{errors.push(e.message);console.log('PAGE ERROR',e.message,JSON.stringify(e),e.stack)});
   await page.route('**/*',route=>{
     const url=new URL(route.request().url());
@@ -8,7 +8,7 @@ async function setup(page, { cards=0, failSave=false,initialLoadFailure=false }=
     if(url.pathname.endsWith('/assets/vendor/supabase.js'))return route.fulfill({contentType:'text/javascript',body:`
       (()=>{const callbacks=[];let user={id:'${A}',email:'test@example.invalid'};
       const now=new Date().toISOString();
-      const rows=[{id:'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa',user_id:user.id,insect_name:'カブトムシ',category:'甲虫',prefecture:'東京都',municipality:'',observed_at:now,created_at:now,image_url:null}];
+      const rows=[{id:'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa',user_id:user.id,insect_name:${JSON.stringify(insectName)},category:'甲虫',prefecture:'東京都',municipality:'',observed_at:now,created_at:now,image_url:null}];
       window.testRows=rows;window.testInitialLoadFailure=${initialLoadFailure};window.testLeaders=[];window.testWrites=[];
       const auth={getUser:async()=>({data:{user},error:null}),getSession:async()=>({data:{session:user?{user,access_token:'test-token'}:null}}),onAuthStateChange:fn=>{callbacks.push(fn);return {data:{subscription:{unsubscribe(){}}}}},signOut:async()=>{window.testSwitchUser(null);return {error:null}}};
       window.testSwitchUser=id=>{user=id?{id,email:'test@example.invalid'}:null;callbacks.forEach(fn=>fn('SIGNED_IN',user?{user}:null))};
@@ -142,4 +142,12 @@ test('a post response from before account switching is discarded',async({page})=
   await expect.poll(()=>page.evaluate(()=>typeof window.testReleasePosts)).toBe('function');
   await page.evaluate(B=>{window.testSwitchUser(B);window.testReleasePosts()},B);
   await expect(page.locator('#feed')).not.toContainText('古いアカウントの応答');
+});
+
+for (const name of ['__proto__','constructor']) test('reserved species name does not crash rendering: '+name,async({page})=>{
+  const errors=await setup(page,{insectName:name});
+  await expect(page.locator('#feed')).toContainText(name);
+  await page.locator('.nav [data-tab="collection"]').click();
+  await expect(page.locator('#collectionList')).toContainText(name);
+  expect(errors).toEqual([]);
 });
