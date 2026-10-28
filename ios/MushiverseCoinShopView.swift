@@ -49,6 +49,13 @@ struct MushiverseCoinShopView: View {
                 Text(message)
                     .font(.footnote)
                     .foregroundStyle(.orange)
+                if purchasesEnabled {
+                    Button("未完了の購入を再確認") {
+                        Task { await store.retryUnfinishedPurchases() }
+                    }
+                    .disabled(store.isPurchasing)
+                    .accessibilityHint("Appleで完了した購入のコイン付与を再確認します。新たな購入は行いません。")
+                }
             }
         }
         .padding()
