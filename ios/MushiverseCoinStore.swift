@@ -19,6 +19,7 @@ final class MushiverseCoinStore: ObservableObject {
     // A purchase can arrive through both purchase() and Transaction.updates.
     private var processingTransactionIDs = Set<UInt64>()
     private var isStarted = false
+    @Published private(set) var isRetrying = false
     private let creditEndpoint: URL
     private let accessToken: () async throws -> String
     private let appAccountToken: () async throws -> UUID
@@ -48,6 +49,9 @@ final class MushiverseCoinStore: ObservableObject {
     /// Safely retry StoreKit transactions that were not acknowledged by our server.
     /// The server must independently verify and deduplicate every transaction.
     func retryUnfinishedPurchases() async {
+        guard !isRetrying else { return }
+        isRetrying = true
+        defer { isRetrying = false }
         for await result in Transaction.unfinished {
             if Task.isCancelled { break }
             await process(result)
