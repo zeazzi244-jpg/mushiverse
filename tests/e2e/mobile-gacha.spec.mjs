@@ -18,3 +18,15 @@ test('AI master is integrated read-only with unapproved artwork and isolated ID 
 test('coin SSR and ticket no-SSR behavior are deterministic at the rare boundary',async({page})=>{
  await setup(page,{coins:500,tickets:2});await page.evaluate(()=>{Math.random=()=>0});await page.locator('nav.nav [data-tab="gacha"]').click();await page.locator('#mv77Draw').click();await expect(page.locator('#mv88Reveal')).toHaveClass(/mv88-SSR/);await expect(page.locator('#mv88Reveal .mv88Card')).toHaveCount(1);await page.locator('#mv88Reveal .mv88Close').click();await page.locator('#mv77TicketDraw').click();await expect(page.locator('#mv88Reveal')).not.toHaveClass(/mv88-SSR/);expect(await page.evaluate(A=>JSON.parse(localStorage.getItem('mushiverse-v77-game:user:'+A)).cards.map(c=>c.rarity),A)).toEqual(['SSR','SR']);
 });
+
+test('AI collection handles malformed local storage without erasing it or changing beta wallet',async({page})=>{
+ await setup(page,{coins:500});
+ const key='mushiverse-ai-collection-v1:user:'+A;
+ await page.evaluate(key=>localStorage.setItem(key,'{corrupt'),key);
+ await page.locator('nav.nav [data-tab="collection"]').click();
+ await page.locator('#aiInsectCollection summary').click();
+ await expect(page.locator('#aiInsectStatus')).toContainText('所持データを読み込めません');
+ await expect(page.locator('#aiInsectCards article')).toHaveCount(0);
+ expect(await page.evaluate(key=>localStorage.getItem(key),key)).toBe('{corrupt');
+ expect(await page.evaluate(A=>JSON.parse(localStorage.getItem('mushiverse-v77-game:user:'+A)).coins,A)).toBe(500);
+});
