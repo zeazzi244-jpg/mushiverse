@@ -1,11 +1,9 @@
 import {test,expect} from '@playwright/test';
-const key='mushiverse-v77-game:guest';
+import {A,setup} from './helpers.mjs';
+const key='mushiverse-v77-game:user:'+A;
 test.describe('beta gacha economy',()=>{
  test.beforeEach(async({page})=>{
-  await page.addInitScript(({key})=>{
-   localStorage.setItem(key,JSON.stringify({coins:500,tickets:2,streak:0,lastClaim:'',cards:[],history:[]}));
-  },{key});
-  await page.goto('/');
+  await setup(page,{tickets:2});
   await page.locator('nav.nav button[data-tab="gacha"]').click();
   await expect(page.locator('#mv77Draw')).toBeVisible();
  });

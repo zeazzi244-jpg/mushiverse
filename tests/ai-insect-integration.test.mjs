@@ -1,0 +1,4 @@
+import {test} from 'node:test';import assert from 'node:assert/strict';import {readFileSync} from 'node:fs';import {canonicalCards,ownedByID} from '../assets/ai-insect-collection.mjs';
+const raw=JSON.parse(readFileSync('docs/ai_insect_catalog_v1.json','utf8'));
+test('ID based ownership survives renamed display labels without modifying saved entries',()=>{const cards=canonicalCards(raw),saved=[{id:'AI-005',name:'旧表示名'},'AI-005','AI-100','legacy-123',null];const before=JSON.stringify(saved);assert.deepEqual([...ownedByID(saved,cards)],[['AI-005',2],['AI-100',1]]);assert.equal(JSON.stringify(saved),before);assert.equal(cards.filter(c=>c.art_status==='approved').length,0)});
+test('runtime catalog rejects duplicate IDs and malformed masters',()=>{const duplicate=structuredClone(raw);duplicate.cards[1].id=duplicate.cards[0].id;assert.throws(()=>canonicalCards(duplicate));assert.throws(()=>canonicalCards({cards:[]}))});
