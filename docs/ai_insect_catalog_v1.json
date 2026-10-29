@@ -72,7 +72,7 @@
     },
     {
       "id": "AI-008",
-      "name": "アカスジコガネ",
+      "name": "ベニスジシズクコガネ",
       "rarity": "N",
       "fictional": true,
       "art_status": "pending"
@@ -121,7 +121,7 @@
     },
     {
       "id": "AI-015",
-      "name": "チャバネコガネ",
+      "name": "チャカゲホシコガネ",
       "rarity": "N",
       "fictional": true,
       "art_status": "pending"
@@ -156,7 +156,7 @@
     },
     {
       "id": "AI-020",
-      "name": "アサツユムシ",
+      "name": "アサツユコモレビムシ",
       "rarity": "N",
       "fictional": true,
       "art_status": "pending"
