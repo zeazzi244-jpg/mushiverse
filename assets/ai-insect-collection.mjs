@@ -2,7 +2,7 @@
 export function canonicalCards(value){
  if(value?.schema_version!==1||!Array.isArray(value.cards)||value.cards.length!==100)throw Error('invalid_catalog');
  const ids=new Set(),names=new Set();
- for(const c of value.cards){const n=Number(c?.id?.slice(3)),rarity=n<=40?'N':n<=70?'R':n<=90?'SR':'SSR';if(!/^AI-\d{3}$/.test(c?.id)||n<1||n>100||ids.has(c.id)||typeof c.name!=='string'||!c.name.trim()||names.has(c.name.trim())||c.rarity!==rarity||c.fictional!==true||!['pending','review','approved'].includes(c.art_status))throw Error('invalid_catalog');ids.add(c.id);names.add(c.name.trim())}
+ for(const c of value.cards){const n=typeof c?.id==='string'?Number(c.id.slice(3)):NaN,rarity=n<=40?'N':n<=70?'R':n<=90?'SR':'SSR';if(!/^AI-\d{3}$/.test(c?.id)||n<1||n>100||ids.has(c.id)||typeof c.name!=='string'||!c.name.trim()||names.has(c.name.trim())||c.rarity!==rarity||c.fictional!==true||!['pending','review','approved'].includes(c.art_status))throw Error('invalid_catalog');ids.add(c.id);names.add(c.name.trim())}
  return value.cards;
 }
 export function ownedByID(value,catalog){
