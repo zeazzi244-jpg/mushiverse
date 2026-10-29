@@ -22,6 +22,6 @@ for (let n=1; n<=100; n++) {
   if (c.fictional !== true) errors.push(id+' must be marked fictional');
   if (!['pending','review','approved'].includes(c.art_status)) errors.push(id+' invalid art_status');
 }
-for (const c of cards) if (!/^AI-\\d{3}$/.test(c.id) || Number(c.id.slice(3))<1 || Number(c.id.slice(3))>100) errors.push('Unexpected ID '+c.id);
+for (const c of cards) if (!/^AI-[0-9]{3}$/.test(c.id) || Number(c.id.slice(3))<1 || Number(c.id.slice(3))>100) errors.push('Unexpected ID '+c.id);
 console.log(JSON.stringify({total:cards.length,rarity_counts:Object.fromEntries(['N','R','SR','SSR'].map(r=>[r,cards.filter(c=>c.rarity===r).length])),unique_names:seenNames.size,approved_art:cards.filter(c=>c.art_status==='approved').length,errors},null,2));
 if(errors.length) process.exitCode=1;
