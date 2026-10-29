@@ -9,9 +9,10 @@
     "ios:sync": "npm run build:web && npx cap sync ios",
     "ios:open": "npx cap open ios",
     "ios:check": "node scripts/check-ios-release.mjs",
-    "test": "node tests/apple-policy.test.mjs && node tests/apple-handler.test.mjs && node tests/coin-wallet.test.mjs && node tests/ios-project.test.mjs && node tests/paid-draw-handler.test.mjs && node tests/paid-draw-controller.test.mjs && node tests/apple-notification.test.mjs && node tests/apple-signing.test.mjs",
+    "test": "npm run check:ai-insects && node tests/apple-policy.test.mjs && node tests/apple-handler.test.mjs && node tests/coin-wallet.test.mjs && node tests/ios-project.test.mjs && node tests/paid-draw-handler.test.mjs && node tests/paid-draw-controller.test.mjs && node tests/apple-notification.test.mjs && node tests/apple-signing.test.mjs",
     "test:e2e": "playwright test",
-    "verify:web": "npm run build:web && node scripts/verify-web.mjs && node scripts/check-inline-scripts.mjs && python3 scripts/check_coin_release_gates.py"
+    "verify:web": "npm run build:web && node scripts/verify-web.mjs && node scripts/check-inline-scripts.mjs && python3 scripts/check_coin_release_gates.py",
+    "check:ai-insects": "node scripts/validate_ai_insect_catalog.cjs"
   },
   "dependencies": {
     "@capacitor/core": "8.5.3",
