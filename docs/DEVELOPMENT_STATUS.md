@@ -231,3 +231,9 @@ Supabase security advisorsはWARN 3件（モデレーターSECURITY DEFINER RPC 
 - `assets/ai-insect-collection.mjs` の本体ランタイム読込で、同名カードを重複許容していた検証漏れを修正。ビルド時のマスタ検証と整合させ、重複名・空白名を拒否する。既存のユーザー所持データは読み取り専用で変更しない。
 - `tests/ai-insect-integration.test.mjs` に重複名/空白名の拒否と正常マスタの保持を追加。ソース `6ea422f`、テスト `2554b0f`。新コミットのCI結果は未確認。旧 `f79ddb2` の5系列成功を新コミットの検証証拠にしない。
 - 本番、main、課金停止ゲート、TestFlight配布は変更なし。画像未承認・Sandbox未検証のため**55%（11/20）**維持。次の独立作業はこの変更に対するCIと残存する公開ゲートの確認。
+
+## 2026-10-29 AI図鑑の所持データ境界テスト
+
+- `tests/ai-insect-integration.test.mjs` に、同じIDの複数所持カウント、架空100種外の旧カードID、null/数値/不正レコード、オブジェクト型財布、原本非破壊を検証する回帰試験を追加。コミット `5e11d250254387505942a796954616772b314fee`。
+- 直前の `a77b0d` で AIカタログ検証 [40878494803](https://github.com/zeazzi244-jpg/mushiverse/actions/runs/40878494803) とiOS署名事前検証 [40878494720](https://github.com/zeazzi244-jpg/mushiverse/actions/runs/40878494720) の成功を確認。Web・iOS Simulator・隔離課金CIは確認時点で未完了。追加テストコミットのCIは未確認。
+- 既存のカード/コインは変更なし。新規テスト以外のランタイム変更なし。公開準備**55%（11/20）**を維持。本番/課金/配布操作なし。
