@@ -237,3 +237,9 @@ Supabase security advisorsはWARN 3件（モデレーターSECURITY DEFINER RPC 
 - `tests/ai-insect-integration.test.mjs` に、同じIDの複数所持カウント、架空100種外の旧カードID、null/数値/不正レコード、オブジェクト型財布、原本非破壊を検証する回帰試験を追加。コミット `5e11d250254387505942a796954616772b314fee`。
 - 直前の `a77b0d` で AIカタログ検証 [40878494803](https://github.com/zeazzi244-jpg/mushiverse/actions/runs/40878494803) とiOS署名事前検証 [40878494720](https://github.com/zeazzi244-jpg/mushiverse/actions/runs/40878494720) の成功を確認。Web・iOS Simulator・隔離課金CIは確認時点で未完了。追加テストコミットのCIは未確認。
 - 既存のカード/コインは変更なし。新規テスト以外のランタイム変更なし。公開準備**55%（11/20）**を維持。本番/課金/配布操作なし。
+
+## 2026-10-29 破損ローカル保存のiPhoneブラウザ回帰テスト
+
+- `tests/e2e/mobile-gacha.spec.mjs` に、AI図鑑のローカル保存JSONが壊れている場合、読み込みエラーを表示し、破損原本を消去せず、ベータ財布の500コインを維持するブラウザ回帰試験を追加。コミット `65c3e357a9ac9b37232c159f1621bad3d6052ca3`。
+- 直前の `1bf3cbe` の [AIカタログCI 40878650363](https://github.com/zeazzi244-jpg/mushiverse/actions/runs/40878650363) と [署名事前検証 40878650258](https://github.com/zeazzi244-jpg/mushiverse/actions/runs/40878650258) は成功。Web/iOS Simulator/隔離課金は確認時点で進行中。この新テストのCI結果は未確認。
+- 進捗55%（11/20）維持。TestFlight v139、本番データ、課金停止状態、mainは変更なし。
