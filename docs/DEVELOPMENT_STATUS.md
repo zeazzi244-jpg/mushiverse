@@ -126,3 +126,10 @@ Supabase security advisorsはWARN 3件（モデレーターSECURITY DEFINER RPC 
 - `tests/ai-insect-catalog.test.mjs` に正常・ID重複・nullカード・レア度誤り・名前重複の5ケースを追加し、`npm test` に接続。
 - 対象コミット `34f07cd4b3c6e8408b161d9a009e023c5d5722f3` のPRワークフロー実行一覧は取得結果0件。**新しいテストのCI成功は未確認**。既存の成功実績と混同しない。
 - 本番/main/課金フラグ変更なし。公開ゲート50%（10/20）を維持。本人操作なし。
+
+## 2026-10-29 図鑑のブラウザー自動試験追加
+
+- `tests/e2e/ai-insect-gallery.spec.mjs` を新規作成。ChromiumとiPhoneサイズのWebKitで、100枚表示、N40/R30/SR20/SSR10のフィルター、正式名称とIDの検索、横スクロールの有無を検査する。
+- テストは既存のPlaywright `testDir: tests/e2e` と `npm run test:e2e` で自動収集される。WebビルドにプレビューHTMLとJSONが含まれることが前提。
+- 対象コミット `c0086f6a2f7629f720b3a563d6c3bc95a0e39d3f`。**CI実行結果と実機成功は未確認**。画像は未承認で、ガチャ本体統合も未完了。
+- main/本番課金/DB変更なし。公開準備ゲートは引き続き10/20（50%）。
