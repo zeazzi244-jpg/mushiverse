@@ -1,0 +1,725 @@
+{
+  "schema_version": 1,
+  "title": "MUSHIVERSE AI昆虫ガチャ 第一弾",
+  "note": "架空のAI昆虫。カード名・レア度・IDを正本として固定。画像は個別制作待ち。",
+  "rarity_ranges": {
+    "N": [
+      1,
+      40
+    ],
+    "R": [
+      41,
+      70
+    ],
+    "SR": [
+      71,
+      90
+    ],
+    "SSR": [
+      91,
+      100
+    ]
+  },
+  "cards": [
+    {
+      "id": "AI-001",
+      "name": "アオシズクムシ",
+      "rarity": "N",
+      "fictional": true,
+      "art_status": "pending"
+    },
+    {
+      "id": "AI-002",
+      "name": "コハクコガネ",
+      "rarity": "N",
+      "fictional": true,
+      "art_status": "pending"
+    },
+    {
+      "id": "AI-003",
+      "name": "モリカゲムシ",
+      "rarity": "N",
+      "fictional": true,
+      "art_status": "pending"
+    },
+    {
+      "id": "AI-004",
+      "name": "シロハネホタル",
+      "rarity": "N",
+      "fictional": true,
+      "art_status": "pending"
+    },
+    {
+      "id": "AI-005",
+      "name": "クロツヤカミキリ",
+      "rarity": "N",
+      "fictional": true,
+      "art_status": "pending"
+    },
+    {
+      "id": "AI-006",
+      "name": "ミドリツノムシ",
+      "rarity": "N",
+      "fictional": true,
+      "art_status": "pending"
+    },
+    {
+      "id": "AI-007",
+      "name": "ハナシズクチョウ",
+      "rarity": "N",
+      "fictional": true,
+      "art_status": "pending"
+    },
+    {
+      "id": "AI-008",
+      "name": "アカスジコガネ",
+      "rarity": "N",
+      "fictional": true,
+      "art_status": "pending"
+    },
+    {
+      "id": "AI-009",
+      "name": "キリハネムシ",
+      "rarity": "N",
+      "fictional": true,
+      "art_status": "pending"
+    },
+    {
+      "id": "AI-010",
+      "name": "ツキイロガ",
+      "rarity": "N",
+      "fictional": true,
+      "art_status": "pending"
+    },
+    {
+      "id": "AI-011",
+      "name": "ヤマホシムシ",
+      "rarity": "N",
+      "fictional": true,
+      "art_status": "pending"
+    },
+    {
+      "id": "AI-012",
+      "name": "スナツノコガネ",
+      "rarity": "N",
+      "fictional": true,
+      "art_status": "pending"
+    },
+    {
+      "id": "AI-013",
+      "name": "ミズアオトンボ",
+      "rarity": "N",
+      "fictional": true,
+      "art_status": "pending"
+    },
+    {
+      "id": "AI-014",
+      "name": "コケイロカマキリ",
+      "rarity": "N",
+      "fictional": true,
+      "art_status": "pending"
+    },
+    {
+      "id": "AI-015",
+      "name": "チャバネコガネ",
+      "rarity": "N",
+      "fictional": true,
+      "art_status": "pending"
+    },
+    {
+      "id": "AI-016",
+      "name": "シモフリホタル",
+      "rarity": "N",
+      "fictional": true,
+      "art_status": "pending"
+    },
+    {
+      "id": "AI-017",
+      "name": "ハルカゼチョウ",
+      "rarity": "N",
+      "fictional": true,
+      "art_status": "pending"
+    },
+    {
+      "id": "AI-018",
+      "name": "ヒメツノムシ",
+      "rarity": "N",
+      "fictional": true,
+      "art_status": "pending"
+    },
+    {
+      "id": "AI-019",
+      "name": "クロモリクワガタ",
+      "rarity": "N",
+      "fictional": true,
+      "art_status": "pending"
+    },
+    {
+      "id": "AI-020",
+      "name": "アサツユムシ",
+      "rarity": "N",
+      "fictional": true,
+      "art_status": "pending"
+    },
+    {
+      "id": "AI-021",
+      "name": "キイロハネガ",
+      "rarity": "N",
+      "fictional": true,
+      "art_status": "pending"
+    },
+    {
+      "id": "AI-022",
+      "name": "ホソツノカミキリ",
+      "rarity": "N",
+      "fictional": true,
+      "art_status": "pending"
+    },
+    {
+      "id": "AI-023",
+      "name": "シラユキコガネ",
+      "rarity": "N",
+      "fictional": true,
+      "art_status": "pending"
+    },
+    {
+      "id": "AI-024",
+      "name": "アオモリバッタ",
+      "rarity": "N",
+      "fictional": true,
+      "art_status": "pending"
+    },
+    {
+      "id": "AI-025",
+      "name": "カゲボシホタル",
+      "rarity": "N",
+      "fictional": true,
+      "art_status": "pending"
+    },
+    {
+      "id": "AI-026",
+      "name": "ヤマシロチョウ",
+      "rarity": "N",
+      "fictional": true,
+      "art_status": "pending"
+    },
+    {
+      "id": "AI-027",
+      "name": "アカネツノムシ",
+      "rarity": "N",
+      "fictional": true,
+      "art_status": "pending"
+    },
+    {
+      "id": "AI-028",
+      "name": "コガネハネムシ",
+      "rarity": "N",
+      "fictional": true,
+      "art_status": "pending"
+    },
+    {
+      "id": "AI-029",
+      "name": "ミズカゲトンボ",
+      "rarity": "N",
+      "fictional": true,
+      "art_status": "pending"
+    },
+    {
+      "id": "AI-030",
+      "name": "ヒスイコオロギ",
+      "rarity": "N",
+      "fictional": true,
+      "art_status": "pending"
+    },
+    {
+      "id": "AI-031",
+      "name": "クサイロカマキリ",
+      "rarity": "N",
+      "fictional": true,
+      "art_status": "pending"
+    },
+    {
+      "id": "AI-032",
+      "name": "ホシスジカミキリ",
+      "rarity": "N",
+      "fictional": true,
+      "art_status": "pending"
+    },
+    {
+      "id": "AI-033",
+      "name": "ツチイロコガネ",
+      "rarity": "N",
+      "fictional": true,
+      "art_status": "pending"
+    },
+    {
+      "id": "AI-034",
+      "name": "アオハネセミ",
+      "rarity": "N",
+      "fictional": true,
+      "art_status": "pending"
+    },
+    {
+      "id": "AI-035",
+      "name": "コモレビチョウ",
+      "rarity": "N",
+      "fictional": true,
+      "art_status": "pending"
+    },
+    {
+      "id": "AI-036",
+      "name": "ヨルシズクムシ",
+      "rarity": "N",
+      "fictional": true,
+      "art_status": "pending"
+    },
+    {
+      "id": "AI-037",
+      "name": "シロツノコガネ",
+      "rarity": "N",
+      "fictional": true,
+      "art_status": "pending"
+    },
+    {
+      "id": "AI-038",
+      "name": "ヤマカゼガ",
+      "rarity": "N",
+      "fictional": true,
+      "art_status": "pending"
+    },
+    {
+      "id": "AI-039",
+      "name": "クロシズクホタル",
+      "rarity": "N",
+      "fictional": true,
+      "art_status": "pending"
+    },
+    {
+      "id": "AI-040",
+      "name": "キンイロハナムグリ",
+      "rarity": "N",
+      "fictional": true,
+      "art_status": "pending"
+    },
+    {
+      "id": "AI-041",
+      "name": "ルリカゲクワガタ",
+      "rarity": "R",
+      "fictional": true,
+      "art_status": "pending"
+    },
+    {
+      "id": "AI-042",
+      "name": "アカツキコガネ",
+      "rarity": "R",
+      "fictional": true,
+      "art_status": "pending"
+    },
+    {
+      "id": "AI-043",
+      "name": "ギンセツホタル",
+      "rarity": "R",
+      "fictional": true,
+      "art_status": "pending"
+    },
+    {
+      "id": "AI-044",
+      "name": "ムラサキツノムシ",
+      "rarity": "R",
+      "fictional": true,
+      "art_status": "pending"
+    },
+    {
+      "id": "AI-045",
+      "name": "コハクハネチョウ",
+      "rarity": "R",
+      "fictional": true,
+      "art_status": "pending"
+    },
+    {
+      "id": "AI-046",
+      "name": "アオホシカミキリ",
+      "rarity": "R",
+      "fictional": true,
+      "art_status": "pending"
+    },
+    {
+      "id": "AI-047",
+      "name": "ヒカリツノカブト",
+      "rarity": "R",
+      "fictional": true,
+      "art_status": "pending"
+    },
+    {
+      "id": "AI-048",
+      "name": "シロガネトンボ",
+      "rarity": "R",
+      "fictional": true,
+      "art_status": "pending"
+    },
+    {
+      "id": "AI-049",
+      "name": "ベニシズクガ",
+      "rarity": "R",
+      "fictional": true,
+      "art_status": "pending"
+    },
+    {
+      "id": "AI-050",
+      "name": "ツキカゲコガネ",
+      "rarity": "R",
+      "fictional": true,
+      "art_status": "pending"
+    },
+    {
+      "id": "AI-051",
+      "name": "ハクギンカマキリ",
+      "rarity": "R",
+      "fictional": true,
+      "art_status": "pending"
+    },
+    {
+      "id": "AI-052",
+      "name": "ヒスイハネムシ",
+      "rarity": "R",
+      "fictional": true,
+      "art_status": "pending"
+    },
+    {
+      "id": "AI-053",
+      "name": "クロホシクワガタ",
+      "rarity": "R",
+      "fictional": true,
+      "art_status": "pending"
+    },
+    {
+      "id": "AI-054",
+      "name": "キンモンチョウ",
+      "rarity": "R",
+      "fictional": true,
+      "art_status": "pending"
+    },
+    {
+      "id": "AI-055",
+      "name": "アオツキホタル",
+      "rarity": "R",
+      "fictional": true,
+      "art_status": "pending"
+    },
+    {
+      "id": "AI-056",
+      "name": "シンジュコガネ",
+      "rarity": "R",
+      "fictional": true,
+      "art_status": "pending"
+    },
+    {
+      "id": "AI-057",
+      "name": "ベニツノカブト",
+      "rarity": "R",
+      "fictional": true,
+      "art_status": "pending"
+    },
+    {
+      "id": "AI-058",
+      "name": "セイランカミキリ",
+      "rarity": "R",
+      "fictional": true,
+      "art_status": "pending"
+    },
+    {
+      "id": "AI-059",
+      "name": "ヨゾラハネガ",
+      "rarity": "R",
+      "fictional": true,
+      "art_status": "pending"
+    },
+    {
+      "id": "AI-060",
+      "name": "コガネシズクトンボ",
+      "rarity": "R",
+      "fictional": true,
+      "art_status": "pending"
+    },
+    {
+      "id": "AI-061",
+      "name": "スミレクワガタ",
+      "rarity": "R",
+      "fictional": true,
+      "art_status": "pending"
+    },
+    {
+      "id": "AI-062",
+      "name": "ハクヨウホタル",
+      "rarity": "R",
+      "fictional": true,
+      "art_status": "pending"
+    },
+    {
+      "id": "AI-063",
+      "name": "ルリツノコガネ",
+      "rarity": "R",
+      "fictional": true,
+      "art_status": "pending"
+    },
+    {
+      "id": "AI-064",
+      "name": "アカホシカマキリ",
+      "rarity": "R",
+      "fictional": true,
+      "art_status": "pending"
+    },
+    {
+      "id": "AI-065",
+      "name": "ギンハネチョウ",
+      "rarity": "R",
+      "fictional": true,
+      "art_status": "pending"
+    },
+    {
+      "id": "AI-066",
+      "name": "クロガネカブト",
+      "rarity": "R",
+      "fictional": true,
+      "art_status": "pending"
+    },
+    {
+      "id": "AI-067",
+      "name": "シロツキコガネ",
+      "rarity": "R",
+      "fictional": true,
+      "art_status": "pending"
+    },
+    {
+      "id": "AI-068",
+      "name": "ミカヅキトンボ",
+      "rarity": "R",
+      "fictional": true,
+      "art_status": "pending"
+    },
+    {
+      "id": "AI-069",
+      "name": "アオギンハナムグリ",
+      "rarity": "R",
+      "fictional": true,
+      "art_status": "pending"
+    },
+    {
+      "id": "AI-070",
+      "name": "コハクツノクワガタ",
+      "rarity": "R",
+      "fictional": true,
+      "art_status": "pending"
+    },
+    {
+      "id": "AI-071",
+      "name": "蒼晶クワガタ",
+      "rarity": "SR",
+      "fictional": true,
+      "art_status": "pending"
+    },
+    {
+      "id": "AI-072",
+      "name": "紅蓮カブト",
+      "rarity": "SR",
+      "fictional": true,
+      "art_status": "pending"
+    },
+    {
+      "id": "AI-073",
+      "name": "月光モルフォ",
+      "rarity": "SR",
+      "fictional": true,
+      "art_status": "pending"
+    },
+    {
+      "id": "AI-074",
+      "name": "紫電オオツノ",
+      "rarity": "SR",
+      "fictional": true,
+      "art_status": "pending"
+    },
+    {
+      "id": "AI-075",
+      "name": "翠玉ハナムグリ",
+      "rarity": "SR",
+      "fictional": true,
+      "art_status": "pending"
+    },
+    {
+      "id": "AI-076",
+      "name": "白銀ホタル",
+      "rarity": "SR",
+      "fictional": true,
+      "art_status": "pending"
+    },
+    {
+      "id": "AI-077",
+      "name": "琥珀オオカマキリ",
+      "rarity": "SR",
+      "fictional": true,
+      "art_status": "pending"
+    },
+    {
+      "id": "AI-078",
+      "name": "蒼月トンボ",
+      "rarity": "SR",
+      "fictional": true,
+      "art_status": "pending"
+    },
+    {
+      "id": "AI-079",
+      "name": "黒曜カブト",
+      "rarity": "SR",
+      "fictional": true,
+      "art_status": "pending"
+    },
+    {
+      "id": "AI-080",
+      "name": "星霜オサムシ",
+      "rarity": "SR",
+      "fictional": true,
+      "art_status": "pending"
+    },
+    {
+      "id": "AI-081",
+      "name": "氷晶クワガタ",
+      "rarity": "SR",
+      "fictional": true,
+      "art_status": "pending"
+    },
+    {
+      "id": "AI-082",
+      "name": "金剛カミキリ",
+      "rarity": "SR",
+      "fictional": true,
+      "art_status": "pending"
+    },
+    {
+      "id": "AI-083",
+      "name": "緋晶ハネムシ",
+      "rarity": "SR",
+      "fictional": true,
+      "art_status": "pending"
+    },
+    {
+      "id": "AI-084",
+      "name": "天青モルフォ",
+      "rarity": "SR",
+      "fictional": true,
+      "art_status": "pending"
+    },
+    {
+      "id": "AI-085",
+      "name": "幻月ホタル",
+      "rarity": "SR",
+      "fictional": true,
+      "art_status": "pending"
+    },
+    {
+      "id": "AI-086",
+      "name": "紫晶カブト",
+      "rarity": "SR",
+      "fictional": true,
+      "art_status": "pending"
+    },
+    {
+      "id": "AI-087",
+      "name": "翠嵐オオカマキリ",
+      "rarity": "SR",
+      "fictional": true,
+      "art_status": "pending"
+    },
+    {
+      "id": "AI-088",
+      "name": "銀河トンボ",
+      "rarity": "SR",
+      "fictional": true,
+      "art_status": "pending"
+    },
+    {
+      "id": "AI-089",
+      "name": "白虹クワガタ",
+      "rarity": "SR",
+      "fictional": true,
+      "art_status": "pending"
+    },
+    {
+      "id": "AI-090",
+      "name": "蒼炎コガネ",
+      "rarity": "SR",
+      "fictional": true,
+      "art_status": "pending"
+    },
+    {
+      "id": "AI-091",
+      "name": "天晶カブト",
+      "rarity": "SSR",
+      "fictional": true,
+      "art_status": "pending"
+    },
+    {
+      "id": "AI-092",
+      "name": "虹皇モルフォ",
+      "rarity": "SSR",
+      "fictional": true,
+      "art_status": "pending"
+    },
+    {
+      "id": "AI-093",
+      "name": "神威クワガタ",
+      "rarity": "SSR",
+      "fictional": true,
+      "art_status": "pending"
+    },
+    {
+      "id": "AI-094",
+      "name": "星帝オオカブト",
+      "rarity": "SSR",
+      "fictional": true,
+      "art_status": "pending"
+    },
+    {
+      "id": "AI-095",
+      "name": "幻煌ホタル",
+      "rarity": "SSR",
+      "fictional": true,
+      "art_status": "pending"
+    },
+    {
+      "id": "AI-096",
+      "name": "天雷オオツノ",
+      "rarity": "SSR",
+      "fictional": true,
+      "art_status": "pending"
+    },
+    {
+      "id": "AI-097",
+      "name": "黒皇クワガタ",
+      "rarity": "SSR",
+      "fictional": true,
+      "art_status": "pending"
+    },
+    {
+      "id": "AI-098",
+      "name": "聖晶モルフォ",
+      "rarity": "SSR",
+      "fictional": true,
+      "art_status": "pending"
+    },
+    {
+      "id": "AI-099",
+      "name": "銀天オオカマキリ",
+      "rarity": "SSR",
+      "fictional": true,
+      "art_status": "pending"
+    },
+    {
+      "id": "AI-100",
+      "name": "創世カブト",
+      "rarity": "SSR",
+      "fictional": true,
+      "art_status": "pending"
+    }
+  ]
+}
