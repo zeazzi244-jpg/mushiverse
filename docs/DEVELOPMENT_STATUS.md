@@ -178,3 +178,12 @@ Supabase security advisorsはWARN 3件（モデレーターSECURITY DEFINER RPC 
 - 上記コミットの `fetch_commit_workflow_runs` はPRイベントに限定された取得で0件。push-triggered iOS CIの成功/失敗はこの結果から判断できない。最新ソースのコンパイル成功・署名IPA・TestFlight配布は**未確認**。
 - iPhoneインストールまでの残作業: 最新Simulator CIのログ確認、Apple署名/Provisioningの確認、署名IPAの生成、TestFlightアップロードとApple処理、実機インストール/動作確認。配布/本番公開は所有者承認と必要な検証後に実施。
 - main/本番DB/課金ゲート変更なし。公開ゲート10/20、進捗50%維持。現時点で所有者の新たな操作は要求しない。
+
+## 2026-10-29 v139実機・CI再確認
+
+- 署名IPA/TestFlightアップロードは [GitHub Actions 40864941075](https://github.com/zeazzi244-jpg/mushiverse/actions/runs/40864941075) で全工程成功。所有者はiPhoneのTestFlightからv139へ更新済みと報告。
+- 実機でガチャのコイン単発 98,850→98,800（50消費）、10連 98,800→98,350（450消費）を所有者が確認。チケット残高なし。これらを再質問しない。カード表示やカメラ・地図等の実機検証は未完了。
+- 同SHA `9d2572e` のiOS Simulator、AI昆虫カタログ、隔離課金統合、署名事前検証は成功。一方 [Web CI 40864197919](https://github.com/zeazzi244-jpg/mushiverse/actions/runs/40864197919) のPlaywrightは失敗。ログに新規ガチャE2Eの非表示ボタンへのclickタイムアウト等を確認。
+- `tests/e2e/gacha-economy.spec.mjs` でテスト開始時にガチャタブを開くよう修正。コードコミット `bbe11d8ae429abf29a16dab6d32e214f729bc54b`。この修正コミットのCI成功はまだ未確認。他のPlaywright失敗も引き続き調査が必要。
+- 公開ゲート #19（署名IPA/TestFlight）を実行ログと所有者のインストール報告により確認済みへ更新。**進捗55%（11/20）**。#20最終実機検証/申請、#11カメラ・地図・ログイン等は未完了。本番DB、課金有効化、main、App Store提出は変更なし。
+- 所有者の新たな操作なし。次は新CIのPlaywright結果を確認して残りの失敗を修正する。
