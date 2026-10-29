@@ -30,4 +30,14 @@ test.describe('beta gacha economy',()=>{
   expect(wallet.coins).toBe(50);
   expect(wallet.tickets).toBe(2);
  });
+ test('first daily claim grants five coins once only',async({page})=>{
+ await page.locator('#mv77Claim').click();
+ await expect.poll(async()=>page.evaluate(k=>JSON.parse(localStorage.getItem(k)||'{}').coins,key)).toBe(505);
+ await expect(page.locator('#mv77Claim')).toBeDisabled();
+ await page.reload();
+ await expect(page.locator('#mv77Claim')).toBeDisabled();
+ const wallet=await page.evaluate(k=>JSON.parse(localStorage.getItem(k)),key);
+ expect(wallet.coins).toBe(505);
+});
+
 });
