@@ -225,3 +225,9 @@ Supabase security advisorsはWARN 3件（モデレーターSECURITY DEFINER RPC 
 - iOS署名/配布workflow `.github/workflows/ios-signed-archive.yml` は `workflow_dispatch` 手動実行のみ。新しいコミットの署名IPA/TestFlight配信はまだ行っていない。既存TestFlight v139の実機成功を新版へ流用しない。
 - 次の独立作業: 画像承認待ちを未完成として保ち、サーバー抽選/台帳境界とSandbox購入・返金を検証する。所有者操作なしで可能なCIとコード作業を優先する。署名配布には別途明示的なアップロード指定が必要。
 - 進捗**55%（11/20）**を維持。`main`・本番DB・本番課金フラグ・App Store申請は変更なし。
+
+## 2026-10-29 AI図鑑のランタイム整合性修正
+
+- `assets/ai-insect-collection.mjs` の本体ランタイム読込で、同名カードを重複許容していた検証漏れを修正。ビルド時のマスタ検証と整合させ、重複名・空白名を拒否する。既存のユーザー所持データは読み取り専用で変更しない。
+- `tests/ai-insect-integration.test.mjs` に重複名/空白名の拒否と正常マスタの保持を追加。ソース `6ea422f`、テスト `2554b0f`。新コミットのCI結果は未確認。旧 `f79ddb2` の5系列成功を新コミットの検証証拠にしない。
+- 本番、main、課金停止ゲート、TestFlight配布は変更なし。画像未承認・Sandbox未検証のため**55%（11/20）**維持。次の独立作業はこの変更に対するCIと残存する公開ゲートの確認。
