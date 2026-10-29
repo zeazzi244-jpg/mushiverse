@@ -6,7 +6,8 @@ test.describe('beta gacha economy',()=>{
    localStorage.setItem(key,JSON.stringify({coins:500,tickets:2,streak:0,lastClaim:'',cards:[],history:[]}));
   },{key});
   await page.goto('/');
-  await expect(page.locator('#mv77Draw')).toBeAttached();
+  await page.locator('nav.nav button[data-tab="gacha"]').click();
+  await expect(page.locator('#mv77Draw')).toBeVisible();
  });
  test('coin draw spends 50 coins even when tickets exist',async({page})=>{
   await page.locator('#mv77Draw').click();
