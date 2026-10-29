@@ -15,16 +15,24 @@
 - iPhone相当320×568、390×844、430×932、844×390で、ホーム/ガチャ/図鑑/プロフィール、10連結果とカード詳細の閉じ操作を試験。長い名前・入力欄・モーダルとセーフエリアのCSSを調整。
 - AI昆虫JSONマスタ100種を本体図鑑に読み取り専用で接続。IDを正として所持表示/検索/レア度フィルターを実装し、従来の自然種カード/採集記録とは分離。画像は100件pending、承認0件、画像・抽選は未接続と明示。名前変更でID所持数を失わない。既存カードをAIカードに変換しない。
 
-### 今回の検証（保存後にSHA/CI証跡を確定）
+### 今回の検証・コミット
 
+- 検証対象コード: `b70366fbc3827a6bbd8a255142ae0da129c3f408`。後続の結果記録コミットは本資料のみを更新。
 - 単体: 78シナリオ成功（SQL親テストを含むNode集計79）。抽選関数の1,000区間を列挙しSSR1/SR19/R180/N800、チケットSSR0を確認。7日報酬 `[5,5,10,5,10,10,20]`、合計65。50/450は維持。
 - Chromium: 全43件成功。保存安全性10件、iPhone相当/AI図鑑/演出6件、ランキング3件を含む。
-- WebKit: ローカルはOS共有ライブラリ不足のため起動不可。CIの `install --with-deps` で全件を確認する。起動不可を成功扱いしない。
-- Web整合性・インラインJS61本・購入停止ゲート、ios:sync/ios:check成功。最新CIはコミット後に確認する。
+- Chromium/WebKit CI: **86/86成功**。両ブラウザー各43件。ローカルWebKitはOS共有ライブラリ不足だったためCIで確認した。
+- Web整合性・インラインJS61本・購入停止ゲート、ios:sync/ios:check成功。最新CIは5種類すべて成功（下記リンク）。
 - 所有者確認済み: TestFlight v139インストール、単発50・10連450の実消費（再質問不要）。今回の変更はまだTestFlightへ送っていない。
 - main、本番DB、App Store提出、課金ゲートは変更しない。公開進捗55%（11/20）を維持。
 
-残課題: WebKit/最終CI、AI画像100枚の検品/承認/登録、AIカード抽選との接続、Sandbox/返金・部分返金/照合・最終実機/申請。本人への新たな操作要求なし。
+CI証跡:
+- [Web 86件/単体/型/停止チェック](https://github.com/zeazzi244-jpg/mushiverse/actions/runs/40876092013)
+- [iOS Simulatorビルド](https://github.com/zeazzi244-jpg/mushiverse/actions/runs/40876092026)
+- [隔離課金統合](https://github.com/zeazzi244-jpg/mushiverse/actions/runs/40876092022)
+- [署名設定事前検証](https://github.com/zeazzi244-jpg/mushiverse/actions/runs/40876092012)
+- [AI昆虫マスタ検証](https://github.com/zeazzi244-jpg/mushiverse/actions/runs/40876092040)
+
+残課題: AI画像100枚の検品/承認/登録、AIカード抽選との接続、Sandbox/返金・部分返金/照合・最終実機/申請。本人への新たな操作要求なし。
 
 ## 継続する条件
 
