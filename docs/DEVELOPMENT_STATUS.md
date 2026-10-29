@@ -107,3 +107,15 @@ Supabase security advisorsはWARN 3件（モデレーターSECURITY DEFINER RPC 
 本人の操作手順は [申請パケットの本人手順](APP_REVIEW_CHECKLIST_JA.md#本人のiphoneで行う設定順序) にまとめた。常設ステージングを希望する場合は、利用組織と見積費用への同意を先に確認する。
 
 過去の詳細: [第2回レビュー](PR2_REVIEW_ROUND2.md)、[Apple設定候補](APPLE_BACKEND_SETUP.md)、[申請原稿](APP_STORE_DRAFT_JA.md)。本ファイルの最新記録を優先する。
+
+## 2026-10-29 AI昆虫ガチャ継続作業（開発ブランチ）
+
+- 正式100種マスタのID・レア度配分・名前重複をコネクタで読み取り確認。名称4件の改名を反映済み。実在種との網羅的照合は未実施。
+- `scripts/validate_ai_insect_catalog.cjs` を作成し、`package.json` の `npm test` に追加。専用GitHub Actions workflowも作成した。
+- `ai-insect-gallery-preview.html` を作成（名前・ID検索、レア度絞り込み、iPhone対応）。本体の既存ガチャ画面には未統合。
+- **検出・修正した不具合**: `scripts/build-web.mjs` が `docs/` を配布対象に含めず、プレビューの `fetch('./docs/ai_insect_catalog_v1.json')` がビルド後に404となる構成だった。公開可能な当該JSONのみ `www/docs/` にコピーするよう変更した。
+- `scripts/verify-web.mjs` に図鑑プレビューHTMLとJSONの同梱・原本一致検査を追加した。
+- 上記新規コミットに対するCI成功、実機、TestFlightは**未確認**。CIの旧成功を新規変更の成功証拠として流用しない。
+- 本番サービス・main・購入ゲートは変更していない。画像100種は依然 `art_status: pending`。本番アセットは未登録。
+- **進捗50%維持**（公開ゲート20件中確認済み10件）。今回の追加は公開ゲート11〜20の完了を証明しない。
+- 次: 現ブランチのCI実行結果を確認し、カード画像の個別検品と登録、既存ガチャ画面への統合、Apple Sandbox・実機・署名IPAの確認。所有者の秘密情報をチャットに送らせない。
