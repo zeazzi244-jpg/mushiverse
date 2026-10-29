@@ -217,3 +217,11 @@ Supabase security advisorsはWARN 3件（モデレーターSECURITY DEFINER RPC 
 - `tests/e2e/gacha-economy.spec.mjs` でテスト開始時にガチャタブを開くよう修正。コードコミット `bbe11d8ae429abf29a16dab6d32e214f729bc54b`。この修正コミットのCI成功はまだ未確認。他のPlaywright失敗も引き続き調査が必要。
 - 公開ゲート #19（署名IPA/TestFlight）を実行ログと所有者のインストール報告により確認済みへ更新。**進捗55%（11/20）**。#20最終実機検証/申請、#11カメラ・地図・ログイン等は未完了。本番DB、課金有効化、main、App Store提出は変更なし。
 - 所有者の新たな操作なし。次は新CIのPlaywright結果を確認して残りの失敗を修正する。
+
+## 2026-10-29 Codex一括修正の検証と次の配布判定
+
+- Codexの修正対象コミット `f79ddb2` に対してGitHub Actionsの5系列を再照合。Web bundle integrity [40876926683](https://github.com/zeazzi244-jpg/mushiverse/actions/runs/40876926683)、iOS Simulator [40876926674](https://github.com/zeazzi244-jpg/mushiverse/actions/runs/40876926674)、隔離課金統合 [40876926681](https://github.com/zeazzi244-jpg/mushiverse/actions/runs/40876926681)、AIカタログ [40876926680](https://github.com/zeazzi244-jpg/mushiverse/actions/runs/40876926680)、iOS署名事前検証 [40876926714](https://github.com/zeazzi244-jpg/mushiverse/actions/runs/40876926714) はいずれも成功。
+- Codexの作業報告は単体78シナリオ、ブラウザー86件、AI昆虫100種の本体図鑑統合、破損・旧カード保持の強化。上記CI成功は確認したが、新版のiPhone実機動作、画像承認、サーバー抽選、Apple Sandbox課金は未確認。
+- iOS署名/配布workflow `.github/workflows/ios-signed-archive.yml` は `workflow_dispatch` 手動実行のみ。新しいコミットの署名IPA/TestFlight配信はまだ行っていない。既存TestFlight v139の実機成功を新版へ流用しない。
+- 次の独立作業: 画像承認待ちを未完成として保ち、サーバー抽選/台帳境界とSandbox購入・返金を検証する。所有者操作なしで可能なCIとコード作業を優先する。署名配布には別途明示的なアップロード指定が必要。
+- 進捗**55%（11/20）**を維持。`main`・本番DB・本番課金フラグ・App Store申請は変更なし。
