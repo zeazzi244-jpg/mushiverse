@@ -243,3 +243,12 @@ Supabase security advisorsはWARN 3件（モデレーターSECURITY DEFINER RPC 
 - `tests/e2e/mobile-gacha.spec.mjs` に、AI図鑑のローカル保存JSONが壊れている場合、読み込みエラーを表示し、破損原本を消去せず、ベータ財布の500コインを維持するブラウザ回帰試験を追加。コミット `65c3e357a9ac9b37232c159f1621bad3d6052ca3`。
 - 直前の `1bf3cbe` の [AIカタログCI 40878650363](https://github.com/zeazzi244-jpg/mushiverse/actions/runs/40878650363) と [署名事前検証 40878650258](https://github.com/zeazzi244-jpg/mushiverse/actions/runs/40878650258) は成功。Web/iOS Simulator/隔離課金は確認時点で進行中。この新テストのCI結果は未確認。
 - 進捗55%（11/20）維持。TestFlight v139、本番データ、課金停止状態、mainは変更なし。
+
+## 2026-10-29 公開リスク優先の継続修正
+
+優先順位: (1) 所持データ保全/ガチャ整合性、(2) CI/WebKit/iOS、(3) 隔離課金・返金、(4) AI画像承認、(5) TestFlight/実機、(6) App Store申請。外部承認待ちの項目を完了扱いしない。
+
+- AI図鑑の不正なID（null、数値、オブジェクト、欠番等）を拒否する回帰テストを `tests/ai-insect-integration.test.mjs` に追加。コミット `7328cfd`。
+- `assets/ai-insect-collection.mjs` のID文字列処理で、数値等に対する `.slice()` 呼出しの例外を防ぎ、カタログ検証で拒否するよう修正。コミット `53fd931`。所持データや財布は変更しない。
+- 変更前 `2e86503` の [Web CI 40878985383](https://github.com/zeazzi244-jpg/mushiverse/actions/runs/40878985383) はPlaywright実行中、[iOS CI 40878985394](https://github.com/zeazzi244-jpg/mushiverse/actions/runs/40878985394) は依存導入中、[隔離課金 40878985510](https://github.com/zeazzi244-jpg/mushiverse/actions/runs/40878985510) は使い捨て環境起動中と確認。AI検証 [40878985372](https://github.com/zeazzi244-jpg/mushiverse/actions/runs/40878985372) と署名事前検証 [40878985390](https://github.com/zeazzi244-jpg/mushiverse/actions/runs/40878985390) は成功。今回のコードコミットのCI成功は未確認。
+- 新版のTestFlight配布、Apple Sandbox購入・返金、100画像の承認は未実施。main/本番/課金有効化/申請は変更なし。公開進捗 **55%（11/20）** 維持。本人操作は今回不要。
