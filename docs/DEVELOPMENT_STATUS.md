@@ -169,3 +169,12 @@ Supabase security advisorsはWARN 3件（モデレーターSECURITY DEFINER RPC 
 - 追加テストはまだ実行成功を確認していない。失敗した場合はアプリ側の動作かテスト初期化の問題かを切り分けること。
 - 現在のガチャ財布は端末ローカルのベータ版。課金販売やサーバー検証済みコイン残高の証明ではない。
 - 本番/main変更なし。公開ゲート10/20（50%）を維持。
+
+## 2026-10-29 iPhoneアップデート配布準備
+
+- 所有者の依頼: 最新のムシバースをiPhoneにインストールできるようiOSビルドと配布準備を進める。
+- `generate-ios-project.yml` の push対象に `codex/verified-changes-20261028` を追加。既存のmacOS Intel runnerで `npm ci`、Web同梱、Capacitor同期、構造検査、未署名Simulatorコンパイル、`.app`成果物アップロードを行う設計。workflow修正コミット `05fd81838b970086791a4e37f8770b28287a1838`。
+- 既存の `ios-signed-archive.yml` は署名IPAエクスポートと、明示的に許可された場合だけTestFlightアップロードを行う手動workflow。現在は起動していない。ASC API読み取り専用事前検証は以前成功したが、署名用Provisioning・IPAは未確認。
+- 上記コミットの `fetch_commit_workflow_runs` はPRイベントに限定された取得で0件。push-triggered iOS CIの成功/失敗はこの結果から判断できない。最新ソースのコンパイル成功・署名IPA・TestFlight配布は**未確認**。
+- iPhoneインストールまでの残作業: 最新Simulator CIのログ確認、Apple署名/Provisioningの確認、署名IPAの生成、TestFlightアップロードとApple処理、実機インストール/動作確認。配布/本番公開は所有者承認と必要な検証後に実施。
+- main/本番DB/課金ゲート変更なし。公開ゲート10/20、進捗50%維持。現時点で所有者の新たな操作は要求しない。
