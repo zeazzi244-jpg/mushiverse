@@ -252,3 +252,9 @@ Supabase security advisorsはWARN 3件（モデレーターSECURITY DEFINER RPC 
 - `assets/ai-insect-collection.mjs` のID文字列処理で、数値等に対する `.slice()` 呼出しの例外を防ぎ、カタログ検証で拒否するよう修正。コミット `53fd931`。所持データや財布は変更しない。
 - 変更前 `2e86503` の [Web CI 40878985383](https://github.com/zeazzi244-jpg/mushiverse/actions/runs/40878985383) はPlaywright実行中、[iOS CI 40878985394](https://github.com/zeazzi244-jpg/mushiverse/actions/runs/40878985394) は依存導入中、[隔離課金 40878985510](https://github.com/zeazzi244-jpg/mushiverse/actions/runs/40878985510) は使い捨て環境起動中と確認。AI検証 [40878985372](https://github.com/zeazzi244-jpg/mushiverse/actions/runs/40878985372) と署名事前検証 [40878985390](https://github.com/zeazzi244-jpg/mushiverse/actions/runs/40878985390) は成功。今回のコードコミットのCI成功は未確認。
 - 新版のTestFlight配布、Apple Sandbox購入・返金、100画像の承認は未実施。main/本番/課金有効化/申請は変更なし。公開進捗 **55%（11/20）** 維持。本人操作は今回不要。
+
+## 2026-10-30 優先CI完了判定
+
+- 最新コードコミット `4e31f3d3ae1f4acce125435d9d59b53578cd5a0a` の5系列CIを再確認し、すべて完了・成功: [Web 40879309333](https://github.com/zeazzi244-jpg/mushiverse/actions/runs/40879309333)、[iOS Simulator 40879309255](https://github.com/zeazzi244-jpg/mushiverse/actions/runs/40879309255)、[iOS signing readiness 40879309125](https://github.com/zeazzi244-jpg/mushiverse/actions/runs/40879309125)、[isolated billing 40879309066](https://github.com/zeazzi244-jpg/mushiverse/actions/runs/40879309066)、[AI catalog 40879309057](https://github.com/zeazzi244-jpg/mushiverse/actions/runs/40879309057)。
+- 優先順位(2)「当該開発コミットのWeb/iOS自動CI成功確認」は完了。これは新しい署名IPAのTestFlight配布、Apple Sandboxでの実購入・返金、100画像の承認、実機のカメラ/位置/ログイン検証を意味しない。
+- 進捗 **55%（11/20）** 維持。main・本番DB・課金ゲート・App Store申請は変更なし。未完了の優先作業はサーバー側の安全な抽選・台帳境界、Sandbox購入/返金、画像承認、TestFlight新版配布/実機、審査項目。
