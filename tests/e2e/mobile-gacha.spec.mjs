@@ -30,3 +30,21 @@ test('AI collection handles malformed local storage without erasing it or changi
  expect(await page.evaluate(key=>localStorage.getItem(key),key)).toBe('{corrupt');
  expect(await page.evaluate(A=>JSON.parse(localStorage.getItem('mushiverse-v77-game:user:'+A)).coins,A)).toBe(500);
 });
+
+test('AI collection isolates guest and signed-in card ownership across account changes',async({page})=>{
+ await setup(page,{coins:500});
+ await page.evaluate(A=>{localStorage.setItem('mushiverse-ai-collection-v1:user:'+A,JSON.stringify(['AI-001','AI-001']));localStorage.setItem('mushiverse-ai-collection-v1:guest',JSON.stringify(['AI-002']))},A);
+ await page.locator('nav.nav [data-tab="collection"]').click();
+ await page.locator('#aiInsectCollection summary').click();
+ await expect(page.locator('#aiInsectStatus')).toContainText('所持 1種類');
+ await page.locator('#aiInsectSearch').fill('AI-001');
+ await expect(page.locator('#aiInsectCards')).toContainText('所持 2枚');
+ await page.evaluate(()=>window.testSwitchUser(null));
+ await expect(page.locator('#aiInsectSearch')).toHaveValue('');
+ await expect(page.locator('#aiInsectStatus')).toContainText('所持 1種類');
+ await page.locator('#aiInsectSearch').fill('AI-001');
+ await expect(page.locator('#aiInsectCards')).toContainText('所持 0枚');
+ await page.locator('#aiInsectSearch').fill('AI-002');
+ await expect(page.locator('#aiInsectCards')).toContainText('所持 1枚');
+ expect(await page.evaluate(A=>JSON.parse(localStorage.getItem('mushiverse-v77-game:user:'+A)).coins,A)).toBe(500);
+});
