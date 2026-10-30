@@ -265,3 +265,9 @@ Priority batch for the next coding-agent run: (1) server-authoritative coin ledg
 
 - New account-isolation browser regression is committed as `64f0266`; its CI remains partially running. For `64f0266`, [AI catalog 41052930869](https://github.com/zeazzi244-jpg/mushiverse/actions/runs/41052930869), [isolated billing 41052930815](https://github.com/zeazzi244-jpg/mushiverse/actions/runs/41052930815), [iOS signing readiness 41052930811](https://github.com/zeazzi244-jpg/mushiverse/actions/runs/41052930811) passed. [Web 41052930823](https://github.com/zeazzi244-jpg/mushiverse/actions/runs/41052930823) running; [iOS 41052930890](https://github.com/zeazzi244-jpg/mushiverse/actions/runs/41052930890) pending at observation time.
 - Release readiness remains 55% (11/20). Coding-agent invocation is not available directly from this chat; this is a handoff plan, not a claim that an agent started work. No production changes or user actions.
+
+## 2026-10-30 Billing fail-closed release assertions
+
+- Updated `scripts/check_coin_release_gates.py` to verify both paid-draw and Apple-notification server feature gates require the exact string `true`, and that the paid-draw UI buttons remain disabled. Commit `34bd439`.
+- Static checks guard against accidental source changes; they do not verify Apple Sandbox transactions or production configuration. CI for this new commit is not yet verified.
+- Keep paid billing and draw gates off; no production data, main branch, TestFlight or App Store changes. Release readiness remains **55% (11/20)**. Pending: server purchase/refund Sandbox verification, artwork approval, new TestFlight device tests and App Store review. Owner action not required for this code change.
