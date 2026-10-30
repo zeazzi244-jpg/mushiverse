@@ -13,6 +13,9 @@ handler = (root / "supabase/functions/_shared/apple-credit-handler.ts").read_tex
 
 checks = {
     "paid draw client gate is fixed off": "const PURCHASED_DRAWS_RELEASE_APPROVED=false" in (root / "assets/paid-shop.mjs").read_text(),
+    "paid draw server requires explicit true": "Deno.env.get('APPLE_PAID_DRAWS_ENABLED')==='true'" in (root / "supabase/functions/draw-purchased-gacha/index.ts").read_text(),
+    "notification server requires explicit true": "Deno.env.get('APPLE_COIN_NOTIFICATIONS_ENABLED')==='true'" in (root / "supabase/functions/apple-coin-notifications/index.ts").read_text(),
+    "paid draw UI remains disabled": "button.disabled=true" in (root / "assets/paid-shop.mjs").read_text(),
     "paid draw server gate is independent": "APPLE_PAID_DRAWS_ENABLED" in (root / "supabase/functions/draw-purchased-gacha/index.ts").read_text(),
     "notification server gate is independent": "APPLE_COIN_NOTIFICATIONS_ENABLED" in (root / "supabase/functions/apple-coin-notifications/index.ts").read_text(),
     "purchase UI has release gate": "!purchasesEnabled || store.isPurchasing || store.isRetrying" in shop,
