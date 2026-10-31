@@ -367,3 +367,11 @@ Priority batch for the next coding-agent run: (1) server-authoritative coin ledg
 - Web bundle integrity: completed/success; https://github.com/zeazzi244-jpg/mushiverse/actions/runs/41160370783
 - Generate iOS Xcode project: completed/success; https://github.com/zeazzi244-jpg/mushiverse/actions/runs/41160364737
 - 1341には写真選択表示の修正は未配布。文書以外の追加変更なし。main/本番DB/課金/公開申請は変更なし。進捗55%（11/20）維持。
+
+
+## 2026-10-31 1341実機：再起動後の認証維持
+
+- アプリを完全に閉じて開き直す確認に、所有者が「ログインされたままです」と回答。再起動後のセッション維持を本人確認済み。新規ログイン/再認証や再起動後の全記録保持まで拡張しない。
+- 現在の実機確認済み: 起動/ホーム、撮影/プレビュー、航空写真マップ/採集マーカー、現在地移動、既存投稿1件の写真/内容保持、再起動後のログイン維持。
+- 次は他ユーザーの投稿詳細の通報/ブロック入口の表示確認。実際の通報送信・ブロック実行・アカウント削除はこの確認で求めない。UGCのサーバー動作/削除専用アカウント試験は別途残る。
+- 文書のみ更新、追加テスト/配布なし。main/本番DB/課金/公開申請は変更なし。進捗55%（11/20）維持。
