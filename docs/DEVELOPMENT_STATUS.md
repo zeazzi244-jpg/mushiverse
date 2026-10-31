@@ -278,3 +278,15 @@ Priority batch for the next coding-agent run: (1) server-authoritative coin ledg
 - Added `scripts/set-signed-build-number.mjs` and inserted it into the manual signed-IPA workflow before archive. Signed CI archives now derive a unique build number from GitHub run number and attempt, above previous TestFlight v139; both Xcode build configurations must be updated or the job fails. Source commits `2fdcd7e`, `12b201c`.
 - Added `tests/signed-build-number.test.mjs` covering previous version, retry uniqueness, invalid run inputs and Xcode project shape; included in standard `npm test`. Commits `27a5ff4`, `d78e7df`. CI for this new code is not yet confirmed.
 - No new signed IPA has been generated or uploaded by this session. No App Store submission, production database changes or paid-feature enablement. Progress **55% (11/20)** unchanged; user action not required for these code changes. Pending: staging server verification, Apple Sandbox purchase/refund, 100 art approvals, new TestFlight on-device verification, review metadata and submission.
+
+
+## 2026-10-31 TestFlight優先引き継ぎ・署名失敗比較
+
+- 所有者は本開発ブランチからTestFlightへのアップロードを明示許可済み。App Store申請、main、本番DB、課金有効化、証明書の失効・再発行は許可対象外。
+- 対象SHA `34e4a88adcc28bb4af6b3037243d3ed01003c544` の最新5系列を確認: Web [41148531253](https://github.com/zeazzi244-jpg/mushiverse/actions/runs/41148531253)、Simulator [41148531260](https://github.com/zeazzi244-jpg/mushiverse/actions/runs/41148531260)、隔離課金 [41148531354](https://github.com/zeazzi244-jpg/mushiverse/actions/runs/41148531354)、署名事前検証 [41148531290](https://github.com/zeazzi244-jpg/mushiverse/actions/runs/41148531290)、AIマスタ [41148531336](https://github.com/zeazzi244-jpg/mushiverse/actions/runs/41148531336) は全て completed/success。今回の新規テスト実行ではなく、既存実行の結果確認。
+- 失敗 [41149278654](https://github.com/zeazzi244-jpg/mushiverse/actions/runs/41149278654) のjob 124381656236と、v139成功 [40864941075](https://github.com/zeazzi244-jpg/mushiverse/actions/runs/40864941075) のjob 123417218174の全文ログを比較。両方ともmacos-26、同じrunner image、Xcode 26.6、同じautomatic signingのarchive引数。成功時は「Apple Development: Created via API」とTeam Provisioning Profileで署名、IPA export/uploadとも成功。
+- 今回は生成・構造チェック・ビルド番号1041割当まで成功。Archive署名準備で「既存のApple Development証明書の秘密鍵がキーチェーンにない。新規作成には既存証明書の失効が必要」とXcodeが明示。続いてDevelopment profileなし。IPA/export/uploadはskipped。1041は配布済みビルドではない。
+- 現workflowはASC API鍵のみを渡し、署名用p12/秘密鍵の永続保存・復元がない。新しい使い捨てrunnerに以前の秘密鍵が引き継がれない構成とログは整合するが、秘密鍵バックアップの外部有無は未確認。API鍵の認証成功だけでは署名用秘密鍵の存在を証明しない。
+- リポジトリtreeの署名関連ファイルに別のp12復元手順は見つからない。秘密鍵をソースへ格納しない。既存証明書を無断で失効・再発行せず、既存鍵の安全な復元経路を確認後にworkflow修正方針を決める。旧IPAの再アップロードでは最新版配布を満たさない。
+- ブラウザーはGitHub未サインイン。GitHub連携は読取/ソース変更が可能だが新規workflow_dispatchは未提供。新規起動と署名Secretsのメタデータ確認にはブラウザー認証が必要。Secrets値は読取・表示しない。
+- 今回はコード/workflow変更なし、再実行なし、新署名IPAなし、Apple processing/インストール可否は未確認。公開進捗55%（11/20）維持。次はブラウザー認証、既存署名鍵の復元可否確認、必要な場合のみ証明書操作の理由・影響と承認を具体化する。
