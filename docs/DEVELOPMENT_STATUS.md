@@ -290,3 +290,13 @@ Priority batch for the next coding-agent run: (1) server-authoritative coin ledg
 - リポジトリtreeの署名関連ファイルに別のp12復元手順は見つからない。秘密鍵をソースへ格納しない。既存証明書を無断で失効・再発行せず、既存鍵の安全な復元経路を確認後にworkflow修正方針を決める。旧IPAの再アップロードでは最新版配布を満たさない。
 - ブラウザーはGitHub未サインイン。GitHub連携は読取/ソース変更が可能だが新規workflow_dispatchは未提供。新規起動と署名Secretsのメタデータ確認にはブラウザー認証が必要。Secrets値は読取・表示しない。
 - 今回はコード/workflow変更なし、再実行なし、新署名IPAなし、Apple processing/インストール可否は未確認。公開進捗55%（11/20）維持。次はブラウザー認証、既存署名鍵の復元可否確認、必要な場合のみ証明書操作の理由・影響と承認を具体化する。
+
+
+## 2026-10-31 署名証明書の読み取り診断
+
+- GitHubブラウザーで所有者 `zeazzi244-jpg` のサインイン完了を確認。Actions設定ではRepository secretsは既存ASC API鍵3項目のみ、Environment secretsなし。署名用p12やそのパスワードの登録はない。外部バックアップの不存在までは断定しない。
+- `scripts/inspect-apple-certificates.mjs` を追加し、既存署名事前検証からGET-onlyでApple証明書一覧を取得。証明書ID・種類・有効期限・公開証明書のSHA-1のみを出力し、秘密鍵・JWT・証明書本文は出力しない。作成/失効/Provisioning/アップロード操作はない。コードSHA `cc1c6f547e2c4bdeda4d49c834e8d1c79c5b7bc7`。
+- ローカルNodeの注入モック試験（GETのみ・空一覧・403・不正レスポンス拒否）は成功。実Apple読み取りCI [41153746526](https://github.com/zeazzi244-jpg/mushiverse/actions/runs/41153746526) はcompleted/success。AIマスタ [41153746471](https://github.com/zeazzi244-jpg/mushiverse/actions/runs/41153746471) 成功。新SHAのWeb [41153746678](https://github.com/zeazzi244-jpg/mushiverse/actions/runs/41153746678) は確認時点で実行中、Simulator [41153746473](https://github.com/zeazzi244-jpg/mushiverse/actions/runs/41153746473) と隔離課金 [41153746534](https://github.com/zeazzi244-jpg/mushiverse/actions/runs/41153746534) はpending。全系列成功とはまだ扱わない。
+- AppleはDevelopment証明書6件を返却（一覧の続きなし）。v139署名時の公開証明書SHA-1 `6A9813ED76F204FB17385A5972E5D2EBB41E4B0B` と一致するIDは **`3WMVSRYMNU`**、期限2027-10-29。証明書自体の期限切れではない。失敗ログにある秘密鍵不在との切り分けができた。
+- 所有者承認が必要な具体的候補: このDevelopment証明書1件のみの失効・再作成と、次回runnerで再利用するための秘密鍵の安全な永続化。既存API鍵3項目、他5証明書、main、本番DB、購入ゲート、App Store申請は対象外。該当証明書に依存する開発用署名/プロファイルは更新が必要となる可能性がある。承認前に証明書操作を実施しない。
+- 本回は新しい署名IPAとTestFlightアップロード未実施。公開進捗55%（11/20）維持。Apple Developerブラウザーは追加サインインが必要だったため、所有者操作を増やさず上記CIの読み取りAPIで証明書照合を完了した。
