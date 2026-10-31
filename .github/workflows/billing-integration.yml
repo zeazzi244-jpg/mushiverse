@@ -1,0 +1,40 @@
+name: Isolated billing integration
+on:
+  pull_request:
+    paths:
+      - 'supabase/**'
+      - 'staging/**'
+      - 'tests/integration/**'
+      - 'scripts/run-billing-integration.mjs'
+      - 'package*.json'
+      - '.github/workflows/billing-integration.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: billing-integration-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+jobs:
+  local-supabase:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - uses: supabase/setup-cli@v1
+        with:
+          version: 2.90.0
+      - run: npm ci --no-audit --no-fund
+      - name: Start disposable Auth, REST and Postgres (no hosted credentials)
+        run: supabase --workdir staging start --exclude realtime,storage-api,imgproxy,mailpit,postgres-meta,studio,edge-runtime,logflare,vector,supavisor > "$RUNNER_TEMP/local-start.log" 2>&1
+      - name: Run actual Auth/RPC/ledger integration with synthetic Apple boundary
+        run: node scripts/run-billing-integration.mjs
+      - name: Summarize integration scope
+        if: always()
+        run: |
+          echo 'Ephemeral local Supabase only. Apple verifier boundary injected; no Sandbox purchase, remote deployment or enabled billing.' >> "$GITHUB_STEP_SUMMARY"
+      - name: Stop disposable stack
+        if: always()
+        run: supabase --workdir staging stop --no-backup > /dev/null 2>&1

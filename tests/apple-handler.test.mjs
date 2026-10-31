@@ -1,0 +1,17 @@
+import {test} from 'node:test';
+import assert from 'node:assert/strict';
+import {createAppleCreditHandler,readPurchaseBody} from '../supabase/functions/_shared/apple-credit-handler.ts';
+const account={id:'11111111-1111-4111-8111-111111111111',sessionID:'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa'};
+const now=Date.now();const tx={bundleId:'com.rikuto.mushiverse',environment:'Sandbox',type:'Consumable',inAppOwnershipType:'PURCHASED',quantity:1,appAccountToken:account.id,transactionId:'123456789',productId:'mushiverse.coins.100',purchaseDate:now-10000,signedDate:now};
+const request=(body='{"signed_transaction":"a.b.c"}',headers={})=>new Request('https://example.invalid/credit',{method:'POST',headers:{authorization:'Bearer test-token','content-type':'application/json',...headers},body});
+function fixture(overrides={}){let credits=0,verifies=0;const deps={authenticate:async()=>account,enabled:()=>true,environment:()=> 'Sandbox',verify:async()=>{verifies++;return tx},credit:async()=>{credits++;return true},...overrides};return {run:createAppleCreditHandler(deps),credits:()=>credits,verifies:()=>verifies}}
+test('gate off never verifies or credits',async()=>{const f=fixture({enabled:()=>false});const r=await f.run(request());assert.equal(r.status,503);assert.equal(r.headers.get('cache-control'),'no-store');assert.equal(f.verifies(),0);assert.equal(f.credits(),0)});
+test('unauthenticated, invalid method and missing bearer are rejected',async()=>{
+ const f=fixture({authenticate:async()=>null});assert.equal((await f.run(request())).status,401);assert.equal((await f.run(new Request('https://example.invalid'))).status,405);assert.equal((await f.run(request('{}',{authorization:''}))).status,401);assert.equal(f.credits(),0);
+});
+for(const body of ['null','[]','{','{}','{"signed_transaction":5}','{"signed_transaction":"forged"}'])test('invalid JSON purchase is rejected: '+body,async()=>{const f=fixture();assert.equal((await f.run(request(body))).status,400);assert.equal(f.credits(),0)});
+test('oversized declared and streamed bodies do not reach verification',async()=>{const f=fixture();for(const req of [request('x'.repeat(33000)),request('{}',{'content-length':'40000'})])assert.equal((await f.run(req)).status,413);assert.equal(f.verifies(),0)});
+test('stalled request body has a deadline and cancels reader',async()=>{let cancelled=false;const body=new ReadableStream({cancel(){cancelled=true}});const req=new Request('https://example.invalid',{method:'POST',headers:{'content-type':'application/json'},body,duplex:'half'});await assert.rejects(()=>readPurchaseBody(req,15),/request_timeout/);assert.equal(cancelled,true)});
+test('Apple failure or mismatched account can never credit',async()=>{for(const verify of [async()=>{throw Error('signature')},async()=>({...tx,appAccountToken:'other'})]){const f=fixture({verify});assert.equal((await f.run(request())).status,422);assert.equal(f.credits(),0)}});
+test('session revoked while Apple is queried prevents credit',async()=>{let auth=0;const f=fixture({authenticate:async()=>++auth===1?account:null});assert.equal((await f.run(request())).status,401);assert.equal(f.credits(),0)});
+test('credit failure leaves purchase unfinished; success binds acknowledgment to transaction',async()=>{const no=fixture({credit:async()=>false});assert.equal((await no.run(request())).status,503);const yes=fixture();const r=await yes.run(request());assert.deepEqual(await r.json(),{credited_or_previously_credited:true,transaction_id:tx.transactionId,product_id:tx.productId});assert.equal(yes.credits(),1)});

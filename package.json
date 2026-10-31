@@ -5,16 +5,27 @@
   "type": "module",
   "scripts": {
     "build:web": "node scripts/build-web.mjs",
-    "ios:add": "npm run build:web && npx cap add ios",
+    "ios:add": "npm run ios:sync",
     "ios:sync": "npm run build:web && npx cap sync ios",
     "ios:open": "npx cap open ios",
-    "ios:check": "node scripts/check-ios-release.mjs"
+    "ios:check": "node scripts/check-ios-release.mjs",
+    "test": "npm run check:ai-insects && node tests/apple-policy.test.mjs && node tests/apple-handler.test.mjs && node tests/coin-wallet.test.mjs && node tests/ios-project.test.mjs && node tests/paid-draw-handler.test.mjs && node tests/paid-draw-controller.test.mjs && node tests/apple-notification.test.mjs && node tests/apple-signing.test.mjs && node tests/ai-insect-catalog.test.mjs && node tests/daily-ssr-policy.test.mjs && node tests/gacha-distribution.test.mjs && node tests/ai-insect-integration.test.mjs && node tests/signed-build-number.test.mjs",
+    "test:e2e": "playwright test",
+    "verify:web": "npm run build:web && node scripts/verify-web.mjs && node scripts/check-inline-scripts.mjs && python3 scripts/check_coin_release_gates.py",
+    "check:ai-insects": "node scripts/validate_ai_insect_catalog.cjs"
   },
   "dependencies": {
-    "@capacitor/core": "^8.5.2",
-    "@capacitor/ios": "^8.5.2"
+    "@capacitor/core": "8.5.3",
+    "@capacitor/ios": "8.5.3",
+    "@supabase/supabase-js": "2.118.0",
+    "leaflet": "1.9.4"
   },
   "devDependencies": {
-    "@capacitor/cli": "^8.5.2"
+    "@apple/app-store-server-library": "3.1.0",
+    "@capacitor/cli": "8.5.3",
+    "@electric-sql/pglite": "0.5.13",
+    "@playwright/test": "1.64.1",
+    "deno": "2.9.6",
+    "xcode": "4.0.0"
   }
 }

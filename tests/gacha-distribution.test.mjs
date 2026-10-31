@@ -1,0 +1,6 @@
+import {test} from 'node:test';import assert from 'node:assert/strict';import {readFileSync} from 'node:fs';import vm from 'node:vm';
+const source=readFileSync('index.html','utf8');const g=source.slice(source.indexOf('<script id="mv-v77-game">'));
+const insects=g.match(/const INSECTS=(\[.*?\]);\n/)[1],pick=g.slice(g.indexOf('function pick('),g.indexOf('\nfunction draw(',g.indexOf('function pick(')));
+function sample(roll,allowSSR){let index=0;const math=Object.create(Math);math.random=()=>++index%2?roll:0.999999;return vm.runInNewContext('const INSECTS='+insects+';'+pick+';pick('+allowSSR+')',{Math:math,Date});}
+test('actual picker has exactly 1 SSR outcome per 1000 coin rolls and none for tickets',()=>{for(const [allowSSR,expected] of [[true,{SSR:1,SR:19,R:180,N:800}],[false,{SSR:0,SR:20,R:180,N:800}]]){const counts={SSR:0,SR:0,R:0,N:0};for(let i=0;i<1000;i++){const card=sample((i+0.5)/1000,allowSSR);counts[card.rarity]++;assert.equal(typeof card.name,'string')}assert.deepEqual(counts,expected)}});
+test('actual picker handles each rarity boundary without falling outside its pool',()=>{for(const [roll,rarity] of [[0,'SSR'],[.001,'SR'],[.019999,'SR'],[.02,'R'],[.199999,'R'],[.2,'N'],[.999999,'N']])assert.equal(sample(roll,true).rarity,rarity)});

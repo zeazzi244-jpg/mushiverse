@@ -1,0 +1,10 @@
+import {test} from 'node:test';import assert from 'node:assert/strict';import {readFileSync} from 'node:fs';import {canonicalCards,ownedByID} from '../assets/ai-insect-collection.mjs';
+const raw=JSON.parse(readFileSync('docs/ai_insect_catalog_v1.json','utf8'));
+test('ID based ownership survives renamed display labels without modifying saved entries',()=>{const cards=canonicalCards(raw),saved=[{id:'AI-005',name:'旧表示名'},'AI-005','AI-100','legacy-123',null];const before=JSON.stringify(saved);assert.deepEqual([...ownedByID(saved,cards)],[['AI-005',2],['AI-100',1]]);assert.equal(JSON.stringify(saved),before);assert.equal(cards.filter(c=>c.art_status==='approved').length,0)});
+test('runtime catalog rejects duplicate IDs and malformed masters',()=>{const duplicate=structuredClone(raw);duplicate.cards[1].id=duplicate.cards[0].id;assert.throws(()=>canonicalCards(duplicate));assert.throws(()=>canonicalCards({cards:[]}))});
+
+test('runtime catalog rejects duplicate visible names and blank names without mutating master',()=>{const dup=structuredClone(raw);dup.cards[1].name=dup.cards[0].name;assert.throws(()=>canonicalCards(dup),/invalid_catalog/);const blank=structuredClone(raw);blank.cards[0].name='  ';assert.throws(()=>canonicalCards(blank),/invalid_catalog/);assert.equal(canonicalCards(raw).length,100)});
+
+test('ownership counts only canonical IDs and ignores untrusted legacy or malformed entries',()=>{const cards=canonicalCards(raw);const input=[{id:'AI-001'},'AI-001',{id:'AI-001'},'AI-100',{id:'AI-999'},'legacy-001',{id:null},null,42,{},['AI-001']];const before=JSON.stringify(input);assert.deepEqual([...ownedByID(input,cards)],[['AI-001',3],['AI-100',1]]);assert.equal(JSON.stringify(input),before);assert.deepEqual([...ownedByID({cards:input},cards)],[['AI-001',3],['AI-100',1]]);assert.equal(ownedByID({cards:'bad'},cards).size,0)});
+
+test('malformed catalog IDs fail closed',()=>{for(const id of [null,42,{},'AI-000','AI-101','AI-1']){const candidate=structuredClone(raw);candidate.cards[0].id=id;assert.throws(()=>canonicalCards(candidate))}});

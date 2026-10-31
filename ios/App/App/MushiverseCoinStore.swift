@@ -2,10 +2,13 @@ import Foundation
 import StoreKit
 import Combine
 
-/// Native iOS component. Not wired to the GitHub Pages web app yet.
+/// StoreKit 2 coin store used by the Capacitor native shop.
 /// The backend endpoint must verify Apple's signed transaction before crediting coins.
 @MainActor
 final class MushiverseCoinStore: ObservableObject {
+    // Compile-time release gate. Never enable from JavaScript, remote config or localStorage.
+    static let purchasesEnabled = false
+
     static let productIDs: Set<String> = [
         "mushiverse.coins.100",
         "mushiverse.coins.550",
@@ -91,6 +94,10 @@ final class MushiverseCoinStore: ObservableObject {
     }
 
     func purchase(_ product: Product) async {
+        guard Self.purchasesEnabled else {
+            lastError = "現在は販売準備中です。購入はできません。"
+            return
+        }
         guard isStarted, !Task.isCancelled, Self.productIDs.contains(product.id), product.type == .consumable, products.contains(where: { $0.id == product.id }), !isPurchasing, !isRetrying else { return }
         isPurchasing = true
         lastError = nil
@@ -113,6 +120,8 @@ final class MushiverseCoinStore: ObservableObject {
     }
 
     private func process(_ result: VerificationResult<Transaction>) async {
+        guard Self.purchasesEnabled, isStarted, !Task.isCancelled else { return }
+        let generation = lifecycleGeneration
         guard case .verified(let transaction) = result else {
             lastError = "Appleによる購入確認に失敗しました"
             return
@@ -126,6 +135,7 @@ final class MushiverseCoinStore: ObservableObject {
         do {
             let token = try await accessToken()
             let expectedAccount = try await appAccountToken()
+            guard isStarted, lifecycleGeneration == generation, !Task.isCancelled else { return }
             guard transaction.appAccountToken == expectedAccount else { throw PurchaseError.accountMismatch }
             guard !token.isEmpty else { throw PurchaseError.unauthorized }
             // Never send an Apple transaction or access token to an untrusted endpoint.
@@ -146,7 +156,10 @@ final class MushiverseCoinStore: ObservableObject {
                 throw PurchaseError.serverRejected
             }
             let receipt = try JSONDecoder().decode(CreditResponse.self, from: data)
-            guard receipt.creditedOrPreviouslyCredited else {
+            guard isStarted, lifecycleGeneration == generation, !Task.isCancelled else { return }
+            guard receipt.creditedOrPreviouslyCredited,
+                  receipt.transactionID == String(transaction.id),
+                  receipt.productID == transaction.productID else {
                 throw PurchaseError.serverRejected
             }
             await transaction.finish()
@@ -166,8 +179,12 @@ final class MushiverseCoinStore: ObservableObject {
 
     private struct CreditResponse: Decodable {
         let creditedOrPreviouslyCredited: Bool
+        let transactionID: String
+        let productID: String
         enum CodingKeys: String, CodingKey {
             case creditedOrPreviouslyCredited = "credited_or_previously_credited"
+            case transactionID = "transaction_id"
+            case productID = "product_id"
         }
     }
 
