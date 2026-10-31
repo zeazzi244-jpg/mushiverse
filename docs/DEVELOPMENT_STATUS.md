@@ -300,3 +300,16 @@ Priority batch for the next coding-agent run: (1) server-authoritative coin ledg
 - AppleはDevelopment証明書6件を返却（一覧の続きなし）。v139署名時の公開証明書SHA-1 `6A9813ED76F204FB17385A5972E5D2EBB41E4B0B` と一致するIDは **`3WMVSRYMNU`**、期限2027-10-29。証明書自体の期限切れではない。失敗ログにある秘密鍵不在との切り分けができた。
 - 所有者承認が必要な具体的候補: このDevelopment証明書1件のみの失効・再作成と、次回runnerで再利用するための秘密鍵の安全な永続化。既存API鍵3項目、他5証明書、main、本番DB、購入ゲート、App Store申請は対象外。該当証明書に依存する開発用署名/プロファイルは更新が必要となる可能性がある。承認前に証明書操作を実施しない。
 - 本回は新しい署名IPAとTestFlightアップロード未実施。公開進捗55%（11/20）維持。Apple Developerブラウザーは追加サインインが必要だったため、所有者操作を増やさず上記CIの読み取りAPIで証明書照合を完了した。
+
+
+## 2026-10-31 ビルド1341：署名修復・TestFlight内部配布確認
+
+- 所有者から対象証明書1件の失効・再発行・秘密鍵の安全な保存の明示承認を受領。修復 [41154139237](https://github.com/zeazzi244-jpg/mushiverse/actions/runs/41154139237) で旧Development証明書 `3WMVSRYMNU` のID/種別/SHA-1を照合してから失効し、後継 **`X9J25MBR3L`**（SHA-1 `2C770434CF69BEC159243E0D87FBA23451279AF6`）を1件作成。他5件は維持。証明書一覧による事後照合済み。
+- 新しいRSA秘密鍵をrunnerで生成し、100,000回反復・高エントロピーパスワード付きPKCS12としてActions artifact `mushiverse-signing-identity` に保存。パスワードは既存ASC秘密鍵から用途を分けて導出し、ソース/ログに記録しない。同一ブランチ・同一手動workflowのartifactのみ復元。復元・一時キーチェーンへの取込・秘密鍵利用を後続runで確認。macOS取込用コピーのみ互換形式に変換し、平文の一時ファイルを削除。
+- **保存の限界**: artifact保存期間は90日、各署名runで更新。永久保存ではない。90日以上ビルドしない場合、artifact削除、ASC秘密鍵のローテーション時には別途安全なバックアップ/移行が必要。秘密鍵をリポジトリへ格納していない。
+- 最初の修復runはPKCS12のmacOS取込で停止したが暗号化バックアップ保存は成功。次の [41154322571](https://github.com/zeazzi244-jpg/mushiverse/actions/runs/41154322571) では復元成功、証明書指紋の直接指定とAutomatic signingの競合を検出。`CODE_SIGN_IDENTITY=Apple Development` に修正し、それ以降は同じ鍵を再利用しており失効・再発行を繰り返していない。
+- 配布ソースSHA **`38195a3a5ee63466aa3b4e29582324fb59fe1ef7`**。手動run [41154574673](https://github.com/zeazzi244-jpg/mushiverse/actions/runs/41154574673) は指定ブランチ、`upload_to_testflight=true`、`repair_approved_certificate=false` で実行。**ビルド1341**の署名Archive・IPA export・IPA artifact保存・altoolアップロードはすべて成功。`UPLOAD SUCCEEDED with no errors`、Delivery UUID `e21a3cbf-4202-4567-a48d-fa136d72d7b6`。
+- 当該run全体の結論はfailure。ただし失敗はアップロード後の読み取り診断がbetaGroups APIで403を受けたためであり、IPA作成/アップロード失敗ではない。診断を修正して、配布グループ権限不足を処理失敗と混同せず、beta詳細を独立に記録するようにした。再アップロードはしていない。
+- 読取CI [41155178021](https://github.com/zeazzi244-jpg/mushiverse/actions/runs/41155178021)（SHA `1db15084db93ea50e3149002eb61f0fc8adf4b2e`）が成功。2026-10-31 10:24 JSTに **build1341 / processingState=VALID / internalBuildState=IN_BETA_TESTING / autoNotifyEnabled=true / externalBuildState=READY_FOR_BETA_SUBMISSION** を確認。内部TestFlight配布可能、外部ベータ審査は未提出。個別グループ一覧はAPI権限不足で未確認。所有者のiPhoneでの最新版インストール/動作は未確認。
+- 配布SHAの5系列CIは全成功: [Web/単体/型/ブラウザー90件 41154524353](https://github.com/zeazzi244-jpg/mushiverse/actions/runs/41154524353)、[Simulator 41154524381](https://github.com/zeazzi244-jpg/mushiverse/actions/runs/41154524381)、[隔離課金 41154524354](https://github.com/zeazzi244-jpg/mushiverse/actions/runs/41154524354)、[署名事前検証 41154524407](https://github.com/zeazzi244-jpg/mushiverse/actions/runs/41154524407)、[AIマスタ 41154524379](https://github.com/zeazzi244-jpg/mushiverse/actions/runs/41154524379)。ローカルNodeモックでJWT署名/120秒寿命・別証明書拒否・DELETE限定ID・HTTP拒否、workflow YAMLを検証済み。診断修正後のSHAではreadiness成功、他系列は確認時点で実行中。診断以外のアプリソースは配布SHAから変更していない。
+- 本人の次の操作はTestFlightでムシバースを開き **1341へ更新**、その後カメラ/位置/ログイン等の実機確認。v139のインストールは再質問しない。公開ゲート#19の最新版配布証跡を更新、最終実機/審査は残るため進捗 **55%（11/20）維持**。main・本番DB・課金ゲート・App Store一般公開申請は変更なし。
