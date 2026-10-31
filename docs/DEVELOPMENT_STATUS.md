@@ -353,3 +353,17 @@ Priority batch for the next coding-agent run: (1) server-authoritative coin ledg
 - 「現在地を地図に表示」で現在地へ移動するかという確認に、所有者が「移動しました」と回答。本人端末で現在地取得と地図移動の成功を確認。位置座標や現在地スクリーンショットは取得していない。
 - 起動/ホーム、撮影/写真プレビュー、航空写真マップ/記録マーカー、現在地移動まで確認済み。位置情報拒否の挙動、新規ログイン/再認証、投稿保存、UGC/削除は未確認。次は既存投稿の写真・内容の保持確認。
 - 文書のみ変更。main/本番DB/課金/公開申請は変更なし。総合ゲート#11の未確認項目が残るため55%（11/20）維持。
+
+
+## 2026-10-31 1341実機：既存投稿の保持
+
+- 過去の投稿1件を開いて写真・内容が残っているかという確認に、所有者が「残っている」と回答。更新後の既存投稿の写真/内容保持を本人確認済みとする。全件比較や新規投稿保存まで確認したとは扱わない。
+- 次はアプリを閉じて開き直した際のログイン状態と既存記録の保持を確認。ログアウトやアカウント削除は求めない。
+- 写真選択表示の修正SHA `9497bad654d412706f5eaf3f14e10ed9eeb68364` のCI照合結果:
+- Generate iOS Xcode project: completed/cancelled; https://github.com/zeazzi244-jpg/mushiverse/actions/runs/41160370827
+- iOS signing readiness: completed/success; https://github.com/zeazzi244-jpg/mushiverse/actions/runs/41160370804
+- AI insect catalog validation: completed/success; https://github.com/zeazzi244-jpg/mushiverse/actions/runs/41160370766
+- Isolated billing integration: completed/cancelled; https://github.com/zeazzi244-jpg/mushiverse/actions/runs/41160370779
+- Web bundle integrity: completed/success; https://github.com/zeazzi244-jpg/mushiverse/actions/runs/41160370783
+- Generate iOS Xcode project: completed/success; https://github.com/zeazzi244-jpg/mushiverse/actions/runs/41160364737
+- 1341には写真選択表示の修正は未配布。文書以外の追加変更なし。main/本番DB/課金/公開申請は変更なし。進捗55%（11/20）維持。
