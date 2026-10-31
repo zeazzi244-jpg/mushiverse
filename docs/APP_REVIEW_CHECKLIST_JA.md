@@ -2,6 +2,13 @@
 
 App Store原稿は [APP_STORE_DRAFT_JA.md](APP_STORE_DRAFT_JA.md)、データ申告は [APP_PRIVACY_INVENTORY.md](APP_PRIVACY_INVENTORY.md)、進捗の正は [DEVELOPMENT_STATUS.md](DEVELOPMENT_STATUS.md)。本資料は申請許可ではない。
 
+## 最新の配布・本人確認（2026-10-31）
+ 
+- TestFlight **1341** はApple処理VALID、内部テスト配布中。所有者から「更新しました」の報告を受領。インストール更新は確認済み、起動・カメラ・地図・ログインの合格とは分けて扱う。
+- 無料機能の先行公開を優先する。有料コイン・有料ガチャ・広告の導入、AI画像100種の完成を先行公開の作業に混ぜない。購入ゲートはOFFのまま。
+- 課金機能のSandbox購入/返金検証は将来の課金版に必要。無料版では購入が利用できないことを確認する。未検証の有料機能を利用可能な状態で提出しない。
+- mainへのマージ/公開・本番DB変更・一般公開申請は現在の許可範囲外。本資料の準備は提出完了を意味しない。
+
 ## App Store Connectへの転記候補
 
 - 名前: ムシバース - 昆虫採集の記録
@@ -54,11 +61,31 @@ TestFlightの最終ビルドをiPhoneで撮影。架空の安全な観察デー�
 5. 専用テストアカウントで通報/ブロック/削除を試す。本番所有者の削除はしない。
 6. Sandbox専用構成が別途用意できた段階でApple購入/再配信/返金/取消を実機確認。本PRの固定停止ゲートは変更しない。
 
-## 本人のiPhoneで行う設定（順序）
+## 本人のiPhoneで行う確認（無料先行公開）
+ 
+一度にすべての操作を求めず、失敗した箇所を修正してから次に進む。既存記録を消さない。
+ 
+|順番|確認|現在の証拠|
+|---|---|---|
+|1|TestFlightで1341へ更新|所有者報告済み。繰り返さない|
+|2|起動してホームが表示される|本人確認待ち|
+|3|カメラ/写真選択/位置情報の許可・拒否で操作不能にならない|本人確認待ち|
+|4|ログイン、既存記録・図鑑・無料ガチャ・地図の表示|1341の実機は未確認|
+|5|専用テストアカウントで通報/ブロック/削除|未確認。本番所有者の削除をしない|
+|6|最終ビルドのスクリーンショット、審査用アカウント、申請情報|未確定|
+ 
+Apple Developer登録/署名/API鍵/Provisioningを最初からやり直す操作は不要。現在の署名鍵は暗号化artifactに90日保存、次の署名ビルドで更新される。長期保管とAPI鍵ローテーション時の移行はDEVELOPMENT_STATUS.md参照。
+ 
+無料先行版の準備中に、有料コインの商品作成・価格設定・銀行口座設定を定例の本人手順として求めない。無料版を提出するために必要なApple契約/アカウント状態は別途確認する。
+ 
+## 提出前に残る文面と運営判断
+ 
+- mainのprivacy.html/terms.htmlをソースで再確認したところ「公開前確認用ドラフト」と表示されている。公開mainのprivacy.htmlはAI送信先の説明が未確定、PR内草案にはGoogle Geminiへの説明がある。URLが存在することと正式な文面の完成を混同しない。
+- 運営者表示、外部サービスの取扱い、保持期間、通報対応体制を確定する。未確認の事実や対応期限は作らない。
+- AI判定への写真送信の説明/同意、App Privacy、年齢区分、Kidsカテゴリの扱いを最終ビルドと照合する。
+- Apple公式のUGC要件・アプリ内アカウント削除要件を確認。ソースやモックの存在だけで実機/本番の合格とはしない。
+- 申請資料が揃ってから、App Store一般公開申請の具体的な最終内容を提示し、別途承認を得る。
 
-1. Safariで developer.apple.com/account と appstoreconnect.apple.com を開き、Developer登録/本人確認と契約・税務/銀行情報の状態を確認。
-2. App Store ConnectでBundle ID `com.rikuto.mushiverse` のアプリとConsumable商品 `mushiverse.coins.100` / `.550` / `.1200`、価格・地域を確認。Developer MembershipのTeam IDが署名ワークフローの `7Q5539YU7V` と一致するか確認する（今回の読み取りAPI試験ではTeam ID/配布証明書/Provisioningは未確認）。
-3. **今回のCIで既存3鍵の形式・Apple API認証・対象アプリ参照を確認済み。再登録不要。** 将来鍵を更新する場合のみ、GitHubリポジトリ > Settings > Secrets and variables > Actionsで `ASC_KEY_ID`、`ASC_ISSUER_ID`、`ASC_API_KEY_P8_BASE64` を登録/確認。App Store Connect API用のP-256 p8をbase64にした値を使用し、チャットへ貼らない。Apple IAPサーバー検証用の鍵と用途を混同しない。
-4. 自動の「iOS signing readiness」の結果を確認。未登録なら不足名が表示される。成功しても配布証明書/Provisioning/署名IPA成功ではない。公開ワークフローを実行する前に成果物・送信先と許可範囲を確認。
-5. 配布準備完了後にTestFlightをiPhoneへ入れ、上記の実機確認を実施。現時点ではアップロード/申請は実行していない。
-6. App Privacy、年齢区分、運営情報、正式アイコン、審査アカウントを確定する。Appleへの提出は別途許可後。
+公式参照（2026-10-31確認）:
+- https://developer.apple.com/app-store/review/guidelines/
+- https://developer.apple.com/help/app-review/guideline-reference/5-1-1-account-deletion/
