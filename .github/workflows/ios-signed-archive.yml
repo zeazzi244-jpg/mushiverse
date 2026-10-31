@@ -46,6 +46,8 @@ jobs:
           npm run build:web
           node scripts/verify-web.mjs
           npx cap sync ios
+      - name: Allocate unique TestFlight build number
+        run: node scripts/set-signed-build-number.mjs
       - name: Run iOS release structure checks
         run: npm run ios:check
       - name: Declare iOS camera and location permissions
