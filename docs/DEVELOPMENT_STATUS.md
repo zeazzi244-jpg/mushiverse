@@ -313,3 +313,13 @@ Priority batch for the next coding-agent run: (1) server-authoritative coin ledg
 - 読取CI [41155178021](https://github.com/zeazzi244-jpg/mushiverse/actions/runs/41155178021)（SHA `1db15084db93ea50e3149002eb61f0fc8adf4b2e`）が成功。2026-10-31 10:24 JSTに **build1341 / processingState=VALID / internalBuildState=IN_BETA_TESTING / autoNotifyEnabled=true / externalBuildState=READY_FOR_BETA_SUBMISSION** を確認。内部TestFlight配布可能、外部ベータ審査は未提出。個別グループ一覧はAPI権限不足で未確認。所有者のiPhoneでの最新版インストール/動作は未確認。
 - 配布SHAの5系列CIは全成功: [Web/単体/型/ブラウザー90件 41154524353](https://github.com/zeazzi244-jpg/mushiverse/actions/runs/41154524353)、[Simulator 41154524381](https://github.com/zeazzi244-jpg/mushiverse/actions/runs/41154524381)、[隔離課金 41154524354](https://github.com/zeazzi244-jpg/mushiverse/actions/runs/41154524354)、[署名事前検証 41154524407](https://github.com/zeazzi244-jpg/mushiverse/actions/runs/41154524407)、[AIマスタ 41154524379](https://github.com/zeazzi244-jpg/mushiverse/actions/runs/41154524379)。ローカルNodeモックでJWT署名/120秒寿命・別証明書拒否・DELETE限定ID・HTTP拒否、workflow YAMLを検証済み。診断修正後のSHAではreadiness成功、他系列は確認時点で実行中。診断以外のアプリソースは配布SHAから変更していない。
 - 本人の次の操作はTestFlightでムシバースを開き **1341へ更新**、その後カメラ/位置/ログイン等の実機確認。v139のインストールは再質問しない。公開ゲート#19の最新版配布証跡を更新、最終実機/審査は残るため進捗 **55%（11/20）維持**。main・本番DB・課金ゲート・App Store一般公開申請は変更なし。
+
+
+## 2026-10-31 所有者の1341更新報告・無料公開の準備順整理
+
+- 所有者が「更新しました」と報告。直前に案内したTestFlight1341への更新完了として記録。起動/ホーム/カメラ/位置/ログイン/既存データ保持まで確認したとは扱わない。
+- 作業開始SHA `7060e92263deace8dfc376fc7e3cffe170fd3724` の5系列CIはすべてcompleted/success: [Web 41155262540](https://github.com/zeazzi244-jpg/mushiverse/actions/runs/41155262540)、[Simulator 41155262649](https://github.com/zeazzi244-jpg/mushiverse/actions/runs/41155262649)、[readiness 41155262442](https://github.com/zeazzi244-jpg/mushiverse/actions/runs/41155262442)、[隔離課金 41155262488](https://github.com/zeazzi244-jpg/mushiverse/actions/runs/41155262488)、[AI 41155262507](https://github.com/zeazzi244-jpg/mushiverse/actions/runs/41155262507)。
+- APP_REVIEW_CHECKLIST_JA.mdの古い「TestFlight未アップロード」「署名未確認」「先に有料商品設定」という手順を現状に合わせて整理。無料版の実機確認/UGC/Privacy/申請資料を先行し、販売開始やSandbox購入・返金は将来の課金版に分離。古い総合ゲートを勝手に合格へ変更しない。
+- mainのcontact.html/privacy.html/terms.htmlを読取。連絡先あり、privacy/termsは依然正式公開前の草案。mainのprivacyはAI送信先説明が未確定、開発ブランチのprivacyにはGemini記載あり。運営者/保持期間/外部送信の確定と正式版の公開は残る。mainや公開設定は変更しない。
+- Apple公式Review Guidelinesと5.1.1(v)を再確認。UGCの通報/ブロック/運営対応とアプリ内アカウント削除は無料先行版でも確認する。利用者の既存アカウントを削除して試験しない。
+- 今回は文書のみの変更。テスト追加やIPAの再作成は不要。次の本人確認は1341起動時のホーム表示、その後カメラ/地図/ログイン。一般公開申請は引き続き別途承認後。進捗55%（11/20）維持。
