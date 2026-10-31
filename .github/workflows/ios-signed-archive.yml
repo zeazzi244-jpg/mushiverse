@@ -7,8 +7,14 @@ on:
         type: boolean
         required: true
         default: false
+      repair_approved_certificate:
+        description: 'Owner approved: replace development certificate 3WMVSRYMNU only (one-time repair)'
+        type: boolean
+        required: true
+        default: false
 permissions:
   contents: read
+  actions: read
 jobs:
   signed-archive:
     runs-on: macos-26-intel
@@ -67,6 +73,43 @@ jobs:
           set_usage NSCameraUsageDescription "昆虫の採集記録を撮影して投稿するためにカメラを使用します。"
           set_usage NSLocationWhenInUseUsageDescription "採集場所を地図に表示するため、使用中のみ位置情報を利用します。"
           set_usage NSPhotoLibraryUsageDescription "採集記録に添付する写真を選ぶために写真ライブラリを使用します。"
+      - name: Restore encrypted signing backup from this branch and workflow
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            const path = require('path');
+            const current = (await github.rest.actions.getWorkflowRun({...context.repo,run_id:context.runId})).data;
+            if (context.ref !== 'refs/heads/codex/verified-changes-20261028') throw new Error('Unexpected branch');
+            const artifacts = await github.paginate(github.rest.actions.listArtifactsForRepo,{...context.repo,name:'mushiverse-signing-identity',per_page:100});
+            for (const a of artifacts.sort((a,b)=>b.id-a.id)) {
+              if (a.expired || a.workflow_run?.id === context.runId) continue;
+              const run = (await github.rest.actions.getWorkflowRun({...context.repo,run_id:a.workflow_run.id})).data;
+              if (run.workflow_id !== current.workflow_id || run.head_branch !== 'codex/verified-changes-20261028' || run.event !== 'workflow_dispatch') continue;
+              const zip = await github.rest.actions.downloadArtifact({...context.repo,artifact_id:a.id,archive_format:'zip'});
+              fs.writeFileSync(path.join(process.env.RUNNER_TEMP,'signing-backup.zip'),Buffer.from(zip.data),{mode:0o600});
+              core.info('Encrypted signing backup selected from run '+run.id);
+              break;
+            }
+      - name: Prepare signing identity (restore or explicitly approved repair)
+        env:
+          ROTATE_APPROVED_CERTIFICATE: ${{ inputs.repair_approved_certificate }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          umask 077
+          if test -f "$RUNNER_TEMP/signing-backup.zip"; then
+            unzip -p "$RUNNER_TEMP/signing-backup.zip" signing-identity.p12 > "$RUNNER_TEMP/signing-identity.p12"
+          fi
+          node scripts/repair-ios-signing.mjs
+      - name: Preserve password-encrypted signing identity for subsequent runners
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: mushiverse-signing-identity
+          path: ${{ runner.temp }}/signing-identity.p12
+          if-no-files-found: ignore
+          retention-days: 90
       - name: Archive signed iPhone app
         shell: bash
         run: |
@@ -78,6 +121,7 @@ jobs:
             -archivePath "$RUNNER_TEMP/Mushiverse.xcarchive" \
             DEVELOPMENT_TEAM="$APPLE_TEAM_ID" \
             CODE_SIGN_STYLE=Automatic \
+            CODE_SIGN_IDENTITY="$SIGNING_SHA1" \
             -allowProvisioningUpdates \
             -authenticationKeyPath "$RUNNER_TEMP/AuthKey.p8" \
             -authenticationKeyID "$ASC_KEY_ID" \
@@ -135,4 +179,8 @@ jobs:
       - name: Remove API key
         if: always()
         shell: bash
-        run: rm -f "$RUNNER_TEMP/AuthKey.p8"
+        run: |
+          rm -f "$RUNNER_TEMP/AuthKey.p8" "$RUNNER_TEMP/signing.key" "$RUNNER_TEMP/signing.csr" "$RUNNER_TEMP/signing.cer" "$RUNNER_TEMP/signing.pem" "$RUNNER_TEMP/signing-identity.p12" "$RUNNER_TEMP/signing-backup.zip"
+          if test -f "$RUNNER_TEMP/mushiverse-signing.keychain-db"; then
+            security delete-keychain "$RUNNER_TEMP/mushiverse-signing.keychain-db"
+          fi
