@@ -383,3 +383,12 @@ Priority batch for the next coding-agent run: (1) server-authoritative coin ledg
 - マイページのアカウント削除入口について、所有者が「あります」と回答。入口の存在のみ確認済み。削除操作・Auth/投稿/Storageの削除・再ログイン不可までは未実施。所有者アカウントの削除を求めない。
 - 今後の優先事項: 専用テスト環境/アカウントでUGCと削除の動作確認、写真表示修正の次回配布、公開ポリシーと運営者表記の確定、最終スクリーンショット/審査アカウント/申請情報。既存の実機確認を繰り返さない。
 - 今回は文書のみ変更。コード・追加テスト・ビルド・App Store提出なし。main/本番DB/購入ゲート変更なし。進捗55%（11/20）維持。
+
+
+## 2026-11-02 運営者の表示名を確定
+
+- 公開文面の運営者名について所有者が「ムシバース運営」を指定する提案に「それでお願いします」と回答。表示名のみ確定し、開発ブランチのprivacy.html/terms.htmlとAPP_STORE_DRAFT_JA.md/APP_REVIEW_CHECKLIST_JA.mdへ反映。
+- privacy/termsの表示名に付いていた「事業者情報は確認中」を除去。外部送信・保持期間等の未確定事項や草案表示は維持。正式公開やApple上の販売者名変更を実施したとは扱わない。
+- 変更は表示文言/資料のみ。置換対象と変更後の文字列を照合。コード動作変更・テスト追加・IPA生成・配布なし。main/公開Web/本番DB/課金/Apple申請は変更なし。
+- 変更コミット: privacy.html `a0719e15370658636b35937aa67ec69404a612a5`、terms.html `9e05c114f75d03227266bd586ee47ab3db56c28a`、docs/APP_STORE_DRAFT_JA.md `cdf5c187686182e781dd1633eb0598f98a3df834`、docs/APP_REVIEW_CHECKLIST_JA.md `cdf0dd7d746da1222baf54a2ba14b954e3ddf4d3`。
+- 公開進捗55%（11/20）維持。残作業はUGC/削除の機能検証、写真表示修正の次回配布、Privacy内容の確定と申請情報・最終画像の準備。
