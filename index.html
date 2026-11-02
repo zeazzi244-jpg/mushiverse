@@ -4343,12 +4343,15 @@ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',
 </style>
 <script id="mv110-follow-feed">
 (()=>{'use strict';
-let request=0;
+let request=0,initialized=false;
 function init(){
- const home=document.getElementById('home');if(!home||document.getElementById('mv110FollowFeed'))return;
- const panel=document.createElement('section');panel.id='mv110FollowFeed';
+ const home=document.getElementById('home');if(!home||initialized)return;
+ let panel=document.getElementById('mv110FollowFeed');
+ if(!panel){panel=document.createElement('section');panel.id='mv110FollowFeed';
  panel.innerHTML='<h2>👥 フォロー中の新着採集</h2><button type="button" id="mv110Reload">更新する</button><div id="mv110FollowStatus" role="status">ログインするとフォロー中の投稿が見られます</div><ul id="mv110FollowList"></ul>';
- const feed=document.getElementById('feed');if(feed&&feed.parentElement===home)home.insertBefore(panel,feed);else home.append(panel);
+ const feed=document.getElementById('feed');if(feed&&feed.parentElement===home)home.insertBefore(panel,feed);else home.append(panel);}
+ initialized=true;
+ document.addEventListener('mushiverse:auth-changed',()=>{request++;document.getElementById('mv110FollowList')?.replaceChildren();setTimeout(refresh,0)});
  document.getElementById('mv110Reload').addEventListener('click',refresh);
  document.addEventListener('click',e=>{if(e.target.closest?.('[data-tab="home"]'))setTimeout(refresh,250)},true);
  document.addEventListener('visibilitychange',()=>{if(!document.hidden)refresh()});
