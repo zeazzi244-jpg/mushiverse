@@ -6,6 +6,9 @@ test.describe('beta gacha economy',()=>{
   await setup(page,{tickets:2});
   await page.locator('nav.nav button[data-tab="gacha"]').click();
   await expect(page.locator('#mv77Draw')).toBeVisible();
+  await expect(page.locator('#mv86GachaLoading')).toHaveCount(0);
+  await expect(page.locator('#mv86GachaMount')).not.toContainText('ガチャを準備しています');
+  await expect(page.locator('#mv101Machine')).toBeVisible();
  });
  test('coin draw spends 50 coins even when tickets exist',async({page})=>{
   await page.locator('#mv77Draw').click();
