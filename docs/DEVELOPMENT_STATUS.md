@@ -422,3 +422,10 @@ Priority batch for the next coding-agent run: (1) server-authoritative coin ledg
 - ビルド番号 **1441**、Apple Delivery/build ID `daac739e-5ece-4b4d-ad87-9575bf14b03e`。2026-11-03 01:13 JST送信成功、01:17 JSTにprocessingState=VALID確認。autoNotifyEnabled=true、internalBuildState=READY_FOR_BETA_TESTING、externalBuildState=READY_FOR_BETA_SUBMISSION。グループ一覧は鍵権限403により未確認で、実機インストール可能・完了と断定しない。既存1341の実機確認と1441の修正確認は区別する。
 - 次: 内部配布状態の反映確認、所有者がTestFlightで1441へ更新後にガチャ準備中案内/写真選択状態/ホームの認証表示を実機確認。インストール前の画面再操作は不要。
 - 公開進捗55%（11/20）維持。main/本番DB/有料課金/一般公開申請は変更なし。Privacy/申請情報とUGC/削除の未確認項目は残る。
+
+
+### 1441の内部配布状態を再確認（2026-11-03 01:18 JST）
+
+- 資料のみ更新したSHA `4452fe7feb3907e03b5928ab9941bad165990bd4` の[読み取り専用readiness 41480196432](https://github.com/zeazzi244-jpg/mushiverse/actions/runs/41480196432)で1441/同build ID、processingState=VALID、internalBuildState=**IN_BETA_TESTING**、autoNotifyEnabled=trueを確認。1441は内部テスト配布中になった。外部はREADY_FOR_BETA_SUBMISSIONで一般公開/外部審査提出はしていない。
+- グループ一覧APIは403のままだが、内部配布状態の確認は成功。所有者にはTestFlightのムシバースを1441へ更新する一手順を案内する。1441の端末へのインストール完了・3修正の実機成功はまだ未確認。
+- 新規アップロードや証明書変更なし、追加のAppleログイン要求は不要。進捗55%（11/20）維持。
