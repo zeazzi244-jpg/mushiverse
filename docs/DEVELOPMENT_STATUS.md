@@ -412,3 +412,13 @@ Priority batch for the next coding-agent run: (1) server-authoritative coin ledg
 - [Web CI](https://github.com/zeazzi244-jpg/mushiverse/actions/runs/41477722098) はnpm test、型検査、verify:web成功、Chromium/WebKit E2E実行中。[Simulator](https://github.com/zeazzi244-jpg/mushiverse/actions/runs/41477722024) は実行中。署名readiness/隔離課金/AIマスタCIは同SHAで成功。完了結果は後続記録で確定する。
 - 写真選択ステータスとフォロー欄初期化修正を含む次の署名IPAを準備。GitHubのブラウザ認証維持を確認。既存署名バックアップを使用し、証明書再発行入力はfalseとする。現時点では新しいIPA/アップロード成功を未確認。
 - 公開進捗55%（11/20）維持。main/本番DB/購入ゲート/一般公開申請は変更なし。実機での修正確認と申請情報/Privacy/UGC・削除検証は残る。
+
+
+## 2026-11-03 修正版1441の署名IPA・TestFlight送信成功
+
+- 配布対象SHA `552bbce51ed4b5d7c9fbbcda65f71b98b6521123`（コード/テストはc8156d1、後続は資料のみ）。写真選択状態・ホームのフォロー欄初期化・ガチャの準備中案内残留の3修正を含む。
+- コード対象c8156d1の[Web CI](https://github.com/zeazzi244-jpg/mushiverse/actions/runs/41477722098)で単体/型/Web整合性/Chromium・WebKit E2E90件成功。配布SHAでも[Web](https://github.com/zeazzi244-jpg/mushiverse/actions/runs/41478444798)、[Simulator](https://github.com/zeazzi244-jpg/mushiverse/actions/runs/41478444810)、[隔離課金](https://github.com/zeazzi244-jpg/mushiverse/actions/runs/41478444576)、[署名readiness](https://github.com/zeazzi244-jpg/mushiverse/actions/runs/41478444615)、[AIマスタ](https://github.com/zeazzi244-jpg/mushiverse/actions/runs/41478444481)すべて成功。
+- ブラウザから正しい開発ブランチ、upload_to_testflight=true、repair_approved_certificate=falseで[署名実行41478798524](https://github.com/zeazzi244-jpg/mushiverse/actions/runs/41478798524)を起動。既存41154574673の暗号化署名バックアップ復元成功。証明書の失効/再発行なし。署名archive、App Store配布用IPA export、artifact保存、altool送信すべて成功。
+- ビルド番号 **1441**、Apple Delivery/build ID `daac739e-5ece-4b4d-ad87-9575bf14b03e`。2026-11-03 01:13 JST送信成功、01:17 JSTにprocessingState=VALID確認。autoNotifyEnabled=true、internalBuildState=READY_FOR_BETA_TESTING、externalBuildState=READY_FOR_BETA_SUBMISSION。グループ一覧は鍵権限403により未確認で、実機インストール可能・完了と断定しない。既存1341の実機確認と1441の修正確認は区別する。
+- 次: 内部配布状態の反映確認、所有者がTestFlightで1441へ更新後にガチャ準備中案内/写真選択状態/ホームの認証表示を実機確認。インストール前の画面再操作は不要。
+- 公開進捗55%（11/20）維持。main/本番DB/有料課金/一般公開申請は変更なし。Privacy/申請情報とUGC/削除の未確認項目は残る。
