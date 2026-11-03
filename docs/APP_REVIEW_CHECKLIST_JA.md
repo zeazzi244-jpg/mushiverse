@@ -91,3 +91,21 @@ Apple Developer登録/署名/API鍵/Provisioningを最初からやり直す操�
 公式参照（2026-10-31確認）:
 - https://developer.apple.com/app-store/review/guidelines/
 - https://developer.apple.com/help/app-review/guideline-reference/5-1-1-account-deletion/
+
+
+## 2026-11-03 こちらで完了した追加検証
+
+- テスト対象SHA `8388c821792023466383eb4d3339b53f7e495367`。[Web CI 41595817806](https://github.com/zeazzi244-jpg/mushiverse/actions/runs/41595817806)でChromium/WebKit各50件、合計100件成功。追加した5シナリオは両ブラウザーで成功。
+- 追加対象: 通報取消/短すぎる理由の送信阻止、通報失敗後の投稿保持と再送payload、投稿者非表示の地図/図鑑への反映と再読込後の保持、削除の入力確認/最終確認取消で送信なし、削除失敗/未確定応答で保存データとログイン保持。
+- 全外部通信を既存Playwright fixtureで遮断してモック応答。実際の運営キュー受信・本番RLS・Auth/Storage削除・実機インストール成功とは扱わない。アプリ本体コードの変更なし、再配布不要。1441を確認対象とする。
+
+### 掲載候補画像の形式確認
+
+|候補|実寸・形式|判断|
+|---|---|---|
+|ホーム IMG_5954.png|1284×2778、PNG/RGB、alphaなし|Face ID大画面枠の規格寸法。修正前の認証案内があるため最終採用保留|
+|図鑑上部 IMG_5955.png|1284×2778、PNG/RGB、alphaなし|同規格寸法。最終候補|
+|虫一覧 IMG_5956.jpeg|710×1536、JPEG/RGB|指定寸法に不足。最終撮影時に原寸画像を取得し、引き伸ばして完了扱いにしない|
+|ガチャ IMG_5957.png|1284×2778、PNG/RGB、alphaなし|同規格寸法。修正前の準備中表示があるため最終採用保留|
+
+Apple公式[スクリーンショット仕様](https://developer.apple.com/help/app-store-connect/reference/app-information/screenshot-specifications/)を2026-11-03に確認。1284×2778はiPhone with Face ID (large display)の受入寸法。最終登録時にデバイス枠と必要な表示サイズを確認する。iPad対応の場合の画像も別に必要で、iPhone画像だけで全プラットフォーム完了とは扱わない。私的な画像本体をGitHubへ追加していない。
