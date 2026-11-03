@@ -1,6 +1,6 @@
 import {expect} from '@playwright/test';
 export const A='11111111-1111-4111-8111-111111111111',B='22222222-2222-4222-8222-222222222222';
-export async function setup(page, { cards=0, tickets=0, coins=500, streak=0, lastClaim='', extraCards=[], rawWallet=null, failSave=false,initialLoadFailure=false,insectName='カブトムシ' }={}) {
+export async function setup(page, { cards=0, tickets=0, coins=500, streak=0, lastClaim='', extraCards=[], rawWallet=null, failSave=false,initialLoadFailure=false,postUserId=A,insectName='カブトムシ' }={}) {
   const errors=[];page.on('pageerror',e=>{errors.push(e.message);console.log('PAGE ERROR',e.message,JSON.stringify(e),e.stack)});
   await page.route('**/*',route=>{
     const url=new URL(route.request().url());
@@ -8,7 +8,7 @@ export async function setup(page, { cards=0, tickets=0, coins=500, streak=0, las
     if(url.pathname.endsWith('/assets/vendor/supabase.js'))return route.fulfill({contentType:'text/javascript',body:`
       (()=>{const callbacks=[];let user={id:'${A}',email:'test@example.invalid'};
       const now=new Date().toISOString();
-      const rows=[{id:'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa',user_id:user.id,insect_name:${JSON.stringify(insectName)},category:'甲虫',prefecture:'東京都',municipality:'',observed_at:now,created_at:now,image_url:null}];
+      const rows=[{id:'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa',user_id:'${postUserId}',insect_name:${JSON.stringify(insectName)},category:'甲虫',prefecture:'東京都',municipality:'',observed_at:now,created_at:now,image_url:null}];
       window.testRows=rows;window.testInitialLoadFailure=${initialLoadFailure};window.testLeaders=[];window.testWrites=[];
       const auth={getUser:async()=>({data:{user},error:null}),getSession:async()=>({data:{session:user?{user,access_token:'test-token'}:null}}),onAuthStateChange:fn=>{callbacks.push(fn);return {data:{subscription:{unsubscribe(){}}}}},signOut:async()=>{window.testSwitchUser(null);return {error:null}}};
       window.testSwitchUser=id=>{user=id?{id,email:'test@example.invalid'}:null;callbacks.forEach(fn=>fn('SIGNED_IN',user?{user}:null))};
