@@ -1,10 +1,18 @@
 # MUSHIVERSE 開発状況・共通引き継ぎ資料
 
-更新日: 2026-10-29 / 作業先: [PR #2](https://github.com/zeazzi244-jpg/mushiverse/pull/2) — `codex/verified-changes-20261028`
+更新日: 2026-11-03 / 作業先: [PR #2](https://github.com/zeazzi244-jpg/mushiverse/pull/2) — `codex/verified-changes-20261028`
 
 このファイルをChatGPTと所有者の共通資料とする。各作業回で「開発内容・検証・進捗・未完了・本人操作」を更新する。コード、CIの対象SHA、本ファイルを正とし、以前のチャットや旧レポートの数字だけで完了を判断しない。
 
-## 最新作業（2026-10-29：ガチャ・CI・iPhone表示）
+## 現在の要点（2026-11-03）
+
+- 最新配布: **TestFlight 1441**。署名IPA/アップロード成功、Apple VALID・IN_BETA_TESTING確認済み。1441の本人端末インストール/3修正の実機確認はまだ報告なし。
+- 1341で確認済み: 起動/ホーム、撮影とプレビュー、航空写真/採集マーカー、現在地移動、既存投稿1件の写真/内容保持、再起動後ログイン維持、削除入口。繰り返し要求しない。
+- 追加検証の最新対象: `8388c821792023466383eb4d3339b53f7e495367`。ブラウザー100件・単体/型/Web整合性・Simulator・隔離課金・署名readiness・AIマスタCIすべて成功。変更はテスト/資料のみで、1441のアプリ本体を変更していない。
+- 次の本人操作は1441でガチャの「準備中」が消えるかの確認。その他の残り: 写真ライブラリ/拒否/投稿保存、UGCと削除の実バックエンド検証、Privacy/運営対応/審査アカウント/年齢区分/掲載画像など。一般公開申請は別途承認が必要。
+- 公開ゲート **55%（11/20）**。main/本番DB/購入ゲート/一般公開申請は未変更。以下の過去記録の「未配布」「本人待ち」は当時の状態であり、この要点と末尾の最新記録を優先する。
+
+## 過去の作業（2026-10-29：ガチャ・CI・iPhone表示）
 
 - 引継ぎ開始SHA: `b8a906a`。`AGENTS.md` と本資料を確認し、`bbe11d8` の修正を維持した。
 - 失敗CI [40864197919](https://github.com/zeazzi244-jpg/mushiverse/actions/runs/40864197919) は10件すべてを調査。8件は非表示ガチャボタンへの操作（bbe11d8で修正済み）、2件は初日報酬5コインへ変更後も600残高を期待していた旧テスト。500→505を確認するよう修正した。
@@ -429,3 +437,14 @@ Priority batch for the next coding-agent run: (1) server-authoritative coin ledg
 - 資料のみ更新したSHA `4452fe7feb3907e03b5928ab9941bad165990bd4` の[読み取り専用readiness 41480196432](https://github.com/zeazzi244-jpg/mushiverse/actions/runs/41480196432)で1441/同build ID、processingState=VALID、internalBuildState=**IN_BETA_TESTING**、autoNotifyEnabled=trueを確認。1441は内部テスト配布中になった。外部はREADY_FOR_BETA_SUBMISSIONで一般公開/外部審査提出はしていない。
 - グループ一覧APIは403のままだが、内部配布状態の確認は成功。所有者にはTestFlightのムシバースを1441へ更新する一手順を案内する。1441の端末へのインストール完了・3修正の実機成功はまだ未確認。
 - 新規アップロードや証明書変更なし、追加のAppleログイン要求は不要。進捗55%（11/20）維持。
+
+
+## 2026-11-03 続行：無料先行公開向けの安全試験と申請資料
+
+- tests/e2e/community-safety.spec.mjsへ5シナリオを追加。通報取消/入力検査、送信失敗/再送、投稿者非表示の地図/図鑑/再読込反映、削除の取消時送信なし、削除失敗時データ/認証保持を確認。既存fixtureのpostUserIdを指定できるようにし、起動時から別投稿者の使い捨てデータを用意する。
+- 初回はテストが非表示のloadMoreをクリックして3シナリオ×2ブラウザーで失敗。アプリの不具合ではなく試験の準備方法を修正。最終コードSHA `8388c821792023466383eb4d3339b53f7e495367` で再検証。
+- `npm test`、型検査、`npm run verify:web`、`npm run test:e2e`、リリースscript構文/バンドル検査を[Web CI 41595817806](https://github.com/zeazzi244-jpg/mushiverse/actions/runs/41595817806)で成功。E2EはChromium50/WebKit50の**100/100成功**（追加10件を含む）。[Simulator](https://github.com/zeazzi244-jpg/mushiverse/actions/runs/41595817824)、[隔離課金](https://github.com/zeazzi244-jpg/mushiverse/actions/runs/41595817847)、[署名readiness](https://github.com/zeazzi244-jpg/mushiverse/actions/runs/41595817804)、[AIマスタ](https://github.com/zeazzi244-jpg/mushiverse/actions/runs/41595817800)も同SHAで成功。
+- 1441は2026-11-03 16:16 JSTの読み取りCIで引き続きVALID・IN_BETA_TESTINGを確認。今回アプリ本体コードの変更、新IPA、再アップロードはなし。1441の実機成功を代替しない。
+- APP_REVIEW_CHECKLIST_JA.mdを最新配布/既確認事項/保留事項へ更新。掲載候補4枚の寸法/形式/alpha有無をPillowで読み取り確認、Apple公式仕様と照合。3枚は1284×2778 PNG RGB、虫一覧は710×1536 JPEGのため最終原寸取得が必要。画像本体はGitHubに保存せず、加工/登録/公開は未実施。
+- 本番API通信はPlaywrightで遮断しモック応答のみ使用。運営側の通報受信/本番RLS、実際のAuth/Storage削除、削除成功後の端末保存範囲、審査用アカウントは未確認。所有者アカウントの削除を求めない。
+- 公開ゲート55%（11/20）維持。無料版に有料商品の設定/Sandbox購入を追加要求しない。main/本番DB/購入ゲート/一般公開提出は変更なし。本人の次の一手は1441でガチャ準備中案内の修正確認。
