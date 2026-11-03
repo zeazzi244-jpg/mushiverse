@@ -2,9 +2,7 @@ import {test,expect} from '@playwright/test';
 import {A,B,setup} from './helpers.mjs';
 const POST='aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa';
 async function otherPost(page){
- const errors=await setup(page);
- await page.evaluate(B=>{window.testRows[0].user_id=B},B);
- await page.locator('#loadMore').click();
+ const errors=await setup(page,{postUserId:B});
  await page.locator('#feed [data-detail]').first().click();
  await expect(page.locator('[data-report-post]')).toBeVisible();
  return errors;
@@ -49,8 +47,6 @@ test('author hiding removes records and persists after reload without server del
  expect(await page.evaluate(()=>window.testWrites.filter(x=>x.action==='delete'))).toHaveLength(0);
  await page.reload();
  await expect.poll(()=>page.evaluate(()=>window.records?.length)).toBe(1);
- await page.evaluate(B=>{window.testRows[0].user_id=B},B);
- await page.locator('#loadMore').click();
  await expect(page.locator('#feed')).not.toContainText('カブトムシ');
  expect(await page.evaluate(()=>JSON.parse(localStorage.getItem('mushiverse-blocked-users-v1')))).toContain(B);
  expect(errors).toEqual([]);
