@@ -1,0 +1,42 @@
+name: Isolated account safety integration
+on:
+  pull_request:
+    paths:
+      - 'supabase/candidates/delete-account/**'
+      - 'staging-safety/**'
+      - 'tests/integration/account-deletion.test.mjs'
+      - 'tests/account-deletion-candidate.test.mjs'
+      - 'scripts/run-safety-integration.mjs'
+      - 'package*.json'
+      - '.github/workflows/safety-integration.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: safety-integration-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+jobs:
+  local-safety:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - uses: supabase/setup-cli@v1
+        with:
+          version: 2.90.0
+      - run: npm ci --no-audit --no-fund
+      - name: Check candidate failure boundaries
+        run: node tests/account-deletion-candidate.test.mjs
+      - name: Start disposable Auth, Storage, REST and Postgres
+        run: supabase --workdir staging-safety start --exclude realtime,imgproxy,mailpit,postgres-meta,studio,edge-runtime,logflare,vector,supavisor > "$RUNNER_TEMP/safety-start.log" 2>&1
+      - name: Run actual local account and report safety integration
+        run: node scripts/run-safety-integration.mjs
+      - name: Summarize scope
+        if: always()
+        run: echo 'Disposable loopback Auth, Storage and minimal FK/RLS fixture only. No hosted keys, production changes or owner account deletion. Edge gateway and full production schema are not tested.' >> "$GITHUB_STEP_SUMMARY"
+      - name: Stop disposable stack
+        if: always()
+        run: supabase --workdir staging-safety stop --no-backup > /dev/null 2>&1
