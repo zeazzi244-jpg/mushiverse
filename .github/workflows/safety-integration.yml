@@ -28,6 +28,8 @@ jobs:
         with:
           version: 2.90.0
       - run: npm ci --no-audit --no-fund
+      - name: Type-check candidate Edge entry point
+        run: npx deno check --no-config --node-modules-dir=manual supabase/candidates/delete-account/index.ts
       - name: Check candidate failure boundaries
         run: node tests/account-deletion-candidate.test.mjs
       - name: Start disposable Auth, Storage, REST and Postgres
