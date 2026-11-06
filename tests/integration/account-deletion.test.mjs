@@ -49,7 +49,15 @@ test('isolated real Auth, Storage and FK/RLS safety integration',async t=>{
   });
   await t.test('injected Storage failure with real Auth preserves posts and account',async()=>{
    await upload(d,'keep.jpg');
-   const failing=createDeleteAccountHandler({caller:caller(),admin:{from:table=>admin.from(table),auth:admin.auth,storage:{from:()=>({list:(...args)=>admin.storage.from('insect-photos').list(...args),remove:async()=>({error:{message:'injected'}})})}});
+   const failingAdmin={
+    from:table=>admin.from(table),
+    auth:admin.auth,
+    storage:{from:()=>({
+     list:(...args)=>admin.storage.from('insect-photos').list(...args),
+     remove:async()=>({error:{message:'injected'}})
+    })}
+   };
+   const failing=createDeleteAccountHandler({caller:caller(),admin:failingAdmin});
    const response=await failing(request(d.token,{confirmation:'DELETE_MY_ACCOUNT'}));assert.equal(response.status,503);assert.equal((await response.json()).error,'photo_delete_failed');
    assert.equal((await admin.auth.admin.getUserById(d.id)).error,null);assert.equal((await admin.storage.from('insect-photos').list(d.id)).data.length,1);
   });
