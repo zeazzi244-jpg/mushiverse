@@ -28,7 +28,7 @@ index.htmlの端末側は、成功した本人の既知3キー（プロフィー
 ## 検証
 
 - [候補単体10件](../tests/account-deletion-candidate.test.mjs): 本人範囲、1,151写真/入れ子/ページ送り、一覧/削除/DB/Auth失敗、旧購入参照、並行アップロード、監査失敗の結果。ローカルNodeとCIで成功。
-- [端末側5件](../tests/account-deletion-client.test.mjs): 本人の3キーのみ消去、別アカウント/ゲスト/旧データ保持、待機中のアカウント切替、サーバー失敗、端末消去失敗、セッション照会失敗。ローカルNodeで成功。標準npm testへ追加しCIでも実行する。
+- [端末側5件](../tests/account-deletion-client.test.mjs): 本人の3キーのみ消去、別アカウント/ゲスト/旧データ保持、待機中のアカウント切替、サーバー失敗、端末消去失敗、セッション照会失敗。ローカルNodeと[Web CI 42203969327](https://github.com/zeazzi244-jpg/mushiverse/actions/runs/42203969327)で成功。標準npm testに追加済み。
 - [実連携試験](../tests/integration/account-deletion.test.mjs): [42203408405](https://github.com/zeazzi244-jpg/mushiverse/actions/runs/42203408405)、コードSHA `7c93f8bffdd9c00dca3ff7343a7672c74e351e4f` で6項目成功。Auth/Storage/REST/Postgresは実サービス、データは使い捨て。本人のAuth/投稿/写真/コメント/いいね/通報の削除、他ユーザーの保持、残る他者通報の参照NULL化、再ログイン拒否/旧JWTによる再削除拒否を確認。
 - 通報では本人INSERT/他者閲覧不可/他者IDでのなりすましINSERT拒否を確認。Storage故障の1箇所だけは意図的に注入してデータ保持を確認。
 - [CI](../.github/workflows/safety-integration.yml) は型検査、候補単体、実連携を実行。初回は試験用アダプターの構文エラーを修正して再実行し、上記で成功。Stack起動ログにはローカル鍵が含まれ得るため公開しない。鍵は子プロセスのメモリのみ。
@@ -47,3 +47,5 @@ index.htmlの端末側は、成功した本人の既知3キー（プロフィー
 公式参照（2026-11-06）:
 - https://supabase.com/docs/guides/auth/managing-user-data （Auth削除だけで発行済JWTが直ちに無効になるわけではない）
 - https://supabase.com/docs/guides/storage/management/delete-objects （Storage API/最大1,000件）
+
+端末修正はTestFlight **1541**へ配布済み。Apple処理VALID・IN_BETA_TESTINGを2026-11-06 19:51 JSTに確認。端末インストール/本番関数の反映は別の確認事項で、どちらも完了と扱わない。
