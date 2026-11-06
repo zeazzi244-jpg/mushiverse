@@ -2215,6 +2215,14 @@ function renderV34Deletion(){
  const el=document.getElementById('v34DeletionCenter');if(!el)return;const en=globalLang?.()==='en';const logged=!!v34User;
  el.innerHTML=`<span class="v34Badge">⚠️ ${en?'ACCOUNT DELETION':'アカウント完全削除'}</span><h3 style="margin:8px 0 4px">${en?'Permanent deletion request':'永久削除リクエスト'}</h3><div class="fineprint">${en?'When the server function is deployed, this flow is designed to delete the signed-in account and owned app data. This cannot be undone.':'サーバー機能配備後は、ログイン中のアカウントと本人所有データを削除する導線です。元には戻せません。'}</div><div class="v34Row"><div><strong>${en?'Login status':'ログイン状態'}</strong><p>${logged?(en?'Authenticated account detected.':'認証済みアカウントを確認。'):(en?'Sign in first.':'先にログインしてください。')}</p></div><span class="v34State ${logged?'ok':'wait'}">${logged?(en?'SIGNED IN':'ログイン済み'):(en?'LOGIN REQUIRED':'ログイン必要')}</span></div><div class="v34Note v34DangerNote">${en?'Safety lock: type DELETE exactly, then press the deletion button. A final confirmation dialog appears before any server request is made.':'安全ロック：下に「削除」と入力して削除ボタンを押してください。その後さらに最終確認を表示し、確認されるまでサーバーへ何も送りません。Appleの自動更新サブスクリプションはアカウント削除だけでは止まりません。必要なら削除前に「Appleのサブスク管理」を開いて解約状況を確認してください。'}</div><input id="v34DeleteConfirm" class="v34Input" autocomplete="off" placeholder="${en?'Type DELETE':'「削除」と入力'}"><div class="v34Actions"><button class="btn outline" type="button" onclick="window.open(\'https://apps.apple.com/account/subscriptions/\',\'_blank\',\'noopener\')">🍎 ${en?'Manage Apple subscriptions':'Appleのサブスク管理'}</button><button class="btn danger" type="button" data-v34-delete-account ${logged?'':'disabled'}>🗑️ ${en?'Permanently delete account':'アカウントを完全削除'}</button></div>`;
 }
+function v34ClearDeletedAccountLocalData(userId){
+ if(!/^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(String(userId||'')))return false;
+ let cleared=true;
+ for(const prefix of ['mushiverse-post-draft-v1:user:','mushiverse-profile-v86:user:','mushiverse-v77-game:user:']){
+  try{localStorage.removeItem(prefix+userId)}catch{cleared=false}
+ }
+ return cleared;
+}
 async function v34DeleteAccount(){
  const en=globalLang?.()==='en';const typed=(document.getElementById('v34DeleteConfirm')?.value||'').trim();if(!(typed==='削除'||typed.toUpperCase()==='DELETE')){toast(en?'Type DELETE first':'「削除」と入力してください');return}
  const u=await v34RefreshAuth();if(!u){toast(en?'Please sign in first':'先にログインしてください');renderV34();return}
@@ -2225,9 +2233,14 @@ async function v34DeleteAccount(){
   if(error)throw error;
   if(!data?.deleted)throw new Error('Deletion was not confirmed by server');
   v34LastMessage='ACCOUNT DELETION: CONFIRMED BY SERVER';
-  try{await db.auth.signOut()}catch{}
-  try{Object.keys(localStorage).filter(k=>k.startsWith('mushiverse')).forEach(k=>localStorage.removeItem(k))}catch{}
-  alert(en?'Your account deletion was confirmed.':'アカウントの完全削除が確認されました。');location.reload();
+  const localCleared=v34ClearDeletedAccountLocalData(u.id);
+  let activeId;
+  try{const current=await db.auth.getSession();if(!current.error)activeId=current.data?.session?.user?.id||null}catch{}
+  if(activeId===u.id){try{await db.auth.signOut({scope:'local'})}catch{}}
+  let message=en?'Your account deletion was confirmed.':'アカウントの削除が確認されました。';
+  if(!localCleared)message+=en?' Some local data could not be cleared. Please contact support.':'端末内データの一部を消去できませんでした。サポートへお問い合わせください。';
+  alert(message);
+  if(activeId===u.id||activeId===null)location.reload();
  }catch(e){v34LastMessage=`ACCOUNT DELETION: NOT COMPLETED\n${String(e?.message||e).slice(0,240)}`;toast(en?'Deletion server could not be reached or deletion failed. Nothing is shown as deleted.':'削除サーバーへの接続に失敗、または削除処理に失敗しました。削除済み扱いにはしません。');renderV34()}
 }
 function renderV34Creator(){
