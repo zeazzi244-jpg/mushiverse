@@ -1,0 +1,10 @@
+import {execFileSync,spawnSync} from 'node:child_process';
+import {readFileSync} from 'node:fs';
+const cli=process.env.SUPABASE_BIN||'supabase';
+const config=readFileSync('staging-safety/supabase/config.toml','utf8');
+if(!config.includes('project_id = "mushiverse-safety-integration"'))throw Error('unexpected_local_project');
+const status=JSON.parse(execFileSync(cli,['--workdir','staging-safety','status','-o','json'],{encoding:'utf8',stdio:['ignore','pipe','pipe']}));
+if(status.API_URL!=='http://127.0.0.1:55321'||!status.ANON_KEY||!status.SERVICE_ROLE_KEY)throw Error('disposable_loopback_stack_required');
+execFileSync('docker',['exec','-i','supabase_db_mushiverse-safety-integration','psql','-U','postgres','-d','postgres','-v','ON_ERROR_STOP=1'],{input:readFileSync('staging-safety/fixture.sql'),stdio:['pipe','ignore','pipe']});
+const result=spawnSync(process.execPath,['--test','tests/integration/account-deletion.test.mjs'],{stdio:'inherit',env:{...process.env,SUPABASE_URL:status.API_URL,SUPABASE_ANON_KEY:status.ANON_KEY,SUPABASE_SERVICE_ROLE_KEY:status.SERVICE_ROLE_KEY}});
+process.exitCode=result.status??1;
