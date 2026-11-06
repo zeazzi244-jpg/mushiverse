@@ -49,6 +49,8 @@ test('isolated real Auth, Storage and FK/RLS safety integration',async t=>{
   });
   await t.test('injected Storage failure with real Auth preserves posts and account',async()=>{
    await upload(d,'keep.jpg');
+   const dPost=crypto.randomUUID();
+   assert.equal((await admin.from('insect_posts').insert({id:dPost,user_id:d.id,insect_name:'D preserved'})).error,null);
    const failingAdmin={
     from:table=>admin.from(table),
     auth:admin.auth,
@@ -60,6 +62,8 @@ test('isolated real Auth, Storage and FK/RLS safety integration',async t=>{
    const failing=createDeleteAccountHandler({caller:caller(),admin:failingAdmin});
    const response=await failing(request(d.token,{confirmation:'DELETE_MY_ACCOUNT'}));assert.equal(response.status,503);assert.equal((await response.json()).error,'photo_delete_failed');
    assert.equal((await admin.auth.admin.getUserById(d.id)).error,null);assert.equal((await admin.storage.from('insect-photos').list(d.id)).data.length,1);
+   assert.equal((await admin.from('insect_posts').select('id').eq('id',dPost)).data.length,1);
+   assert.equal((await admin.from('insect_posts').delete().eq('id',dPost)).error,null);
   });
   await t.test('deletion removes only caller photos, posts and Auth; other user and report remain',async()=>{
    assert.equal((await admin.from('post_comments').insert([{post_id:bPost,user_id:a.id},{post_id:aPost,user_id:b.id}])).error,null);
