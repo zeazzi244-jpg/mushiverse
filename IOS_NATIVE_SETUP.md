@@ -1,3 +1,5 @@
+> 最新の引き継ぎ状況は [2026-10-28公開準備レポート](docs/RELEASE_STATUS_2026-10-28.md) を参照。以下は過去の調査・計画を含み、現在の完了証明ではありません。
+
 # MUSHIVERSE iOS release status and next actions
 
 ## Verified configuration
@@ -5,7 +7,7 @@
 - Registered Bundle ID: `com.rikuto.mushiverse` in `capacitor.config.json`.
 - Apple Developer Team ID is configured in the GitHub manual signing workflow.
 - Unsigned iOS Simulator compilation previously passed in GitHub Actions; this is not an iPhone/TestFlight build.
-- Generated iOS project lives in temporary GitHub Actions artifacts, not in the repository.
+- Generated iOS project is now committed under ios/App; CI syncs bundled web assets.
 - Native camera, photo and when-in-use location privacy descriptions are added during GitHub Actions build. The simulator workflow checks that they survive into the built app.
 - **No signed IPA, TestFlight distribution or App Store approval has been confirmed.**
 

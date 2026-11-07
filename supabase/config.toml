@@ -1,0 +1,13 @@
+project_id = "mushiverse"
+
+# Apple cannot send a Supabase user JWT. The handler verifies Apple's outer JWS,
+# nested transaction and latest App Store state before any service-role RPC.
+# Candidate configuration only; all notification and financial gates remain OFF.
+[functions.apple-coin-notifications]
+verify_jwt = false
+
+[functions.credit-apple-gacha-coins]
+verify_jwt = true
+
+[functions.draw-purchased-gacha]
+verify_jwt = true

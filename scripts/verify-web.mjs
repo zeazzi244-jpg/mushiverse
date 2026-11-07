@@ -14,3 +14,10 @@ if(config.webDir!=='www')throw Error('Capacitor webDir must be www');
 if(!config.appId||!/^([A-Za-z][A-Za-z0-9-]*\.)+[A-Za-z][A-Za-z0-9-]*$/.test(config.appId))throw Error('Invalid appId format');
 if(config.appId==='com.mushiverse.prototype')console.warn('WARNING: temporary appId — replace with App Store Connect bundle identifier before native archive.');
 console.log('PASS: web bundle integrity and Capacitor config structure');
+
+// Keep the standalone AI insect gallery usable in the bundled iOS/web output.
+for (const f of ['ai-insect-gallery-preview.html','docs/ai_insect_catalog_v1.json']) {
+ const sourceFile=join(root,f), bundledFile=join(root,'www',f);
+ if(!existsSync(sourceFile)||!existsSync(bundledFile))throw Error('Missing AI insect gallery asset: '+f);
+ if(readFileSync(sourceFile,'utf8')!==readFileSync(bundledFile,'utf8'))throw Error('AI insect gallery bundle mismatch: '+f);
+}
