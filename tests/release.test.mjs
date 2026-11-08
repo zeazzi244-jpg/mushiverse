@@ -23,3 +23,15 @@ test('web bundle contains usable entry point', () => {
   assert.match(html, /<body\b/i);
   assert.ok(html.length > 500, 'Web entry is unexpectedly small');
 });
+
+test('adventure theme ships in offline web bundle', () => {
+  const html = readFileSync(join('www', 'index.html'), 'utf8');
+  const css = join('www', 'css', 'adventure-ui.css');
+  assert.match(html, /href="css\/adventure-ui\.css"/);
+  assert.ok(existsSync(css), 'Adventure CSS missing from web bundle');
+  const style = readFileSync(css, 'utf8');
+  assert.match(style, /prefers-reduced-motion/);
+  for (const section of ['home', 'post', 'collection', 'gacha', 'map', 'profile']) {
+    assert.ok(html.includes(`id="${section}"`), 'Missing navigation section: ' + section);
+  }
+});
