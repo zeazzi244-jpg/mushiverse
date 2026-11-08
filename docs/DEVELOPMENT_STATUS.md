@@ -584,3 +584,13 @@ App Store ConnectのApp Privacyで、メール、概算位置、写真、その�
 ### 画像登録後のApple提出前チェック
 
 Add for Reviewを実行し、画像不足が表示されなくなったことを確認。残る必須項目はPrivacy Policy URL、App Privacyの公開、Content Rights、審査用ログインのユーザー名とパスワード。審査未提出。ソースではEsri World Imagery・OpenStreetMapタイルの利用と出典表示、Nominatim・国土地理院の検索先を確認。公式利用条件の取得は今回の検索で結果が返らず、利用権は未確定。ポリシー配信の既存PagesワークフローはmainのWeb一式を公開するため、ポリシー単独公開の承認と反映範囲を区別する。1741や画像を再登録せず、上記の残項目から再開。公開ゲート11/20。
+
+## 2026-11-08 正式PNG・冒険UI・起動検証
+
+- mainを基準に引き継ぎ資料・既存実装を確認。公開Pagesへの影響を避け、作業ブランチに反映した。PR #2は競合を検出。
+- `abb0927` で承認済みRGB PNG（1024×1024）を `assets/MUSHIVERSE-AppIcon-1024.png` と既存のiOS AppIcon参照先に同一バイトで配置。6画面の冒険UIとWeb同梱検証を追加。既存66 script要素は変更していない。
+- `1cd2164` と `51696ad` でホーム導線の回帰試験と作業ブランチ向けCIを追加。[Web CI](https://github.com/zeazzi244-jpg/mushiverse/actions/runs/42452087808) はChromium/WebKit 102/102、インライン構文61本、単体・Web同梱・課金停止チェック成功。
+- [Simulator CI](https://github.com/zeazzi244-jpg/mushiverse/actions/runs/42451937611) はネイティブコンパイル成功。撮影画像を目視するとiPadは新ホーム、iPhoneは起動12秒後に白画面だった。従来のCIは撮影コマンド成功だけを確認していた。端末実機・歴史的事象との同一性・原因は未確認。
+- `be9e1bc` / `edb314f` でSimulatorの描画待ち・白画面検出・失敗時のログ取得を追加。初回はワークフロー記述エラーで開始できず、後続コミットで修正。再検証を継続する。
+- [署名・TestFlight](https://github.com/zeazzi244-jpg/mushiverse/actions/runs/42452466758) は `51696ad` を対象にアップロード有効で実行。Apple処理と実機確認は結果確認後に追記する。
+- 審査下書きは1741。残りは公開ポリシーURL、App Privacyの公開、コンテンツ権利確認、審査用アカウント、最終実機確認、提出承認。公開ゲート11/20。最新のiPhone起動証跡を優先し、白画面の原因とTestFlight影響を切り分ける。
