@@ -15,7 +15,7 @@
 
 ## 作成した修正
 
-[サーバー候補](../supabase/candidates/delete-account/handler.mjs)と[Edge入口](../supabase/candidates/delete-account/index.ts)は未配備。候補は以下を行う。
+[サーバー候補](../supabase/candidates/delete-account/handler.mjs)と[Edge入口](../supabase/candidates/delete-account/index.ts)は11月8日に本番version 2として配備。修正版は以下を行う。
 
 1. getUserで検証した本人のIDだけを使用。bodyのuser_idで対象を選ばせない。
 2. 旧購入台帳への参照を破壊前に確認し、記録がある場合は409で停止する。購入記録/残高は削除・移行しない。
@@ -48,4 +48,9 @@ index.htmlの端末側は、成功した本人の既知3キー（プロフィー
 - https://supabase.com/docs/guides/auth/managing-user-data （Auth削除だけで発行済JWTが直ちに無効になるわけではない）
 - https://supabase.com/docs/guides/storage/management/delete-objects （Storage API/最大1,000件）
 
-端末修正はTestFlight **1541**へ配布済み。Apple処理VALID・IN_BETA_TESTINGを2026-11-06 19:51 JSTに確認。端末インストール/本番関数の反映は別の確認事項で、どちらも完了と扱わない。
+端末修正はTestFlight **1541**へ配布済み。Apple処理VALID・IN_BETA_TESTINGを2026-11-06 19:51 JSTに確認。端末インストールは未確認。本番反映は下記参照。
+
+
+## 2026-11-08 本番反映
+
+所有者の承認を受け、delete-account の関数コードを version 2 に更新。ACTIVE、verify_jwt=true、および配備済み2ファイルが隔離CI [42203408405](https://github.com/zeazzi244-jpg/mushiverse/actions/runs/42203408405) の対象 SHA `7c93f8bffdd9c00dca3ff7343a7672c74e351e4f` と一致することを反映後に確認。旧版の参照は [こちら](references/delete-account-live-v1.ts)。実アカウントへの削除リクエストは送っていない。本番での削除完走、通報の運営受信、1541の端末確認は未検証。旧購入台帳を持つアカウントの削除は事前に停止し、保持方針は未確定。
