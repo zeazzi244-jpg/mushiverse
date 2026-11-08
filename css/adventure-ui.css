@@ -1,0 +1,40 @@
+
+#home .mvAdventureHero{position:relative;overflow:hidden;padding:28px 22px;margin:0 0 24px;border-radius:24px;background:radial-gradient(circle at 90% 12%,#477d5b 0%,transparent 42%),linear-gradient(135deg,#102e25,#21523d 78%);color:#fff;box-shadow:0 14px 30px rgba(13,54,38,.18)}
+#home .mvAdventureHero:after{content:"✦";position:absolute;right:22px;top:54px;color:#d8efad;font-size:64px;opacity:.25;pointer-events:none}
+#home .mvAdventureEyebrow{font-size:10px;letter-spacing:.18em;font-weight:800;color:#c8e6ad;margin-bottom:14px}
+#home .mvAdventureHero h2{font-size:clamp(26px,7vw,37px);line-height:1.35;letter-spacing:-.04em;margin:0 0 12px;color:#fff}
+#home .mvAdventureHero p{line-height:1.8;font-size:14px;color:#e2f2e6;margin:0 0 22px}
+#home .mvAdventureActions{display:flex;flex-wrap:wrap;gap:10px}
+#home .mvAdventureActions button{border-radius:13px;padding:12px 16px;font-size:14px;font-weight:800;cursor:pointer;min-height:44px}
+#home .mvAdventurePrimary{background:#d5f0ad;border:1px solid #d5f0ad;color:#173c29}
+#home .mvAdventureSecondary{background:transparent;border:1px solid #a2c2ae;color:#fff}
+#home #v41LaunchSprint,#home #v38SyncShield,#home #v37SystemStatus{display:none!important}
+@media(max-width:360px){#home .mvAdventureHero{padding:24px 17px}#home .mvAdventureActions button{flex:1}}
+
+
+.mvSectionIntro{position:relative;overflow:hidden;background:linear-gradient(125deg,#143b2d,#285b42);color:#fff;padding:24px 20px;margin:0 0 20px;border-radius:22px;box-shadow:0 10px 25px rgba(15,52,36,.13)}
+.mvSectionIntro:after{content:"✧";position:absolute;right:18px;top:12px;font-size:72px;opacity:.12;pointer-events:none}
+.mvSectionKicker{display:block;font-size:10px;letter-spacing:.18em;color:#d2e9b8;font-weight:800;margin-bottom:10px}
+.mvSectionIntro h2{color:#fff;font-size:clamp(22px,6vw,31px);line-height:1.4;margin:0 0 10px;letter-spacing:-.035em}
+.mvSectionIntro p{color:#e4f2e7;line-height:1.8;font-size:14px;margin:0;max-width:42em}
+@media(max-width:360px){.mvSectionIntro{padding:20px 16px}}
+
+/* MUSHIVERSE Adventure UI — progressive enhancement; existing data and interactions untouched */
+:root{--mv-forest:#173e30;--mv-fern:#276348;--mv-lime:#d5f0ad;--mv-paper:#f5f8f1}
+#home .mvAdventureHero,.mvSectionIntro{isolation:isolate}
+#home .mvAdventureHero:before,.mvSectionIntro:before{content:"";position:absolute;inset:auto -28px -65px auto;width:180px;height:180px;border:1px solid rgba(221,247,192,.17);border-radius:50%;pointer-events:none}
+#home .mvAdventureHero:after,.mvSectionIntro:after{user-select:none}
+#home .mvAdventureActions button:focus-visible,#home button:focus-visible,#post button:focus-visible,#collection button:focus-visible,#gacha button:focus-visible,#map button:focus-visible,#profile button:focus-visible{outline:3px solid #e5bd64;outline-offset:3px}
+#home .mvAdventurePrimary:hover{background:#e8ffc9}
+#home .mvAdventureSecondary:hover{background:rgba(255,255,255,.13)}
+#home #mv110FollowFeed{padding:18px;border:1px solid #d9e6d8;border-radius:19px;background:linear-gradient(155deg,#f5faef,#fff);margin-bottom:18px}
+#home #mv110FollowFeed h2{font-size:18px;margin:0 0 8px;color:#1c5038}
+#home #mv110FollowStatus{font-size:13px;line-height:1.7}
+#home .panel{border-radius:18px}
+#home .sectionTitle{font-size:clamp(19px,5vw,25px);line-height:1.35}
+#home .hint{line-height:1.7}
+#home .toolbar{padding:14px;border-radius:17px;background:#f3f7f0}
+#home #feed{scroll-margin-top:80px}
+#post .mvSectionIntro,#collection .mvSectionIntro,#gacha .mvSectionIntro,#map .mvSectionIntro,#profile .mvSectionIntro{scroll-margin-top:80px}
+@media(prefers-reduced-motion:no-preference){#home .mvAdventureHero,.mvSectionIntro{animation:mvAdventureReveal .4s ease-out both}@keyframes mvAdventureReveal{from{opacity:.65;transform:translateY(7px)}to{opacity:1;transform:translateY(0)}}}
+@media(prefers-reduced-motion:reduce){#home .mvAdventureHero,.mvSectionIntro{animation:none!important;transition:none!important}}

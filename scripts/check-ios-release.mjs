@@ -10,6 +10,16 @@ if(!existsSync('www/index.html'))problems.push('Bundled web assets missing (run 
 if(config.webDir!=='www')problems.push('Capacitor webDir must be www for the generated web bundle');
 if(config.server?.url)problems.push('Remote server.url is configured: production app must package its local assets');
 const nativeRoot=join('ios','App','App');
+const approvedIcon=join('assets','MUSHIVERSE-AppIcon-1024.png');
+const nativeIcon=join(nativeRoot,'Assets.xcassets','AppIcon.appiconset','AppIcon-512@2x.png');
+if(!existsSync(approvedIcon)||!existsSync(nativeIcon)) problems.push('Approved iOS icon files are missing');
+else {
+ const icon=readFileSync(approvedIcon);
+ if(icon.length<33||!icon.subarray(0,8).equals(Buffer.from([137,80,78,71,13,10,26,10]))||icon.readUInt32BE(16)!==1024||icon.readUInt32BE(20)!==1024||icon[25]!==2) problems.push('Approved icon must be a 1024x1024 RGB PNG');
+ if(!icon.equals(readFileSync(nativeIcon))) problems.push('Native icon does not match approved artwork');
+}
+if(!existsSync('www/css/adventure-ui.css')) problems.push('Adventure stylesheet missing from packaged app');
+
 const projectPath=join('ios','App','App.xcodeproj','project.pbxproj');
 if(existsSync(projectPath)){
  const project=readFileSync(projectPath,'utf8');
