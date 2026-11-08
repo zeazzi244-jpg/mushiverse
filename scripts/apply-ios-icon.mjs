@@ -19,8 +19,8 @@ const validPng = bytes.length > 24 && bytes.subarray(0, 8).equals(Buffer.from([1
 const width = validPng ? bytes.readUInt32BE(16) : 0;
 const height = validPng ? bytes.readUInt32BE(20) : 0;
 const colorType = validPng ? bytes[25] : -1;
-if (width !== 1024 || height !== 1024 || ![2,6].includes(colorType)) {
-  console.error('Approved icon must be a 1024x1024 RGB/RGBA PNG.');
+if (width !== 1024 || height !== 1024 || colorType !== 2) {
+  console.error('Approved icon must be a 1024x1024 opaque RGB PNG.');
   process.exit(1);
 }
 mkdirSync(dest, { recursive: true });
