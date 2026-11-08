@@ -10,7 +10,7 @@
     "ios:open": "npx cap open ios",
     "ios:check": "node scripts/check-ios-release.mjs",
     "ios:icon": "node scripts/apply-ios-icon.mjs",
-    "ios:prepare": "npm run ios:sync && npm run ios:icon && npm run ios:check"
+    "ios:prepare": "node scripts/prepare-ios.mjs"
   },
   "dependencies": {
     "@capacitor/core": "^8.5.2",
