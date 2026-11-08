@@ -9,3 +9,5 @@ Continue on PR #2 (`codex/verified-changes-20261028`) unless the owner changes s
 Keep secrets out of source, logs, issues and chat. Preserve user records and unverified legacy balances. Use additive, reviewed SQL candidates and isolated test data; do not deploy them to production. Prefer cloud CI for iOS, because the owner uses only an iPhone.
 
 Record blockers precisely and continue independent work. Do not repeat requests for already provided authorization or ask the owner to do work that can be completed and verified in this branch.
+
+Owner’s standing instruction: 「ずっと作業を続けて。すべての作業を終わらせるまでつづけて。」 Continue all authorized work without pausing for routine updates or repeated approval. Batch iPhone checks at the end. When a genuine blocker needs owner action, first finish independent work and identify the exact remaining step.
