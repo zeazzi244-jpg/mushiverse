@@ -574,3 +574,8 @@ App Store ConnectのApp Privacyで、メール、概算位置、写真、その�
 ### 所有者提供画像をApp Store Connectに登録
 
 添付3点の実寸を確認。ホームPNGは1284×2778で、Media Managerが同寸法を許可するiPhone Face ID大画面枠に登録し、1/10件表示を確認。図鑑とマップのJPEGは710×1536のため規格枠に登録しなかった。必須のDynamic Island中型と13インチiPadは別枠として未確認。[Apple Silicon撮影](https://github.com/zeazzi244-jpg/mushiverse/actions/runs/42439470527)はSimulatorコンパイル成功・撮影中。残作業は成果物の確認と不足枠への登録、および他の提出必須項目。公開ゲート11/20。
+
+
+### 必須のiPhone・iPad画像を登録
+
+[Simulator CI](https://github.com/zeazzi244-jpg/mushiverse/actions/runs/42439470527)が成功。成果物のゲスト状態ホームを目視し、iPhone 1206×2622とiPad 2064×2752を確認。元画像は全ピクセル不透明で、画面を変更せずRGB PNGに変換。App Store Connectの日本語Media Managerで中型Dynamic Island iPhoneと13インチiPadの必須枠へ各1枚登録し、各枠1/10件を確認。所有者提供の大画面iPhone画像も登録済み。配布対象1741の変更や再ビルドなし。残りはポリシー公開とURL、App Privacy公開、Content Rights、審査専用ログイン、提出前チェック。Content Rightsの調査ではアプリ内にEsriとOSMタイル・出典表示があることを確認したが、出典表示だけで利用権を確定していない。公開ゲート11/20、審査未提出。
