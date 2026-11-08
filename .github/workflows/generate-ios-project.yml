@@ -96,6 +96,36 @@ jobs:
           path: ${{ runner.temp }}/mushiverse-derived/Build/Products/Debug-iphonesimulator/App.app/
           if-no-files-found: error
           retention-days: 7
+      - name: Capture App Store screenshot candidates
+        if: github.event_name == 'push' && github.ref == 'refs/heads/codex/verified-changes-20261028'
+        run: |
+          set -euo pipefail
+          APP="$RUNNER_TEMP/mushiverse-derived/Build/Products/Debug-iphonesimulator/App.app"
+          OUT="$RUNNER_TEMP/store-shots"
+          mkdir -p "$OUT"
+          xcrun simctl list devices available -j > "$RUNNER_TEMP/sims.json"
+          capture() {
+            local name="$1" pattern="$2" udid
+            udid=$(python3 -c 'import json,re,sys; print(next(d["udid"] for k, ds in reversed(list(json.load(open(sys.argv[1]))["devices"].items())) if ".iOS-" in k for d in ds if d["isAvailable"] and re.search(sys.argv[2], d["name"])))' "$RUNNER_TEMP/sims.json" "$pattern")
+            xcrun simctl boot "$udid"
+            xcrun simctl bootstatus "$udid" -b
+            xcrun simctl install "$udid" "$APP"
+            xcrun simctl launch "$udid" com.rikuto.mushiverse
+            sleep 12
+            xcrun simctl io "$udid" screenshot "$OUT/$name.png"
+            sips -g pixelWidth -g pixelHeight "$OUT/$name.png"
+            xcrun simctl shutdown "$udid"
+          }
+          capture iphone '^(iPhone (16|17) Pro|iPhone 17)$'
+          capture ipad '^iPad Pro 13-inch'
+      - name: Save App Store screenshot candidates
+        if: github.event_name == 'push' && github.ref == 'refs/heads/codex/verified-changes-20261028'
+        uses: actions/upload-artifact@v4
+        with:
+          name: mushiverse-app-store-screenshot-candidates
+          path: ${{ runner.temp }}/store-shots/*.png
+          if-no-files-found: error
+          retention-days: 7
       - name: Save compile log on failure
         if: failure()
         run: |
