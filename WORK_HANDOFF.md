@@ -18,6 +18,12 @@
 - `tests/release.test.mjs` and `npm run test:release` validate release-script syntax, app identity and the built web entry.
 - GitHub Actions `verify.yml` now runs these tests. CI success must be checked in GitHub; adding a workflow does not prove it passed.
 
+## Major update (2026-11-08)
+- The Home hero and introductions for Record, Collection, Gacha, Map and Profile are committed in `index.html`.
+- `css/adventure-ui.css` adds responsive adventure styling, focus-visible and reduced-motion support; loaded by `index.html`.
+- `tests/release.test.mjs` verifies CSS inclusion in the offline bundle and presence of all six screens.
+- `MAJOR_UPDATE_ROADMAP.md` defines phased priorities and quality gates. **UI changes have not been verified on iPhone.**
+
 ## Remaining blockers, in priority order
 1. Transfer the **exact approved PNG** into `assets/MUSHIVERSE-AppIcon-1024.png` (do not generate a lookalike).
 2. Confirm GitHub Actions `Verify MUSHIVERSE release scripts` passes. Fix any reported failure.
