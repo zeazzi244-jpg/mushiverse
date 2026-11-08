@@ -133,3 +133,15 @@ test('paid draw controls stay disabled regardless of local tampering',async({pag
  for(const button of await page.locator('#paidDrawControls button').all())await expect(button).toBeDisabled();
  expect(errors).toEqual([]);
 });
+
+test('adventure home actions open the existing record and collection tabs', async ({page}) => {
+  const errors = await setup(page);
+  const nav = page.locator('.nav');
+  await expect(page.locator('#home .mvAdventureHero')).toBeVisible();
+  await page.locator('#home .mvAdventurePrimary').click();
+  await expect(page.locator('#recordForm')).toBeVisible();
+  await nav.locator('[data-tab="home"]').click();
+  await page.locator('#home .mvAdventureSecondary').click();
+  await expect(page.locator('#collectionList')).toBeVisible();
+  expect(errors).toEqual([]);
+});
