@@ -602,5 +602,5 @@ Add for Reviewを実行し、画像不足が表示されなくなったことを
 ## 2026-11-08 アイコン外周修正
 
 - 所有者の承認に基づき、元のチョウの画素を保ち、背景の深緑を四辺に延長。1024×1024 RGB、四辺の最外12pxが緑であること、チョウを含む中央領域が原本とピクセル単位で一致することを検証。原本は前コミットに保管。素材とiOSアセットを同一blobで更新（`f15dfe3`）。
-- [Web CI](https://github.com/zeazzi244-jpg/mushiverse/actions/runs/42454008146) 成功。[Simulator](https://github.com/zeazzi244-jpg/mushiverse/actions/runs/42454008130) のiPhoneホーム画像を目視確認。iPad画像は取得できず。
+- [Web CI](https://github.com/zeazzi244-jpg/mushiverse/actions/runs/42454008146) 成功。[Simulator](https://github.com/zeazzi244-jpg/mushiverse/actions/runs/42454008130) のiPhoneホーム画像を目視確認。iPadはSimulator OSのデータ移行待ちで撮影工程の7分制限に達し、起動確認未実施。
 - [署名と配布](https://github.com/zeazzi244-jpg/mushiverse/actions/runs/42454088367) 成功。1941はApple `VALID` / `IN_BETA_TESTING`。1941の実機での外周表示は未確認。App Store審査下書きは1741、公開ゲート11/20。
