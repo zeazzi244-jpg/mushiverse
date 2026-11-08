@@ -569,3 +569,8 @@ App Store ConnectのApp Privacyで、メール、概算位置、写真、その�
 ### iPhone・iPad掲載画像のCI撮影
 
 開発ブランチで、実際のSimulatorアプリを起動して中型iPhoneと13インチiPadのPNGを撮るCI手順を追加（`b19bed638e4a4701b44e5ec764113ca83f6e5a02`）。YAML解析とbash構文をローカル検証。[Intel実行](https://github.com/zeazzi244-jpg/mushiverse/actions/runs/42438828097)ではコンパイルとSimulatorアプリ保存まで成功し、撮影は長引いたため後続実行でキャンセル。撮影をApple Siliconへ切り替え、7分の上限と起動ログを追加（`19a5b138c506e0c0a324d8dea2da349554cbfb19`）。[新実行](https://github.com/zeazzi244-jpg/mushiverse/actions/runs/42439470527)は確認時点で待機中。画像の取得・目視・寸法確認・App Store Connect登録は未完了。再開時は新実行の結果と撮影ログを確認し、候補画像があれば確認してアップロード。写真の作り直しや1741の再配布は不要。公開ゲート11/20。
+
+
+### 所有者提供画像をApp Store Connectに登録
+
+添付3点の実寸を確認。ホームPNGは1284×2778で、Media Managerが同寸法を許可するiPhone Face ID大画面枠に登録し、1/10件表示を確認。図鑑とマップのJPEGは710×1536のため規格枠に登録しなかった。必須のDynamic Island中型と13インチiPadは別枠として未確認。[Apple Silicon撮影](https://github.com/zeazzi244-jpg/mushiverse/actions/runs/42439470527)はSimulatorコンパイル成功・撮影中。残作業は成果物の確認と不足枠への登録、および他の提出必須項目。公開ゲート11/20。
