@@ -1,5 +1,24 @@
 # MUSHIVERSE — Major Update Roadmap
 
+## Founder vision and product north star (2026-11-08)
+The founder's enduring goals are **financial success**, **sharing the beauty and fascination of insects worldwide**, **building global recognition**, and **creating a lasting historical contribution through MUSHIVERSE**. Treat these goals as the north star for future design, product, engineering and marketing decisions.
+
+Aim for a world-leading insect app. There is no guarantee of reaching #1, but do not impose arbitrary limits on the ambition. Test bold hypotheses through measurable, responsible iteration.
+
+### Engagement principles
+- Create voluntary, sustainable return visits through curiosity, discovery, meaningful progression, collection, learning and community.
+- Study user motivations and behavior patterns: first-time explorers, children with guardians, casual nature lovers, collectors, photographers, students and expert naturalists.
+- Give each group a satisfying path from first discovery to long-term mastery.
+- Reward **real learning and safe outdoor exploration**, not compulsive checking.
+- Use transparent, fair reward mechanics. No deceptive scarcity, manipulative notifications, exploitative streak penalties or pressure on children to purchase.
+- Optimize for meaningful 7-day/30-day retention, genuine discoveries, learning outcomes, user trust and sustainable revenue—not screen time at any cost.
+- Keep virtual fantasy insect cards separate from verified wildlife records.
+
+### Business principles
+- Evaluate monetization through ethical premium features, appropriate digital purchases and optional ads with child/privacy safeguards.
+- Track activation, retained explorers, purchase conversion, refunds, satisfaction and real operating costs.
+- Protect user trust and wildlife conservation as competitive advantages.
+
 ## Product vision
 Turn MUSHIVERSE into a joyful insect discovery adventure: **find real insects, document sightings, learn responsibly, connect with other explorers, and collect fantasy insect cards**. Keep real wildlife observations clearly separate from fictional gacha cards.
 
