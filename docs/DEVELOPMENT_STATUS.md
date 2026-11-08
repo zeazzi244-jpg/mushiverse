@@ -525,3 +525,8 @@ Priority batch for the next coding-agent run: (1) server-authoritative coin ledg
 |20|最終署名版の確認とApp Store Connectの申請結果|
 
 次回署名ビルドのCIに、アーカイブ内のPrivacy manifestのAPI理由、収集カテゴリ数、追跡宣言を集計する手順を追加（`92a381798cb32c2d8f902c01858439fc1f37e1c9`）。YAMLを読み取り、manifestなしとバイナリplistの模擬アーカイブで当該手順をローカル実行済み。実際のmacOS署名CIとApple申告は未検証。1541のIPA成果物は1日保持のため現時点の成果物一覧にない。1541のApple配布結果は[元の署名実行](https://github.com/zeazzi244-jpg/mushiverse/actions/runs/42204944777)を参照。
+
+
+### 署名版のPrivacy manifest集計を確認
+
+[署名CI #15](https://github.com/zeazzi244-jpg/mushiverse/actions/runs/42430256227)を開発ブランチで実行。署名鍵を復元し、Archive・集計・IPAエクスポート成功。アップロードと証明書修復の入力はfalse。集計にはCapacitor/Cordovaの2ファイルが出力され、両方とも収集カテゴリ0、追跡宣言false、Required Reason API行なし。アプリ全体の収集区分はバックエンドと外部サービスも含めて棚卸しが必要。TestFlight確認対象は1541。Apple申告・Sandbox・本番専用アカウント検証・最終実機試験が残り、ゲートは55%（11/20）。
