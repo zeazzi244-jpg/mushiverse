@@ -554,3 +554,8 @@ iOS 1.0で年齢区分質問票を入力し、Apple算定13+を保存。投稿�
 - 審査連絡先の氏名・メール・電話をApp Store Connectで保存し、再読み込み後の入力を確認。連絡先の値はGitHubに保存しない。住所は今回の連絡先フォームで求められていない。
 - 停止理由：App Store Connectの下書きで旧ビルドの選択解除操作がタイムアウトし、1541のまま。提出必須のiPhone/iPad掲載画像、Privacy Policy URLとApp Privacy、Content Rights、審査専用ログインも残る。審査は未提出、公開ゲート11/20。
 - 再開手順：フォームが読み込まれてから下書きのBuild欄で選択解除→1741を選択→保存・再読込確認。TestFlightの再アップロードや連絡先の再入力は不要。審査項目をまとめて埋め、AppleのAdd for Reviewで不足を再検証する。
+
+
+### App Store Connectの審査対象を1741に更新
+
+再ログイン後、ビルド行を画面内に表示してポインターを置くと解除ボタンが表示された。1541の関連付けを解除し、1741を選択・保存。Add for Reviewの再検証で、審査連絡先の不足は解消し、iPhone Dynamic Island中型と13インチiPad画像、Privacy Policy URL、App Privacy、Content Rights、審査用ログインのみが表示された。審査未提出。次回はビルドの再切替や連絡先再入力をせず、これらの不足項目から再開する。
