@@ -4,7 +4,7 @@
 
 このファイルをChatGPTと所有者の共通資料とする。各作業回で「開発内容・検証・進捗・未完了・本人操作」を更新する。コード、CIの対象SHA、本ファイルを正とし、以前のチャットや旧レポートの数字だけで完了を判断しない。
 
-## 現在の要点（2026-11-06）
+## 現在の要点（2026-11-08）
 
 - 最新配布: **TestFlight 1841**（承認済み原本PNG・冒険UI、Apple VALID・IN_BETA_TESTING、実機未確認）。1741もApple VALID・IN_BETA_TESTINGを確認済み。前回の1541は、2026-11-06 19:51 JSTにApple VALID・IN_BETA_TESTINGを確認。削除成功後に別アカウントの端末データを消さない修正を含む。1541は所有者がiPhoneで起動できたと報告。本番delete-accountは11月8日にversion 2へ更新済み。過去の1441では、署名IPA/アップロード成功、Apple VALID・IN_BETA_TESTING確認済み。1441でガチャの準備中案内が消えたことを所有者が2026-11-06に確認。写真プレビューと「写真を選択しました」の正しい案内も所有者画像で確認。ホームも「まだフォロー中のユーザーはいません」と表示され、ログイン案内の不整合解消を実機確認。1441の3表示修正はすべて本人端末で確認済み。
 - 1341で確認済み: 起動/ホーム、撮影とプレビュー、航空写真/採集マーカー、現在地移動、既存投稿1件の写真/内容保持、再起動後ログイン維持、削除入口。繰り返し要求しない。
@@ -591,6 +591,6 @@ Add for Reviewを実行し、画像不足が表示されなくなったことを
 - `abb0927` で承認済みRGB PNG（1024×1024）を `assets/MUSHIVERSE-AppIcon-1024.png` と既存のiOS AppIcon参照先に同一バイトで配置。6画面の冒険UIとWeb同梱検証を追加。既存66 script要素は変更していない。
 - `1cd2164` と `51696ad` でホーム導線の回帰試験と作業ブランチ向けCIを追加。[Web CI](https://github.com/zeazzi244-jpg/mushiverse/actions/runs/42452087808) はChromium/WebKit 102/102、インライン構文61本、単体・Web同梱・課金停止チェック成功。
 - [Simulator CI](https://github.com/zeazzi244-jpg/mushiverse/actions/runs/42451937611) はネイティブコンパイル成功。撮影画像を目視するとiPadは新ホーム、iPhoneは起動12秒後に白画面だった。従来のCIは撮影コマンド成功だけを確認していた。端末実機・歴史的事象との同一性・原因は未確認。
-- `be9e1bc` / `edb314f` でSimulatorの描画待ち・白画面検出・失敗時のログ取得を追加。ワークフロー記述・画像読み込みコードのエラーを `47bd91c` / `b5b092c` で修正。[再検証](https://github.com/zeazzi244-jpg/mushiverse/actions/runs/42452902025) を実行。
+- `be9e1bc` / `edb314f` でSimulatorの描画待ち・白画面検出・失敗時のログ取得を追加。ワークフロー記述・画像読み込みコードのエラーを `47bd91c` / `b5b092c` で修正。[再検証](https://github.com/zeazzi244-jpg/mushiverse/actions/runs/42452902025) が成功。iPhone・iPadとも初回判定でホームを検出し、撮影結果を目視確認（iPhone 1206×2622、iPad 2064×2752）。アプリ本体は1841と同一。白画面は再現せず、初回の原因と物理端末での起動は未確認。
 - [署名・TestFlight](https://github.com/zeazzi244-jpg/mushiverse/actions/runs/42452466758) は `51696ad` を対象にアップロード有効で実行。署名・IPA書き出し・アップロードに成功。Appleがビルド1841を `VALID` / `IN_BETA_TESTING` と判定。外部テストは `READY_FOR_BETA_SUBMISSION`。実機インストール未確認。
-- 審査下書きは1741。残りは公開ポリシーURL、App Privacyの公開、コンテンツ権利確認、審査用アカウント、最終実機確認、提出承認。公開ゲート11/20。最新のiPhone起動証跡を優先し、白画面の原因とTestFlight影響を切り分ける。
+- 審査下書きは1741。残りは公開ポリシーURL、App Privacyの公開、コンテンツ権利確認、審査用アカウント、最終実機確認、提出承認。公開ゲート11/20。次は登録済みiPhoneで1841の初回起動と正式アイコンを確認。再現時は端末機種・iOS・更新直後かどうかを記録し、Simulatorの描画判定と照合する。
