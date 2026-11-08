@@ -22,6 +22,8 @@ jobs:
           node --check scripts/check-ios-release.mjs
       - name: Build local web assets
         run: npm run build:web
+      - name: Run release regression tests
+        run: node --test tests/release.test.mjs
       - name: Verify bundled web entry
         run: test -s www/index.html
       - name: Verify native bundle identity
