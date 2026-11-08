@@ -6,7 +6,7 @@
 
 ## 現在の要点（2026-11-06）
 
-- 最新配布: **TestFlight 1541**。2026-11-06 19:51 JSTにApple VALID・IN_BETA_TESTINGを確認。削除成功後に別アカウントの端末データを消さない修正を含む。1541の端末インストールは未確認。本番delete-accountは11月8日にversion 2へ更新済み。過去の1441では、署名IPA/アップロード成功、Apple VALID・IN_BETA_TESTING確認済み。1441でガチャの準備中案内が消えたことを所有者が2026-11-06に確認。写真プレビューと「写真を選択しました」の正しい案内も所有者画像で確認。ホームも「まだフォロー中のユーザーはいません」と表示され、ログイン案内の不整合解消を実機確認。1441の3表示修正はすべて本人端末で確認済み。
+- 最新配布: **TestFlight 1541**。2026-11-06 19:51 JSTにApple VALID・IN_BETA_TESTINGを確認。削除成功後に別アカウントの端末データを消さない修正を含む。1541は所有者がiPhoneで起動できたと報告。本番delete-accountは11月8日にversion 2へ更新済み。過去の1441では、署名IPA/アップロード成功、Apple VALID・IN_BETA_TESTING確認済み。1441でガチャの準備中案内が消えたことを所有者が2026-11-06に確認。写真プレビューと「写真を選択しました」の正しい案内も所有者画像で確認。ホームも「まだフォロー中のユーザーはいません」と表示され、ログイン案内の不整合解消を実機確認。1441の3表示修正はすべて本人端末で確認済み。
 - 1341で確認済み: 起動/ホーム、撮影とプレビュー、航空写真/採集マーカー、現在地移動、既存投稿1件の写真/内容保持、再起動後ログイン維持、削除入口。繰り返し要求しない。
 - 過去の追加検証対象: `8388c821792023466383eb4d3339b53f7e495367`。ブラウザー100件・単体/型/Web整合性・Simulator・隔離課金・署名readiness・AIマスタCIすべて成功。変更はテスト/資料のみで、1441のアプリ本体を変更していない。
 - 1441のガチャ/写真選択/ホーム認証案内の3表示修正の再確認は不要。次は無料先行公開の申請情報・掲載画像と実バックエンド確認の残課題を進める。その他の残り: 写真ライブラリ/拒否/投稿保存、UGCと削除の実バックエンド検証、Privacy/運営対応/審査アカウント/年齢区分/掲載画像など。一般公開申請は別途承認が必要。
@@ -484,7 +484,7 @@ Priority batch for the next coding-agent run: (1) server-authoritative coin ledg
 - [隔離実連携CI 42203408405](https://github.com/zeazzi244-jpg/mushiverse/actions/runs/42203408405): SHA `7c93f8bffdd9c00dca3ff7343a7672c74e351e4f`。Deno型検査/候補単体10件と、実Auth/Storage/REST/Postgres最小FK/RLSの6ステップ成功、環境破棄成功。通報保存/なりすまし拒否/他者閲覧拒否、旧台帳の事前停止、Storage故障時保持、本人だけ削除/他者保持、再ログイン拒否を確認。Storage故障のみ注入。実配備Edge gateway/本番の全スキーマ/運営受信確認とは区別。
 - [Web CI 42203969327](https://github.com/zeazzi244-jpg/mushiverse/actions/runs/42203969327): SHA `ad601874ce9e1cca00f2e055ff9e62ef6c235828`。npm test（上記15件を含む）/型/Web検証とChromium/WebKit **100/100成功**。後続の一部CIは資料更新に伴い取消されたため、全最新CI成功とは記載しない。
 - [署名/配布 42204944777](https://github.com/zeazzi244-jpg/mushiverse/actions/runs/42204944777): ソースSHA `baac9c861bffdac10ad4252b331af0ec9004b5a2`（ad601以降は参照資料のみ）。正しい開発ブランチでupload_to_testflight=true、repair_approved_certificate=false。既存の暗号化署名identityを復元し、証明書の失効/再発行なし。Archive/IPA/アップロード成功、ビルド **1541**、Apple build ID `14aca9cf-c87e-4abc-ac51-86831be55560`。
-- 2026-11-06 **19:51:01 JST**にApple processingState=VALID / internalBuildState=IN_BETA_TESTING / autoNotify=true。外部はREADY_FOR_BETA_SUBMISSION、betaGroups参照403は任意項目で未確認。内部TestFlight配布可能、1541の本人端末インストールは未確認。
+- 2026-11-06 **19:51:01 JST**にApple processingState=VALID / internalBuildState=IN_BETA_TESTING / autoNotify=true。外部はREADY_FOR_BETA_SUBMISSION、betaGroups参照403は任意項目で未確認。内部TestFlight配布可能、1541は所有者がiPhoneで起動できたと報告。
 - 1441の3表示修正はすべて実機確認済み。再操作を求めない。
 - **次の承認対象**: 本番delete-accountの関数コード更新のみ。現行AGENTSでは本番サービス変更は禁止のため、具体的候補/試験/旧コードを揃えてから所有者へ承認を求める。既存記録の削除実行/DB構造変更/main/課金/一般公開申請は含めない。旧購入台帳があるアカウントの保持方針は別途未確定。
 - 残る作業: 上記反映承認、配備gatewayの安全な検証、使い捨て専用アカウントによる最終UGC/削除、Privacy/保持方針/運営対応/審査アカウント/年齢区分/掲載画像、1541の端末確認。所有者の実アカウント削除を求めない。main/本番DB/本番関数/購入ゲート/一般公開申請は変更なし。
@@ -500,6 +500,11 @@ Priority batch for the next coding-agent run: (1) server-authoritative coin ledg
 
 ## 2026-11-08 本番反映
 
-所有者の承認を受け、delete-account の関数コードを version 2 に更新。ACTIVE、verify_jwt=true、および配備済み2ファイルが隔離CI [42203408405](https://github.com/zeazzi244-jpg/mushiverse/actions/runs/42203408405) の対象 SHA `7c93f8bffdd9c00dca3ff7343a7672c74e351e4f` と一致することを反映後に確認。旧版の参照は [こちら](references/delete-account-live-v1.ts)。実アカウントへの削除リクエストは送っていない。本番での削除完走、通報の運営受信、1541の端末確認は未検証。旧購入台帳を持つアカウントの削除は事前に停止し、保持方針は未確定。
+所有者の承認を受け、delete-account の関数コードを version 2 に更新。ACTIVE、verify_jwt=true、および配備済み2ファイルが隔離CI [42203408405](https://github.com/zeazzi244-jpg/mushiverse/actions/runs/42203408405) の対象 SHA `7c93f8bffdd9c00dca3ff7343a7672c74e351e4f` と一致することを反映後に確認。旧版の参照は [こちら](references/delete-account-live-v1.ts)。実アカウントへの削除リクエストは送っていない。本番での削除完走と通報の運営受信は未検証。旧購入台帳を持つアカウントの削除は事前に停止し、保持方針は未確定。
 
-公開ゲートは **55%（11/20）**。関数配備と本番E2Eの確認は別。残りは本番の専用アカウント検証、1541実機確認、公開用ポリシーとストア情報の確定、一般公開申請の別途承認。今回の承認は関数コード更新のみ。
+公開ゲートは **55%（11/20）**。関数配備と本番E2Eの確認は別。残りは本番の専用アカウント検証、1541での残りの機能確認、公開用ポリシーとストア情報の確定、一般公開申請の別途承認。今回の承認は関数コード更新のみ。
+
+
+## TestFlight 1541のiPhone起動確認
+
+所有者が更新後に「開けた」と報告。確認範囲は起動まで。写真ライブラリ、権限拒否、投稿保存などの残項目があるため、公開ゲート55%（11/20）を維持。
