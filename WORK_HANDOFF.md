@@ -24,6 +24,10 @@
 - `tests/release.test.mjs` verifies CSS inclusion in the offline bundle and presence of all six screens.
 - `MAJOR_UPDATE_ROADMAP.md` defines phased priorities and quality gates. **UI changes have not been verified on iPhone.**
 
+## Latest release hardening
+- `scripts/check-ios-release.mjs` verifies the bundled adventure CSS and checks that the installed native AppIcon bytes match the approved source PNG (SHA-256).
+- These changes have not been verified on an iPhone or in Xcode.
+
 ## Remaining blockers, in priority order
 1. Transfer the **exact approved PNG** into `assets/MUSHIVERSE-AppIcon-1024.png` (do not generate a lookalike).
 2. Confirm GitHub Actions `Verify MUSHIVERSE release scripts` passes. Fix any reported failure.
