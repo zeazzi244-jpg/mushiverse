@@ -540,3 +540,8 @@ Priority batch for the next coding-agent run: (1) server-authoritative coin ledg
 ## App Store Connect契約反映と基本情報
 
 Apple Developer契約の同意日2026-11-08を所有者の画面で確認し、App Store Connectの契約更新通知が消えたことを確認。iOS 1.0の日本語サブタイトルと主カテゴリ「ライフスタイル」を設定。申請は未提出。掲載画像、権利・年齢区分、プライバシー、審査用ログイン、最終検証が残る。公開ゲート11/20。所有者は確認のたびに止めず完了まで継続し、端末確認をまとめるよう指示。
+
+
+## Appleの提出前チェック結果
+
+iOS 1.0で年齢区分質問票を入力し、Apple算定13+を保存。投稿・ソーシャル機能・コメント交流、継続ランキング、無料コインでのランダムカードを申告。AppleのAdd for Reviewは不足項目を表示し、提出されていない。必須はDynamic Island中型iPhone・13インチiPadの画像、Privacy Policy URLとApp Privacy、Content Rights、審査用ログインと連絡先。連絡先氏名は入力したが、電話・メールの検証エラーにより保存未確認。公開ゲート11/20。既存の本人ログインを審査用に転用しない。
