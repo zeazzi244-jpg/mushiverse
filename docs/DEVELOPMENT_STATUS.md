@@ -535,3 +535,8 @@ Priority batch for the next coding-agent run: (1) server-authoritative coin ledg
 ## App Store Connect 1.0申請下書き
 
 所有者のApple認証後に、App Store ConnectのムシバースiOS 1.0へ日本語の販促文・説明・キーワード・サポートURL・著作権、英語の審査メモを保存。ビルド1541を選択し、公開方式を手動に設定。再読み込み後にビルド、掲載項目、手動設定が保存されていることを確認。アプリ一覧にApple Developer Program License Agreementの更新通知が表示され、提出にはAccount Holderのレビューと同意が必要。申請ステータスはPrepare for Submission。掲載画像・App Privacy・審査用ログイン情報・最終検証が残る。公開ゲート55%（11/20）。
+
+
+## App Store Connect契約反映と基本情報
+
+Apple Developer契約の同意日2026-11-08を所有者の画面で確認し、App Store Connectの契約更新通知が消えたことを確認。iOS 1.0の日本語サブタイトルと主カテゴリ「ライフスタイル」を設定。申請は未提出。掲載画像、権利・年齢区分、プライバシー、審査用ログイン、最終検証が残る。公開ゲート11/20。所有者は確認のたびに止めず完了まで継続し、端末確認をまとめるよう指示。
