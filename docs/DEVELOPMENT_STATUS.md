@@ -530,3 +530,8 @@ Priority batch for the next coding-agent run: (1) server-authoritative coin ledg
 ### 署名版のPrivacy manifest集計を確認
 
 [署名CI #15](https://github.com/zeazzi244-jpg/mushiverse/actions/runs/42430256227)を開発ブランチで実行。署名鍵を復元し、Archive・集計・IPAエクスポート成功。アップロードと証明書修復の入力はfalse。集計にはCapacitor/Cordovaの2ファイルが出力され、両方とも収集カテゴリ0、追跡宣言false、Required Reason API行なし。アプリ全体の収集区分はバックエンドと外部サービスも含めて棚卸しが必要。TestFlight確認対象は1541。Apple申告・Sandbox・本番専用アカウント検証・最終実機試験が残り、ゲートは55%（11/20）。
+
+
+## App Store Connect 1.0申請下書き
+
+所有者のApple認証後に、App Store ConnectのムシバースiOS 1.0へ日本語の販促文・説明・キーワード・サポートURL・著作権、英語の審査メモを保存。ビルド1541を選択し、公開方式を手動に設定。再読み込み後にビルド、掲載項目、手動設定が保存されていることを確認。アプリ一覧にApple Developer Program License Agreementの更新通知が表示され、提出にはAccount Holderのレビューと同意が必要。申請ステータスはPrepare for Submission。掲載画像・App Privacy・審査用ログイン情報・最終検証が残る。公開ゲート55%（11/20）。
