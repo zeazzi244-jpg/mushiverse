@@ -105,6 +105,31 @@ jobs:
           OUT="$RUNNER_TEMP/store-shots"
           mkdir -p "$OUT"
           xcrun simctl list devices available -j > "$RUNNER_TEMP/sims.json"
+          cat > "$RUNNER_TEMP/check-home.swift" <<'SWIFT'
+          import AppKit
+          import Foundation
+
+          guard let image = NSBitmapImageRep(contentsOf: URL(fileURLWithPath: CommandLine.arguments[1])) else {
+              exit(1)
+          }
+
+          // Sample the central viewport for the green home header and hero.
+          var greenSamples = 0
+          for row in 1...20 {
+              for column in 5...15 {
+                  let x = image.pixelsWide * column / 20
+                  let y = image.pixelsHigh * row / 24
+                  guard let color = image.colorAt(x: x, y: y)?.usingColorSpace(.deviceRGB) else { continue }
+                  if color.greenComponent > color.redComponent + 0.12,
+                     color.greenComponent > color.blueComponent + 0.05 {
+                      greenSamples += 1
+                  }
+              }
+          }
+          exit(greenSamples >= 12 ? 0 : 1)
+          SWIFT
+          swiftc "$RUNNER_TEMP/check-home.swift" -o "$RUNNER_TEMP/check-home"
+
           capture() {
             local name="$1" pattern="$2" udid
             udid=$(python3 -c 'import json,re,sys; print(next(d["udid"] for k, ds in reversed(list(json.load(open(sys.argv[1]))["devices"].items())) if ".iOS-" in k for d in ds if d["isAvailable"] and re.search(sys.argv[2], d["name"])))' "$RUNNER_TEMP/sims.json" "$pattern")
@@ -113,13 +138,60 @@ jobs:
             xcrun simctl bootstatus "$udid" -b
             xcrun simctl install "$udid" "$APP"
             xcrun simctl launch "$udid" com.rikuto.mushiverse
-            sleep 12
-            xcrun simctl io "$udid" screenshot "$OUT/$name.png"
-            sips -g pixelWidth -g pixelHeight "$OUT/$name.png"
+            for attempt in {1..8}; do
+              sleep 5
+              xcrun simctl io "$udid" screenshot "$OUT/$name.png"
+              if "$RUNNER_TEMP/check-home" "$OUT/$name.png"; then
+                echo "$name home colors detected on attempt $attempt"
+                sips -g pixelWidth -g pixelHeight "$OUT/$name.png"
+                xcrun simctl shutdown "$udid"
+                return 0
+              fi
+            done
+            echo "::error::$name home did not render within the capture window"
+            xcrun simctl spawn "$udid" log show --last 2m --style compact \
+              --predicate 'process == "App" OR subsystem == "com.apple.WebKit"' | tail -n 150 || true
             xcrun simctl shutdown "$udid"
+            return 1
           }
-          capture iphone '^(iPhone (16|17) Pro|iPhone 17)$'
-          capture ipad '^iPad Pro 13-inch'
+          capture_status=0
+          capture iphone '^(iPhone (16|17) Pro|iPhone 17)
+      - name: Save App Store screenshot candidates
+        if: ${{ !cancelled() && github.event_name == 'push' && github.ref == 'refs/heads/codex/verified-changes-20261028' }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: mushiverse-app-store-screenshot-candidates
+          path: ${{ runner.temp }}/store-shots/*.png
+          if-no-files-found: error
+          retention-days: 7
+      - name: Save compile log on failure
+        if: failure()
+        run: |
+          if test -f "$RUNNER_TEMP/mushiverse-ios-build.log"; then
+            cp "$RUNNER_TEMP/mushiverse-ios-build.log" ios-build.log
+          fi
+      - name: Upload build log on failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: mushiverse-ios-build-log
+          path: ios-build.log
+          if-no-files-found: ignore
+          retention-days: 7
+      - name: Save Xcode project for follow-up work
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: mushiverse-ios-unsigned-project
+          path: |
+            ios/
+            capacitor.config.json
+            package.json
+          if-no-files-found: warn
+          retention-days: 7
+ || capture_status=1
+          capture ipad '^iPad Pro 13-inch' || capture_status=1
+          exit "$capture_status"
       - name: Save App Store screenshot candidates
         if: github.event_name == 'push' && github.ref == 'refs/heads/codex/verified-changes-20261028'
         uses: actions/upload-artifact@v4
