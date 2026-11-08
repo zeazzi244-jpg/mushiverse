@@ -20,7 +20,7 @@ permissions:
   contents: read
 jobs:
   generate-native:
-    runs-on: macos-26-intel
+    runs-on: ${{ github.event_name == 'push' && github.ref == 'refs/heads/codex/verified-changes-20261028' && 'macos-26' || 'macos-26-intel' }}
     timeout-minutes: 35
     steps:
       - uses: actions/checkout@v4
@@ -97,6 +97,7 @@ jobs:
           if-no-files-found: error
           retention-days: 7
       - name: Capture App Store screenshot candidates
+        timeout-minutes: 7
         if: github.event_name == 'push' && github.ref == 'refs/heads/codex/verified-changes-20261028'
         run: |
           set -euo pipefail
@@ -107,6 +108,7 @@ jobs:
           capture() {
             local name="$1" pattern="$2" udid
             udid=$(python3 -c 'import json,re,sys; print(next(d["udid"] for k, ds in reversed(list(json.load(open(sys.argv[1]))["devices"].items())) if ".iOS-" in k for d in ds if d["isAvailable"] and re.search(sys.argv[2], d["name"])))' "$RUNNER_TEMP/sims.json" "$pattern")
+            echo "Booting $name simulator $udid"
             xcrun simctl boot "$udid"
             xcrun simctl bootstatus "$udid" -b
             xcrun simctl install "$udid" "$APP"
