@@ -191,39 +191,3 @@ jobs:
             package.json
           if-no-files-found: warn
           retention-days: 7
- || capture_status=1
-          capture ipad '^iPad Pro 13-inch' || capture_status=1
-          exit "$capture_status"
-      - name: Save App Store screenshot candidates
-        if: github.event_name == 'push' && github.ref == 'refs/heads/codex/verified-changes-20261028'
-        uses: actions/upload-artifact@v4
-        with:
-          name: mushiverse-app-store-screenshot-candidates
-          path: ${{ runner.temp }}/store-shots/*.png
-          if-no-files-found: error
-          retention-days: 7
-      - name: Save compile log on failure
-        if: failure()
-        run: |
-          if test -f "$RUNNER_TEMP/mushiverse-ios-build.log"; then
-            cp "$RUNNER_TEMP/mushiverse-ios-build.log" ios-build.log
-          fi
-      - name: Upload build log on failure
-        if: failure()
-        uses: actions/upload-artifact@v4
-        with:
-          name: mushiverse-ios-build-log
-          path: ios-build.log
-          if-no-files-found: ignore
-          retention-days: 7
-      - name: Save Xcode project for follow-up work
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: mushiverse-ios-unsigned-project
-          path: |
-            ios/
-            capacitor.config.json
-            package.json
-          if-no-files-found: warn
-          retention-days: 7
