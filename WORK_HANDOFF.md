@@ -36,3 +36,10 @@
 - Do not commit credentials, Apple certificates or private user data.
 - Do not modify production records or paid purchase settings without an explicit need.
 - Report only actual commits and verified test results. GitHub Actions checks are not a substitute for an Xcode/TestFlight build.
+
+## Product north star — preserve across sessions
+- Founder priorities: build a financially successful MUSHIVERSE, communicate the fascination of insects worldwide, grow brand recognition, and make a lasting contribution.
+- The ambition is a world-leading insect app; no claim of guaranteed market leadership.
+- Build compelling but healthy engagement through curiosity, discoveries, progression, collections, community and learning. Avoid exploitative addictive mechanics, especially for children.
+- The durable strategy is documented in `MAJOR_UPDATE_ROADMAP.md` (commit `a84a282`).
+- Next implementation priorities: verify CI, check home navigation and empty states, remove confusing developer-facing panels without concealing security or account notices, and fix TestFlight white-screen startup before expanding monetization.
