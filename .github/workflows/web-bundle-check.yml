@@ -1,9 +1,10 @@
 name: Web bundle integrity
 on:
   push:
-    branches: [main]
+    branches: [main, codex/verified-changes-20261028]
     paths:
       - 'assets/**'
+      - 'css/**'
       - 'tests/**'
       - 'supabase/**'
       - 'ios/**'
