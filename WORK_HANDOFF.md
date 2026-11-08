@@ -14,6 +14,10 @@
 - `.github/workflows/verify.yml` checks script syntax, builds web bundle, validates bundle ID and release guard on pushes.
 - `npm run ios:prepare` is the single preparation command after approved PNG is available.
 
+## Additional automated validation
+- `tests/release.test.mjs` and `npm run test:release` validate release-script syntax, app identity and the built web entry.
+- GitHub Actions `verify.yml` now runs these tests. CI success must be checked in GitHub; adding a workflow does not prove it passed.
+
 ## Remaining blockers, in priority order
 1. Transfer the **exact approved PNG** into `assets/MUSHIVERSE-AppIcon-1024.png` (do not generate a lookalike).
 2. Confirm GitHub Actions `Verify MUSHIVERSE release scripts` passes. Fix any reported failure.
