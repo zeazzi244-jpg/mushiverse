@@ -128,6 +128,36 @@ jobs:
             -authenticationKeyIssuerID "$ASC_ISSUER_ID" \
             archive
           test -d "$RUNNER_TEMP/Mushiverse.xcarchive/Products/Applications/App.app"
+      - name: Record bundled privacy manifests for App Review
+        shell: bash
+        run: |
+          set -euo pipefail
+          APP_DIR="$RUNNER_TEMP/Mushiverse.xcarchive/Products/Applications/App.app"
+          python3 - "$APP_DIR" >> "$GITHUB_STEP_SUMMARY" <<'PY'
+          import pathlib
+          import plistlib
+          import sys
+
+          app = pathlib.Path(sys.argv[1])
+          if not app.is_dir():
+              raise SystemExit("Archived app bundle not found")
+
+          print("### Bundled privacy manifest inventory")
+          manifests = sorted(app.rglob("PrivacyInfo.xcprivacy"))
+          if not manifests:
+              print("No privacy manifest found in the app bundle. Review required.")
+          for manifest in manifests:
+              with manifest.open("rb") as source:
+                  data = plistlib.load(source)
+              print(f"- `{manifest.relative_to(app)}`")
+              for entry in data.get("NSPrivacyAccessedAPITypes", []):
+                  reasons = ", ".join(entry.get("NSPrivacyAccessedAPITypeReasons", []))
+                  print(f"  - {entry.get('NSPrivacyAccessedAPIType', 'Unknown category')}: {reasons}")
+              print(f"  - Declared collected data categories: {len(data.get('NSPrivacyCollectedDataTypes', []))}")
+              print(f"  - Declared tracking: {data.get('NSPrivacyTracking', 'unspecified')}")
+          print()
+          print("Review against app and service behavior before answering App Privacy.")
+          PY
       - name: Export signed IPA for App Store distribution
         shell: bash
         run: |
