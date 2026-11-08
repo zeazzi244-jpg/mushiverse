@@ -579,3 +579,8 @@ App Store ConnectのApp Privacyで、メール、概算位置、写真、その�
 ### 必須のiPhone・iPad画像を登録
 
 [Simulator CI](https://github.com/zeazzi244-jpg/mushiverse/actions/runs/42439470527)が成功。成果物のゲスト状態ホームを目視し、iPhone 1206×2622とiPad 2064×2752を確認。元画像は全ピクセル不透明で、画面を変更せずRGB PNGに変換。App Store Connectの日本語Media Managerで中型Dynamic Island iPhoneと13インチiPadの必須枠へ各1枚登録し、各枠1/10件を確認。所有者提供の大画面iPhone画像も登録済み。配布対象1741の変更や再ビルドなし。残りはポリシー公開とURL、App Privacy公開、Content Rights、審査専用ログイン、提出前チェック。Content Rightsの調査ではアプリ内にEsriとOSMタイル・出典表示があることを確認したが、出典表示だけで利用権を確定していない。公開ゲート11/20、審査未提出。
+
+
+### 画像登録後のApple提出前チェック
+
+Add for Reviewを実行し、画像不足が表示されなくなったことを確認。残る必須項目はPrivacy Policy URL、App Privacyの公開、Content Rights、審査用ログインのユーザー名とパスワード。審査未提出。ソースではEsri World Imagery・OpenStreetMapタイルの利用と出典表示、Nominatim・国土地理院の検索先を確認。公式利用条件の取得は今回の検索で結果が返らず、利用権は未確定。ポリシー配信の既存PagesワークフローはmainのWeb一式を公開するため、ポリシー単独公開の承認と反映範囲を区別する。1741や画像を再登録せず、上記の残項目から再開。公開ゲート11/20。
