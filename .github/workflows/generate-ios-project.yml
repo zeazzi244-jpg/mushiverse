@@ -132,15 +132,15 @@ jobs:
 
           capture() {
             local name="$1" pattern="$2" udid
-            udid=$(python3 -c 'import json,re,sys; print(next(d["udid"] for k, ds in reversed(list(json.load(open(sys.argv[1]))["devices"].items())) if ".iOS-" in k for d in ds if d["isAvailable"] and re.search(sys.argv[2], d["name"])))' "$RUNNER_TEMP/sims.json" "$pattern")
+            udid=$(python3 -c 'import json,re,sys; print(next(d["udid"] for k, ds in reversed(list(json.load(open(sys.argv[1]))["devices"].items())) if ".iOS-" in k for d in ds if d["isAvailable"] and re.search(sys.argv[2], d["name"])))' "$RUNNER_TEMP/sims.json" "$pattern") || return 1
             echo "Booting $name simulator $udid"
-            xcrun simctl boot "$udid"
-            xcrun simctl bootstatus "$udid" -b
-            xcrun simctl install "$udid" "$APP"
-            xcrun simctl launch "$udid" com.rikuto.mushiverse
+            xcrun simctl boot "$udid" || return 1
+            xcrun simctl bootstatus "$udid" -b || return 1
+            xcrun simctl install "$udid" "$APP" || return 1
+            xcrun simctl launch "$udid" com.rikuto.mushiverse || return 1
             for attempt in {1..8}; do
               sleep 5
-              xcrun simctl io "$udid" screenshot "$OUT/$name.png"
+              xcrun simctl io "$udid" screenshot "$OUT/$name.png" || return 1
               if "$RUNNER_TEMP/check-home" "$OUT/$name.png"; then
                 echo "$name home colors detected on attempt $attempt"
                 sips -g pixelWidth -g pixelHeight "$OUT/$name.png"
@@ -155,7 +155,9 @@ jobs:
             return 1
           }
           capture_status=0
-          capture iphone '^(iPhone (16|17) Pro|iPhone 17)
+          capture iphone '^(iPhone (16|17) Pro|iPhone 17)$' || capture_status=1
+          capture ipad '^iPad Pro 13-inch' || capture_status=1
+          exit "$capture_status"
       - name: Save App Store screenshot candidates
         if: ${{ !cancelled() && github.event_name == 'push' && github.ref == 'refs/heads/codex/verified-changes-20261028' }}
         uses: actions/upload-artifact@v4
