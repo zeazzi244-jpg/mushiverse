@@ -594,3 +594,5 @@ Add for Reviewを実行し、画像不足が表示されなくなったことを
 - `be9e1bc` / `edb314f` でSimulatorの描画待ち・白画面検出・失敗時のログ取得を追加。ワークフロー記述・画像読み込みコードのエラーを `47bd91c` / `b5b092c` で修正。[再検証](https://github.com/zeazzi244-jpg/mushiverse/actions/runs/42452902025) が成功。iPhone・iPadとも初回判定でホームを検出し、撮影結果を目視確認（iPhone 1206×2622、iPad 2064×2752）。アプリ本体は1841と同一。白画面は再現せず、初回の原因と物理端末での起動は未確認。
 - [署名・TestFlight](https://github.com/zeazzi244-jpg/mushiverse/actions/runs/42452466758) は `51696ad` を対象にアップロード有効で実行。署名・IPA書き出し・アップロードに成功。Appleがビルド1841を `VALID` / `IN_BETA_TESTING` と判定。外部テストは `READY_FOR_BETA_SUBMISSION`。実機インストール未確認。
 - 審査下書きは1741。残りは公開ポリシーURL、App Privacyの公開、コンテンツ権利確認、審査用アカウント、最終実機確認、提出承認。公開ゲート11/20。次は登録済みiPhoneで1841の初回起動と正式アイコンを確認。再現時は端末機種・iOS・更新直後かどうかを記録し、Simulatorの描画判定と照合する。
+
+- 所有者のiPhoneホーム画面の画像で、MUSHIVERSEの深緑地・白いチョウの正式アイコンを確認。画像だけではビルド番号とアプリ内ホームの描画は未確認。公開ゲートの集計は維持。
