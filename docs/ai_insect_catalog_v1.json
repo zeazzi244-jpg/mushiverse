@@ -26,14 +26,14 @@
       "name": "アオシズクムシ",
       "rarity": "N",
       "fictional": true,
-      "art_status": "pending"
+      "art_status": "review"
     },
     {
       "id": "AI-002",
       "name": "コハクコガネ",
       "rarity": "N",
       "fictional": true,
-      "art_status": "pending"
+      "art_status": "review"
     },
     {
       "id": "AI-003",
@@ -306,14 +306,14 @@
       "name": "ルリカゲクワガタ",
       "rarity": "R",
       "fictional": true,
-      "art_status": "pending"
+      "art_status": "review"
     },
     {
       "id": "AI-042",
       "name": "アカツキコガネ",
       "rarity": "R",
       "fictional": true,
-      "art_status": "pending"
+      "art_status": "review"
     },
     {
       "id": "AI-043",
@@ -516,14 +516,14 @@
       "name": "蒼晶クワガタ",
       "rarity": "SR",
       "fictional": true,
-      "art_status": "pending"
+      "art_status": "review"
     },
     {
       "id": "AI-072",
       "name": "紅蓮カブト",
       "rarity": "SR",
       "fictional": true,
-      "art_status": "pending"
+      "art_status": "review"
     },
     {
       "id": "AI-073",
@@ -656,14 +656,14 @@
       "name": "天晶カブト",
       "rarity": "SSR",
       "fictional": true,
-      "art_status": "pending"
+      "art_status": "review"
     },
     {
       "id": "AI-092",
       "name": "虹皇モルフォ",
       "rarity": "SSR",
       "fictional": true,
-      "art_status": "pending"
+      "art_status": "review"
     },
     {
       "id": "AI-093",
