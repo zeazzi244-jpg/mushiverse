@@ -604,3 +604,10 @@ Add for Reviewを実行し、画像不足が表示されなくなったことを
 - 所有者の承認に基づき、元のチョウの画素を保ち、背景の深緑を四辺に延長。1024×1024 RGB、四辺の最外12pxが緑であること、チョウを含む中央領域が原本とピクセル単位で一致することを検証。原本は前コミットに保管。素材とiOSアセットを同一blobで更新（`f15dfe3`）。
 - [Web CI](https://github.com/zeazzi244-jpg/mushiverse/actions/runs/42454008146) 成功。[Simulator](https://github.com/zeazzi244-jpg/mushiverse/actions/runs/42454008130) のiPhoneホーム画像を目視確認。iPadはSimulator OSのデータ移行待ちで撮影工程の7分制限に達し、起動確認未実施。
 - [署名と配布](https://github.com/zeazzi244-jpg/mushiverse/actions/runs/42454088367) 成功。1941はApple `VALID` / `IN_BETA_TESTING`。所有者がiPhoneのホーム画面で白い縁が消えたことを確認。App Store審査下書きは1741、公開ゲート11/20。
+
+## 2026-11-10 PR統合検証・AI写真送信の明示確認
+
+- 40cb0f8でmainとの差分4ファイル・競合5箇所を解消。[リリースCI](https://github.com/zeazzi244-jpg/mushiverse/actions/runs/42622598328)成功。PR #2は競合解消・ドラフト・未マージ。[Web CI](https://github.com/zeazzi244-jpg/mushiverse/actions/runs/42622665616)は102/102、インライン構文61本確認。
+- [Simulator CI](https://github.com/zeazzi244-jpg/mushiverse/actions/runs/42622665500)はコンパイル成功。撮影工程でSimulator OSのデータ移行待ちと7分制限により失敗。bf8e223で撮影工程の上限を15分へ延長し、描画判定は維持。
+- 7156a49でGoogle Geminiへ写真を送る前に日英の確認を追加。キャンセル時は送信・利用回数加算なし。画像変換中に写真またはアカウントが変わった場合も送信しない。Node VMで実ハンドラーを実行し、キャンセル・許可・写真差し替えの3ケースをモックで確認。最新CI・実通信・実機の結果は未確認。
+- TestFlightは既存の1941、審査下書きは1741。新署名・再配布・main更新・本番変更・審査提出なし。公開ゲート55%（11/20）を維持。残りはポリシー確定と公開URL、App Privacy、地図利用権、審査用ログイン、最終実機確認。本人操作は今回なし。
