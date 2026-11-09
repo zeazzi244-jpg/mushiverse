@@ -145,3 +145,37 @@ test('adventure home actions open the existing record and collection tabs', asyn
   await expect(page.locator('#collectionList')).toBeVisible();
   expect(errors).toEqual([]);
 });
+
+test('Gemini receives a photo only after explicit confirmation',async({page})=>{
+  const errors=await setup(page);
+  await page.evaluate(()=>{
+    window.testAiCalls=[];
+    const originalInvoke=window.db.functions.invoke;
+    window.db.functions.invoke=async function(name,options){
+      if(name!=='identify-insect-gemini')return originalInvoke.call(this,name,options);
+      window.testAiCalls.push({name,hasPhoto:options.body.image.startsWith('data:image/jpeg;base64,')});
+      return {data:{result:'最も可能性が高い虫の名前：カブトムシ'},error:null};
+    };
+  });
+  await page.locator('.nav [data-tab="post"]').click();
+  await page.locator('#species').fill('手入力の名前');
+  await page.locator('#photo').setInputFiles({
+    name:'test.png',mimeType:'image/png',
+    buffer:Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+jRZkAAAAASUVORK5CYII=','base64'),
+  });
+  const identify=page.locator('#aiIdentify');
+  let prompt='';
+  page.once('dialog',async dialog=>{prompt=dialog.message();await dialog.dismiss()});
+  await identify.click();
+  expect(prompt).toContain('Google Gemini');
+  expect(await page.evaluate(()=>window.testAiCalls)).toEqual([]);
+  await expect(page.locator('#species')).toHaveValue('手入力の名前');
+
+  page.once('dialog',dialog=>dialog.accept());
+  await identify.click();
+  await expect(page.locator('#species')).toHaveValue('カブトムシ');
+  expect(await page.evaluate(()=>window.testAiCalls)).toEqual([
+    {name:'identify-insect-gemini',hasPhoto:true},
+  ]);
+  expect(errors).toEqual([]);
+});
