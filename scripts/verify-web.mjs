@@ -13,7 +13,6 @@ const config=JSON.parse(readFileSync(join(root,'capacitor.config.json'),'utf8'))
 if(config.webDir!=='www')throw Error('Capacitor webDir must be www');
 if(!config.appId||!/^([A-Za-z][A-Za-z0-9-]*\.)+[A-Za-z][A-Za-z0-9-]*$/.test(config.appId))throw Error('Invalid appId format');
 if(config.appId==='com.mushiverse.prototype')console.warn('WARNING: temporary appId — replace with App Store Connect bundle identifier before native archive.');
-console.log('PASS: web bundle integrity and Capacitor config structure');
 
 // Keep the standalone AI insect gallery usable in the bundled iOS/web output.
 for (const f of ['ai-insect-gallery-preview.html','docs/ai_insect_catalog_v1.json']) {
@@ -21,3 +20,20 @@ for (const f of ['ai-insect-gallery-preview.html','docs/ai_insect_catalog_v1.jso
  if(!existsSync(sourceFile)||!existsSync(bundledFile))throw Error('Missing AI insect gallery asset: '+f);
  if(readFileSync(sourceFile,'utf8')!==readFileSync(bundledFile,'utf8'))throw Error('AI insect gallery bundle mismatch: '+f);
 }
+
+const startupAssets = [
+ ['css/adventure-ui.css', 'css/adventure-ui.css'],
+ ['assets/vendor/supabase.js', 'node_modules/@supabase/supabase-js/dist/umd/supabase.js'],
+ ['assets/vendor/leaflet/leaflet.js', 'node_modules/leaflet/dist/leaflet.js'],
+ ['assets/vendor/leaflet/leaflet.css', 'node_modules/leaflet/dist/leaflet.css'],
+];
+for (const [asset, input] of startupAssets) {
+ const bundledFile = join(root, 'www', asset);
+ if (!existsSync(bundledFile)) throw Error('Missing bundled startup asset: ' + asset);
+ const original = readFileSync(join(root, input));
+ if (!original.length || !original.equals(readFileSync(bundledFile))) {
+  throw Error('Bundled startup asset mismatch: ' + asset);
+ }
+}
+
+console.log('PASS: web bundle integrity, startup assets and Capacitor config structure');
