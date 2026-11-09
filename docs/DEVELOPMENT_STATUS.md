@@ -626,3 +626,9 @@ Add for Reviewを実行し、画像不足が表示されなくなったことを
 - [Simulator撮影CI](https://github.com/zeazzi244-jpg/mushiverse/actions/runs/42700417772) は7156a49のアプリをコンパイルし、iPhone 1206×2622とiPad 2064×2752のホーム描画を初回判定で検出。タイムアウト延長後の撮影成功。後続の[PRコンパイル](https://github.com/zeazzi244-jpg/mushiverse/actions/runs/42701337642)も成功。
 - [署名・内部配布](https://github.com/zeazzi244-jpg/mushiverse/actions/runs/42701199408) はdc13d15で既存署名を使用。Archive・IPA・アップロード成功。Appleで2041のVALID・IN_BETA_TESTINGを11/10 06:25 JSTに確認。実機および実Gemini通信は未確認。
 - 公開ゲート55%（11/20）。次の本人操作はTestFlightで2041へ更新し、起動と写真送信確認のキャンセル動作を1回確認。App Store下書き1741。ポリシーの公開・App Privacy公開・地図利用権・審査用ログイン・審査提出は残る。mainと本番設定に変更なし。
+
+## 2026-11-10 起動用アセットの同梱検査
+
+- [変更コミット](https://github.com/zeazzi244-jpg/mushiverse/commit/49143cbb9b29800c3837f99c26eb0ae176daefba) で、Webビルドの検証に冒険UIのCSS、SupabaseのJS、LeafletのJS/CSSの検査を追加。ファイル欠落、空ファイル、元ファイルとの不一致で失敗する。端末の過去の白画面の原因は未特定。
+- ローカルで `node --check scripts/verify-web.mjs` と、正常な最小構成および4アセットの欠落・不一致8ケースを確認。実バンドルの検証はGitHub Actionsで確認する。
+- 公開ゲート55%（11/20）。TestFlight 2041でのiPhone起動・写真送信キャンセルの確認と、審査準備の公開ポリシーURL、App Privacy、地図利用権、審査用ログインが残る。今回の変更はビルド時の検査のみで、新規配布は不要。
