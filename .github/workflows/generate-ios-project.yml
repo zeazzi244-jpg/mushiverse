@@ -97,7 +97,8 @@ jobs:
           if-no-files-found: error
           retention-days: 7
       - name: Capture App Store screenshot candidates
-        timeout-minutes: 7
+        # Both Simulator runtimes may perform first-boot data migration.
+        timeout-minutes: 15
         if: github.event_name == 'push' && github.ref == 'refs/heads/codex/verified-changes-20261028'
         run: |
           set -euo pipefail
