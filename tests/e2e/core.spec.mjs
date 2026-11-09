@@ -179,3 +179,21 @@ test('Gemini receives a photo only after explicit confirmation',async({page})=>{
   ]);
   expect(errors).toEqual([]);
 });
+
+test('a background map failure leaves observation pins usable',async({page})=>{
+  const errors=await setup(page);
+  await page.route('https://server.arcgisonline.com/**',route=>route.fulfill({status:503}));
+  const tile=Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+jRZkAAAAASUVORK5CYII=','base64');
+  await page.route('https://tile.openstreetmap.org/**',route=>route.fulfill({contentType:'image/png',body:tile}));
+  await page.locator('.nav [data-tab="map"]').click();
+  const status=page.locator('#mapTileStatus');
+  await expect(status).toContainText('地図の一部を読み込めませんでした');
+  await expect(status).toBeVisible();
+  await page.locator('#insectMap .leaflet-marker-icon').first().click();
+  await expect(page.locator('#mapPostList')).toContainText('カブトムシ');
+
+  await page.locator('#insectMap .leaflet-control-layers-base label').filter({hasText:'通常地図'}).click();
+  await expect(status).toBeHidden();
+  await expect(page.locator('#mapPostList')).toContainText('カブトムシ');
+  expect(errors).toEqual([]);
+});
