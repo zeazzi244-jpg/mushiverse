@@ -632,3 +632,8 @@ Add for Reviewを実行し、画像不足が表示されなくなったことを
 - [変更コミット](https://github.com/zeazzi244-jpg/mushiverse/commit/49143cbb9b29800c3837f99c26eb0ae176daefba) で、Webビルドの検証に冒険UIのCSS、SupabaseのJS、LeafletのJS/CSSの検査を追加。ファイル欠落、空ファイル、元ファイルとの不一致で失敗する。端末の過去の白画面の原因は未特定。
 - ローカルで `node --check scripts/verify-web.mjs` と、正常な最小構成および4アセットの欠落・不一致8ケースを確認。実バンドルの検証はGitHub Actionsで確認する。
 - 公開ゲート55%（11/20）。TestFlight 2041でのiPhone起動・写真送信キャンセルの確認と、審査準備の公開ポリシーURL、App Privacy、地図利用権、審査用ログインが残る。今回の変更はビルド時の検査のみで、新規配布は不要。
+
+### iPhoneでの写真送信確認（2026-11-10）
+
+- 所有者のiPhone画像で、記録画面・選択画像のプレビュー・Google Geminiへの写真送信前の日本語確認文とCancel/Okボタンの表示を確認。アプリは記録画面まで起動。画像内にビルド番号の表示はなく、Cancel押下後の画面や実送信は画像から確認できない。Cancel時の送信なし・手入力維持は既存のChromium/WebKit回帰試験で確認済み。
+- 公開ゲートは55%（11/20）。本人に同じ確認画面の再撮影は求めない。
