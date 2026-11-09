@@ -14,7 +14,8 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
-      - run: npm ci --no-audit --no-fund
+      - name: Install locked dependencies
+        run: npm ci --no-audit --no-fund
       - name: Syntax-check iOS release scripts
         run: |
           node --check scripts/build-web.mjs
