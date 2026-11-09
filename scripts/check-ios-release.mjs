@@ -18,6 +18,15 @@ else {
  if(icon.length<33||!icon.subarray(0,8).equals(Buffer.from([137,80,78,71,13,10,26,10]))||icon.readUInt32BE(16)!==1024||icon.readUInt32BE(20)!==1024||icon[25]!==2) problems.push('Approved icon must be a 1024x1024 RGB PNG');
  if(!icon.equals(readFileSync(nativeIcon))) problems.push('Native icon does not match approved artwork');
 }
+const iconMetadata=join(nativeRoot,'Assets.xcassets','AppIcon.appiconset','Contents.json');
+try {
+ const {images}=JSON.parse(readFileSync(iconMetadata,'utf8'));
+ if(!images?.some(image=>image.filename==='AppIcon-512@2x.png' && image.size==='1024x1024')){
+  problems.push('AppIcon Contents.json does not match the approved icon');
+ }
+} catch(error) {
+ problems.push('Invalid AppIcon metadata: '+error.message);
+}
 if(!existsSync('www/css/adventure-ui.css')) problems.push('Adventure stylesheet missing from packaged app');
 
 const projectPath=join('ios','App','App.xcodeproj','project.pbxproj');
