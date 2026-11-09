@@ -13,17 +13,26 @@ const storageKey=()=> 'mushiverse-ai-collection-v1:'+(window.user?.id?'user:'+wi
 function start(){
  const host=document.getElementById('collection');if(!host||document.getElementById('aiInsectCollection'))return;
  const panel=document.createElement('details');panel.id='aiInsectCollection';
- panel.innerHTML='<summary>🧬 AI昆虫100種の図鑑（準備中）</summary><p>架空の昆虫カードの開発中図鑑です。制作済みのイラストを先行表示しています。ガチャは未接続です。採集記録や既存のカード・コインは変更しません。</p><div class="aiTools"><label>名前・IDで検索<input id="aiInsectSearch" type="search" placeholder="AI-005・名前" /></label><label>レア度<select id="aiInsectRarity"><option value="ALL">すべて</option><option>N</option><option>R</option><option>SR</option><option>SSR</option></select></label></div><p id="aiInsectStatus" role="status">図鑑を開くと読み込みます。</p><div id="aiInsectCards"></div>';
+ panel.innerHTML='<summary>🧬 AI昆虫100種の図鑑（準備中）</summary><p>架空の昆虫カードの開発中図鑑です。制作済みのイラストを先行表示しています。イラストがそろったカードシリーズがガチャに登場します。採集記録や既存のカード・コインは変更しません。</p><div class="aiTools"><label>名前・IDで検索<input id="aiInsectSearch" type="search" placeholder="AI-005・名前" /></label><label>レア度<select id="aiInsectRarity"><option value="ALL">すべて</option><option>N</option><option>R</option><option>SR</option><option>SSR</option></select></label></div><p id="aiInsectStatus" role="status">図鑑を開くと読み込みます。</p><div id="aiInsectCards"></div>';
  host.append(panel);let catalog=null,loading=false;
+ const walletKey=()=> 'mushiverse-v77-game:'+(window.user?.id?'user:'+window.user.id:'guest');
+ const catalogURL=new URL('../docs/ai_insect_catalog_v1.json',import.meta.url);
+ async function fetchCatalog(){const response=await fetch(catalogURL);if(!response.ok)throw Error('unavailable');return canonicalCards(await response.json())}
+ void fetchCatalog().then(cards=>{
+  if(cards.some(c=>c.art_status==='pending'))return;
+  const pool=Object.fromEntries(['N','R','SR','SSR'].map(r=>[r,Object.freeze(cards.filter(c=>c.rarity===r).map(c=>Object.freeze({id:c.id,name:c.name})))]));
+  Object.defineProperty(window,'MushiverseIllustratedCards',{value:Object.freeze(pool)});
+ }).catch(()=>{});
+ document.addEventListener('mushiverse:gacha-drawn',render);
  const status=panel.querySelector('#aiInsectStatus'),list=panel.querySelector('#aiInsectCards'),search=panel.querySelector('input'),select=panel.querySelector('select');
  function render(){
-  if(!catalog)return;let counts;try{counts=ownedByID(JSON.parse(localStorage.getItem(storageKey())||'[]'),catalog)}catch{status.textContent='所持データを読み込めません。保存データは変更していません。';list.replaceChildren();return}
+  if(!catalog)return;let counts;try{counts=ownedByID(JSON.parse(localStorage.getItem(storageKey())||'[]'),catalog);for(const [id,n] of ownedByID(JSON.parse(localStorage.getItem(walletKey())||'{}'),catalog))counts.set(id,(counts.get(id)||0)+n)}catch{status.textContent='所持データを読み込めません。保存データは変更していません。';list.replaceChildren();return}
   const q=search.value.trim().toLocaleLowerCase('ja'),found=catalog.filter(c=>(select.value==='ALL'||c.rarity===select.value)&&(c.name.toLocaleLowerCase('ja').includes(q)||c.id.toLowerCase().includes(q)));
-  status.textContent=found.length+' / 100種類 · 所持 '+counts.size+'種類 · 画像制作 '+catalog.filter(c=>c.art_status!=='pending').length+' / 100（ガチャ未接続）';
+  status.textContent=found.length+' / 100種類 · 所持 '+counts.size+'種類 · 画像制作 '+catalog.filter(c=>c.art_status!=='pending').length+' / 100';
   list.replaceChildren(...found.map(c=>{const card=document.createElement('article');card.dataset.cardId=c.id;card.className='aiCard ai-'+c.rarity;const id=document.createElement('small');id.textContent=c.id+' · '+c.rarity;const art=document.createElement('div');art.className='aiPlaceholder';art.textContent='画像準備中';if(c.art_status!=='pending'){const img=document.createElement('img');img.src=new URL('./ai-insects/'+c.id+'.webp',import.meta.url).href;img.alt=c.name;img.loading='lazy';img.width=480;img.height=720;img.style.cssText='display:block;width:100%;height:auto';art.style.padding='0';img.addEventListener('error',()=>{art.textContent='画像を読み込めませんでした'},{once:true});art.replaceChildren(img)}const title=document.createElement('h3');title.textContent=c.name;const owned=document.createElement('p');owned.textContent='所持 '+(counts.get(c.id)||0)+'枚';card.append(id,art,title,owned);return card}));
  }
  async function load(){if(catalog){render();return}if(loading)return;loading=true;status.textContent='読み込み中…';try{const r=await fetch(new URL('../docs/ai_insect_catalog_v1.json',import.meta.url));if(!r.ok)throw Error('unavailable');catalog=canonicalCards(await r.json());render()}catch{status.textContent='AI図鑑を読み込めません。閉じて開くと再試行します。'}finally{loading=false}}
  panel.addEventListener('toggle',()=>{if(panel.open)void load()});search.addEventListener('input',render);select.addEventListener('change',render);
- document.addEventListener('mushiverse:auth-changed',()=>{search.value='';select.value='ALL';render()});window.addEventListener('storage',e=>{if(e.key===storageKey()||e.key===null)render()});
+ document.addEventListener('mushiverse:auth-changed',()=>{search.value='';select.value='ALL';render()});window.addEventListener('storage',e=>{if(e.key===storageKey()||e.key===walletKey()||e.key===null)render()});
 }
 if(typeof document!=='undefined'){if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',start,{once:true});else start()}

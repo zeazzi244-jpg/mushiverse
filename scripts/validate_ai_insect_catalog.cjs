@@ -35,6 +35,12 @@ for (const [index, c] of cards.entries()) {
  if (c.fictional !== true) errors.push(String(c.id)+' must be fictional');
  if (!['pending','review','approved'].includes(c.art_status)) errors.push(String(c.id)+' invalid art_status');
  if (c.art_status === 'approved') approvedArt++;
+ if (!process.env.AI_INSECT_CATALOG_PATH && /^AI-\d{3}$/.test(c.id) && ['review','approved'].includes(c.art_status)) {
+  try {
+   const image = fs.readFileSync(path.join(__dirname, '../assets/ai-insects', c.id+'.webp'));
+   if (image.length < 16 || image.toString('ascii',0,4)!=='RIFF' || image.toString('ascii',8,12)!=='WEBP') errors.push(c.id+' invalid WebP');
+  } catch { errors.push(c.id+' missing WebP'); }
+ }
  if (Object.hasOwn(rarityCounts,c.rarity)) rarityCounts[c.rarity]++;
  else errors.push(String(c.id)+' invalid rarity '+String(c.rarity));
 }
