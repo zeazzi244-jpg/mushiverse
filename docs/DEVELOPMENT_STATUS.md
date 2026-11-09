@@ -611,3 +611,11 @@ Add for Reviewを実行し、画像不足が表示されなくなったことを
 - [Simulator CI](https://github.com/zeazzi244-jpg/mushiverse/actions/runs/42622665500)はコンパイル成功。撮影工程でSimulator OSのデータ移行待ちと7分制限により失敗。bf8e223で撮影工程の上限を15分へ延長し、描画判定は維持。
 - 7156a49でGoogle Geminiへ写真を送る前に日英の確認を追加。キャンセル時は送信・利用回数加算なし。画像変換中に写真またはアカウントが変わった場合も送信しない。Node VMで実ハンドラーを実行し、キャンセル・許可・写真差し替えの3ケースをモックで確認。最新CI・実通信・実機の結果は未確認。
 - TestFlightは既存の1941、審査下書きは1741。新署名・再配布・main更新・本番変更・審査提出なし。公開ゲート55%（11/20）を維持。残りはポリシー確定と公開URL、App Privacy、地図利用権、審査用ログイン、最終実機確認。本人操作は今回なし。
+
+## 2026-11-10 V6 リリース候補の検証・TestFlight
+
+- PR #2は main 7de561e を基準に競合なし（mergeable=true）。ドラフト。mainへのマージ・本番変更・審査提出なし。
+- ee7e70c: Playwrightに、Google Geminiへの送信キャンセル時の通信なし・手入力保持と、許可後の画像1件送信・候補反映の回帰検証を追加。[Web CI](https://github.com/zeazzi244-jpg/mushiverse/actions/runs/42700678552)で実行。
+- dc13d15: privacy.htmlの開発用草案に事前同意、キャンセル時の手入力、Geminiの適用条件へのリンクを追加。実運用のGemini契約・保持条件は未確認。ポリシー配信およびApp Privacy公開は未実施。
+- dc13d15のリリーススクリプト、署名事前検証、AI図鑑、隔離課金とアカウント安全CIが成功。Web、Simulatorおよび[署名・内部配布](https://github.com/zeazzi244-jpg/mushiverse/actions/runs/42701199408)の最終結果は後続確認。署名修復フラグは無効。既存の配布確認済みは1941。
+- 公開ゲート55%（11/20）。残りは公開ポリシーURL、App Privacy、地図利用権、審査用ログイン、最終実機、提出承認。審査下書きは1741。端末操作は次の配布結果後にまとめる。
