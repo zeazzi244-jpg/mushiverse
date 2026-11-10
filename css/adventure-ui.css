@@ -38,3 +38,37 @@
 #post .mvSectionIntro,#collection .mvSectionIntro,#gacha .mvSectionIntro,#map .mvSectionIntro,#profile .mvSectionIntro{scroll-margin-top:80px}
 @media(prefers-reduced-motion:no-preference){#home .mvAdventureHero,.mvSectionIntro{animation:mvAdventureReveal .4s ease-out both}@keyframes mvAdventureReveal{from{opacity:.65;transform:translateY(7px)}to{opacity:1;transform:translateY(0)}}}
 @media(prefers-reduced-motion:reduce){#home .mvAdventureHero,.mvSectionIntro{animation:none!important;transition:none!important}}
+
+/* Chapter markers connect the six destinations without changing navigation. */
+.mvAdventureChapter {
+  display: inline-grid;
+  place-items: center;
+  width: 2rem;
+  height: 2rem;
+  margin-inline-end: .6rem;
+  border: 1px solid #a6c381;
+  border-radius: 50%;
+  color: #f7e6ab;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0;
+}
+#post .mvSectionIntro { background: linear-gradient(145deg, #163b2c, #376747); }
+#gacha .mvSectionIntro { background: linear-gradient(145deg, #261e3c, #55406a); }
+#collection .mvSectionIntro { background: linear-gradient(145deg, #204231, #476042); }
+#map .mvSectionIntro { background: linear-gradient(145deg, #143d43, #2b6462); }
+#profile .mvSectionIntro { background: linear-gradient(145deg, #28392c, #53523a); }
+.mvFieldClue {
+  margin-block-start: 1rem;
+  padding-block-start: .8rem;
+  border-block-start: 1px solid #d2e9b866;
+  color: #fff;
+}
+.mvFieldClueLabel {
+  display: block;
+  color: #e9d798;
+  font-size: .75rem;
+  font-weight: 800;
+}
+.mvFieldClueText { display: block; margin-block-start: .25rem; }
+.mvFieldClue [lang="en"], .lang-en .mvFieldClue [lang="ja"] { display: none; }
+.lang-en .mvFieldClue [lang="en"] { display: inline; }
