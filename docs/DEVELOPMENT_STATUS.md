@@ -688,3 +688,5 @@ Add for Reviewを実行し、画像不足が表示されなくなったことを
 - V7を `backup/v8-20261110`（`b87088a502c55b8ab0c4d4f48db77d926a98be43`）に保存。PR #2はドラフトのまま。追加・変更差分を代表的な鍵の形式で確認し一致なし。履歴全体の監査は未実施。
 - `77e22f918febd573d7c59ebef3058b7e0b9e6000` でカタログ取得失敗からの復帰をガチャタブと通信復帰にも接続。対象モジュールと追加回帰試験はNode構文検査成功。ブラウザー・iOS結果は同じ変更を含むPR先端のCIで確認する。公開ゲート55%（11/20）据え置き。2341の次の配布・審査提出は未実施。
 - [引き継ぎ](MUSHIVERSE_RETURN_HANDOFF.md)にビルド・テスト・署名設定名と復元手順を追記。
+
+- V8検証対象 `f9804095f928ae11265b5785f3ba8b4b1310036f`。 [Web CI](https://github.com/zeazzi244-jpg/mushiverse/actions/runs/42788692955) と [iOS Simulator](https://github.com/zeazzi244-jpg/mushiverse/actions/runs/42788693016) を含む全7件のCIが成功。初回カタログ取得失敗、抽選未成立時の残高保持、再選択後の抽選と50コイン消費をChromium・WebKitで確認。2341は署名・IPA・内部テスト中を確認済み。V8は未配布。追記は資料のみ。
