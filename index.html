@@ -4002,15 +4002,16 @@ function showGachaReveal(got,discoveries){
  const result=document.createElement('div');result.className='mv88Results';result.hidden=true;
  const btn=document.createElement('button');btn.type='button';btn.className='mv88Close';btn.textContent='結果を見る';
  inner.append(title,stage,result,btn);overlay.append(inner);document.body.append(overlay);
- let revealed=false;let timer;let hintTimer;const previous=document.activeElement;
- const reveal=()=>{if(revealed)return;revealed=true;clearTimeout(timer);clearTimeout(hintTimer);stage.hidden=true;result.hidden=false;result.replaceChildren(...got.map((c,index)=>{const card=document.createElement('div');card.className='mv88Card mv88Card-'+c.rarity;const emblem=document.createElement('div');emblem.className='mv88Emblem';emblem.textContent=c.name.includes('チョウ')?'🦋':c.name.includes('テントウ')?'🐞':c.name.includes('バッタ')?'🦗':'🪲';const tier=document.createElement('strong');tier.textContent=c.rarity;const name=document.createElement('span');name.textContent=c.name;if(/^AI-\d{3}$/.test(c.id)){const image=document.createElement('img');image.src='./assets/ai-insects/'+c.id+'.webp';image.alt=c.name;image.style.cssText='width:100%;height:auto;max-height:42vh;object-fit:contain';image.addEventListener('error',()=>image.replaceWith(emblem),{once:true});card.append(image)}else card.append(emblem);card.append(tier,name);if(discoveries.has(index)){const badge=document.createElement('strong');badge.className='mvNewDiscovery';badge.textContent='NEW · 初発見';card.prepend(badge)}return card}));title.textContent={N:'発見！',R:'レア発見！',SR:'スーパーレア発見！',SSR:'SSR · 伝説の発見！'}[top];overlay.classList.add('mvRevealSettled');btn.textContent='ガチャに戻る';if(top==='SSR'&&!matchMedia('(prefers-reduced-motion: reduce)').matches){overlay.classList.add('mv88Burst');try{navigator.vibrate?.([60,40,120])}catch(_){}}};
- const close=()=>{clearTimeout(timer);clearTimeout(hintTimer);overlay.remove();document.removeEventListener('keydown',keyHandler);dismissReveal=null;render();if(previous&&previous.isConnected)previous.focus()};dismissReveal=close;
+ let revealed=false;let timer;let hintTimer;let chargeTimer;const previous=document.activeElement;
+ const reveal=()=>{if(revealed)return;revealed=true;clearTimeout(timer);clearTimeout(hintTimer);clearTimeout(chargeTimer);stage.hidden=true;result.hidden=false;result.replaceChildren(...got.map((c,index)=>{const card=document.createElement('div');card.className='mv88Card mv88Card-'+c.rarity;const emblem=document.createElement('div');emblem.className='mv88Emblem';emblem.textContent=c.name.includes('チョウ')?'🦋':c.name.includes('テントウ')?'🐞':c.name.includes('バッタ')?'🦗':'🪲';const tier=document.createElement('strong');tier.textContent=c.rarity;const name=document.createElement('span');name.textContent=c.name;if(/^AI-\d{3}$/.test(c.id)){const image=document.createElement('img');image.src='./assets/ai-insects/'+c.id+'.webp';image.alt=c.name;image.style.cssText='width:100%;height:auto;max-height:42vh;object-fit:contain';image.addEventListener('error',()=>image.replaceWith(emblem),{once:true});card.append(image)}else card.append(emblem);card.append(tier,name);if(discoveries.has(index)){const badge=document.createElement('strong');badge.className='mvNewDiscovery';badge.textContent='NEW · 初発見';card.prepend(badge)}return card}));title.textContent={N:'発見！',R:'レア発見！',SR:'スーパーレア発見！',SSR:'SSR · 伝説の発見！'}[top];overlay.classList.add('mvRevealSettled');btn.textContent='ガチャに戻る';if(top==='SSR'&&!matchMedia('(prefers-reduced-motion: reduce)').matches){overlay.classList.add('mv88Burst');try{navigator.vibrate?.([60,40,120])}catch(_){}}};
+ const close=()=>{clearTimeout(timer);clearTimeout(hintTimer);clearTimeout(chargeTimer);overlay.remove();document.removeEventListener('keydown',keyHandler);dismissReveal=null;render();if(previous&&previous.isConnected)previous.focus()};dismissReveal=close;
  const keyHandler=e=>{if(e.key==='Escape'){if(!revealed)reveal();else close()}if(e.key==='Tab'){e.preventDefault();btn.focus()}};
  document.addEventListener('keydown',keyHandler);btn.addEventListener('click',()=>revealed?close():reveal());
  overlay.addEventListener('click',e=>{if(e.target===overlay){if(!revealed)reveal();else close()}});
  const reduced=matchMedia('(prefers-reduced-motion: reduce)').matches;
- if(!reduced)hintTimer=setTimeout(()=>{wait.textContent=hint;stage.classList.add('mvCapsuleCharged')},550);
- timer=setTimeout(reveal,reduced?0:top==='SSR'?2250:top==='SR'?1750:1400);btn.focus();
+ if(!reduced)hintTimer=setTimeout(()=>{wait.textContent='森の光が集まっていく…';stage.classList.add('mvCapsuleCharged')},450);
+ if(!reduced)chargeTimer=setTimeout(()=>{wait.textContent=hint;stage.classList.add('mvCapsuleOpening')},1050);
+ timer=setTimeout(reveal,reduced?0:top==='SSR'?2700:top==='SR'?2200:1800);btn.focus();
 }
 
 function start(){ensure();render();document.addEventListener('mushiverse:auth-changed',()=>{state=null;el('mv80Dialog')?.close();dismissReveal?.();render()});window.addEventListener('storage',e=>{if(e.key===storageKey()){state=read();render()}});window.addEventListener('focus',()=>{state=read();render()});document.addEventListener('click',e=>{if(e.target.closest?.('[data-tab="profile"]'))setTimeout(render,30)},true);document.addEventListener('visibilitychange',()=>{if(!document.hidden){state=read();render()}});window.addEventListener('pageshow',render);setInterval(()=>{if(!document.hidden&&el('profile')&&!el('profile').classList.contains('hide'))render()},10000)}
@@ -4198,8 +4199,14 @@ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',
 function init(){
  const mount=document.getElementById('mv86GachaMount');if(!mount||document.getElementById('mv101Machine'))return;
  const unit=document.createElement('section');unit.id='mv101Machine';unit.setAttribute('aria-label','ガシャポン筐体イラスト');
- unit.innerHTML='<h2>🌿 ムシガシャポン</h2><div class="mv101Glass"><span class="mv101Cap" style="background:#ffd47a"></span><span class="mv101Cap" style="background:#c6a4f8"></span><span class="mv101Cap" style="background:#81d4c4"></span></div><div class="mv101Base"><div class="mv101Knob">✣</div><div class="mv101Slot"></div></div>';
- mount.prepend(unit);
+ unit.innerHTML='<img class="mvAltarArt" src="assets/icons/forest-capsule-altar.svg" width="300" height="220" alt="光るカプセルを宿す森の祭壇"><div class="mvSsrTeaser"><svg viewBox="0 0 64 64" width="50" height="50" aria-hidden="true"><path d="M29 23V8l5-6 3 6-3 8v7c10 2 14 13 11 24l-6 13H25l-7-13c-3-12 1-21 11-24ZM19 29 8 21l-4 2 13 13Zm26 0 11-8 4 2-13 13ZM17 42 5 45l-2 5 16-2Zm30 0 12 3 2 5-16-2Z" fill="currentColor"/></svg><div><b>SSR 天晶カブト</b><small>出会える最高レアの1体 · コイン抽選0.1%</small></div></div>';
+ const panel=document.getElementById('mvDailyGame');
+ if(!panel){mount.prepend(unit);return}
+ const controls=document.createElement('div');controls.className='mvQuickDraw';
+ for(const id of ['mv77Draw','mv77Ten','mv77TicketDraw']){const control=document.getElementById(id);if(control)controls.append(control)}
+ panel.prepend(unit,controls);
+ const stats=document.getElementById('mv77Coins')?.parentElement;if(stats)unit.after(stats);
+
 }
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init,{once:true});else init();
 })();

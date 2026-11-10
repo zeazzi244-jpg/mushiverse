@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 300 220" fill="none">
+<defs>
+<linearGradient id="stone" x2="0" y2="1"><stop stop-color="#3d6953"/><stop offset="1" stop-color="#102a22"/></linearGradient>
+<radialGradient id="orb"><stop stop-color="#e4ffd1"/><stop offset=".45" stop-color="#75cba2"/><stop offset="1" stop-color="#194e44"/></radialGradient>
+</defs>
+<ellipse cx="150" cy="200" rx="105" ry="12" fill="#000" opacity=".25"/>
+<path d="M49 172 67 60 92 35 82 166M251 172 233 60 208 35 218 166" fill="url(#stone)" stroke="#91b98d" stroke-width="2"/>
+<path d="M70 60Q150-10 230 60" stroke="#90ad79" stroke-width="11" stroke-linecap="round"/>
+<path d="M76 57Q150 1 224 57" stroke="#dbdf9b" stroke-width="2"/>
+<circle cx="150" cy="102" r="63" fill="#173d32" stroke="#a9c48d" stroke-width="3"/>
+<circle cx="150" cy="102" r="52" fill="url(#orb)" stroke="#d7edbd" stroke-width="1.5"/>
+<path d="M108 103h84M150 51v102" stroke="#d6f7d5" opacity=".25"/>
+<path d="m150 69 10 20 23 4-17 16 4 23-20-11-20 11 4-23-17-16 23-4Z" fill="#e6e8ad" opacity=".8"/>
+<path d="M98 153h104l21 35H77l21-35Z" fill="url(#stone)" stroke="#c8c98c" stroke-width="2"/>
+<path d="M110 172h80l-9 13h-62l-9-13Z" fill="#071a13"/>
+<path d="M58 127Q26 95 55 87q23 8 3 40ZM242 127q32-32 3-40-23 8-3 40Z" fill="#67a97d" stroke="#a9c990"/>
+<circle cx="96" cy="32" r="3" fill="#eddf93"/><circle cx="208" cy="24" r="2" fill="#eddf93"/><circle cx="266" cy="70" r="3" fill="#a8e7bf"/>
+</svg>
