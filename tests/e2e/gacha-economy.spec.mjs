@@ -1,0 +1,52 @@
+import {test,expect} from '@playwright/test';
+import {A,setup} from './helpers.mjs';
+const key='mushiverse-v77-game:user:'+A;
+test.describe('beta gacha economy',()=>{
+ test.beforeEach(async({page})=>{
+  await setup(page,{tickets:2});
+  await page.locator('nav.nav button[data-tab="gacha"]').click();
+  await expect(page.locator('#mv77Draw')).toBeVisible();
+  await expect(page.locator('#mv86GachaLoading')).toHaveCount(0);
+  await expect(page.locator('#mv86GachaMount')).not.toContainText('ガチャを準備しています');
+  await expect(page.locator('#mv101Machine')).toBeVisible();
+ });
+ test('coin draw spends 50 coins even when tickets exist',async({page})=>{
+  await page.locator('#mv77Draw').click();
+  await expect.poll(async()=>page.evaluate(k=>JSON.parse(localStorage.getItem(k)||'{}').cards?.length,key)).toBe(1);
+  const wallet=await page.evaluate(k=>JSON.parse(localStorage.getItem(k)),key);
+  expect(wallet.coins).toBe(450);
+  expect(wallet.tickets).toBe(2);
+ });
+ test('ticket draw spends only a ticket and never produces SSR',async({page})=>{
+  await page.locator('#mv77TicketDraw').click();
+  await expect.poll(async()=>page.evaluate(k=>JSON.parse(localStorage.getItem(k)||'{}').cards?.length,key)).toBe(1);
+  const wallet=await page.evaluate(k=>JSON.parse(localStorage.getItem(k)),key);
+  expect(wallet.coins).toBe(500);
+  expect(wallet.tickets).toBe(1);
+  expect(wallet.cards[0].rarity).not.toBe('SSR');
+ });
+ test('ten draws cost 450 coins without spending tickets',async({page})=>{
+  await page.locator('#mv77Ten').click();
+  await expect.poll(async()=>page.evaluate(k=>JSON.parse(localStorage.getItem(k)||'{}').cards?.length,key)).toBe(10);
+  const wallet=await page.evaluate(k=>JSON.parse(localStorage.getItem(k)),key);
+  expect(wallet.coins).toBe(50);
+  expect(wallet.tickets).toBe(2);
+ });
+ test('the first copy gets a discovery badge even in a duplicate ten-draw',async({page})=>{
+  await page.waitForFunction(()=>window.MushiverseIllustratedCards?.N?.length===40);
+  await page.evaluate(()=>{Math.random=()=>0.9});
+  await page.locator('#mv77Ten').click();
+  await expect(page.locator('#mv88Reveal .mv88Card')).toHaveCount(10);
+  await expect(page.locator('#mv88Reveal .mvNewDiscovery')).toHaveCount(1);
+ });
+ test('first daily claim grants five coins once only',async({page})=>{
+ await page.locator('#mv77Claim').click();
+ await expect.poll(async()=>page.evaluate(k=>JSON.parse(localStorage.getItem(k)||'{}').coins,key)).toBe(505);
+ await expect(page.locator('#mv77Claim')).toBeDisabled();
+ await page.reload();
+ await expect(page.locator('#mv77Claim')).toBeDisabled();
+ const wallet=await page.evaluate(k=>JSON.parse(localStorage.getItem(k)),key);
+ expect(wallet.coins).toBe(505);
+});
+
+});

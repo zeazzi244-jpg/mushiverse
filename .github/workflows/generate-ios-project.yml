@@ -1,18 +1,26 @@
 name: Generate iOS Xcode project
 on:
+  pull_request:
   workflow_dispatch:
   push:
-    branches: [main]
+    branches: [main, codex/verified-changes-20261028]
     paths:
+      - 'ios/**'
+      - 'index.html'
+      - 'assets/**'
+      - 'package-lock.json'
       - 'package.json'
       - 'capacitor.config.json'
       - 'scripts/build-web.mjs'
       - '.github/workflows/generate-ios-project.yml'
+concurrency:
+  group: native-${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
 permissions:
   contents: read
 jobs:
   generate-native:
-    runs-on: macos-latest
+    runs-on: ${{ github.event_name == 'push' && github.ref == 'refs/heads/codex/verified-changes-20261028' && 'macos-26' || 'macos-26-intel' }}
     timeout-minutes: 35
     steps:
       - uses: actions/checkout@v4
@@ -20,13 +28,13 @@ jobs:
         with:
           node-version: '22'
       - name: Install dependencies
-        run: npm install --no-audit --no-fund
+        run: npm ci --no-audit --no-fund
       - name: Prepare local web bundle
         run: |
           npm run build:web
           node scripts/verify-web.mjs
       - name: Generate Capacitor iOS project
-        run: npx cap add ios
+        run: npx cap sync ios
       - name: Run iOS release structure checks
         run: npm run ios:check
       - name: Declare iOS camera and location permissions
@@ -86,6 +94,79 @@ jobs:
         with:
           name: mushiverse-ios-simulator-app
           path: ${{ runner.temp }}/mushiverse-derived/Build/Products/Debug-iphonesimulator/App.app/
+          if-no-files-found: error
+          retention-days: 7
+      - name: Capture App Store screenshot candidates
+        # Both Simulator runtimes may perform first-boot data migration.
+        timeout-minutes: 15
+        if: github.event_name == 'push' && github.ref == 'refs/heads/codex/verified-changes-20261028'
+        run: |
+          set -euo pipefail
+          APP="$RUNNER_TEMP/mushiverse-derived/Build/Products/Debug-iphonesimulator/App.app"
+          OUT="$RUNNER_TEMP/store-shots"
+          mkdir -p "$OUT"
+          xcrun simctl list devices available -j > "$RUNNER_TEMP/sims.json"
+          cat > "$RUNNER_TEMP/check-home.swift" <<'SWIFT'
+          import AppKit
+          import Foundation
+
+          let screenshotURL = URL(fileURLWithPath: CommandLine.arguments[1])
+          guard let data = try? Data(contentsOf: screenshotURL),
+                let image = NSBitmapImageRep(data: data) else {
+              exit(1)
+          }
+
+          // Sample the central viewport for the green home header and hero.
+          var greenSamples = 0
+          for row in 1...20 {
+              for column in 5...15 {
+                  let x = image.pixelsWide * column / 20
+                  let y = image.pixelsHigh * row / 24
+                  guard let color = image.colorAt(x: x, y: y)?.usingColorSpace(NSColorSpace.deviceRGB) else { continue }
+                  if color.greenComponent > color.redComponent + 0.12,
+                     color.greenComponent > color.blueComponent + 0.05 {
+                      greenSamples += 1
+                  }
+              }
+          }
+          exit(greenSamples >= 12 ? 0 : 1)
+          SWIFT
+          swiftc "$RUNNER_TEMP/check-home.swift" -o "$RUNNER_TEMP/check-home"
+
+          capture() {
+            local name="$1" pattern="$2" udid
+            udid=$(python3 -c 'import json,re,sys; print(next(d["udid"] for k, ds in reversed(list(json.load(open(sys.argv[1]))["devices"].items())) if ".iOS-" in k for d in ds if d["isAvailable"] and re.search(sys.argv[2], d["name"])))' "$RUNNER_TEMP/sims.json" "$pattern") || return 1
+            echo "Booting $name simulator $udid"
+            xcrun simctl boot "$udid" || return 1
+            xcrun simctl bootstatus "$udid" -b || return 1
+            xcrun simctl install "$udid" "$APP" || return 1
+            xcrun simctl launch "$udid" com.rikuto.mushiverse || return 1
+            for attempt in {1..8}; do
+              sleep 5
+              xcrun simctl io "$udid" screenshot "$OUT/$name.png" || return 1
+              if "$RUNNER_TEMP/check-home" "$OUT/$name.png"; then
+                echo "$name home colors detected on attempt $attempt"
+                sips -g pixelWidth -g pixelHeight "$OUT/$name.png"
+                xcrun simctl shutdown "$udid"
+                return 0
+              fi
+            done
+            echo "::error::$name home did not render within the capture window"
+            xcrun simctl spawn "$udid" log show --last 2m --style compact \
+              --predicate 'process == "App" OR subsystem == "com.apple.WebKit"' | tail -n 150 || true
+            xcrun simctl shutdown "$udid"
+            return 1
+          }
+          capture_status=0
+          capture iphone '^(iPhone (16|17) Pro|iPhone 17)$' || capture_status=1
+          capture ipad '^iPad Pro 13-inch' || capture_status=1
+          exit "$capture_status"
+      - name: Save App Store screenshot candidates
+        if: ${{ !cancelled() && github.event_name == 'push' && github.ref == 'refs/heads/codex/verified-changes-20261028' }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: mushiverse-app-store-screenshot-candidates
+          path: ${{ runner.temp }}/store-shots/*.png
           if-no-files-found: error
           retention-days: 7
       - name: Save compile log on failure

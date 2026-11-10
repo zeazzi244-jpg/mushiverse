@@ -1,3 +1,24 @@
+
+#home .mvAdventureHero{position:relative;overflow:hidden;padding:28px 22px;margin:0 0 24px;border-radius:24px;background:radial-gradient(circle at 90% 12%,#477d5b 0%,transparent 42%),linear-gradient(135deg,#102e25,#21523d 78%);color:#fff;box-shadow:0 14px 30px rgba(13,54,38,.18)}
+#home .mvAdventureHero:after{content:"✦";position:absolute;right:22px;top:54px;color:#d8efad;font-size:64px;opacity:.25;pointer-events:none}
+#home .mvAdventureEyebrow{font-size:10px;letter-spacing:.18em;font-weight:800;color:#c8e6ad;margin-bottom:14px}
+#home .mvAdventureHero h2{font-size:clamp(26px,7vw,37px);line-height:1.35;letter-spacing:-.04em;margin:0 0 12px;color:#fff}
+#home .mvAdventureHero p{line-height:1.8;font-size:14px;color:#e2f2e6;margin:0 0 22px}
+#home .mvAdventureActions{display:flex;flex-wrap:wrap;gap:10px}
+#home .mvAdventureActions button{border-radius:13px;padding:12px 16px;font-size:14px;font-weight:800;cursor:pointer;min-height:44px}
+#home .mvAdventurePrimary{background:#d5f0ad;border:1px solid #d5f0ad;color:#173c29}
+#home .mvAdventureSecondary{background:transparent;border:1px solid #a2c2ae;color:#fff}
+#home #v41LaunchSprint,#home #v38SyncShield,#home #v37SystemStatus{display:none!important}
+@media(max-width:360px){#home .mvAdventureHero{padding:24px 17px}#home .mvAdventureActions button{flex:1}}
+
+
+.mvSectionIntro{position:relative;overflow:hidden;background:linear-gradient(125deg,#143b2d,#285b42);color:#fff;padding:24px 20px;margin:0 0 20px;border-radius:22px;box-shadow:0 10px 25px rgba(15,52,36,.13)}
+.mvSectionIntro:after{content:"✧";position:absolute;right:18px;top:12px;font-size:72px;opacity:.12;pointer-events:none}
+.mvSectionKicker{display:block;font-size:10px;letter-spacing:.18em;color:#d2e9b8;font-weight:800;margin-bottom:10px}
+.mvSectionIntro h2{color:#fff;font-size:clamp(22px,6vw,31px);line-height:1.4;margin:0 0 10px;letter-spacing:-.035em}
+.mvSectionIntro p{color:#e4f2e7;line-height:1.8;font-size:14px;margin:0;max-width:42em}
+@media(max-width:360px){.mvSectionIntro{padding:20px 16px}}
+
 /* MUSHIVERSE Adventure UI — progressive enhancement; existing data and interactions untouched */
 :root{--mv-forest:#173e30;--mv-fern:#276348;--mv-lime:#d5f0ad;--mv-paper:#f5f8f1}
 #home .mvAdventureHero,.mvSectionIntro{isolation:isolate}
@@ -18,6 +39,76 @@
 @media(prefers-reduced-motion:no-preference){#home .mvAdventureHero,.mvSectionIntro{animation:mvAdventureReveal .4s ease-out both}@keyframes mvAdventureReveal{from{opacity:.65;transform:translateY(7px)}to{opacity:1;transform:translateY(0)}}}
 @media(prefers-reduced-motion:reduce){#home .mvAdventureHero,.mvSectionIntro{animation:none!important;transition:none!important}}
 
+/* Chapter markers connect the six destinations without changing navigation. */
+.mvAdventureChapter {
+  display: inline-grid;
+  place-items: center;
+  width: 2rem;
+  height: 2rem;
+  margin-inline-end: .6rem;
+  border: 1px solid #a6c381;
+  border-radius: 50%;
+  color: #f7e6ab;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0;
+}
+#post .mvSectionIntro { background: linear-gradient(145deg, #163b2c, #376747); }
+#gacha .mvSectionIntro { background: linear-gradient(145deg, #261e3c, #55406a); }
+#collection .mvSectionIntro { background: linear-gradient(145deg, #204231, #476042); }
+#map .mvSectionIntro { background: linear-gradient(145deg, #143d43, #2b6462); }
+#profile .mvSectionIntro { background: linear-gradient(145deg, #28392c, #53523a); }
+.mvFieldClue {
+  margin-block-start: 1rem;
+  padding-block-start: .8rem;
+  border-block-start: 1px solid #d2e9b866;
+  color: #fff;
+}
+.mvFieldClueLabel {
+  display: block;
+  color: #e9d798;
+  font-size: .75rem;
+  font-weight: 800;
+}
+.mvFieldClueText { display: block; margin-block-start: .25rem; }
+.mvFieldClue [lang="en"], .lang-en .mvFieldClue [lang="ja"] { display: none; }
+.lang-en .mvFieldClue [lang="en"] { display: inline; }
+
+/* Translated tab labels are real text, shared by the screen and assistive tech. */
+.lang-en .nav button[data-tab]::after { content: none; }
+.nav .mvTabLabel { font-size: 11px; letter-spacing: 0; }
+
+.mvDiscoveryTrail {
+  padding: 1rem;
+  margin-block-end: 1.15rem;
+  border: 1px solid #b9cfaa;
+  border-radius: 1rem;
+  background: #f5faef;
+  color: #1b3d2b;
+}
+.mvDiscoveryTrail h2, .mvDiscoveryTrail p { margin: 0 0 .55rem; }
+.mvDiscoveryTrail progress { width: min(75%, 16rem); accent-color: #3d764e; }
+.mvDiscoveryTrail output { margin-inline-start: .5rem; font-weight: 800; }
+.mvDiscoveryActions button {
+  min-height: 44px;
+  margin-block-start: .4rem;
+  padding-inline: .7rem;
+  border: 1px solid #7b9c73;
+  border-radius: .65rem;
+  background: #fff;
+  color: #1b3d2b;
+}
+body.mv128Kids #mvDiscoveryTrail, body.mv128Kids .mvAdventurePrimary { display: none; }
+
+#collectionMineLabel:not([hidden]) {
+  display: flex;
+  grid-column: 1 / -1;
+  align-items: center;
+  gap: .55rem;
+  min-height: 44px;
+  padding-inline: .65rem;
+}
+#collectionMine { width: 1.15rem; height: 1.15rem; accent-color: #3d764e; }
+
 /* V11 readability pass: consistent tap targets, text wrapping and comfortable spacing. */
 #home,#post,#collection,#gacha,#map,#profile{overflow-wrap:anywhere}
 #home .panel,#post .panel,#collection .panel,#gacha .panel,#map .panel,#profile .panel{border-radius:18px}
@@ -36,4 +127,253 @@
 }
 @media(prefers-reduced-motion:reduce){
   #home *,#post *,#collection *,#gacha *,#map *,#profile *{scroll-behavior:auto!important}
+}
+.mvNewDiscovery {
+  display: inline-block;
+  margin: 0 0 .4rem;
+  padding: .22rem .65rem;
+  border-radius: 999px;
+  background: #f7df97;
+  color: #372a13;
+  font-size: .75rem;
+  font-weight: 800;
+}
+
+#mvForestBgm {
+  min-height: 44px;
+  margin-block-start: .65rem;
+  padding-inline: .75rem;
+  border: 1px solid #a6c381;
+  border-radius: .7rem;
+  background: #173e30;
+  color: #fff;
+}
+#mvForestBgm[aria-pressed="true"] {
+  background: #d5f0ad;
+  color: #173e30;
+}
+
+/* A capsule drops, charges, then gives way to the result cards. */
+#mv88Reveal { --capsule-light: #8fe6b7; }
+#mv88Reveal.mv88-R { --capsule-light: #76c9ff; }
+#mv88Reveal.mv88-SR { --capsule-light: #c58bff; }
+#mv88Reveal.mv88-SSR { --capsule-light: #ffdc78; }
+#mv88Reveal .mv88Capsule {
+  width: clamp(92px, 27vw, 132px);
+  aspect-ratio: 1;
+  border-radius: 50%;
+  border: 3px solid var(--capsule-light);
+  background: radial-gradient(circle at 27% 22%, #fff8, transparent 32%),
+    linear-gradient(160deg, #fff 0%, var(--capsule-light) 48%, #182926 49% 53%, #224a42 54% 100%);
+  box-shadow: 0 0 26px var(--capsule-light);
+  filter: none;
+  animation: none;
+}
+#mv88Reveal .mv88Wait { animation: none; }
+#mv88Reveal.mvRevealSettled .mv88Title { animation: none; }
+#mv134CoinStore > summary { cursor: pointer; font-weight: 750; padding-block: .5rem; }
+@media (prefers-reduced-motion: no-preference) {
+  #gacha:not(.hide) #mv101Machine { animation: mvAdventureReveal .4s ease-out both; }
+  #mv88Reveal .mv88Capsule { animation: mvCapsuleDrop .55s ease-out both; }
+  #mv88Reveal .mvCapsuleCharged .mv88Capsule {
+    animation: mvCapsuleCharge .55s ease-in-out 2 alternate both;
+  }
+  @keyframes mvCapsuleDrop {
+    0% { opacity: 0; transform: translateY(-68px) rotate(-22deg); }
+    72% { opacity: 1; transform: translateY(8px) rotate(8deg); }
+    100% { transform: translateY(0) rotate(0); }
+  }
+  @keyframes mvCapsuleCharge {
+    from { transform: scale(1); }
+    to { transform: scale(1.07); box-shadow: 0 0 52px var(--capsule-light); }
+  }
+}
+
+#mvBgmStop:not([hidden]) {
+  position: fixed;
+  z-index: 900;
+  right: .75rem;
+  bottom: calc(76px + env(safe-area-inset-bottom, 0px));
+  min-height: 44px;
+  padding: .5rem .8rem;
+  border: 1px solid #9cba86;
+  border-radius: 999px;
+  background: #173e30;
+  color: #fff;
+  box-shadow: 0 3px 12px #0003;
+}
+body:has(#mv88Reveal) #mvBgmStop { visibility: hidden; }
+#mvBgmStop [lang="en"], .lang-en #mvBgmStop [lang="ja"] { display: none; }
+.lang-en #mvBgmStop [lang="en"] { display: inline; }
+#mvBgmStop:focus-visible { outline: 3px solid #e5bd64; outline-offset: 3px; }
+#mvBgmStatus { display: block; margin-top: .35rem; font-size: .8rem; }
+
+/* Forest night surfaces shared by all six destinations. */
+:root {
+  color-scheme: dark;
+  --mv-night: #091610;
+  --mv-surface: #142a20;
+  --mv-raised: #1d382a;
+  --mv-text: #e6f1e8;
+  --mv-muted: #b4cbbb;
+  --mv-line: #42634e;
+}
+html, body { background: var(--mv-night) !important; color: var(--mv-text) !important; }
+body .wrap, body main { background: transparent !important; color: var(--mv-text); }
+body :is(.panel,.card,.toolbar,.collectionTools,.empty,.mapNote,.mapLegend,.mapActions,
+  .bestCard,.rankItem,.detailSheet,.authpanel,.mvSectionIntro,
+  #mv110FollowFeed,#mvDiscoveryTrail,#mv101Machine,#mv104Ranking,
+  #mv128Settings,#mv134CoinStore,#mv86ProfileCard,#mv131KidsNotice,
+  #mvDailyGame,#mv105PublicProfile,.mv80Dialog,.mv81Card) {
+  background: var(--mv-surface) !important;
+  color: var(--mv-text) !important;
+  border-color: var(--mv-line) !important;
+}
+body :is(.panel,.card,.detailSheet,#mv86ProfileCard,#mv104Ranking,#mv128Settings,
+  #mv101Machine,#mvDailyGame,#mvDiscoveryTrail,#mv110FollowFeed)
+  :is(h1,h2,h3,h4,p,b,strong,label,.species,.sectionTitle) {
+  color: var(--mv-text) !important;
+}
+body :is(.hint,.muted,.fineprint,.speciesMeta,.mv90Intro,.mapNote,.mapLegend,
+  .mv114PostNote,.mv114Public,.mv114Chip,.mv114PostAuthor small) {
+  color: var(--mv-muted) !important;
+}
+body :is(input,select,textarea) {
+  background: #0c1e15 !important;
+  color: var(--mv-text) !important;
+  border-color: #58785f !important;
+}
+body :is(input,textarea)::placeholder { color: #acc0b1 !important; opacity: 1; }
+body :is(.btn.outline,.mv114Action,.mv90Tabs button,.mvDiscoveryActions button,
+  .collectionTools select,.bestCard button) {
+  background: var(--mv-raised) !important;
+  color: var(--mv-text) !important;
+  border-color: #68886e !important;
+}
+body nav.nav {
+  background: #102319 !important;
+  border-color: var(--mv-line) !important;
+  box-shadow: 0 -4px 18px #0005;
+}
+body nav.nav button { background: transparent !important; color: #bfd1c2 !important; }
+body nav.nav button.active, body .mv90Tabs button.mv90Active {
+  background: #31583b !important;
+  color: #edffcf !important;
+}
+body a { color: #b8e7a5; }
+body :is(.mv114PostHeader,.mv114PostBody,.mv114Actions,.mv114Chip,.mv114Public,
+  .mv86Stats,.mv86Stat,.mv104Progress,.mv90Tabs,.mv81Meta) {
+  background-color: var(--mv-surface) !important;
+  border-color: var(--mv-line) !important;
+}
+body .detailSheet :is(button,.chip) { background: var(--mv-raised); color: var(--mv-text); }
+body dialog { background: var(--mv-surface); color: var(--mv-text); border-color: var(--mv-line); }
+body .appCopyright { color: var(--mv-muted); }
+body .leaflet-control :is(a,label,span) { color: #173729; }
+body .leaflet-popup-content { color: #173729; }
+
+/* Finish night surfaces in nested cards, collection tiles and account details. */
+body :is(.mv114Post,.mv114PostPhoto,.mv114Avatar,.mv81Tile,#mv86ProfileBody,
+  #mv86Stats,#mv86ProfileEdit,.mv104Actions button,#mv105PublicProfile button,
+  #mv86AdvancedToggle,#mv86CoverButton,.mv80Dialog button,
+  .mv81Tile[class*="mv123Tier-"]) {
+  background: var(--mv-raised) !important;
+  color: var(--mv-text) !important;
+  border-color: #58785f !important;
+}
+body :is(.mv114PostAuthor b,.mv114Species,#mv86ProfileBody h2,
+  #mv86Stats b,.mv81Tile span,.mv81Tile small) { color: var(--mv-text) !important; }
+body :is(#mv86Bio,#mv86Stats small,.mv104Help) { color: var(--mv-muted) !important; }
+body .mv81Tile[class*="mv123Tier-"] { border-color: var(--tier, #58785f) !important; }
+body .mv114Action.liked { background: #44232e !important; color: #ffc1d0 !important; }
+body .mv114Action.active { background: #40371b !important; color: #ffe5a1 !important; }
+body .mv114Delete { color: #ffb9b2 !important; }
+body :is(#recordForm,.authpanel,.collectionTools) :is(button,input,select,textarea) {
+  min-height: 44px;
+}
+body :is(#home,#post,#gacha,#collection,#map,#profile) :is(button,input,select,textarea,a):focus-visible {
+  outline: 3px solid #e5bd64 !important;
+  outline-offset: 3px;
+}
+body :is(#home,#post,#gacha,#collection,#map,#profile) button:not(:disabled):active {
+  filter: brightness(1.15);
+}
+body :is(#home,#post,#gacha,#collection,#map,#profile) button:disabled { cursor: not-allowed; }
+@media (max-width: 380px) {
+  body .mv114Actions { gap: 6px; }
+  body .mv114Action { padding: 9px; min-height: 44px; }
+  body #mv86Stats { gap: 4px; }
+}
+
+#mv101Machine { max-width: 360px; margin: 0 auto .35rem; padding: 0; background: transparent !important; box-shadow: none; }
+.mvAltarArt { display: block; width: min(100%, 250px); height: auto; margin: auto; }
+.mvSsrTeaser { display: flex; align-items: center; justify-content: center; gap: .65rem; color: #dbcc85; }
+.mvSsrTeaser svg { color: #050e09; filter: drop-shadow(0 0 4px #dacb8c); flex: none; }
+.mvSsrTeaser small { display: block; font-size: 11px; color: #cad6bc; margin-top: .2rem; }
+.mvQuickDraw { display: grid; grid-template-columns: 1fr 1fr; gap: .5rem; margin: .65rem 0; }
+#mvDailyGame .mvQuickDraw button { margin: 0; min-height: 48px; font-weight: 800; border-radius: 12px; }
+#mvDailyGame #mv77Draw { background: #d5efb5; color: #173729; }
+#mvDailyGame #mv77TicketDraw { grid-column: 1 / -1; }
+#gacha > .mvSectionIntro { display: none; }
+@media (prefers-reduced-motion: no-preference) {
+  #mv88Reveal .mvCapsuleOpening .mv88Capsule { animation: mvCapsuleOpen .65s ease-in both; }
+  @keyframes mvCapsuleOpen {
+    to { transform: scale(1.16); opacity: .25; box-shadow: 0 0 65px var(--capsule-light); }
+  }
+}
+
+/* Match legacy selectors that otherwise paint pale surfaces over the night theme. */
+body :is(#home,#post,#gacha,#collection,#map,#profile) {
+  --mvCardBg: #142a20;
+  --mvCardLine: #42634e;
+  background: #091610 !important;
+  color: #e6f1e8;
+}
+body #home #mv110FollowFeed,
+body #home #mv110FollowFeed li,
+body #home #ranking,
+body #profile #mvMembershipStatus,
+body #collection #aiInsectCollection,
+body #collection #mv90Wild,
+body #collection #mv90Gacha {
+  background: #142a20 !important;
+  color: #e6f1e8 !important;
+}
+body #home #mv110FollowFeed h2,
+body #home #ranking h2,
+body :is(#home,#post,#gacha,#collection,#map,#profile) > .sectionTitle {
+  color: #e6f1e8 !important;
+}
+body #home .toolbar :is(input,select,label),
+body #post #recordForm :is(input,select,textarea),
+body #collection .aiTools :is(input,select),
+body #map .toolbar :is(select,label) {
+  background: #102319 !important;
+  color: #e6f1e8 !important;
+  border-color: #68886e !important;
+}
+body #home .toolbar input::placeholder { color: #b4cbbb !important; }
+body #home #weeklyQuest { display: block !important; background: #142a20 !important; }
+body #home #mv82Quest { display: none !important; }
+body #home #weeklyQuest :is(.questRow,.questBadge,.questDone,.reviewNote) {
+  background: #1d382a !important;
+  color: #e6f1e8 !important;
+  border-color: #42634e !important;
+}
+body #home #weeklyQuest :is(h2,b,.muted) { color: #e6f1e8 !important; }
+body .mv116Hud { position: relative; top: auto !important; border-radius: 16px; }
+@media (prefers-reduced-motion: no-preference) {
+  #mv88Reveal .mv88Halo {
+    animation: mvGatherLight 2s ease-in-out infinite alternate;
+  }
+  #mv88Reveal .mvCapsuleCharged .mv88Capsule {
+    animation: mvCapsuleCharge 1s ease-in-out infinite alternate;
+  }
+  #mv88Reveal .mvCapsuleOpening .mv88Capsule {
+    animation: mvCapsuleOpen 1.6s ease-in both;
+  }
+  @keyframes mvGatherLight {
+    from { transform: scale(.72) rotate(0); opacity: .35; }
+    to { transform: scale(1.2) rotate(55deg); opacity: .85; }
+  }
 }

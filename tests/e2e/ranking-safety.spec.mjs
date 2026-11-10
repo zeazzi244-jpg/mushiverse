@@ -1,0 +1,11 @@
+import {test,expect} from '@playwright/test';import {A,B,setup} from './helpers.mjs';
+test('ranking collection rate refreshes when another tab saves a card',async({page,context})=>{
+ await setup(page);await page.locator('nav.nav [data-tab="collection"]').click();const other=await context.newPage();await setup(other);await other.evaluate(A=>{const key='mushiverse-v77-game:user:'+A,w=JSON.parse(localStorage.getItem(key));w.cards.push({name:'ナナホシテントウ',rarity:'N'});localStorage.setItem(key,JSON.stringify(w))},A);await expect(page.locator('#mv104MyRate')).toContainText('1 / 100');
+});
+test('older ranking response cannot replace a newer ranking',async({page})=>{
+ await setup(page);await page.locator('nav.nav [data-tab="collection"]').click();await page.evaluate(()=>{let first=true;window.testQueryHook=({table,write})=>{if(table==='gacha_collection_leaderboard'&&!write&&first){first=false;return new Promise(resolve=>window.releaseOldRanking=()=>resolve({data:[{user_id:'old',display_name:'古いランキング',unique_species:1}],error:null}))}}});
+ await page.locator('#mv104Refresh').click();await expect.poll(()=>page.evaluate(()=>typeof window.releaseOldRanking)).toBe('function');await page.evaluate(A=>window.testLeaders=[{user_id:A,display_name:'新しいランキング',unique_species:2}],A);await page.locator('#mv104Refresh').click();await expect(page.locator('#mv104List')).toContainText('新しいランキング');await page.evaluate(()=>window.releaseOldRanking());await expect(page.locator('#mv104List')).not.toContainText('古いランキング');
+});
+test('late registration confirmation cannot appear under a different account',async({page})=>{
+ await setup(page);await page.locator('nav.nav [data-tab="collection"]').click();await page.locator('#mv104Name').fill('利用者A');await page.evaluate(()=>{window.testQueryHook=({table,write})=>{if(table==='gacha_collection_leaderboard'&&write?.action==='upsert')return new Promise(resolve=>window.releaseRegistration=()=>resolve({data:null,error:null}))}});await page.locator('#mv104Join').click();await expect.poll(()=>page.evaluate(()=>typeof window.releaseRegistration)).toBe('function');await page.evaluate(B=>{window.testSwitchUser(B);window.releaseRegistration()},B);await expect(page.locator('#mv104Status')).not.toContainText('登録・更新しました');await expect(page.locator('#mv104Name')).toHaveValue('');
+});

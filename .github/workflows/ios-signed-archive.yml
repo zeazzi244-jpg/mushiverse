@@ -1,15 +1,29 @@
 name: iOS signed archive (manual)
 on:
   workflow_dispatch:
-  push:
-    branches: [main]
-    paths:
-      - '.github/workflows/ios-signed-archive.yml'
+    inputs:
+      upload_to_testflight:
+        description: 'Upload to App Store Connect (requires separate owner authorization)'
+        type: boolean
+        required: true
+        default: false
+      upload_existing_build_2541:
+        description: 'Upload the owner-approved saved build 2541 without rebuilding'
+        type: boolean
+        required: true
+        default: false
+      repair_approved_certificate:
+        description: 'Owner approved: replace development certificate 3WMVSRYMNU only (one-time repair)'
+        type: boolean
+        required: true
+        default: false
 permissions:
   contents: read
+  actions: read
 jobs:
   signed-archive:
-    runs-on: macos-latest
+    if: ${{ !inputs.upload_existing_build_2541 }}
+    runs-on: macos-26-intel
     timeout-minutes: 60
     concurrency:
       group: mushiverse-ios-signed-archive
@@ -40,10 +54,12 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          npm install --no-audit --no-fund
+          npm ci --no-audit --no-fund
           npm run build:web
           node scripts/verify-web.mjs
-          npx cap add ios
+          npx cap sync ios
+      - name: Allocate unique TestFlight build number
+        run: node scripts/set-signed-build-number.mjs
       - name: Run iOS release structure checks
         run: npm run ios:check
       - name: Declare iOS camera and location permissions
@@ -63,6 +79,43 @@ jobs:
           set_usage NSCameraUsageDescription "昆虫の採集記録を撮影して投稿するためにカメラを使用します。"
           set_usage NSLocationWhenInUseUsageDescription "採集場所を地図に表示するため、使用中のみ位置情報を利用します。"
           set_usage NSPhotoLibraryUsageDescription "採集記録に添付する写真を選ぶために写真ライブラリを使用します。"
+      - name: Restore encrypted signing backup from this branch and workflow
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            const path = require('path');
+            const current = (await github.rest.actions.getWorkflowRun({...context.repo,run_id:context.runId})).data;
+            if (context.ref !== 'refs/heads/codex/verified-changes-20261028') throw new Error('Unexpected branch');
+            const artifacts = await github.paginate(github.rest.actions.listArtifactsForRepo,{...context.repo,name:'mushiverse-signing-identity',per_page:100});
+            for (const a of artifacts.sort((a,b)=>Date.parse(b.created_at)-Date.parse(a.created_at))) {
+              if (a.expired || a.workflow_run?.id === context.runId) continue;
+              const run = (await github.rest.actions.getWorkflowRun({...context.repo,run_id:a.workflow_run.id})).data;
+              if (run.workflow_id !== current.workflow_id || run.head_branch !== 'codex/verified-changes-20261028' || run.event !== 'workflow_dispatch') continue;
+              const zip = await github.rest.actions.downloadArtifact({...context.repo,artifact_id:a.id,archive_format:'zip'});
+              fs.writeFileSync(path.join(process.env.RUNNER_TEMP,'signing-backup.zip'),Buffer.from(zip.data),{mode:0o600});
+              core.info('Encrypted signing backup selected from run '+run.id);
+              break;
+            }
+      - name: Prepare signing identity (restore or explicitly approved repair)
+        env:
+          ROTATE_APPROVED_CERTIFICATE: ${{ inputs.repair_approved_certificate }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          umask 077
+          if test -f "$RUNNER_TEMP/signing-backup.zip"; then
+            unzip -p "$RUNNER_TEMP/signing-backup.zip" signing-identity.p12 > "$RUNNER_TEMP/signing-identity.p12"
+          fi
+          node scripts/repair-ios-signing.mjs
+      - name: Preserve password-encrypted signing identity for subsequent runners
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: mushiverse-signing-identity
+          path: ${{ runner.temp }}/signing-identity.p12
+          if-no-files-found: ignore
+          retention-days: 90
       - name: Archive signed iPhone app
         shell: bash
         run: |
@@ -74,12 +127,43 @@ jobs:
             -archivePath "$RUNNER_TEMP/Mushiverse.xcarchive" \
             DEVELOPMENT_TEAM="$APPLE_TEAM_ID" \
             CODE_SIGN_STYLE=Automatic \
+            CODE_SIGN_IDENTITY="Apple Development" \
             -allowProvisioningUpdates \
             -authenticationKeyPath "$RUNNER_TEMP/AuthKey.p8" \
             -authenticationKeyID "$ASC_KEY_ID" \
             -authenticationKeyIssuerID "$ASC_ISSUER_ID" \
             archive
           test -d "$RUNNER_TEMP/Mushiverse.xcarchive/Products/Applications/App.app"
+      - name: Record bundled privacy manifests for App Review
+        shell: bash
+        run: |
+          set -euo pipefail
+          APP_DIR="$RUNNER_TEMP/Mushiverse.xcarchive/Products/Applications/App.app"
+          python3 - "$APP_DIR" >> "$GITHUB_STEP_SUMMARY" <<'PY'
+          import pathlib
+          import plistlib
+          import sys
+
+          app = pathlib.Path(sys.argv[1])
+          if not app.is_dir():
+              raise SystemExit("Archived app bundle not found")
+
+          print("### Bundled privacy manifest inventory")
+          manifests = sorted(app.rglob("PrivacyInfo.xcprivacy"))
+          if not manifests:
+              print("No privacy manifest found in the app bundle. Review required.")
+          for manifest in manifests:
+              with manifest.open("rb") as source:
+                  data = plistlib.load(source)
+              print(f"- `{manifest.relative_to(app)}`")
+              for entry in data.get("NSPrivacyAccessedAPITypes", []):
+                  reasons = ", ".join(entry.get("NSPrivacyAccessedAPITypeReasons", []))
+                  print(f"  - {entry.get('NSPrivacyAccessedAPIType', 'Unknown category')}: {reasons}")
+              print(f"  - Declared collected data categories: {len(data.get('NSPrivacyCollectedDataTypes', []))}")
+              print(f"  - Declared tracking: {data.get('NSPrivacyTracking', 'unspecified')}")
+          print()
+          print("Review against app and service behavior before answering App Privacy.")
+          PY
       - name: Export signed IPA for App Store distribution
         shell: bash
         run: |
@@ -112,6 +196,7 @@ jobs:
           if-no-files-found: error
           retention-days: 1
       - name: Upload IPA to App Store Connect for TestFlight
+        if: ${{ inputs.upload_to_testflight }}
         shell: bash
         run: |
           set -euo pipefail
@@ -123,6 +208,12 @@ jobs:
           test -n "$IPA"
           xcrun altool --upload-app --type ios --file "$IPA" --apiKey "$ASC_KEY_ID" --apiIssuer "$ASC_ISSUER_ID"
           echo 'IPA submitted to App Store Connect; Apple processing and TestFlight acceptance are pending.' >> "$GITHUB_STEP_SUMMARY"
+      - name: Check Apple processing and TestFlight availability
+        if: ${{ inputs.upload_to_testflight }}
+        shell: bash
+        run: |
+          export SIGNED_BUILD_NUMBER="$(/usr/libexec/PlistBuddy -c 'Print :CFBundleVersion' "$RUNNER_TEMP/Mushiverse.xcarchive/Products/Applications/App.app/Info.plist")"
+          node scripts/check-testflight-processing.mjs
       - name: Remove upload API key
         if: always()
         shell: bash
@@ -130,4 +221,52 @@ jobs:
       - name: Remove API key
         if: always()
         shell: bash
-        run: rm -f "$RUNNER_TEMP/AuthKey.p8"
+        run: |
+          rm -f "$RUNNER_TEMP/AuthKey.p8" "$RUNNER_TEMP/signing.key" "$RUNNER_TEMP/signing.csr" "$RUNNER_TEMP/signing.cer" "$RUNNER_TEMP/signing.pem" "$RUNNER_TEMP/signing-identity.p12" "$RUNNER_TEMP/signing-backup.zip" "$RUNNER_TEMP/import-material.pem" "$RUNNER_TEMP/import-identity.p12"
+          if test -f "$RUNNER_TEMP/mushiverse-signing.keychain-db"; then
+            security delete-keychain "$RUNNER_TEMP/mushiverse-signing.keychain-db"
+          fi
+
+  upload-saved-2541:
+    if: ${{ inputs.upload_existing_build_2541 && inputs.upload_to_testflight }}
+    runs-on: macos-26-intel
+    timeout-minutes: 20
+    concurrency:
+      group: mushiverse-ios-signed-archive
+      cancel-in-progress: false
+    env:
+      ASC_KEY_ID: ${{ secrets.ASC_KEY_ID }}
+      ASC_ISSUER_ID: ${{ secrets.ASC_ISSUER_ID }}
+      ASC_API_KEY_P8_BASE64: ${{ secrets.ASC_API_KEY_P8_BASE64 }}
+      SIGNED_BUILD_NUMBER: '2541'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - uses: actions/download-artifact@v4
+        with:
+          name: mushiverse-signed-ipa
+          run-id: 42912429942
+          github-token: ${{ github.token }}
+          path: ${{ runner.temp }}/saved-2541
+      - name: Verify saved IPA identity and upload approved build
+        shell: bash
+        run: |
+          set -euo pipefail
+          IPA="$(find "$RUNNER_TEMP/saved-2541" -maxdepth 1 -name '*.ipa' -type f -print -quit)"
+          test -n "$IPA"
+          unzip -p "$IPA" Payload/App.app/Info.plist > "$RUNNER_TEMP/saved-2541.plist"
+          test "$(/usr/libexec/PlistBuddy -c 'Print :CFBundleVersion' "$RUNNER_TEMP/saved-2541.plist")" = '2541'
+          test "$(/usr/libexec/PlistBuddy -c 'Print :CFBundleIdentifier' "$RUNNER_TEMP/saved-2541.plist")" = 'com.rikuto.mushiverse'
+          umask 077
+          mkdir -p "$HOME/.appstoreconnect/private_keys"
+          KEY="$HOME/.appstoreconnect/private_keys/AuthKey_${ASC_KEY_ID}.p8"
+          trap 'rm -f "$KEY" "$RUNNER_TEMP/AuthKey.p8"' EXIT
+          printf '%s' "$ASC_API_KEY_P8_BASE64" | base64 -D > "$RUNNER_TEMP/AuthKey.p8"
+          cp "$RUNNER_TEMP/AuthKey.p8" "$KEY"
+          xcrun altool --upload-app --type ios --file "$IPA" --apiKey "$ASC_KEY_ID" --apiIssuer "$ASC_ISSUER_ID"
+      - name: Install locked verification dependencies
+        run: npm ci --no-audit --no-fund
+      - name: Check Apple processing and TestFlight availability
+        run: node scripts/check-testflight-processing.mjs
