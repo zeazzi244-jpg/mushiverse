@@ -62,6 +62,18 @@ jobs:
           printf 'forced_login_method = "api"\n' > "$CODEX_HOME/config.toml"
           printf '%s' "$OPENAI_API_KEY" | npx --yes @openai/codex login --with-api-key
           npx --yes @openai/codex login status
+          # Validate that this CLI session can reach the Responses API before attempting edits.
+          # Never print credentials or API response bodies.
+          status=$(curl --silent --show-error --output /dev/null --write-out '%{http_code}' \
+            --connect-timeout 10 --max-time 30 \
+            -H "Authorization: Bearer $OPENAI_API_KEY" \
+            -H 'Content-Type: application/json' \
+            -d '{"model":"gpt-5.1-codex-mini","input":"Reply OK","max_output_tokens":8}' \
+            https://api.openai.com/v1/responses)
+          if [ "$status" != "200" ]; then
+            echo "::error::OpenAI Responses API returned HTTP $status. API key, model access, or API billing may need attention; stopping before coding."
+            exit 1
+          fi
       - name: Run bounded AI coding task
         run: |
           npx --yes @openai/codex exec --config forced_login_method='"api"' --model gpt-5.1-codex-mini --sandbox workspace-write "You are working on the existing MUSHIVERSE application. Inspect the repository and its existing tests. Prioritize App Store release blockers: startup blank screen diagnostics, fatal runtime errors, login, privacy and safety, and release validation. Implement up to THREE related, independently verifiable improvements in this run, with regression tests for each. Avoid cosmetic work unless it fixes a release-blocking readability problem. Make the actual code change and add or update a relevant regression test. Never change credentials, GitHub Actions workflows, payment or billing logic, account security, or production configuration. Do not delete existing features. Do not use network services beyond the available development environment. Do not commit or push; the workflow will handle that. If no safe improvement is possible, make no changes."
