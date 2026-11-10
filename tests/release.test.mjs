@@ -116,3 +116,11 @@ test('release bundle contains no symlinks or unsupported asset extensions', () =
   assert.ok(existsSync('www'), 'Run npm run build:web first');
   walk('www');
 });
+
+test('mobile forms retain readable placeholders and disabled states', () => {
+  const css = readFileSync(join('css', 'adventure-ui.css'), 'utf8');
+  assert.match(css, /:is\(input,textarea,select\)\{font-size:16px/, 'iPhone input font-size missing');
+  assert.match(css, /:is\(input,textarea\)::placeholder\{opacity:1;color:#596b60\}/, 'Placeholder contrast missing');
+  assert.match(css, /:disabled\{opacity:\.65;cursor:not-allowed\}/, 'Disabled action styling missing');
+  assert.match(css, /forced-colors:active/, 'Forced-colors accessibility missing');
+});
