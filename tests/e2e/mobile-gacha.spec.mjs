@@ -49,3 +49,22 @@ test('AI collection isolates guest and signed-in card ownership across account c
  await expect(page.locator('#aiInsectCards')).toContainText('所持 1枚');
  expect(await page.evaluate(A=>JSON.parse(localStorage.getItem('mushiverse-v77-game:user:'+A)).coins,A)).toBe(500);
 });
+
+test('gacha recovers a failed startup catalog without opening the encyclopedia',async({page})=>{
+ await setup(page,{coins:500});
+ let offline=true;
+ await page.route('**/docs/ai_insect_catalog_v1.json',route=>offline?route.fulfill({status:503}):route.continue());
+ await page.reload();
+ await expect(page.locator('#aiInsectStatus')).toContainText('再試行');
+ await page.locator('nav.nav [data-tab="gacha"]').click();
+ await expect(page.locator('#aiInsectStatus')).toContainText('再試行');
+ await page.locator('#mv77Draw').click();
+ await expect(page.locator('#mv77Result')).toContainText('読み込みが完了していません');
+ expect(await page.evaluate(A=>JSON.parse(localStorage.getItem('mushiverse-v77-game:user:'+A)).coins,A)).toBe(500);
+ offline=false;
+ await page.locator('nav.nav [data-tab="gacha"]').click();
+ await page.waitForFunction(()=>window.MushiverseIllustratedCards?.N?.length===40);
+ await page.locator('#mv77Draw').click();
+ await expect(page.locator('#mv88Reveal')).toBeVisible();
+ expect(await page.evaluate(A=>JSON.parse(localStorage.getItem('mushiverse-v77-game:user:'+A)).coins,A)).toBe(450);
+});

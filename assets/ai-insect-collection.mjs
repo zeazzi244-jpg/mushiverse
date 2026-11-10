@@ -32,8 +32,10 @@ function start(){
   if(!found.length){const empty=document.createElement('p');empty.textContent=counts.size?'条件に一致する所持カードがありません。':'まだカードを持っていません。ガチャで獲得したカードがここに表示されます。';list.replaceChildren(empty);return}
   list.replaceChildren(...found.map(c=>{const card=document.createElement('article');card.dataset.cardId=c.id;card.className='aiCard ai-'+c.rarity;const id=document.createElement('small');id.textContent=c.id+' · '+c.rarity;const art=document.createElement('div');art.className='aiPlaceholder';art.textContent='画像準備中';if(c.art_status!=='pending'){const img=document.createElement('img');img.src=new URL('./ai-insects/'+c.id+'.webp',import.meta.url).href;img.alt=c.name;img.loading='lazy';img.width=480;img.height=720;img.style.cssText='display:block;width:100%;height:auto';art.style.padding='0';img.addEventListener('error',()=>{art.textContent='画像を読み込めませんでした'},{once:true});art.replaceChildren(img)}const title=document.createElement('h3');title.textContent=c.name;const owned=document.createElement('p');owned.textContent='所持 '+(counts.get(c.id)||0)+'枚';card.append(id,art,title,owned);return card}));
  }
- async function load(){if(catalog){render();return}if(loading)return;loading=true;status.textContent='読み込み中…';try{catalog=await fetchCatalog();prepareDrawPool(catalog);render()}catch{status.textContent='AI図鑑を読み込めません。AI昆虫カードのタブをタップして再試行できます。'}finally{loading=false}}
+ async function load(){if(catalog){render();return}if(loading)return;loading=true;status.textContent='読み込み中…';try{catalog=await fetchCatalog();prepareDrawPool(catalog);render()}catch{status.textContent='AI図鑑を読み込めません。ガチャまたはAI昆虫カードのタブを開き直すと再試行します。'}finally{loading=false}}
  document.getElementById('mv90GachaTab')?.addEventListener('click',()=>{panel.open=true;void load()});
+ document.querySelector('nav.nav [data-tab="gacha"]')?.addEventListener('click',()=>{if(!catalog)void load()});
+ window.addEventListener('online',()=>{if(!catalog)void load()});
  panel.addEventListener('toggle',()=>{if(panel.open)void load()});search.addEventListener('input',render);select.addEventListener('change',render);
  document.addEventListener('mushiverse:auth-changed',()=>{search.value='';select.value='ALL';render()});window.addEventListener('storage',e=>{if(e.key===storageKey()||e.key===walletKey()||e.key===null)render()});
  void load();
