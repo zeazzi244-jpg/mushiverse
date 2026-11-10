@@ -674,3 +674,9 @@ Add for Reviewを実行し、画像不足が表示されなくなったことを
 - 図鑑修正版はWeb CI成功。署名・TestFlightアップロード成功（ビルド2241、Apple処理VALID、内部IN_BETA_TESTING、実機未確認）。[署名CI](https://github.com/zeazzi244-jpg/mushiverse/actions/runs/42743349620)
 
 - 2241のiPhone実機でRギンハネチョウの所持1枚と50コイン消費を確認。AI図鑑は所持カードだけを描画する仕様へ変更。検索・レア度は所持カードに適用。0枚時と検索該当なしの案内を追加。2241には未反映。
+
+### V7 一時的な開発休止のチェックポイント
+
+- 2341はApple処理VALID・内部IN_BETA_TESTING、実機未確認。[配布](https://github.com/zeazzi244-jpg/mushiverse/actions/runs/42749161027)。
+- AI図鑑とガチャのカタログ取得を一本化し、起動時に取得できなかった場合はタブの再操作で抽選も復旧するよう修正。モジュール構文確認済み。新しいCIはPRで追跡。公開ゲートの前回記録55%（11/20）を据え置き。本人操作は再開時の2341実機確認とApp Store Connectの残項目。
+- 再開順と公開ゲートは [MUSHIVERSE_RETURN_HANDOFF.md](MUSHIVERSE_RETURN_HANDOFF.md)。
