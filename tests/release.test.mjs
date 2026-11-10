@@ -66,3 +66,11 @@ test('forest panels use explicit high-contrast text colors', () => {
   assert.match(css, /#home #mv110FollowFeed h2\{color:#f5ffe8\}/, 'Follow feed title contrast missing');
   assert.match(css, /prefers-contrast:more/, 'High contrast mode missing');
 });
+
+test('all six app sections receive consistent legibility rules', () => {
+  const css = readFileSync(join('css', 'adventure-ui.css'), 'utf8');
+  assert.match(css, /font-size:16px/, 'Base font size must be readable');
+  assert.match(css, /-webkit-text-size-adjust:100%/, 'iOS text scaling baseline missing');
+  assert.match(css, /:is\(#home,#post,#collection,#gacha,#map,#profile\)/, 'Typography must cover all six sections');
+  assert.match(css, /foregrounds are limited to known dark surfaces/, 'Contrast rules must not force white text onto light cards');
+});
