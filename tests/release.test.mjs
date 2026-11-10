@@ -158,3 +158,15 @@ test('gacha presentation supports skip, reduced motion and transparent rewards',
   assert.match(html, /id="mvGachaReviewSafety"/, 'Accessibility styles missing');
   assert.doesNotMatch(html, /overlay\.addEventListener\('click',e=>\{if\(e\.target===overlay\)/, 'Accidental backdrop dismissal remains');
 });
+
+test('gacha avoids early rarity audio spoilers and cleans up replaced overlays', () => {
+  const html = readFileSync('index.html', 'utf8');
+  const start = html.indexOf('function showGachaReveal(got){');
+  const end = html.indexOf('\nfunction start(){ensure();render();', start);
+  assert.ok(start >= 0 && end > start, 'Gacha reveal implementation missing');
+  const reveal = html.slice(start, end);
+  assert.match(reveal, /window\.mvCloseGachaReveal=close/, 'Overlay cleanup hook missing');
+  assert.match(reveal, /window\.mvCloseGachaReveal\(\)/, 'Prior reveal is not cleaned up');
+  assert.match(reveal, /const reveal=\(\)=>\{[^\n]*mushiverse:rarity-reveal/, 'Rarity signal must occur at reveal');
+  assert.doesNotMatch(reveal.split('const reveal=()=>')[0], /dispatchEvent\(new CustomEvent\('mushiverse:rarity-reveal'/, 'Rarity leaked before reveal');
+});
