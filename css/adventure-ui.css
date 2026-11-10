@@ -67,3 +67,12 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Hiragino Kaku Gothic ProN","Y
 #home .mvAdventureHero a:not(.mvAdventurePrimary),.mvSectionIntro a,#home #mv110FollowFeed a{color:#eaffc8;text-decoration-thickness:1.5px;text-underline-offset:3px}
 #home .mvAdventureHero .mvAdventurePrimary{color:#102a22}
 @media(max-width:380px){body{font-size:16px}:is(#home,#post,#collection,#gacha,#map,#profile) :is(h1,h2){overflow-wrap:anywhere}}
+
+/* V14: controls, helper text and overlays remain legible on iPhone. */
+:is(#home,#post,#collection,#gacha,#map,#profile) :is(input,textarea,select){font-size:16px;line-height:1.5}
+:is(#home,#post,#collection,#gacha,#map,#profile) :is(input,textarea)::placeholder{opacity:1;color:#596b60}
+:is(#home,#post,#collection,#gacha,#map,#profile) :is(input,textarea,select):disabled{opacity:.72}
+:is(#home,#post,#collection,#gacha,#map,#profile) :is(button,[role="button"]):disabled{opacity:.65;cursor:not-allowed}
+:is(#home,#post,#collection,#gacha,#map,#profile) :is(.panel,.toolbar) :is(h1,h2,h3,h4){overflow-wrap:break-word}
+:is(#home,#post,#collection,#gacha,#map,#profile) :is(.panel,.toolbar) :is(input,textarea,select){box-sizing:border-box}
+@media(forced-colors:active){:is(#home,#post,#collection,#gacha,#map,#profile) :is(button,a,input,select,textarea):focus-visible{outline:3px solid Highlight}}
