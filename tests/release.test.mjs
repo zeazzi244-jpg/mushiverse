@@ -49,3 +49,11 @@ test('production bundle excludes development and private artifacts', () => {
   };
   walk(root);
 });
+
+test('mobile adventure controls remain readable and accessible', () => {
+  const css = readFileSync(join('css', 'adventure-ui.css'), 'utf8');
+  assert.match(css, /focus-visible/, 'Keyboard focus styling missing');
+  assert.match(css, /min-height:44px/, 'Minimum adventure button tap target missing');
+  assert.match(css, /prefers-reduced-motion:reduce/, 'Reduced motion support missing');
+  assert.match(css, /max-width:380px/, 'Small-screen adaptation missing');
+});
