@@ -190,3 +190,8 @@ test('gacha does not expose rarity via initial overlay CSS', () => {
   assert.match(reveal, /revealed=true;overlay\.classList\.add\('mv88-'\+top\)/, 'Rarity colors should appear only at result reveal');
   assert.match(html, /id="mvGachaSpoilerGuard"/, 'Spoiler protection CSS missing');
 });
+
+test('third gacha phase gets screen time before final result', () => {
+  const html = readFileSync('index.html', 'utf8');
+  assert.match(html, /phaseTimer=setInterval\(\(\)=>\{phaseIndex=Math\.min\(phaseIndex\+1,2\);updatePhase\(\);if\(phaseIndex===2\)clearInterval\(phaseTimer\)\},duration\/4\)/, 'Final phase must play before automatic reveal');
+});
