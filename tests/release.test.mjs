@@ -149,3 +149,12 @@ test('gacha reveal uses longer three-stage variants without rerolling rewards', 
   assert.match(html, /const updatePhase=\(\)=>/, 'Three-stage reveal controller missing');
   assert.match(html, /clearInterval\(phaseTimer\)/, 'Animation timer cleanup missing');
 });
+
+test('gacha presentation supports skip, reduced motion and transparent rewards', () => {
+  const html = readFileSync('index.html', 'utf8');
+  assert.match(html, /演出をスキップして結果を見る/, 'Skip control missing');
+  assert.match(html, /抽選時に確定済み/, 'Fixed-result disclosure missing');
+  assert.match(html, /if\(reduced\)reveal\(\)/, 'Reduced-motion immediate reveal missing');
+  assert.match(html, /id="mvGachaReviewSafety"/, 'Accessibility styles missing');
+  assert.doesNotMatch(html, /overlay\.addEventListener\('click',e=>\{if\(e\.target===overlay\)/, 'Accidental backdrop dismissal remains');
+});
