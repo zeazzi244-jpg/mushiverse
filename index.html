@@ -3869,7 +3869,7 @@ function draw(n){if(working)return;working=true;try{render();const before=JSON.p
 function showGachaReveal(got){
  const rank={N:0,R:1,SR:2,SSR:3};const top=got.reduce((a,c)=>rank[c.rarity]>rank[a]?c.rarity:a,'N');
  if(typeof window.mvCloseGachaReveal==='function')window.mvCloseGachaReveal();else document.getElementById('mv88Reveal')?.remove();
- const overlay=document.createElement('div');overlay.id='mv88Reveal';overlay.className='mv88Reveal mv88-'+top;overlay.setAttribute('role','dialog');overlay.setAttribute('aria-modal','true');overlay.setAttribute('aria-label','ガチャ結果');
+ const overlay=document.createElement('div');overlay.id='mv88Reveal';overlay.className='mv88Reveal';overlay.setAttribute('role','dialog');overlay.setAttribute('aria-modal','true');overlay.setAttribute('aria-label','ガチャ結果');
  const inner=document.createElement('div');inner.className='mv88Inner';
  const title=document.createElement('div');title.className='mv88Title';title.textContent=got.length===10?'✨ 10連ガチャ ✨':'✨ ムシガチャ ✨';
  const stage=document.createElement('div');stage.className='mv88Stage';stage.innerHTML='<div class="mv88Halo"></div><div class="mv88Capsule">🪲</div><div class="mv88Wait"></div>';stage.querySelector('.mv88Wait').textContent='光が集まっている…';// Rarity sounds and visual hints begin only after the reveal; no premature spoiler.
@@ -3881,7 +3881,7 @@ function showGachaReveal(got){
  const btn=document.createElement('button');btn.type='button';btn.className='mv88Close';btn.textContent='演出をスキップして結果を見る';btn.setAttribute('aria-label','演出をスキップして獲得カードを確認');
  const note=document.createElement('p');note.className='mv88Fairness';note.textContent='獲得カードは抽選時に確定済みです。演出・スキップ操作で結果や排出率は変わりません。';inner.append(title,phase,stage,result,note,btn);overlay.append(inner);document.body.append(overlay);
  let revealed=false;let timer;let phaseTimer;const previous=document.activeElement;
- const reveal=()=>{if(revealed)return;revealed=true;document.dispatchEvent(new CustomEvent('mushiverse:rarity-reveal',{detail:{rarity:top}}));if(top==='SR'||top==='SSR')overlay.classList.add('mv103Rare');clearTimeout(timer);clearInterval(phaseTimer);phase.hidden=true;stage.hidden=true;result.hidden=false;result.replaceChildren(...got.map(c=>{const card=document.createElement('div');card.className='mv88Card mv88Card-'+c.rarity;const emblem=document.createElement('div');emblem.className='mv88Emblem';emblem.textContent=c.name.includes('チョウ')?'🦋':c.name.includes('テントウ')?'🐞':c.name.includes('バッタ')?'🦗':'🪲';const tier=document.createElement('strong');tier.textContent=c.rarity;const name=document.createElement('span');name.textContent=c.name;card.append(emblem,tier,name);return card}));btn.textContent='ガチャに戻る';btn.setAttribute('aria-label','ガチャ画面に戻る');if(top==='SSR'&&!matchMedia('(prefers-reduced-motion: reduce)').matches){overlay.classList.add('mv88Burst');try{navigator.vibrate?.([60,40,120])}catch(_){}}};
+ const reveal=()=>{if(revealed)return;revealed=true;overlay.classList.add('mv88-'+top);document.dispatchEvent(new CustomEvent('mushiverse:rarity-reveal',{detail:{rarity:top}}));if(top==='SR'||top==='SSR')overlay.classList.add('mv103Rare');clearTimeout(timer);clearInterval(phaseTimer);phase.hidden=true;stage.hidden=true;result.hidden=false;result.replaceChildren(...got.map(c=>{const card=document.createElement('div');card.className='mv88Card mv88Card-'+c.rarity;const emblem=document.createElement('div');emblem.className='mv88Emblem';emblem.textContent=c.name.includes('チョウ')?'🦋':c.name.includes('テントウ')?'🐞':c.name.includes('バッタ')?'🦗':'🪲';const tier=document.createElement('strong');tier.textContent=c.rarity;const name=document.createElement('span');name.textContent=c.name;card.append(emblem,tier,name);return card}));btn.textContent='ガチャに戻る';btn.setAttribute('aria-label','ガチャ画面に戻る');if(top==='SSR'&&!matchMedia('(prefers-reduced-motion: reduce)').matches){overlay.classList.add('mv88Burst');try{navigator.vibrate?.([60,40,120])}catch(_){}}};
  const close=()=>{clearTimeout(timer);clearInterval(phaseTimer);overlay.remove();if(window.mvCloseGachaReveal===close)delete window.mvCloseGachaReveal;document.removeEventListener('keydown',keyHandler);if(previous&&previous.isConnected)previous.focus()};
  const keyHandler=e=>{if(e.key==='Escape'){e.preventDefault();if(!revealed)reveal();else close()}if(e.key==='Tab'){e.preventDefault();btn.focus()}};
  window.mvCloseGachaReveal=close;document.addEventListener('keydown',keyHandler);btn.addEventListener('click',()=>revealed?close():reveal());
@@ -4132,6 +4132,12 @@ document.addEventListener('mushiverse:gacha-drawn',()=>{
 })();
 </script>
 
+<style id="mvGachaSpoilerGuard">
+/* The rarity color is revealed only with the final card, never during the wait. */
+.mv88Reveal:not([data-phase="3"]) .mvAwakeningLabel{visibility:hidden}
+.mv88Reveal .mv88Close{position:relative;z-index:4}
+.mv88Reveal .mv88Wait{max-width:90%;line-height:1.6}
+</style>
 <style id="mvGachaAwakening">
 .mvAwakeningLabel{position:relative;z-index:2;min-height:32px;font-weight:900;font-size:clamp(17px,5vw,25px);letter-spacing:.08em;color:#fff4bd;text-shadow:0 0 20px #ffd54e}
 .mv88Reveal.mvAwakeningBurst .mv88Halo{width:280px;height:280px;background:conic-gradient(#ffca4a,#fff,#f78bff,#80e9ff,#ffca4a);filter:blur(8px);animation:mvAwakenPulse .65s ease-in-out infinite alternate}
