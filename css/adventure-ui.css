@@ -321,3 +321,59 @@ body :is(#home,#post,#gacha,#collection,#map,#profile) button:disabled { cursor:
     to { transform: scale(1.16); opacity: .25; box-shadow: 0 0 65px var(--capsule-light); }
   }
 }
+
+/* Match legacy selectors that otherwise paint pale surfaces over the night theme. */
+body :is(#home,#post,#gacha,#collection,#map,#profile) {
+  --mvCardBg: #142a20;
+  --mvCardLine: #42634e;
+  background: #091610 !important;
+  color: #e6f1e8;
+}
+body #home #mv110FollowFeed,
+body #home #mv110FollowFeed li,
+body #home #ranking,
+body #profile #mvMembershipStatus,
+body #collection #aiInsectCollection,
+body #collection #mv90Wild,
+body #collection #mv90Gacha {
+  background: #142a20 !important;
+  color: #e6f1e8 !important;
+}
+body #home #mv110FollowFeed h2,
+body #home #ranking h2,
+body :is(#home,#post,#gacha,#collection,#map,#profile) > .sectionTitle {
+  color: #e6f1e8 !important;
+}
+body #home .toolbar :is(input,select,label),
+body #post #recordForm :is(input,select,textarea),
+body #collection .aiTools :is(input,select),
+body #map .toolbar :is(select,label) {
+  background: #102319 !important;
+  color: #e6f1e8 !important;
+  border-color: #68886e !important;
+}
+body #home .toolbar input::placeholder { color: #b4cbbb !important; }
+body #home #weeklyQuest { display: block !important; background: #142a20 !important; }
+body #home #mv82Quest { display: none !important; }
+body #home #weeklyQuest :is(.questRow,.questBadge,.questDone,.reviewNote) {
+  background: #1d382a !important;
+  color: #e6f1e8 !important;
+  border-color: #42634e !important;
+}
+body #home #weeklyQuest :is(h2,b,.muted) { color: #e6f1e8 !important; }
+body .mv116Hud { position: relative; top: auto !important; border-radius: 16px; }
+@media (prefers-reduced-motion: no-preference) {
+  #mv88Reveal .mv88Halo {
+    animation: mvGatherLight 2s ease-in-out infinite alternate;
+  }
+  #mv88Reveal .mvCapsuleCharged .mv88Capsule {
+    animation: mvCapsuleCharge 1s ease-in-out infinite alternate;
+  }
+  #mv88Reveal .mvCapsuleOpening .mv88Capsule {
+    animation: mvCapsuleOpen 1.6s ease-in both;
+  }
+  @keyframes mvGatherLight {
+    from { transform: scale(.72) rotate(0); opacity: .35; }
+    to { transform: scale(1.2) rotate(55deg); opacity: .85; }
+  }
+}

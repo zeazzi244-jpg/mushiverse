@@ -236,3 +236,21 @@ test('kids mode blocks hidden home shortcuts and direct record or map tab clicks
   await expect(page.locator('#map')).toBeHidden();
   expect(errors).toEqual([]);
 });
+
+test('night surfaces stay dark and available weekly goals are visible', async ({page}) => {
+  const errors = await setup(page);
+  for (const selector of ['#home', '#mv110FollowFeed', '#home .toolbar', '#home .toolbar input', '#ranking']) {
+    const background = await page.locator(selector).first().evaluate(el => getComputedStyle(el).backgroundColor);
+    const channels = background.match(/[\d.]+/g).slice(0,3).map(Number);
+    expect(Math.max(...channels), selector).toBeLessThan(90);
+  }
+  await expect(page.locator('#mv82Quest')).toBeHidden();
+  await expect(page.locator('#weeklyQuest')).toBeVisible();
+  await expect(page.locator('#weeklyQuest .questRow')).toHaveCount(3);
+  await expect(page.locator('#weeklyQuest')).toContainText('今週3件記録');
+  await expect(page.locator('#weeklyQuest')).toContainText('写真付き記録を1件');
+  await expect(page.locator('#weeklyQuest')).not.toContainText('予定');
+  await page.locator('#mv110FollowFeed').scrollIntoViewIfNeeded();
+  await page.screenshot({path: test.info().outputPath('night-home-readable.png')});
+  expect(errors).toEqual([]);
+});
