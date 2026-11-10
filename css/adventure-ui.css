@@ -37,3 +37,16 @@
 @media(prefers-reduced-motion:reduce){
   #home *,#post *,#collection *,#gacha *,#map *,#profile *{scroll-behavior:auto!important}
 }
+
+/* V12: readable forest palette and clearer cards; preserve application logic. */
+:root{--mv-surface:#102a22;--mv-surface-raised:#193b2f;--mv-border:rgba(205,238,194,.22);--mv-text:#f3f8ef;--mv-muted:#c9ddcd;--mv-accent:#e5bd64}
+#home .mvAdventureHero,#post .mvSectionIntro,#collection .mvSectionIntro,#gacha .mvSectionIntro,#map .mvSectionIntro,#profile .mvSectionIntro{color:var(--mv-text);background:linear-gradient(145deg,#102a22,#20523c);border:1px solid var(--mv-border);border-radius:22px;box-shadow:0 10px 28px rgba(6,24,16,.18)}
+#home .mvAdventureHero h1,#home .mvAdventureHero h2,#post .mvSectionIntro h1,#collection .mvSectionIntro h1,#gacha .mvSectionIntro h1,#map .mvSectionIntro h1,#profile .mvSectionIntro h1{color:#fff}
+#home .mvAdventureHero p,#post .mvSectionIntro p,#collection .mvSectionIntro p,#gacha .mvSectionIntro p,#map .mvSectionIntro p,#profile .mvSectionIntro p{color:var(--mv-muted)}
+#home #mv110FollowFeed{background:linear-gradient(145deg,#153a2c,#214a36);border-color:var(--mv-border);color:var(--mv-text)}
+#home #mv110FollowFeed h2{color:#f5ffe8}
+#home #mv110FollowStatus{color:var(--mv-muted)}
+#home .mvAdventureSecondary{border:1px solid rgba(232,249,222,.55);color:#f5ffe8}
+#home .mvAdventurePrimary{color:#102a22;font-weight:800}
+#home .mvAdventureHero a:focus-visible,#home #mv110FollowFeed a:focus-visible{outline:3px solid var(--mv-accent);outline-offset:3px}
+@media(prefers-contrast:more){#home .mvAdventureHero,#home #mv110FollowFeed,.mvSectionIntro{border-color:#fff}#home #mv110FollowStatus{color:#fff}}
