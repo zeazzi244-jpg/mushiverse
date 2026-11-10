@@ -198,3 +198,17 @@ test('a background map failure leaves observation pins usable',async({page})=>{
   await expect(page.locator('#mapPostList')).toContainText('カブトムシ');
   expect(errors).toEqual([]);
 });
+
+test('kids mode blocks hidden home shortcuts and direct record or map tab clicks', async ({page}) => {
+  const errors = await setup(page);
+  await page.evaluate(() => {
+    document.body.classList.add('mv128Kids');
+    document.querySelector('.mvAdventurePrimary').click();
+    document.querySelector('.nav [data-tab="map"]').click();
+  });
+  await expect(page.locator('#home')).toBeVisible();
+  await expect(page.locator('#home .mvAdventurePrimary')).toBeHidden();
+  await expect(page.locator('#post')).toBeHidden();
+  await expect(page.locator('#map')).toBeHidden();
+  expect(errors).toEqual([]);
+});

@@ -32,6 +32,13 @@ test.describe('beta gacha economy',()=>{
   expect(wallet.coins).toBe(50);
   expect(wallet.tickets).toBe(2);
  });
+ test('the first copy gets a discovery badge even in a duplicate ten-draw',async({page})=>{
+  await page.waitForFunction(()=>window.MushiverseIllustratedCards?.N?.length===40);
+  await page.evaluate(()=>{Math.random=()=>0.9});
+  await page.locator('#mv77Ten').click();
+  await expect(page.locator('#mv88Reveal .mv88Card')).toHaveCount(10);
+  await expect(page.locator('#mv88Reveal .mvNewDiscovery')).toHaveCount(1);
+ });
  test('first daily claim grants five coins once only',async({page})=>{
  await page.locator('#mv77Claim').click();
  await expect.poll(async()=>page.evaluate(k=>JSON.parse(localStorage.getItem(k)||'{}').coins,key)).toBe(505);

@@ -58,3 +58,14 @@
 @media(prefers-reduced-motion:reduce){
   #home *,#post *,#collection *,#gacha *,#map *,#profile *{scroll-behavior:auto!important}
 }
+
+.mvNewDiscovery {
+  display: inline-block;
+  margin: 0 0 .4rem;
+  padding: .22rem .65rem;
+  border-radius: 999px;
+  background: #f7df97;
+  color: #372a13;
+  font-size: .75rem;
+  font-weight: 800;
+}
