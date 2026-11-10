@@ -32,3 +32,13 @@
 
 ## G. 運用方針
 世界一の昆虫アプリと早期公開を目指す。AI主体で実装・検証し、iPhoneのみで管理できるようにする。本人への操作依頼は最小限にまとめ、済んだ作業は繰り返さない。未取得AIカードは非表示を標準とし、表示が必要ならシルエットのみ。実在昆虫カードは追加しない。課金・外部公開・審査提出は明示承認が必要。
+
+## H. V8 復元地点と検証手順
+
+- 作業ブランチは `codex/verified-changes-20261028`。V8の実装コミットは `77e22f918febd573d7c59ebef3058b7e0b9e6000`。最新の資料コミットはPRの先端を確認する。
+- [復帰用バックアップ](https://github.com/zeazzi244-jpg/mushiverse/tree/backup/v8-20261110) はV8開始前の `b87088a502c55b8ab0c4d4f48db77d926a98be43` を固定。復元時はこのブランチから新規作業ブランチを切り、作業中のブランチを強制更新しない。
+- V7のブラウザー・iOS Simulator・署名準備CIは成功。V8の変更で、起動時にAIカタログを読み込めなかった場合、ガチャタブの再選択または通信復帰で再試行する。図鑑タブでの再試行も使える。V8のCIは [PR #2](https://github.com/zeazzi244-jpg/mushiverse/pull/2/checks) で照合する。
+- ローカルはCIと同じNodeバージョンをワークフローで確認し、`npm ci` → `npm test` → `npm run verify:web`。ブラウザー試験は `npx playwright install --with-deps chromium webkit` → `npm run test:e2e`。iOSプロジェクトは `npm run ios:sync` → `npm run ios:check`、コンパイルはGitHub ActionsのmacOSランナーを使用。iPhoneでの管理はActionsとTestFlightを使う。
+- 署名は `iOS signed archive (manual)` を作業ブランチで実行。内部配布を明示承認された場合に `upload_to_testflight` を有効にする。証明書修復は既存署名で復旧できず、別途承認された場合に限る。アーカイブ・IPA出力・Apple処理・内部配布の各段階をログで確認する。
+- 署名用GitHub Secretsの名前と用途のみを記載。 `ASC_KEY_ID` はApp Store Connect APIキーの識別子、`ASC_ISSUER_ID` は発行者の識別子、`ASC_API_KEY_P8_BASE64` はAPI署名用の秘密鍵。 `APPLE_TEAM_ID` は署名チーム指定用の環境変数。実値は保護設定で確認し、チャット・ファイル・ログへ転記しない。
+- 審査への最短順は、実機でコールド起動・ログイン・6タブ・所持図鑑を確認 → ポリシーURL、App Privacy、地図利用権、審査用ログインを揃える → 承認済みの配布候補を選択 → 審査提出。過去の白画面は原因未特定、2341の実機動作とApp Store Connectの最新下書きは未確認。

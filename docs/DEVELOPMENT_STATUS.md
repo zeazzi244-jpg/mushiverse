@@ -682,3 +682,9 @@ Add for Reviewを実行し、画像不足が表示されなくなったことを
 - 再開順と公開ゲートは [MUSHIVERSE_RETURN_HANDOFF.md](MUSHIVERSE_RETURN_HANDOFF.md)。
 
 - 検証対象 `24e1500e681360ef68333b1b306639a73c48210d`。ローカルで起動時取得失敗、図鑑タブでの復旧、連打時の通信重複防止、SSRプール復元を確認。[Web CI](https://github.com/zeazzi244-jpg/mushiverse/actions/runs/42754053157) は初回がブラウザーのインストール工程でキャンセルされたが、同じコミットの再実行で成功。[iOS Simulator](https://github.com/zeazzi244-jpg/mushiverse/actions/runs/42754053137)、AI図鑑、署名事前検証、隔離課金、アカウント安全、リリーススクリプトも成功。追記は資料のみ。
+
+### V8 復元地点とガチャの再試行
+
+- V7を `backup/v8-20261110`（`b87088a502c55b8ab0c4d4f48db77d926a98be43`）に保存。PR #2はドラフトのまま。追加・変更差分を代表的な鍵の形式で確認し一致なし。履歴全体の監査は未実施。
+- `77e22f918febd573d7c59ebef3058b7e0b9e6000` でカタログ取得失敗からの復帰をガチャタブと通信復帰にも接続。対象モジュールと追加回帰試験はNode構文検査成功。ブラウザー・iOS結果は同じ変更を含むPR先端のCIで確認する。公開ゲート55%（11/20）据え置き。2341の次の配布・審査提出は未実施。
+- [引き継ぎ](MUSHIVERSE_RETURN_HANDOFF.md)にビルド・テスト・署名設定名と復元手順を追記。
