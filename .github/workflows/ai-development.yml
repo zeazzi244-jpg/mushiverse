@@ -1,0 +1,73 @@
+name: MUSHIVERSE AI development (review required)
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '17 * * * *'
+permissions:
+  contents: write
+  pull-requests: write
+  issues: read
+concurrency:
+  group: mushiverse-ai-development
+  cancel-in-progress: false
+jobs:
+  develop:
+    if: github.repository == 'zeazzi244-jpg/mushiverse'
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    env:
+      OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+      GH_TOKEN: ${{ github.token }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: true
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+      - name: Verify AI key is configured
+        run: |
+          if [ -z "$OPENAI_API_KEY" ]; then
+            echo "::error::Set OPENAI_API_KEY in repository Actions secrets first."
+            exit 1
+          fi
+      - name: Install project dependencies
+        run: npm ci
+      - name: Start isolated development branch
+        id: branch
+        run: |
+          BRANCH="automation/ai-$(date -u +%Y%m%d-%H%M%S)-$GITHUB_RUN_ID"
+          git switch -c "$BRANCH"
+          echo "name=$BRANCH" >> "$GITHUB_OUTPUT"
+      - name: Run bounded AI coding task
+        run: |
+          npx --yes @openai/codex exec --full-auto "You are working on the existing MUSHIVERSE application. Inspect the repository and its existing tests. Choose exactly ONE small, high-value, verifiable improvement prioritizing startup blank screen diagnostics, contrast/readability, gacha usability, or App Store readiness. Make the actual code change and add or update a relevant regression test. Never change credentials, GitHub Actions workflows, payment or billing logic, account security, or production configuration. Do not delete existing features. Do not use network services beyond the available development environment. Do not commit or push; the workflow will handle that. If no safe improvement is possible, make no changes."
+      - name: Run release regression suite
+        run: npm run test:release
+      - name: Detect changed files
+        id: changes
+        run: |
+          if [ -n "$(git status --porcelain)" ]; then
+            echo "changed=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "changed=false" >> "$GITHUB_OUTPUT"
+          fi
+      - name: Enforce safe file boundaries
+        if: steps.changes.outputs.changed == 'true'
+        run: |
+          if git status --porcelain | grep -E '(^|/)(\.github/|\.env|package(-lock)?\.json|capacitor\.config|ios/|android/)' ; then
+            echo "::error::Protected files were modified; refusing to publish."
+            exit 1
+          fi
+      - name: Open reviewable pull request
+        if: steps.changes.outputs.changed == 'true'
+        env:
+          BRANCH: ${{ steps.branch.outputs.name }}
+        run: |
+          git config user.name "mushiverse-ai-bot"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          git commit -m "chore(ai): bounded MUSHIVERSE improvement"
+          git push --set-upstream origin "$BRANCH"
+          gh pr create --base main --head "$BRANCH" --title "AI: review MUSHIVERSE improvement" --body "Automated bounded change. Release tests passed. **Human review required before merging.**"
