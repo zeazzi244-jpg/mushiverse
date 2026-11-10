@@ -200,7 +200,9 @@ test('startup recovery is non-destructive and supports all main tabs', () => {
   const html = readFileSync('index.html', 'utf8');
   assert.match(html, /id="mvStartupRecoveryScript"/);
   assert.match(html, /setTimeout\(check,12000\)/);
-  assert.match(html, /#home, #record, #gacha, #collection, #map, #profile/);
+  assert.match(html, /window\.dispatchEvent\(new Event\('mushiverse:app-ready'\)\)/);
+  assert.match(html, /window\.addEventListener\('mushiverse:app-ready'/);
+  assert.doesNotMatch(html.slice(html.indexOf('id="mvStartupRecoveryScript"'), html.indexOf('</script>', html.indexOf('id="mvStartupRecoveryScript"'))), /if\(visible\)return/, 'Static markup must not conceal initialization failure');
   assert.match(html, /location\.reload\(\)/);
   const recovery = html.slice(html.indexOf('id="mvStartupRecoveryScript"'), html.indexOf('</script>', html.indexOf('id="mvStartupRecoveryScript"')));
   assert.doesNotMatch(recovery, /localStorage\.clear|indexedDB\.deleteDatabase|sessionStorage\.clear/, 'Recovery must not erase user data');
