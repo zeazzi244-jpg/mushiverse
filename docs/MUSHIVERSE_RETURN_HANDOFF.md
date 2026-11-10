@@ -20,6 +20,8 @@ Updated: 2026-11-11 (JST). This file records verified GitHub edits, not a claim 
 - `7f48ccc2cdc3`: added typography and legibility rules across six app sections.
 - `1698dbd455a6`: added six-section typography regression test.
 - `9c5e731c8aaf`: added numerical WCAG AA contrast test for solid forest surfaces.
+- `6b2ec2dce008`: hardened web bundle against unexpected nested file extensions and symlinks.
+- `356113043e37`: added a release test for safe file types and symlink exclusion.
 - These are **source-control changes**, not evidence that tests, device checks, TestFlight distribution, or App Store submission succeeded.
 - Latest verified commit before this handoff update: `9c5e731c8aaf`.
 
