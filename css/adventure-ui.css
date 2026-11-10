@@ -76,3 +76,25 @@
 /* Translated tab labels are real text, shared by the screen and assistive tech. */
 .lang-en .nav button[data-tab]::after { content: none; }
 .nav .mvTabLabel { font-size: 11px; letter-spacing: 0; }
+
+.mvDiscoveryTrail {
+  padding: 1rem;
+  margin-block-end: 1.15rem;
+  border: 1px solid #b9cfaa;
+  border-radius: 1rem;
+  background: #f5faef;
+  color: #1b3d2b;
+}
+.mvDiscoveryTrail h2, .mvDiscoveryTrail p { margin: 0 0 .55rem; }
+.mvDiscoveryTrail progress { width: min(75%, 16rem); accent-color: #3d764e; }
+.mvDiscoveryTrail output { margin-inline-start: .5rem; font-weight: 800; }
+.mvDiscoveryActions button {
+  min-height: 44px;
+  margin-block-start: .4rem;
+  padding-inline: .7rem;
+  border: 1px solid #7b9c73;
+  border-radius: .65rem;
+  background: #fff;
+  color: #1b3d2b;
+}
+body.mv128Kids #mvDiscoveryTrail, body.mv128Kids .mvAdventurePrimary { display: none; }
