@@ -3081,7 +3081,7 @@ setTimeout(render,1200);window.addEventListener('online',()=>setTimeout(render,3
      const {data,error}=await window.db.functions.invoke('get-premium-status',{body:{}});
      if(error)throw error;
      return data||{plan:'free',status:'inactive'};
-   }catch(e){return {plan:currentPlan?.()||'free',status:'check_failed'}}
+   }catch(e){return {plan:typeof currentPlan==='function'?currentPlan():'free',status:'check_failed'}}
  }
  function ensure(){
    const p=document.getElementById('profile');if(!p||document.getElementById('v52Money'))return null;
