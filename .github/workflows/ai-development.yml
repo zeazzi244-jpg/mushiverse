@@ -42,7 +42,7 @@ jobs:
       - name: Force API-key authentication (ignore cached ChatGPT sessions)
         run: |
           mkdir -p "$HOME/.codex"
-          printf 'forced_login_method = "apikey"\n' > "$HOME/.codex/config.toml"
+          printf 'forced_login_method = "api"\n' > "$HOME/.codex/config.toml"
           rm -f "$HOME/.codex/auth.json"
       - name: Authenticate Codex using the repository secret
         run: |
