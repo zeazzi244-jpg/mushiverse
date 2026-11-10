@@ -132,3 +132,11 @@ test('home quest avoids beta label and misleading coin reward promises', () => {
   assert.doesNotMatch(html, /審査通過で100コイン（予定）/, 'Unimplemented reward is advertised');
   assert.match(html, /報酬機能は準備中/, 'Reward status must be explicit');
 });
+
+test('gacha machine presents an SSR preview without changing draw probabilities', () => {
+  const html = readFileSync('index.html', 'utf8');
+  assert.match(html, /id="mvGachaShowcaseStyle"/, 'Gacha showcase styling missing');
+  assert.match(html, /mvGachaRarityHint/, 'SSR preview is missing');
+  assert.match(html, /出現率 0\.1%/, 'SSR probability label missing');
+  assert.match(html, /#mv101Machine\{max-width:360px/, 'Compact machine layout missing');
+});
