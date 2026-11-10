@@ -61,3 +61,9 @@
 - [署名・アップロード実行 #23](https://github.com/zeazzi244-jpg/mushiverse/actions/runs/42803214089) は実装コミット `3851a9e894fd9fbfff073feb5c59102bf93c15d4` をビルド。Apple処理は `VALID`、内部状態は `READY_FOR_BETA_TESTING`。グループ照会はHTTP 403のため割り当て未確認。iPhoneのTestFlightに2441が表示されない場合は、App Store ConnectのTestFlightで既存の内部テスターグループに2441を追加する。
 - [iOS Simulator](https://github.com/zeazzi244-jpg/mushiverse/actions/runs/42803055503) と [リリース検査](https://github.com/zeazzi244-jpg/mushiverse/actions/runs/42803055881) は同じコミットで成功。ブラウザー結果は [Web CI](https://github.com/zeazzi244-jpg/mushiverse/actions/runs/42803055521) で確認する。
 - 2441でコールド起動・ログイン・6タブ・所持AI図鑑を確認。App Store Connectの審査下書きはサインインが必要で未確認。プライバシーとサポートの公開ページはHTTP 200を確認済み。登録済みURL、App Privacy、地図利用権、審査用ログイン、スクリーンショットを審査前に照合する。
+
+## L. V12 公開候補の整理と再開順
+
+- V11の5件は `main` の `d97d7be` までに保存済み。配布候補の作業先は、カード100種と署名履歴がある [PR #2](https://github.com/zeazzi244-jpg/mushiverse/pull/2)。V11の梱包・表示改善とテストを `ee7f491` で取り込んだ。地図は実行用ライブラリー、CSS、アイコンのみ同梱する。
+- V12でキッズ表示中の記録・地図への遷移と位置取得をガードし、投稿前にも再確認する。ガチャの確定済み抽選結果に、未所持カードの初発見バッジを表示する。冒険目標と個人図鑑は [PR #3](https://github.com/zeazzi244-jpg/mushiverse/pull/3) で別途検証する。
+- 再開時はPR #2と #3のCIを照合する。公開側は2441の内部テスター割り当て、実機コールド起動、ログイン・撮影・6タブ・図鑑・通信失敗からの復帰をまとめて確認。App Store Connectでは審査状態、App Privacy、地図利用権、審査用ログイン、スクリーンショットを確認する。

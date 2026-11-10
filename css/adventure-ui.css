@@ -108,3 +108,33 @@ body.mv128Kids #mvDiscoveryTrail, body.mv128Kids .mvAdventurePrimary { display: 
   padding-inline: .65rem;
 }
 #collectionMine { width: 1.15rem; height: 1.15rem; accent-color: #3d764e; }
+
+/* V11 readability pass: consistent tap targets, text wrapping and comfortable spacing. */
+#home,#post,#collection,#gacha,#map,#profile{overflow-wrap:anywhere}
+#home .panel,#post .panel,#collection .panel,#gacha .panel,#map .panel,#profile .panel{border-radius:18px}
+#home p,#post p,#collection p,#gacha p,#map p,#profile p{line-height:1.65}
+#home button,#post button,#collection button,#gacha button,#map button,#profile button{touch-action:manipulation}
+#home .mvAdventureActions button{min-height:44px;max-width:100%;white-space:normal;line-height:1.35}
+#home .mvAdventureHero{overflow:hidden}
+#home .mvAdventureHero h1,#home .mvAdventureHero h2{line-height:1.25;letter-spacing:.015em;text-wrap:balance}
+#home #mv110FollowFeed{overflow:hidden}
+#home #mv110FollowFeed h2{line-height:1.4}
+#home .hint{font-size:clamp(13px,3.6vw,15px)}
+@media(max-width:380px){
+  #home #mv110FollowFeed{padding:14px}
+  #home .toolbar{padding:11px}
+  #home .mvAdventureActions{gap:10px}
+}
+@media(prefers-reduced-motion:reduce){
+  #home *,#post *,#collection *,#gacha *,#map *,#profile *{scroll-behavior:auto!important}
+}
+.mvNewDiscovery {
+  display: inline-block;
+  margin: 0 0 .4rem;
+  padding: .22rem .65rem;
+  border-radius: 999px;
+  background: #f7df97;
+  color: #372a13;
+  font-size: .75rem;
+  font-weight: 800;
+}

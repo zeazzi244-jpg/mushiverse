@@ -776,7 +776,7 @@ async function resolveMapPoint(pref,municipality){
   return prefCoords[pref]||null
 }
 async function renderMap(){
-  const el=$('insectMap');if(!el||!window.L)return;
+  const el=$('insectMap');if(!el||!window.L||document.body.classList.contains('mv128Kids'))return;
   const generation=++mapRenderGeneration;
   const list=$('mapPostList');
   if(!insectMap){
@@ -866,7 +866,7 @@ async function renderMap(){
   }
   setTimeout(()=>{if(generation!==mapRenderGeneration)return;insectMap.invalidateSize();if(placedPoints.length===1)insectMap.setView(placedPoints[0],8);else if(placedPoints.length>1)insectMap.fitBounds(placedPoints,{padding:[28,28],maxZoom:9})},80)
 }
-function tab(name){document.querySelectorAll('main > section').forEach(el=>el.classList.toggle('hide',el.id!==name));document.querySelectorAll('.nav button').forEach(el=>el.classList.toggle('active',el.dataset.tab===name));if(name==='map')renderMap();window.scrollTo({top:0,behavior:'smooth'})}
+function tab(name){if(document.body.classList.contains('mv128Kids')&&(name==='post'||name==='map'))return;document.querySelectorAll('main > section').forEach(el=>el.classList.toggle('hide',el.id!==name));document.querySelectorAll('.nav button').forEach(el=>el.classList.toggle('active',el.dataset.tab===name));if(name==='map')renderMap();window.scrollTo({top:0,behavior:'smooth'})}
 document.querySelectorAll('.nav button').forEach(b=>b.onclick=()=>tab(b.dataset.tab));
 function safePhoto(r,cls='photo'){if(!r.image_url)return `<div class="${cls==='photo'?'placeholder':'miniPlaceholder'}">🪲</div>`;try{const u=new URL(r.image_url);if(u.protocol!=='https:')throw Error();return `<img src="${esc(u.href)}" class="${cls}" loading="lazy" alt="${esc(r.insect_name)}の写真">`}catch{return '<div class="placeholder">🪲</div>'}}
 
@@ -2094,7 +2094,7 @@ const btn=$('aiIdentify');const accountGeneration=authGeneration,selectedGenerat
 $('aiResult').onclick=e=>{const b=e.target.closest('[data-ai-candidate]');if(!b)return;$('species').value=b.dataset.aiCandidate;currentAiName=b.dataset.aiCandidate;currentAiConfidence=null;toast('この候補を「昆虫の名前」に入れました')};
 const draftKey=()=>user?.id?'mushiverse-post-draft-v1:user:'+user.id:'mushiverse-post-draft-v1';const draftFields=['species','category','date','pref','municipality','weather','notes'];function saveDraft(){try{const d={};for(const id of draftFields)d[id]=$(id)?.value||'';localStorage.setItem(draftKey(),JSON.stringify(d));const has=d.species||d.category||d.pref||d.municipality||d.notes;if($('draftNote'))$('draftNote').style.display=has?'block':'none'}catch{}}function restoreDraft(){try{const d=JSON.parse(localStorage.getItem(draftKey())||'null');if(!d)return;for(const id of draftFields)if($(id)&&typeof d[id]==='string'&&d[id])$(id).value=d[id];if($('draftNote'))$('draftNote').style.display='block'}catch{}}for(const id of draftFields){const el=$(id);if(el){el.addEventListener('input',saveDraft);el.addEventListener('change',saveDraft)}}restoreDraft();
 $('recordForm').onsubmit=async e=>{
- e.preventDefault();if(posting)return;if(!user){toast('先にログインしてください');return}if(photoLoading){toast('写真を読み込み中です');return}
+ e.preventDefault();if(posting||document.body.classList.contains('mv128Kids'))return;if(!user){toast('先にログインしてください');return}if(photoLoading){toast('写真を読み込み中です');return}
  const ownerID=user.id,generation=authGeneration,photo=selectedPhoto,fields=Object.fromEntries(draftFields.map(id=>[id,$(id)?.value||'']));
  if(!fields.species.trim()||!/^\d{4}-\d{2}-\d{2}$/.test(fields.date)){toast('昆虫名と観察日を入力してください');return}
  const duplicate=records.some(r=>r.user_id===ownerID&&String(r.insect_name||'').trim().toLocaleLowerCase('ja-JP')===fields.species.trim().toLocaleLowerCase('ja-JP')&&String(r.observed_at||'').slice(0,10)===fields.date&&String(r.municipality||'').trim().toLocaleLowerCase('ja-JP')===fields.municipality.trim().toLocaleLowerCase('ja-JP'));
@@ -2104,6 +2104,7 @@ $('recordForm').onsubmit=async e=>{
  try{
   if(photo){uploadedPath=ownerID+'/'+crypto.randomUUID()+'.jpg';const {error}=await db.storage.from('insect-photos').upload(uploadedPath,photo,{contentType:'image/jpeg',upsert:false});if(error)throw Error('写真アップロード：'+error.message);payload.image_url=db.storage.from('insect-photos').getPublicUrl(uploadedPath).data.publicUrl}
   if(generation!==authGeneration||user?.id!==ownerID)throw Error('アカウントが変更されたため投稿を中止しました');
+  if(document.body.classList.contains('mv128Kids'))throw Error('キッズ表示に切り替えたため投稿を中止しました');
   const {error}=await db.from('insect_posts').insert(payload);if(error)throw Error('投稿保存：'+error.message);saved=true;
   if(generation!==authGeneration)return;
   const unchanged=photo===selectedPhoto&&draftFields.every(id=>($(id)?.value||'')===fields[id]);
@@ -3987,8 +3988,8 @@ function claim(){return gameAction(()=>claimNow())}
 function claimNow(){try{state=read();render();if(state.lastClaim>=today()){message('今日はすでに受け取り済みです。');return}const before=JSON.parse(JSON.stringify(state));const day=currentDay();if(!Number.isSafeInteger(state.coins+REWARDS[day-1])){message('残高の安全な保存範囲を超えるため、受取を停止しました。');return}state.coins+=REWARDS[day-1];state.streak=day;state.lastClaim=today();if(!save()){state=before;return;}message('DAY '+day+' のログインボーナス：'+REWARDS[day-1]+'コインを受け取りました！')}finally{render()}}
 function pick(allowSSR=true){const roll=Math.floor(Math.random()*1000);const rarity=allowSSR&&roll<1?'SSR':roll<20?'SR':roll<200?'R':'N';const ai=window.MushiverseIllustratedCards?.[rarity];if(ai?.length){const card=ai[Math.floor(Math.random()*ai.length)];return {id:card.id,name:card.name,rarity,at:new Date().toISOString()}}const pool=INSECTS.filter(x=>x[1]===rarity);const entry=pool[Math.floor(Math.random()*pool.length)];return {name:entry[0],rarity:entry[1],at:new Date().toISOString()}}
 function draw(n,useTicket=false){return gameAction(()=>drawNow(n,useTicket))}
-function drawNow(n,useTicket=false){try{state=read();render();if(!Number.isInteger(n)||(n!==1&&n!==10)||(useTicket&&n!==1)){message('無効なガチャ操作です。');return}if(!window.MushiverseIllustratedCards){message('AI昆虫カードの読み込みが完了していません。アプリを開き直してお試しください。');return}const before=JSON.parse(JSON.stringify(state));const cost=n===10?450:COST;if(useTicket&&n===1&&state.tickets>0){state.tickets--}else if(!useTicket&&state.coins>=cost){state.coins-=cost}else{message('選択した支払い方法の残高が足りません。');return}const got=Array.from({length:n},()=>pick(!useTicket));state.cards.push(...got);state.history.push({at:new Date().toISOString(),results:got.map(x=>x.rarity+':'+x.name)});state.history=state.history.slice(-50);if(!save()){state=before;render();return}render();document.dispatchEvent(new CustomEvent('mushiverse:gacha-drawn',{detail:{count:n}}));showGachaReveal(got);message('🎉 '+got.map(x=>'['+x.rarity+'] '+x.name).join(' / '))}finally{render()}}
-function showGachaReveal(got){
+function drawNow(n,useTicket=false){try{state=read();render();if(!Number.isInteger(n)||(n!==1&&n!==10)||(useTicket&&n!==1)){message('無効なガチャ操作です。');return}if(!window.MushiverseIllustratedCards){message('AI昆虫カードの読み込みが完了していません。アプリを開き直してお試しください。');return}const before=JSON.parse(JSON.stringify(state));const cost=n===10?450:COST;if(useTicket&&n===1&&state.tickets>0){state.tickets--}else if(!useTicket&&state.coins>=cost){state.coins-=cost}else{message('選択した支払い方法の残高が足りません。');return}const got=Array.from({length:n},()=>pick(!useTicket));const owned=new Set(state.cards.map(card=>card.id).filter(Boolean));const discoveries=new Set();got.forEach((card,index)=>{if(card.id&&!owned.has(card.id)){owned.add(card.id);discoveries.add(index)}});state.cards.push(...got);state.history.push({at:new Date().toISOString(),results:got.map(x=>x.rarity+':'+x.name)});state.history=state.history.slice(-50);if(!save()){state=before;render();return}render();document.dispatchEvent(new CustomEvent('mushiverse:gacha-drawn',{detail:{count:n}}));showGachaReveal(got,discoveries);message('🎉 '+got.map(x=>'['+x.rarity+'] '+x.name).join(' / '))}finally{render()}}
+function showGachaReveal(got,discoveries){
  const rank={N:0,R:1,SR:2,SSR:3};const top=got.reduce((a,c)=>rank[c.rarity]>rank[a]?c.rarity:a,'N');
  dismissReveal?.();
  const overlay=document.createElement('div');overlay.id='mv88Reveal';overlay.className='mv88Reveal mv88-'+top;overlay.setAttribute('role','dialog');overlay.setAttribute('aria-modal','true');overlay.setAttribute('aria-label','ガチャ結果');
@@ -3999,7 +4000,7 @@ function showGachaReveal(got){
  const btn=document.createElement('button');btn.type='button';btn.className='mv88Close';btn.textContent='結果を見る';
  inner.append(title,stage,result,btn);overlay.append(inner);document.body.append(overlay);
  let revealed=false;let timer;const previous=document.activeElement;
- const reveal=()=>{if(revealed)return;revealed=true;clearTimeout(timer);stage.hidden=true;result.hidden=false;result.replaceChildren(...got.map(c=>{const card=document.createElement('div');card.className='mv88Card mv88Card-'+c.rarity;const emblem=document.createElement('div');emblem.className='mv88Emblem';emblem.textContent=c.name.includes('チョウ')?'🦋':c.name.includes('テントウ')?'🐞':c.name.includes('バッタ')?'🦗':'🪲';const tier=document.createElement('strong');tier.textContent=c.rarity;const name=document.createElement('span');name.textContent=c.name;if(/^AI-\d{3}$/.test(c.id)){const image=document.createElement('img');image.src='./assets/ai-insects/'+c.id+'.webp';image.alt=c.name;image.style.cssText='width:100%;height:auto;max-height:42vh;object-fit:contain';image.addEventListener('error',()=>image.replaceWith(emblem),{once:true});card.append(image)}else card.append(emblem);card.append(tier,name);return card}));btn.textContent='ガチャに戻る';if(top==='SSR'&&!matchMedia('(prefers-reduced-motion: reduce)').matches){overlay.classList.add('mv88Burst');try{navigator.vibrate?.([60,40,120])}catch(_){}}};
+ const reveal=()=>{if(revealed)return;revealed=true;clearTimeout(timer);stage.hidden=true;result.hidden=false;result.replaceChildren(...got.map((c,index)=>{const card=document.createElement('div');card.className='mv88Card mv88Card-'+c.rarity;const emblem=document.createElement('div');emblem.className='mv88Emblem';emblem.textContent=c.name.includes('チョウ')?'🦋':c.name.includes('テントウ')?'🐞':c.name.includes('バッタ')?'🦗':'🪲';const tier=document.createElement('strong');tier.textContent=c.rarity;const name=document.createElement('span');name.textContent=c.name;if(/^AI-\d{3}$/.test(c.id)){const image=document.createElement('img');image.src='./assets/ai-insects/'+c.id+'.webp';image.alt=c.name;image.style.cssText='width:100%;height:auto;max-height:42vh;object-fit:contain';image.addEventListener('error',()=>image.replaceWith(emblem),{once:true});card.append(image)}else card.append(emblem);card.append(tier,name);if(discoveries.has(index)){const badge=document.createElement('strong');badge.className='mvNewDiscovery';badge.textContent='NEW · 初発見';card.prepend(badge)}return card}));btn.textContent='ガチャに戻る';if(top==='SSR'&&!matchMedia('(prefers-reduced-motion: reduce)').matches){overlay.classList.add('mv88Burst');try{navigator.vibrate?.([60,40,120])}catch(_){}}};
  const close=()=>{clearTimeout(timer);overlay.remove();document.removeEventListener('keydown',keyHandler);dismissReveal=null;render();if(previous&&previous.isConnected)previous.focus()};dismissReveal=close;
  const keyHandler=e=>{if(e.key==='Escape'){if(!revealed)reveal();else close()}if(e.key==='Tab'){e.preventDefault();btn.focus()}};
  document.addEventListener('keydown',keyHandler);btn.addEventListener('click',()=>revealed?close():reveal());
@@ -4089,7 +4090,7 @@ function initGacha(){const nav=document.querySelector('.nav button[data-tab="gac
  moveGacha();new MutationObserver(moveGacha).observe(document.body,{childList:true,subtree:true});
 }
 function initLocation(){const b=$('mv86Locate');if(!b)return;let marker=null,circle=null;
- b.onclick=()=>{const status=$('mv86LocationStatus');if(!navigator.geolocation){status.textContent='この端末では位置情報を利用できません';return}
+ b.onclick=()=>{if(document.body.classList.contains('mv128Kids'))return;const status=$('mv86LocationStatus');if(!navigator.geolocation){status.textContent='この端末では位置情報を利用できません';return}
  b.disabled=true;status.textContent='位置情報を確認しています…';
  navigator.geolocation.getCurrentPosition(pos=>{b.disabled=false;const map=window.mv86InsectMap;if(!map||!window.L){status.textContent='地図を表示してからもう一度押してください';return}const lat=pos.coords.latitude,lng=pos.coords.longitude;if(marker)map.removeLayer(marker);if(circle)map.removeLayer(circle);marker=L.circleMarker([lat,lng],{radius:8,color:'#0967bb',weight:3,fillColor:'#53aaf0',fillOpacity:1}).addTo(map).bindPopup('📍 現在地（この端末のみ）');circle=L.circle([lat,lng],{radius:Math.min(pos.coords.accuracy||0,5000),color:'#4393d3',fillOpacity:.08,weight:1}).addTo(map);map.setView([lat,lng],14);status.textContent='青い点が現在地です。採集記録には投稿・保存しません。地図表示のため地図提供元と通信します。';},err=>{b.disabled=false;status.textContent=err.code===1?'位置情報の利用が許可されていません':'現在地を取得できませんでした。もう一度お試しください。';},{enableHighAccuracy:false,timeout:15000,maximumAge:0});};
 }
@@ -4697,12 +4698,12 @@ document.addEventListener('click',e=>{if(e.target.closest?.('[data-tab="profile"
 </script>
 
 <style id="mv131-kids-safety-ui">
-body.mv128Kids nav.nav [data-tab="post"],body.mv128Kids nav.nav [data-tab="map"],body.mv128Kids #mv110FollowFeed,body.mv128Kids #mv108Follows,body.mv128Kids #mv104Ranking{display:none!important}
+body.mv128Kids #home .mvAdventurePrimary,body.mv128Kids nav.nav [data-tab="post"],body.mv128Kids nav.nav [data-tab="map"],body.mv128Kids #mv110FollowFeed,body.mv128Kids #mv108Follows,body.mv128Kids #mv104Ranking{display:none!important}
 #mv131KidsNotice{display:none;padding:14px;margin:12px;border:1px solid #c4d8bf;border-radius:14px;background:#f1f8e9;color:#254a32;font-weight:700}
 body.mv128Kids #mv131KidsNotice{display:block}
 </style>
 <script id="mv131-kids-safety-ui-script">
-(()=>{'use strict';function update(){const kids=document.body.classList.contains('mv128Kids');let notice=document.getElementById('mv131KidsNotice');if(!notice){notice=document.createElement('aside');notice.id='mv131KidsNotice';notice.setAttribute('role','status');notice.textContent='🌱 キッズ表示中：投稿・地図・交流の入口を非表示にしています。保護者の方へ：この表示制限だけではアカウントやサーバー側の安全管理にはなりません。';const root=document.querySelector('.wrap')||document.body;root.prepend(notice)}if(kids){const active=document.querySelector('#post.active,#map.active');if(active)document.querySelector('[data-tab="home"]')?.click()}}
+(()=>{'use strict';function update(){const kids=document.body.classList.contains('mv128Kids');let notice=document.getElementById('mv131KidsNotice');if(!notice){notice=document.createElement('aside');notice.id='mv131KidsNotice';notice.setAttribute('role','status');notice.textContent='🌱 キッズ表示中：投稿・地図・交流の入口を非表示にしています。保護者の方へ：この表示制限だけではアカウントやサーバー側の安全管理にはなりません。';const root=document.querySelector('.wrap')||document.body;root.prepend(notice)}if(kids){const active=document.querySelector('main > #post:not(.hide),main > #map:not(.hide)');if(active)document.querySelector('[data-tab="home"]')?.click()}}
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',update,{once:true});else update();new MutationObserver(update).observe(document.documentElement,{attributes:true,attributeFilter:['class'],subtree:false});document.addEventListener('change',e=>{if(e.target?.getAttribute?.('aria-label')==='表示モード')requestAnimationFrame(update)});})();
 </script>
 
