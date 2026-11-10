@@ -680,3 +680,5 @@ Add for Reviewを実行し、画像不足が表示されなくなったことを
 - 2341はApple処理VALID・内部IN_BETA_TESTING、実機未確認。[配布](https://github.com/zeazzi244-jpg/mushiverse/actions/runs/42749161027)。
 - AI図鑑とガチャのカタログ取得を一本化し、起動時に取得できなかった場合はタブの再操作で抽選も復旧するよう修正。モジュール構文確認済み。新しいCIはPRで追跡。公開ゲートの前回記録55%（11/20）を据え置き。本人操作は再開時の2341実機確認とApp Store Connectの残項目。
 - 再開順と公開ゲートは [MUSHIVERSE_RETURN_HANDOFF.md](MUSHIVERSE_RETURN_HANDOFF.md)。
+
+- 検証対象 `24e1500e681360ef68333b1b306639a73c48210d`。ローカルで起動時取得失敗、図鑑タブでの復旧、連打時の通信重複防止、SSRプール復元を確認。[Web CI](https://github.com/zeazzi244-jpg/mushiverse/actions/runs/42754053157) は初回がブラウザーのインストール工程でキャンセルされたが、同じコミットの再実行で成功。[iOS Simulator](https://github.com/zeazzi244-jpg/mushiverse/actions/runs/42754053137)、AI図鑑、署名事前検証、隔離課金、アカウント安全、リリーススクリプトも成功。追記は資料のみ。
