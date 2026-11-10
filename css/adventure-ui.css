@@ -72,3 +72,7 @@
 .mvFieldClueText { display: block; margin-block-start: .25rem; }
 .mvFieldClue [lang="en"], .lang-en .mvFieldClue [lang="ja"] { display: none; }
 .lang-en .mvFieldClue [lang="en"] { display: inline; }
+
+/* Translated tab labels are real text, shared by the screen and assistive tech. */
+.lang-en .nav button[data-tab]::after { content: none; }
+.nav .mvTabLabel { font-size: 11px; letter-spacing: 0; }
