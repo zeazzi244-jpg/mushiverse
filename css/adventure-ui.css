@@ -38,3 +38,23 @@
 #post .mvSectionIntro,#collection .mvSectionIntro,#gacha .mvSectionIntro,#map .mvSectionIntro,#profile .mvSectionIntro{scroll-margin-top:80px}
 @media(prefers-reduced-motion:no-preference){#home .mvAdventureHero,.mvSectionIntro{animation:mvAdventureReveal .4s ease-out both}@keyframes mvAdventureReveal{from{opacity:.65;transform:translateY(7px)}to{opacity:1;transform:translateY(0)}}}
 @media(prefers-reduced-motion:reduce){#home .mvAdventureHero,.mvSectionIntro{animation:none!important;transition:none!important}}
+
+/* V11 readability pass: consistent tap targets, text wrapping and comfortable spacing. */
+#home,#post,#collection,#gacha,#map,#profile{overflow-wrap:anywhere}
+#home .panel,#post .panel,#collection .panel,#gacha .panel,#map .panel,#profile .panel{border-radius:18px}
+#home p,#post p,#collection p,#gacha p,#map p,#profile p{line-height:1.65}
+#home button,#post button,#collection button,#gacha button,#map button,#profile button{touch-action:manipulation}
+#home .mvAdventureActions button{min-height:44px;max-width:100%;white-space:normal;line-height:1.35}
+#home .mvAdventureHero{overflow:hidden}
+#home .mvAdventureHero h1,#home .mvAdventureHero h2{line-height:1.25;letter-spacing:.015em;text-wrap:balance}
+#home #mv110FollowFeed{overflow:hidden}
+#home #mv110FollowFeed h2{line-height:1.4}
+#home .hint{font-size:clamp(13px,3.6vw,15px)}
+@media(max-width:380px){
+  #home #mv110FollowFeed{padding:14px}
+  #home .toolbar{padding:11px}
+  #home .mvAdventureActions{gap:10px}
+}
+@media(prefers-reduced-motion:reduce){
+  #home *,#post *,#collection *,#gacha *,#map *,#profile *{scroll-behavior:auto!important}
+}
