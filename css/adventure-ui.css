@@ -50,3 +50,20 @@
 #home .mvAdventurePrimary{color:#102a22;font-weight:800}
 #home .mvAdventureHero a:focus-visible,#home #mv110FollowFeed a:focus-visible{outline:3px solid var(--mv-accent);outline-offset:3px}
 @media(prefers-contrast:more){#home .mvAdventureHero,#home #mv110FollowFeed,.mvSectionIntro{border-color:#fff}#home #mv110FollowStatus{color:#fff}}
+
+/* V13: app-wide legibility without forcing white text onto light cards. */
+html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
+body{font-family:-apple-system,BlinkMacSystemFont,"Hiragino Kaku Gothic ProN","Yu Gothic",Meiryo,sans-serif;font-size:16px;line-height:1.6;font-synthesis:none;-webkit-font-smoothing:antialiased}
+:is(#home,#post,#collection,#gacha,#map,#profile) :is(h1,h2,h3,h4){line-height:1.35;letter-spacing:.01em;overflow-wrap:break-word}
+:is(#home,#post,#collection,#gacha,#map,#profile) :is(p,li,label,small,button,input,select,textarea){line-height:1.55;letter-spacing:.005em}
+:is(#home,#post,#collection,#gacha,#map,#profile) :is(button,input,select,textarea){font:inherit}
+:is(#home,#post,#collection,#gacha,#map,#profile) :is(button,a,input,select,textarea):focus-visible{outline:3px solid #e5bd64;outline-offset:2px}
+:is(#home,#post,#collection,#gacha,#map,#profile) :is(input,select,textarea){min-height:44px;max-width:100%}
+:is(#home,#post,#collection,#gacha,#map,#profile) :is(button,[role="button"]){min-height:40px}
+:is(#home,#post,#collection,#gacha,#map,#profile) :is(.hint,.muted,.subtitle){font-size:max(13px,.85rem)}
+/* Explicit foregrounds are limited to known dark surfaces. */
+#home .mvAdventureHero :is(h1,h2,h3,h4,strong),.mvSectionIntro :is(h1,h2,h3,h4,strong),#home #mv110FollowFeed :is(h1,h2,h3,h4,strong){color:#fff}
+#home .mvAdventureHero :is(p,small,.hint),.mvSectionIntro :is(p,small,.hint),#home #mv110FollowFeed :is(p,small,.hint){color:#e1eee0}
+#home .mvAdventureHero a:not(.mvAdventurePrimary),.mvSectionIntro a,#home #mv110FollowFeed a{color:#eaffc8;text-decoration-thickness:1.5px;text-underline-offset:3px}
+#home .mvAdventureHero .mvAdventurePrimary{color:#102a22}
+@media(max-width:380px){body{font-size:16px}:is(#home,#post,#collection,#gacha,#map,#profile) :is(h1,h2){overflow-wrap:anywhere}}
