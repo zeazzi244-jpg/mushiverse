@@ -188,3 +188,22 @@ body.mv128Kids #mvDiscoveryTrail, body.mv128Kids .mvAdventurePrimary { display: 
     to { transform: scale(1.07); box-shadow: 0 0 52px var(--capsule-light); }
   }
 }
+
+#mvBgmStop:not([hidden]) {
+  position: fixed;
+  z-index: 900;
+  right: .75rem;
+  bottom: calc(76px + env(safe-area-inset-bottom, 0px));
+  min-height: 44px;
+  padding: .5rem .8rem;
+  border: 1px solid #9cba86;
+  border-radius: 999px;
+  background: #173e30;
+  color: #fff;
+  box-shadow: 0 3px 12px #0003;
+}
+body:has(#mv88Reveal) #mvBgmStop { visibility: hidden; }
+#mvBgmStop [lang="en"], .lang-en #mvBgmStop [lang="ja"] { display: none; }
+.lang-en #mvBgmStop [lang="en"] { display: inline; }
+#mvBgmStop:focus-visible { outline: 3px solid #e5bd64; outline-offset: 3px; }
+#mvBgmStatus { display: block; margin-top: .35rem; font-size: .8rem; }
