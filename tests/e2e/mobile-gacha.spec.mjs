@@ -5,15 +5,15 @@ for(const size of [{width:320,height:568},{width:390,height:844},{width:430,heig
   await page.locator('nav.nav [data-tab="'+tab+'"]').click();await expect(page.locator('main > section:not(.hide)')).toHaveAttribute('id',tab);
   expect(await page.evaluate(()=>document.documentElement.scrollWidth)).toBeLessThanOrEqual(size.width+1);
  }
- await page.locator('nav.nav [data-tab="gacha"]').click();await page.locator('#mv77Ten').click();await expect(page.locator('#mv88Reveal .mv88Card')).toHaveCount(10);const close=page.locator('#mv88Reveal .mv88Close');await expect(close).toHaveText('ガチャに戻る');await close.click();await expect(page.locator('#mv88Reveal')).toHaveCount(0);
- await page.locator('nav.nav [data-tab="collection"]').click();await page.locator('#mv90GachaTab').click();await expect(page.locator('#aiInsectCards article')).toHaveCount(100);
+ await page.locator('nav.nav [data-tab="gacha"]').click();await page.waitForFunction(()=>window.MushiverseIllustratedCards?.N?.length===40);await page.evaluate(()=>{Math.random=()=>0.5});await page.locator('#mv77Ten').click();await expect(page.locator('#mv88Reveal .mv88Card')).toHaveCount(10);const close=page.locator('#mv88Reveal .mv88Close');await expect(close).toHaveText('ガチャに戻る');await close.click();await expect(page.locator('#mv88Reveal')).toHaveCount(0);
+ await page.locator('nav.nav [data-tab="collection"]').click();await page.locator('#mv90GachaTab').click();await expect(page.locator('#aiInsectCards article')).toHaveCount(1);
  if(size.width===320)await page.screenshot({path:test.info().outputPath('iphone-se-collection.png')});
  expect(errors).toEqual([]);
 });
-test('illustrated AI master shows all images and isolates ownership by account',async({page})=>{
- await setup(page);await page.evaluate(A=>localStorage.setItem('mushiverse-ai-collection-v1:user:'+A,JSON.stringify([{id:'AI-005',name:'旧名'}])),A);await page.locator('nav.nav [data-tab="collection"]').click();await page.locator('#mv90GachaTab').click();await expect(page.locator('#aiInsectCards article')).toHaveCount(100);await expect(page.locator('#aiInsectStatus')).toContainText('画像制作 100 / 100');await expect(page.locator('#aiInsectStatus')).toContainText('所持 1種類');await expect(page.locator('#aiInsectCards img')).toHaveCount(100);
+test('AI collection only shows acquired images and isolates ownership by account',async({page})=>{
+ await setup(page);await page.evaluate(A=>localStorage.setItem('mushiverse-ai-collection-v1:user:'+A,JSON.stringify([{id:'AI-005',name:'旧名'}])),A);await page.locator('nav.nav [data-tab="collection"]').click();await page.locator('#mv90GachaTab').click();await expect(page.locator('#aiInsectCards article')).toHaveCount(1);await expect(page.locator('[data-card-id="AI-001"]')).toHaveCount(0);await expect(page.locator('#aiInsectStatus')).toContainText('所持 1種類');await expect(page.locator('#aiInsectCards img')).toHaveCount(1);
  await page.locator('#aiInsectSearch').fill('AI-005');await expect(page.locator('#aiInsectCards article')).toHaveCount(1);await expect(page.locator('#aiInsectCards')).toContainText('クロガネシズクカミキリ');await expect(page.locator('#aiInsectCards')).toContainText('所持 1枚');
- await page.evaluate(()=>window.testSwitchUser(null));await expect(page.locator('#aiInsectStatus')).toContainText('所持 0種類');expect(await page.evaluate(A=>JSON.parse(localStorage.getItem('mushiverse-v77-game:user:'+A)).coins,A)).toBe(500);
+ await page.evaluate(()=>window.testSwitchUser(null));await expect(page.locator('#aiInsectStatus')).toContainText('所持 0種類');await expect(page.locator('#aiInsectCards article')).toHaveCount(0);await expect(page.locator('#aiInsectCards')).toContainText('まだカードを持っていません');expect(await page.evaluate(A=>JSON.parse(localStorage.getItem('mushiverse-v77-game:user:'+A)).coins,A)).toBe(500);
 });
 test('coin SSR and ticket no-SSR behavior are deterministic at the rare boundary',async({page})=>{
  await setup(page,{coins:500,tickets:2});await page.waitForFunction(()=>window.MushiverseIllustratedCards?.SSR?.length===10);await page.evaluate(()=>{Math.random=()=>0});await page.locator('nav.nav [data-tab="gacha"]').click();await page.locator('#mv77Draw').click();await expect(page.locator('#mv88Reveal')).toHaveClass(/mv88-SSR/);await expect(page.locator('#mv88Reveal .mv88Card')).toHaveCount(1);await expect(page.locator('#mv88Reveal .mv88Card img')).toHaveAttribute('src',/AI-091\.webp$/);await page.locator('#mv88Reveal .mv88Close').click();await page.locator('#mv77TicketDraw').click();await expect(page.locator('#mv88Reveal')).not.toHaveClass(/mv88-SSR/);expect(await page.evaluate(A=>JSON.parse(localStorage.getItem('mushiverse-v77-game:user:'+A)).cards.map(c=>c.rarity),A)).toEqual(['SSR','SR']);
@@ -43,7 +43,8 @@ test('AI collection isolates guest and signed-in card ownership across account c
  await expect(page.locator('#aiInsectSearch')).toHaveValue('');
  await expect(page.locator('#aiInsectStatus')).toContainText('所持 1種類');
  await page.locator('#aiInsectSearch').fill('AI-001');
- await expect(page.locator('#aiInsectCards')).toContainText('所持 0枚');
+ await expect(page.locator('#aiInsectCards article')).toHaveCount(0);
+ await expect(page.locator('#aiInsectCards')).toContainText('条件に一致する所持カードがありません');
  await page.locator('#aiInsectSearch').fill('AI-002');
  await expect(page.locator('#aiInsectCards')).toContainText('所持 1枚');
  expect(await page.evaluate(A=>JSON.parse(localStorage.getItem('mushiverse-v77-game:user:'+A)).coins,A)).toBe(500);
