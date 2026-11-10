@@ -41,7 +41,7 @@ jobs:
           echo "name=$BRANCH" >> "$GITHUB_OUTPUT"
       - name: Run bounded AI coding task
         run: |
-          npx --yes @openai/codex exec --sandbox workspace-write --ask-for-approval never "You are working on the existing MUSHIVERSE application. Inspect the repository and its existing tests. Choose exactly ONE small, high-value, verifiable improvement prioritizing startup blank screen diagnostics, contrast/readability, gacha usability, or App Store readiness. Make the actual code change and add or update a relevant regression test. Never change credentials, GitHub Actions workflows, payment or billing logic, account security, or production configuration. Do not delete existing features. Do not use network services beyond the available development environment. Do not commit or push; the workflow will handle that. If no safe improvement is possible, make no changes."
+          npx --yes @openai/codex exec --sandbox workspace-write "You are working on the existing MUSHIVERSE application. Inspect the repository and its existing tests. Choose exactly ONE small, high-value, verifiable improvement prioritizing startup blank screen diagnostics, contrast/readability, gacha usability, or App Store readiness. Make the actual code change and add or update a relevant regression test. Never change credentials, GitHub Actions workflows, payment or billing logic, account security, or production configuration. Do not delete existing features. Do not use network services beyond the available development environment. Do not commit or push; the workflow will handle that. If no safe improvement is possible, make no changes."
       - name: Run release regression suite
         run: npm run test:release
       - name: Detect changed files
