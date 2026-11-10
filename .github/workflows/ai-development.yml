@@ -25,7 +25,6 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
-          cache: npm
       - name: Verify AI key is configured
         run: |
           if [ -z "$OPENAI_API_KEY" ]; then
@@ -33,7 +32,7 @@ jobs:
             exit 1
           fi
       - name: Install project dependencies
-        run: npm ci
+        run: npm install --no-package-lock --no-audit --no-fund
       - name: Start isolated development branch
         id: branch
         run: |
