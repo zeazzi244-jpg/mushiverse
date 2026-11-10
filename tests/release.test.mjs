@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { existsSync, readFileSync, readdirSync, statSync } from 'node:fs';
+import { existsSync, readFileSync, readdirSync, statSync, lstatSync } from 'node:fs';
 import { spawnSync } from 'node:child_process';
 import { join, relative } from 'node:path';
 
@@ -96,4 +96,23 @@ test('forest theme text contrast meets WCAG AA on known solid surfaces', () => {
     assert.ok(contrast(foreground, background) >= 4.5,
       'Forest text contrast must be at least 4.5:1 on ' + background);
   }
+});
+
+test('release bundle contains no symlinks or unsupported asset extensions', () => {
+  const allowed = new Set(['.html','.js','.css','.json','.svg','.png','.jpg','.jpeg','.webp','.gif','.ico','.woff','.woff2','.mp3','.wav','.webmanifest']);
+  const walk = dir => {
+    for (const name of readdirSync(dir)) {
+      const path = join(dir, name);
+      const info = lstatSync(path);
+      assert.ok(!info.isSymbolicLink(), 'Symlink in release bundle: ' + path);
+      if (info.isDirectory()) walk(path);
+      else {
+        assert.ok(info.isFile(), 'Non-file in release bundle: ' + path);
+        const extension = name.slice(name.lastIndexOf('.')).toLowerCase();
+        assert.ok(allowed.has(extension), 'Unsupported release asset: ' + path);
+      }
+    }
+  };
+  assert.ok(existsSync('www'), 'Run npm run build:web first');
+  walk('www');
 });
