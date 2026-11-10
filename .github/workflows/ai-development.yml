@@ -32,14 +32,6 @@ jobs:
             echo "::error::Set OPENAI_API_KEY in repository Actions secrets first."
             exit 1
           fi
-      - name: Install project dependencies
-        run: npm install --no-package-lock --no-audit --no-fund
-      - name: Start isolated development branch
-        id: branch
-        run: |
-          BRANCH="automation/ai-$(date -u +%Y%m%d-%H%M%S)-$GITHUB_RUN_ID"
-          git switch -c "$BRANCH"
-          echo "name=$BRANCH" >> "$GITHUB_OUTPUT"
       - name: Verify OpenAI API authentication without exposing secret
         shell: bash
         run: |
@@ -53,6 +45,14 @@ jobs:
             exit 1
           fi
           echo "OpenAI Platform API authentication succeeded (HTTP 200)."
+      - name: Install project dependencies
+        run: npm install --no-package-lock --no-audit --no-fund
+      - name: Start isolated development branch
+        id: branch
+        run: |
+          BRANCH="automation/ai-$(date -u +%Y%m%d-%H%M%S)-$GITHUB_RUN_ID"
+          git switch -c "$BRANCH"
+          echo "name=$BRANCH" >> "$GITHUB_OUTPUT"
       - name: Authenticate Codex using isolated API-key profile
         shell: bash
         run: |
@@ -64,7 +64,7 @@ jobs:
           npx --yes @openai/codex login status
       - name: Run bounded AI coding task
         run: |
-          npx --yes @openai/codex exec --model gpt-5.1-codex-mini --sandbox workspace-write "You are working on the existing MUSHIVERSE application. Inspect the repository and its existing tests. Prioritize App Store release blockers: startup blank screen diagnostics, fatal runtime errors, login, privacy and safety, and release validation. Implement up to THREE related, independently verifiable improvements in this run, with regression tests for each. Avoid cosmetic work unless it fixes a release-blocking readability problem. Make the actual code change and add or update a relevant regression test. Never change credentials, GitHub Actions workflows, payment or billing logic, account security, or production configuration. Do not delete existing features. Do not use network services beyond the available development environment. Do not commit or push; the workflow will handle that. If no safe improvement is possible, make no changes."
+          npx --yes @openai/codex exec --config forced_login_method='"api"' --model gpt-5.1-codex-mini --sandbox workspace-write "You are working on the existing MUSHIVERSE application. Inspect the repository and its existing tests. Prioritize App Store release blockers: startup blank screen diagnostics, fatal runtime errors, login, privacy and safety, and release validation. Implement up to THREE related, independently verifiable improvements in this run, with regression tests for each. Avoid cosmetic work unless it fixes a release-blocking readability problem. Make the actual code change and add or update a relevant regression test. Never change credentials, GitHub Actions workflows, payment or billing logic, account security, or production configuration. Do not delete existing features. Do not use network services beyond the available development environment. Do not commit or push; the workflow will handle that. If no safe improvement is possible, make no changes."
       - name: Run release regression suite
         run: npm run test:release
       - name: Detect changed files
