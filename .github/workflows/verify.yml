@@ -22,8 +22,8 @@ jobs:
           node --check scripts/apply-ios-icon.mjs
           node --check scripts/prepare-ios.mjs
           node --check scripts/check-ios-release.mjs
-      - name: Build local web assets
-        run: npm run build:web
+      - name: Build and sync native web assets
+        run: npm run ios:sync
       - name: Run release regression tests
         run: node --test tests/release.test.mjs
       - name: Verify bundled web entry
@@ -43,3 +43,14 @@ jobs:
           fi
           cat "$RUNNER_TEMP/incomplete-ios.log"
           grep -F 'Approved iOS icon files are missing' "$RUNNER_TEMP/incomplete-ios.log"
+      - name: Verify stale native startup assets are rejected
+        run: |
+          entry=ios/App/App/public/index.html
+          cp "$entry" "$RUNNER_TEMP/ios-entry.html"
+          trap 'mv "$RUNNER_TEMP/ios-entry.html" "$entry"' EXIT
+          printf '\n<!-- stale startup asset -->\n' >> "$entry"
+          if npm run ios:check > "$RUNNER_TEMP/stale-ios.log" 2>&1; then
+            echo 'ERROR: release check passed with a stale native entry point'
+            exit 1
+          fi
+          grep -F 'Empty or stale iOS web asset: index.html' "$RUNNER_TEMP/stale-ios.log"

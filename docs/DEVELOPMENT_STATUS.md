@@ -694,3 +694,9 @@ Add for Reviewを実行し、画像不足が表示されなくなったことを
 ### iOS配布前のカード同梱検査
 
 - `910da1fd311e82898b4609da56429b884d9cc753` で、公開対象のカード画像をソースと配布用Webバンドルでバイト比較し、欠落・不一致ならカードIDを表示してビルド検査を失敗させる。AI図鑑モジュールも起動アセットの検査に含めた。Node構文と正常・不一致・欠落のローカル試験が成功。既存の配布はTestFlight 2341、公開ゲート55%（11/20）。残りの公開準備は [復帰用引き継ぎ](MUSHIVERSE_RETURN_HANDOFF.md) を参照。
+
+### V10 CIのiOS同期と回帰検査
+
+- 起動用ファイル照合を追加した後、既存のリリーススクリプトCIはWebのビルドのみでiOS同期を省いていた。CIを `npm run ios:sync` に切り替え、同期済みのiOS起動ページが変更された場合の拒否テストを追加した。[修正前のCI](https://github.com/zeazzi244-jpg/mushiverse/actions/runs/42802802071)
+- ローカルで `npm test`、`npm run verify:web`、`npm run test:release`、同期済みの `npm run ios:check` が成功。起動ページの意図的な変更も検出した。修正コミットのmacOS CI・署名・実機は別途確認する。
+- 公開ゲートは前回の11/20（55%）を維持。最新候補の内部配布と実機起動、App Store Connectの登録内容と審査状態の確認が残る。

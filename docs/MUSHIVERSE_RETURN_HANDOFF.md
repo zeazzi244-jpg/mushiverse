@@ -50,3 +50,8 @@
 - 開始時点のコミットは [Web CI](https://github.com/zeazzi244-jpg/mushiverse/actions/runs/42800481970)、[iOS Simulator](https://github.com/zeazzi244-jpg/mushiverse/actions/runs/42800482131) を含む7ワークフローが成功。AIカード100枚の同梱検査も含む。
 - [2341の署名ログ](https://github.com/zeazzi244-jpg/mushiverse/actions/runs/42749161027) で署名・IPA・アップロード・Apple処理確認の工程成功を再照合した。Apple側の現在の配布・審査ステータスは別途App Store Connectで確認する。
 - 再開時は [PRのチェック](https://github.com/zeazzi244-jpg/mushiverse/pull/2/checks) を先に確認し、最新候補の署名・内部配布に進む。iPhoneでは最新配布候補でコールド起動、ログイン、6タブ、AIカード所持表示を一度に確認する。
+
+## J. V10 リリースCI修正後の再開
+
+- 作業は [PR #2](https://github.com/zeazzi244-jpg/mushiverse/pull/2) の既存ブランチを継続。修正直前の先端は `69e7ef64891afdb061f65c46338b14a819fe398c`。最新コミットはPRのCommitsを参照する。
+- Linuxのリリース検査でも先にCapacitorを同期する。同期後の起動ページが古い場合に拒否する試験を追加。ローカルで単体、Webバンドル、リリース回帰、同期後のiOS構造検査が成功。Xcodeビルドと署名配布は [PRのChecks](https://github.com/zeazzi244-jpg/mushiverse/pull/2/checks) と [署名ワークフロー](https://github.com/zeazzi244-jpg/mushiverse/actions/workflows/ios-signed-archive.yml) で個別に照合する。
