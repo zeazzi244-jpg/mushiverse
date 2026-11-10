@@ -207,3 +207,67 @@ body:has(#mv88Reveal) #mvBgmStop { visibility: hidden; }
 .lang-en #mvBgmStop [lang="en"] { display: inline; }
 #mvBgmStop:focus-visible { outline: 3px solid #e5bd64; outline-offset: 3px; }
 #mvBgmStatus { display: block; margin-top: .35rem; font-size: .8rem; }
+
+/* Forest night surfaces shared by all six destinations. */
+:root {
+  color-scheme: dark;
+  --mv-night: #091610;
+  --mv-surface: #142a20;
+  --mv-raised: #1d382a;
+  --mv-text: #e6f1e8;
+  --mv-muted: #b4cbbb;
+  --mv-line: #42634e;
+}
+html, body { background: var(--mv-night) !important; color: var(--mv-text) !important; }
+body .wrap, body main { background: transparent !important; color: var(--mv-text); }
+body :is(.panel,.card,.toolbar,.collectionTools,.empty,.mapNote,.mapLegend,.mapActions,
+  .bestCard,.rankItem,.detailSheet,.authpanel,.mvSectionIntro,
+  #mv110FollowFeed,#mvDiscoveryTrail,#mv101Machine,#mv104Ranking,
+  #mv128Settings,#mv134CoinStore,#mv86ProfileCard,#mv131KidsNotice,
+  #mvDailyGame,#mv105PublicProfile,.mv80Dialog,.mv81Card) {
+  background: var(--mv-surface) !important;
+  color: var(--mv-text) !important;
+  border-color: var(--mv-line) !important;
+}
+body :is(.panel,.card,.detailSheet,#mv86ProfileCard,#mv104Ranking,#mv128Settings,
+  #mv101Machine,#mvDailyGame,#mvDiscoveryTrail,#mv110FollowFeed)
+  :is(h1,h2,h3,h4,p,b,strong,label,.species,.sectionTitle) {
+  color: var(--mv-text) !important;
+}
+body :is(.hint,.muted,.fineprint,.speciesMeta,.mv90Intro,.mapNote,.mapLegend,
+  .mv114PostNote,.mv114Public,.mv114Chip,.mv114PostAuthor small) {
+  color: var(--mv-muted) !important;
+}
+body :is(input,select,textarea) {
+  background: #0c1e15 !important;
+  color: var(--mv-text) !important;
+  border-color: #58785f !important;
+}
+body :is(input,textarea)::placeholder { color: #acc0b1 !important; opacity: 1; }
+body :is(.btn.outline,.mv114Action,.mv90Tabs button,.mvDiscoveryActions button,
+  .collectionTools select,.bestCard button) {
+  background: var(--mv-raised) !important;
+  color: var(--mv-text) !important;
+  border-color: #68886e !important;
+}
+body nav.nav {
+  background: #102319 !important;
+  border-color: var(--mv-line) !important;
+  box-shadow: 0 -4px 18px #0005;
+}
+body nav.nav button { background: transparent !important; color: #bfd1c2 !important; }
+body nav.nav button.active, body .mv90Tabs button.mv90Active {
+  background: #31583b !important;
+  color: #edffcf !important;
+}
+body a { color: #b8e7a5; }
+body :is(.mv114PostHeader,.mv114PostBody,.mv114Actions,.mv114Chip,.mv114Public,
+  .mv86Stats,.mv86Stat,.mv104Progress,.mv90Tabs,.mv81Meta) {
+  background-color: var(--mv-surface) !important;
+  border-color: var(--mv-line) !important;
+}
+body .detailSheet :is(button,.chip) { background: var(--mv-raised); color: var(--mv-text); }
+body dialog { background: var(--mv-surface); color: var(--mv-text); border-color: var(--mv-line); }
+body .appCopyright { color: var(--mv-muted); }
+body .leaflet-control :is(a,label,span) { color: #173729; }
+body .leaflet-popup-content { color: #173729; }
