@@ -57,3 +57,12 @@ test('mobile adventure controls remain readable and accessible', () => {
   assert.match(css, /prefers-reduced-motion:reduce/, 'Reduced motion support missing');
   assert.match(css, /max-width:380px/, 'Small-screen adaptation missing');
 });
+
+test('forest panels use explicit high-contrast text colors', () => {
+  const css = readFileSync(join('css', 'adventure-ui.css'), 'utf8');
+  assert.match(css, /--mv-surface:#102a22/, 'Forest surface token missing');
+  assert.match(css, /--mv-text:#f3f8ef/, 'Light text token missing');
+  assert.match(css, /#home #mv110FollowFeed\{background:linear-gradient/, 'Follow feed forest surface missing');
+  assert.match(css, /#home #mv110FollowFeed h2\{color:#f5ffe8\}/, 'Follow feed title contrast missing');
+  assert.match(css, /prefers-contrast:more/, 'High contrast mode missing');
+});
