@@ -42,3 +42,11 @@
 - 署名は `iOS signed archive (manual)` を作業ブランチで実行。内部配布を明示承認された場合に `upload_to_testflight` を有効にする。証明書修復は既存署名で復旧できず、別途承認された場合に限る。アーカイブ・IPA出力・Apple処理・内部配布の各段階をログで確認する。
 - 署名用GitHub Secretsの名前と用途のみを記載。 `ASC_KEY_ID` はApp Store Connect APIキーの識別子、`ASC_ISSUER_ID` は発行者の識別子、`ASC_API_KEY_P8_BASE64` はAPI署名用の秘密鍵。 `APPLE_TEAM_ID` は署名チーム指定用の環境変数。実値は保護設定で確認し、チャット・ファイル・ログへ転記しない。
 - 審査への最短順は、実機でコールド起動・ログイン・6タブ・所持図鑑を確認 → ポリシーURL、App Privacy、地図利用権、審査用ログインを揃える → 承認済みの配布候補を選択 → 審査提出。過去の白画面は原因未特定、2341の実機動作とApp Store Connectの最新下書きは未確認。
+
+## I. V10 保存地点と公開状況
+
+- [V10開始時点のバックアップ](https://github.com/zeazzi244-jpg/mushiverse/tree/backup/v10-20261110) を `44e1f82d11c8840b654c421bc6e3983fed12a3bf` に固定。作業は既存の `codex/verified-changes-20261028` と [PR #2](https://github.com/zeazzi244-jpg/mushiverse/pull/2) を継続。
+- V10の実装 `125c31969b0193648f97bfcf678ec03701813111` は、Capacitor同期後のiOSプロジェクトで起動に使う7ファイルを配布用Webバンドルと照合する。欠落・空・内容不一致は署名前のエラーになる。Node構文検査と正常・欠落・不一致・空のケースは合格。実装を含むmacOS CIはPRで確認する。
+- 開始時点のコミットは [Web CI](https://github.com/zeazzi244-jpg/mushiverse/actions/runs/42800481970)、[iOS Simulator](https://github.com/zeazzi244-jpg/mushiverse/actions/runs/42800482131) を含む7ワークフローが成功。AIカード100枚の同梱検査も含む。
+- [2341の署名ログ](https://github.com/zeazzi244-jpg/mushiverse/actions/runs/42749161027) で署名・IPA・アップロード・Apple処理確認の工程成功を再照合した。Apple側の現在の配布・審査ステータスは別途App Store Connectで確認する。
+- 再開時は [PRのチェック](https://github.com/zeazzi244-jpg/mushiverse/pull/2/checks) を先に確認し、最新候補の署名・内部配布に進む。iPhoneでは最新配布候補でコールド起動、ログイン、6タブ、AIカード所持表示を一度に確認する。
