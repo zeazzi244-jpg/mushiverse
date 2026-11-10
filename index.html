@@ -3898,7 +3898,7 @@ function showGachaReveal(got){
  let phaseIndex=0;
  const updatePhase=()=>{const p=phases[phaseIndex];phase.textContent='第'+(phaseIndex+1)+'段階 · '+p[0];stage.querySelector('.mv88Capsule').textContent=p[1];overlay.dataset.phase=String(phaseIndex+1);awakeningLabel.textContent=awakening&&phaseIndex===2?'逆転覚醒 · 虹色の羽化！':'';if(awakening&&phaseIndex===2)overlay.classList.add('mvAwakeningBurst')};
  updatePhase();
- if(!reduced)phaseTimer=setInterval(()=>{phaseIndex=Math.min(phaseIndex+1,2);updatePhase()},duration/3);
+ if(!reduced)phaseTimer=setInterval(()=>{phaseIndex=Math.min(phaseIndex+1,2);updatePhase();if(phaseIndex===2)clearInterval(phaseTimer)},duration/4);
  if(reduced)reveal();else timer=setTimeout(reveal,duration);btn.focus();
 }
 
