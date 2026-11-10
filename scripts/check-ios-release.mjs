@@ -27,7 +27,27 @@ try {
 } catch(error) {
  problems.push('Invalid AppIcon metadata: '+error.message);
 }
-if(!existsSync('www/css/adventure-ui.css')) problems.push('Adventure stylesheet missing from packaged app');
+const nativeWebRoot = join(nativeRoot, 'public');
+for (const asset of [
+ 'index.html',
+ 'css/adventure-ui.css',
+ 'assets/ai-insect-collection.mjs',
+ 'assets/vendor/supabase.js',
+ 'assets/vendor/leaflet/leaflet.js',
+ 'assets/vendor/leaflet/leaflet.css',
+ 'docs/ai_insect_catalog_v1.json',
+]) {
+ const webAsset = join('www', asset);
+ const nativeAsset = join(nativeWebRoot, asset);
+ if (!existsSync(webAsset) || !existsSync(nativeAsset)) {
+  problems.push('Missing iOS web asset: ' + asset + ' (run npm run ios:sync)');
+  continue;
+ }
+ const expected = readFileSync(webAsset);
+ if (!expected.length || !expected.equals(readFileSync(nativeAsset))) {
+  problems.push('Empty or stale iOS web asset: ' + asset + ' (run npm run ios:sync)');
+ }
+}
 
 const projectPath=join('ios','App','App.xcodeproj','project.pbxproj');
 if(existsSync(projectPath)){
