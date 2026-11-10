@@ -4074,13 +4074,25 @@ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',
 function init(){
  const mount=document.getElementById('mv86GachaMount');if(!mount||document.getElementById('mv101Machine'))return;
  const unit=document.createElement('section');unit.id='mv101Machine';unit.setAttribute('aria-label','ガシャポン筐体イラスト');
- unit.innerHTML='<h2>🌿 ムシガシャポン</h2><div class="mv101Glass"><span class="mv101Cap" style="background:#ffd47a"></span><span class="mv101Cap" style="background:#c6a4f8"></span><span class="mv101Cap" style="background:#81d4c4"></span></div><div class="mv101Base"><div class="mv101Knob">✣</div><div class="mv101Slot"></div></div><p style="margin:10px 0 0;font-size:13px">1回50コイン · 10連450コイン</p>';
+ unit.innerHTML='<h2>✦ 幻想昆虫ガチャ</h2><div class="mv101Glass"><span class="mv101Cap" style="background:#ffd47a"></span><span class="mv101Cap" style="background:#c6a4f8"></span><span class="mv101Cap" style="background:#81d4c4"></span></div><div class="mv101Base"><div class="mv101Knob">✣</div><div class="mv101Slot"></div></div><div class="mvGachaRarityHint" aria-label="最高レアリティSSRの紹介"><span class="mvGachaMystery" aria-hidden="true">✦ ? ✦</span><span><strong>SSR · 幻の昆虫</strong><small>出現率 0.1% · 何が出るかはお楽しみ</small></span></div><p style="margin:10px 0 0;font-size:13px">1回50コイン · 10連450コイン</p>';
  mount.prepend(unit);
 }
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init,{once:true});else init();
 })();
 </script>
 
+<style id="mvGachaShowcaseStyle">
+#mv101Machine{max-width:360px;margin:8px auto 12px;padding:15px;background:linear-gradient(155deg,#0b241d,#214b37)!important;border:1px solid #597c60;box-shadow:0 12px 30px #061b14a8;color:#f5ffe9}
+#mv101Machine h2{color:#f7ffe6!important;font-size:19px}
+#mv101Machine .mv101Glass{height:110px;width:145px;border-color:#b9c88b;background:linear-gradient(150deg,#2a6854,#102f29)}
+#mv101Machine .mv101Cap{width:38px;height:38px}
+#mv101Machine .mv101Base{width:150px}
+#mv101Machine .mv101Knob{height:40px;width:40px;font-size:24px}
+#mv101Machine .mvGachaRarityHint{display:flex;align-items:center;gap:12px;text-align:left;margin:12px 0 2px;padding:10px 12px;border:1px solid #c6a866;border-radius:14px;background:#1a3029;color:#fff8d6}
+#mv101Machine .mvGachaMystery{display:grid;place-items:center;flex:none;width:56px;height:56px;border-radius:50%;background:radial-gradient(circle,#a98d55,#4a3420 68%,#1c231b);color:#fff3c0;font-size:18px}
+#mv101Machine .mvGachaRarityHint strong,#mv101Machine .mvGachaRarityHint small{display:block;color:#fff8d6}
+#mv101Machine .mvGachaRarityHint small{font-size:12px;line-height:1.5}
+</style>
 <style id="mv102-polish">
 #mv88Reveal .mv88Stage[hidden],#mv88Reveal .mv88Results[hidden]{display:none!important}
 #mv101Machine.mv102Draw .mv101Knob{animation:mv102Spin .75s ease-out}
