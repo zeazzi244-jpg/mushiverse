@@ -1,6 +1,6 @@
 # MUSHIVERSE — development resumption handoff
 
-Updated: 2026-11-10 (JST). This file records *verified GitHub edits in the current session*, not a claim that the iOS app has shipped.
+Updated: 2026-11-11 (JST). This file records verified GitHub edits, not a claim that the iOS app has shipped.
 
 ## Repository and release identity
 - Repository: https://github.com/zeazzi244-jpg/mushiverse
@@ -15,7 +15,13 @@ Updated: 2026-11-10 (JST). This file records *verified GitHub edits in the curre
 - `c815f5738f73`: added a release bundle exclusion test.
 - `4e1b03b34366`: improved mobile readability, touch targets, and reduced-motion styles.
 - `7b0fd103f44f`: added regression checks for those styles.
-- These are **source-control changes**, not evidence that device tests or App Store submission succeeded.
+- `472a333bec72`: replaced bright adventure panels with dark forest surfaces and readable text.
+- `bfc1eafccaff`: added forest palette regression test.
+- `7f48ccc2cdc3`: added typography and legibility rules across six app sections.
+- `1698dbd455a6`: added six-section typography regression test.
+- `9c5e731c8aaf`: added numerical WCAG AA contrast test for solid forest surfaces.
+- These are **source-control changes**, not evidence that tests, device checks, TestFlight distribution, or App Store submission succeeded.
+- Latest verified commit before this handoff update: `9c5e731c8aaf`.
 
 ## User-facing product direction
 MUSHIVERSE should feel like a polished insect discovery adventure, not a cluttered administrative dashboard. Six main sections: Home, Record, Gacha, Collection, Map, Profile. Keep the real-insect record collection distinct from fantasy gacha cards. Prioritize discoverability, delight, accessibility, readable Japanese text, responsive mobile navigation, and a safe kids mode. Do not remove user records or purchased items when simplifying the UI.
