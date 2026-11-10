@@ -7,6 +7,11 @@ on:
         type: boolean
         required: true
         default: false
+      upload_existing_build_2541:
+        description: 'Upload the owner-approved saved build 2541 without rebuilding'
+        type: boolean
+        required: true
+        default: false
       repair_approved_certificate:
         description: 'Owner approved: replace development certificate 3WMVSRYMNU only (one-time repair)'
         type: boolean
@@ -17,6 +22,7 @@ permissions:
   actions: read
 jobs:
   signed-archive:
+    if: ${{ !inputs.upload_existing_build_2541 }}
     runs-on: macos-26-intel
     timeout-minutes: 60
     concurrency:
@@ -220,3 +226,47 @@ jobs:
           if test -f "$RUNNER_TEMP/mushiverse-signing.keychain-db"; then
             security delete-keychain "$RUNNER_TEMP/mushiverse-signing.keychain-db"
           fi
+
+  upload-saved-2541:
+    if: ${{ inputs.upload_existing_build_2541 && inputs.upload_to_testflight }}
+    runs-on: macos-26-intel
+    timeout-minutes: 20
+    concurrency:
+      group: mushiverse-ios-signed-archive
+      cancel-in-progress: false
+    env:
+      ASC_KEY_ID: ${{ secrets.ASC_KEY_ID }}
+      ASC_ISSUER_ID: ${{ secrets.ASC_ISSUER_ID }}
+      ASC_API_KEY_P8_BASE64: ${{ secrets.ASC_API_KEY_P8_BASE64 }}
+      SIGNED_BUILD_NUMBER: '2541'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - uses: actions/download-artifact@v4
+        with:
+          name: mushiverse-signed-ipa
+          run-id: 42912429942
+          github-token: ${{ github.token }}
+          path: ${{ runner.temp }}/saved-2541
+      - name: Verify saved IPA identity and upload approved build
+        shell: bash
+        run: |
+          set -euo pipefail
+          IPA="$(find "$RUNNER_TEMP/saved-2541" -maxdepth 1 -name '*.ipa' -type f -print -quit)"
+          test -n "$IPA"
+          unzip -p "$IPA" Payload/App.app/Info.plist > "$RUNNER_TEMP/saved-2541.plist"
+          test "$(/usr/libexec/PlistBuddy -c 'Print :CFBundleVersion' "$RUNNER_TEMP/saved-2541.plist")" = '2541'
+          test "$(/usr/libexec/PlistBuddy -c 'Print :CFBundleIdentifier' "$RUNNER_TEMP/saved-2541.plist")" = 'com.rikuto.mushiverse'
+          umask 077
+          mkdir -p "$HOME/.appstoreconnect/private_keys"
+          KEY="$HOME/.appstoreconnect/private_keys/AuthKey_${ASC_KEY_ID}.p8"
+          trap 'rm -f "$KEY" "$RUNNER_TEMP/AuthKey.p8"' EXIT
+          printf '%s' "$ASC_API_KEY_P8_BASE64" | base64 -D > "$RUNNER_TEMP/AuthKey.p8"
+          cp "$RUNNER_TEMP/AuthKey.p8" "$KEY"
+          xcrun altool --upload-app --type ios --file "$IPA" --apiKey "$ASC_KEY_ID" --apiIssuer "$ASC_ISSUER_ID"
+      - name: Install locked verification dependencies
+        run: npm ci --no-audit --no-fund
+      - name: Check Apple processing and TestFlight availability
+        run: node scripts/check-testflight-processing.mjs
