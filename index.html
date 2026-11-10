@@ -658,9 +658,8 @@ header .topstats .stat small{opacity:1!important;font-weight:700!important}
 var booted=false;
 function check(){
  if(booted||!document.body||document.getElementById('mvStartupRecovery'))return;
- var roots=document.querySelectorAll('#home, #record, #gacha, #collection, #map, #profile, #app, main, [role="main"]');
- var visible=Array.from(roots).some(function(main){return main.getBoundingClientRect().height>0&&getComputedStyle(main).display!=='none'});
- if(visible)return;
+ // Static HTML can be visible even when application initialization has failed.
+ // Only the app-ready event confirms that initialization reached its first render.
  var screen=document.createElement('div');screen.id='mvStartupRecovery';screen.setAttribute('role','alertdialog');screen.setAttribute('aria-label','起動できない場合の案内');
  var panel=document.createElement('div');panel.className='panel';
  var title=document.createElement('h2');title.textContent='ムシバースを起動できませんでした';
@@ -2057,7 +2056,7 @@ document.addEventListener('click',async e=>{
  if(e.target.closest?.('#copyGlobalMigration')){const payload=JSON.stringify(buildGlobalMigrationPayload(),null,2);try{await navigator.clipboard.writeText(payload);toast(globalLang()==='en'?'Migration JSON copied':'移行JSONをコピーしました')}catch{toast(globalLang()==='en'?'Copy failed':'コピーできませんでした')}return}
  if(e.target.closest?.('#exportGlobalMigration')){const payload=JSON.stringify(buildGlobalMigrationPayload(),null,2),blob=new Blob([payload],{type:'application/json'}),a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=`mushiverse-global-migration-${new Date().toISOString().slice(0,10)}.json`;a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1200);toast(globalLang()==='en'?'Migration JSON exported':'移行JSONを書き出しました');return}
 });
-async function init(){if(!db){toast('接続ライブラリの読み込みに失敗しました');return}const {data}=await db.auth.getUser();user=data?.user||null;window.user=user;authUI();await load();await syncBillingGuard();await syncBillingPlan();render();await handleBillingReturn();db.auth.onAuthStateChange(async(_event,session)=>{user=session?.user||null;window.user=user;syncedBillingPlan=null;authUI();await syncBillingGuard();await syncBillingPlan();render()});setInterval(()=>{if(document.visibilityState==='visible'){load();syncBillingGuard()}},60000)}init();
+async function init(){if(!db){toast('接続ライブラリの読み込みに失敗しました');return}const {data}=await db.auth.getUser();user=data?.user||null;window.user=user;authUI();await load();await syncBillingGuard();await syncBillingPlan();render();window.dispatchEvent(new Event('mushiverse:app-ready'));await handleBillingReturn();db.auth.onAuthStateChange(async(_event,session)=>{user=session?.user||null;window.user=user;syncedBillingPlan=null;authUI();await syncBillingGuard();await syncBillingPlan();render()});setInterval(()=>{if(document.visibilityState==='visible'){load();syncBillingGuard()}},60000)}init();
 })();
 </script>
 <script id="mushiverse-v32-script">
