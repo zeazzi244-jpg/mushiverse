@@ -138,3 +138,17 @@ body.mv128Kids #mvDiscoveryTrail, body.mv128Kids .mvAdventurePrimary { display: 
   font-size: .75rem;
   font-weight: 800;
 }
+
+#mvForestBgm {
+  min-height: 44px;
+  margin-block-start: .65rem;
+  padding-inline: .75rem;
+  border: 1px solid #a6c381;
+  border-radius: .7rem;
+  background: #173e30;
+  color: #fff;
+}
+#mvForestBgm[aria-pressed="true"] {
+  background: #d5f0ad;
+  color: #173e30;
+}
