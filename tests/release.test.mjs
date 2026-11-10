@@ -140,3 +140,12 @@ test('gacha machine presents an SSR preview without changing draw probabilities'
   assert.match(html, /出現率 0\.1%/, 'SSR probability label missing');
   assert.match(html, /#mv101Machine\{max-width:360px/, 'Compact machine layout missing');
 });
+
+test('gacha reveal uses longer three-stage variants without rerolling rewards', () => {
+  const html = readFileSync('index.html', 'utf8');
+  assert.match(html, /id="mvGachaMultiStage"/, 'Multi-stage styles missing');
+  assert.match(html, /森の共鳴.*星屑の召喚.*古代遺跡の覚醒.*月光の羽化/, 'Four presentation variants missing');
+  assert.match(html, /top==='SSR'\?10500:top==='SR'\?8500/, 'Extended rare reveal duration missing');
+  assert.match(html, /const updatePhase=\(\)=>/, 'Three-stage reveal controller missing');
+  assert.match(html, /clearInterval\(phaseTimer\)/, 'Animation timer cleanup missing');
+});
