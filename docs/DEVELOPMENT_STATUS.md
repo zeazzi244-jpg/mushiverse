@@ -717,3 +717,4 @@ Add for Reviewを実行し、画像不足が表示されなくなったことを
 - 公開候補 `64b0c87` は [Chromium/WebKit 108件](https://github.com/zeazzi244-jpg/mushiverse/actions/runs/42804482674) と [iOS Simulator](https://github.com/zeazzi244-jpg/mushiverse/actions/runs/42804483001) を含む7ワークフロー成功。2441のApple処理は有効。内部グループ・実機・App Store Connect下書きは未確認。公開ゲートは11/20（55%）を維持。
 - 冒険ブランチでホームの虫さがしから、自分の発見に絞った実在昆虫の図鑑へ直接遷移。既にAIカード図鑑を開いていても切り替え、ログアウト時に絞り込みを解除する。ホームからガチャへの期待値を回帰テストで更新し、図鑑遷移とログアウトのケースを追加。
 - ローカルの `npm test`、`npm run verify:web`、`npm run test:release`（4件）、`npm run ios:sync` と `npm run ios:check` は成功。ローカルのブラウザー実行はダウンロードおよび実行環境の制約で開始できなかったため、冒険側のE2EとiOSコンパイルはGitHub Actionsで追跡する。
+- 冒険PR #3 のiOS Simulator・リリース検査・署名準備は成功。ブラウザーCIの初回はUbuntu依存パッケージの取得中に10分で打ち切られたため、ジョブ上限を25分に延ばした。テストの合否は [PR #3](https://github.com/zeazzi244-jpg/mushiverse/pull/3/checks) で確認する。
