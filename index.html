@@ -3887,6 +3887,8 @@ function showGachaReveal(got){
  window.mvCloseGachaReveal=close;document.addEventListener('keydown',keyHandler);btn.addEventListener('click',()=>revealed?close():reveal());
  // Taps outside the button never dismiss the result by accident.
  const reduced=window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
+ const awakening=top==='SSR' && !reduced;
+ const awakeningLabel=document.createElement('div');awakeningLabel.className='mvAwakeningLabel';awakeningLabel.setAttribute('aria-live','off');stage.append(awakeningLabel);
  const phases=top==='SSR'
  ?[['小さな命が目覚める','🪲'],['光が集まり、姿が変わる','✦'],['伝説の羽化！','🦋']]
  :top==='SR'
@@ -3894,7 +3896,7 @@ function showGachaReveal(got){
  :[['カプセル起動','🪲'],['光の判定','✦'],['新たな発見！','🦋']];
  const duration=reduced?0:top==='SSR'?10500:top==='SR'?8500:got.length===10?7200:6500;
  let phaseIndex=0;
- const updatePhase=()=>{const p=phases[phaseIndex];phase.textContent='第'+(phaseIndex+1)+'段階 · '+p[0];stage.querySelector('.mv88Capsule').textContent=p[1];overlay.dataset.phase=String(phaseIndex+1)};
+ const updatePhase=()=>{const p=phases[phaseIndex];phase.textContent='第'+(phaseIndex+1)+'段階 · '+p[0];stage.querySelector('.mv88Capsule').textContent=p[1];overlay.dataset.phase=String(phaseIndex+1);awakeningLabel.textContent=awakening&&phaseIndex===2?'逆転覚醒 · 虹色の羽化！':'';if(awakening&&phaseIndex===2)overlay.classList.add('mvAwakeningBurst')};
  updatePhase();
  if(!reduced)phaseTimer=setInterval(()=>{phaseIndex=Math.min(phaseIndex+1,2);updatePhase()},duration/3);
  if(reduced)reveal();else timer=setTimeout(reveal,duration);btn.focus();
@@ -4130,6 +4132,14 @@ document.addEventListener('mushiverse:gacha-drawn',()=>{
 })();
 </script>
 
+<style id="mvGachaAwakening">
+.mvAwakeningLabel{position:relative;z-index:2;min-height:32px;font-weight:900;font-size:clamp(17px,5vw,25px);letter-spacing:.08em;color:#fff4bd;text-shadow:0 0 20px #ffd54e}
+.mv88Reveal.mvAwakeningBurst .mv88Halo{width:280px;height:280px;background:conic-gradient(#ffca4a,#fff,#f78bff,#80e9ff,#ffca4a);filter:blur(8px);animation:mvAwakenPulse .65s ease-in-out infinite alternate}
+.mv88Reveal.mvAwakeningBurst .mv88Capsule{animation:mvAwakenRise 1.1s ease-in-out infinite alternate}
+@keyframes mvAwakenPulse{from{transform:scale(.75) rotate(0deg);opacity:.6}to{transform:scale(1.2) rotate(35deg);opacity:1}}
+@keyframes mvAwakenRise{from{transform:translateY(14px) scale(.85)}to{transform:translateY(-18px) scale(1.25)}}
+@media(prefers-reduced-motion:reduce){.mv88Reveal.mvAwakeningBurst .mv88Halo,.mv88Reveal.mvAwakeningBurst .mv88Capsule{animation:none!important}}
+</style>
 <style id="mvGachaReviewSafety">
 .mv88Fairness{font-size:12px;line-height:1.65;color:#e5f0df;max-width:420px;margin:12px auto 0}
 .mv88Close{min-height:48px;touch-action:manipulation}
