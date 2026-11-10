@@ -700,3 +700,5 @@ Add for Reviewを実行し、画像不足が表示されなくなったことを
 - 起動用ファイル照合を追加した後、既存のリリーススクリプトCIはWebのビルドのみでiOS同期を省いていた。CIを `npm run ios:sync` に切り替え、同期済みのiOS起動ページが変更された場合の拒否テストを追加した。[修正前のCI](https://github.com/zeazzi244-jpg/mushiverse/actions/runs/42802802071)
 - ローカルで `npm test`、`npm run verify:web`、`npm run test:release`、同期済みの `npm run ios:check` が成功。起動ページの意図的な変更も検出した。修正コミットのmacOS CI・署名・実機は別途確認する。
 - 公開ゲートは前回の11/20（55%）を維持。最新候補の内部配布と実機起動、App Store Connectの登録内容と審査状態の確認が残る。
+
+- 実装コミット `3851a9e894fd9fbfff073feb5c59102bf93c15d4` のリリースCI・iOS Simulatorは成功。[署名実行 #23](https://github.com/zeazzi244-jpg/mushiverse/actions/runs/42803214089) でIPAをアップロードし、2441のApple処理 `VALID`、内部状態 `READY_FOR_BETA_TESTING` を確認。グループ照会はHTTP 403で、割り当てと実機は未確認。ブラウザー結果は [Web CI](https://github.com/zeazzi244-jpg/mushiverse/actions/runs/42803055521) で追跡する。公開ゲートの再集計は実機と審査下書きの確認後。

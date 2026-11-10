@@ -55,3 +55,9 @@
 
 - 作業は [PR #2](https://github.com/zeazzi244-jpg/mushiverse/pull/2) の既存ブランチを継続。修正直前の先端は `69e7ef64891afdb061f65c46338b14a819fe398c`。最新コミットはPRのCommitsを参照する。
 - Linuxのリリース検査でも先にCapacitorを同期する。同期後の起動ページが古い場合に拒否する試験を追加。ローカルで単体、Webバンドル、リリース回帰、同期後のiOS構造検査が成功。Xcodeビルドと署名配布は [PRのChecks](https://github.com/zeazzi244-jpg/mushiverse/pull/2/checks) と [署名ワークフロー](https://github.com/zeazzi244-jpg/mushiverse/actions/workflows/ios-signed-archive.yml) で個別に照合する。
+
+## K. TestFlight 2441
+
+- [署名・アップロード実行 #23](https://github.com/zeazzi244-jpg/mushiverse/actions/runs/42803214089) は実装コミット `3851a9e894fd9fbfff073feb5c59102bf93c15d4` をビルド。Apple処理は `VALID`、内部状態は `READY_FOR_BETA_TESTING`。グループ照会はHTTP 403のため割り当て未確認。iPhoneのTestFlightに2441が表示されない場合は、App Store ConnectのTestFlightで既存の内部テスターグループに2441を追加する。
+- [iOS Simulator](https://github.com/zeazzi244-jpg/mushiverse/actions/runs/42803055503) と [リリース検査](https://github.com/zeazzi244-jpg/mushiverse/actions/runs/42803055881) は同じコミットで成功。ブラウザー結果は [Web CI](https://github.com/zeazzi244-jpg/mushiverse/actions/runs/42803055521) で確認する。
+- 2441でコールド起動・ログイン・6タブ・所持AI図鑑を確認。App Store Connectの審査下書きはサインインが必要で未確認。プライバシーとサポートの公開ページはHTTP 200を確認済み。登録済みURL、App Privacy、地図利用権、審査用ログイン、スクリーンショットを審査前に照合する。
