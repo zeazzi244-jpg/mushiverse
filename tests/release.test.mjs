@@ -195,3 +195,13 @@ test('third gacha phase gets screen time before final result', () => {
   const html = readFileSync('index.html', 'utf8');
   assert.match(html, /phaseTimer=setInterval\(\(\)=>\{phaseIndex=Math\.min\(phaseIndex\+1,2\);updatePhase\(\);if\(phaseIndex===2\)clearInterval\(phaseTimer\)\},duration\/4\)/, 'Final phase must play before automatic reveal');
 });
+
+test('startup recovery is non-destructive and supports all main tabs', () => {
+  const html = readFileSync('index.html', 'utf8');
+  assert.match(html, /id="mvStartupRecoveryScript"/);
+  assert.match(html, /setTimeout\(check,12000\)/);
+  assert.match(html, /#home, #record, #gacha, #collection, #map, #profile/);
+  assert.match(html, /location\.reload\(\)/);
+  const recovery = html.slice(html.indexOf('id="mvStartupRecoveryScript"'), html.indexOf('</script>', html.indexOf('id="mvStartupRecoveryScript"')));
+  assert.doesNotMatch(recovery, /localStorage\.clear|indexedDB\.deleteDatabase|sessionStorage\.clear/, 'Recovery must not erase user data');
+});
