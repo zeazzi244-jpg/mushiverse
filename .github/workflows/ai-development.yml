@@ -47,6 +47,8 @@ jobs:
           echo "OpenAI Platform API authentication succeeded (HTTP 200)."
       - name: Install project dependencies
         run: npm install --no-package-lock --no-audit --no-fund
+      - name: Verify baseline release tests before spending AI tokens
+        run: npm run test:release
       - name: Start isolated development branch
         id: branch
         run: |
