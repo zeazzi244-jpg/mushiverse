@@ -3873,16 +3873,31 @@ function showGachaReveal(got){
  const inner=document.createElement('div');inner.className='mv88Inner';
  const title=document.createElement('div');title.className='mv88Title';title.textContent=got.length===10?'✨ 10連ガチャ ✨':'✨ ムシガチャ ✨';
  const stage=document.createElement('div');stage.className='mv88Stage';stage.innerHTML='<div class="mv88Halo"></div><div class="mv88Capsule">🪲</div><div class="mv88Wait"></div>';stage.querySelector('.mv88Wait').textContent=top==='SSR'?'🌈 虹色覚醒… SSR確定！':top==='SR'?'💜 激アツ！ SR確定！':top==='R'?'✨ レアの気配！':'カプセルを開封中…';if(top==='SR'||top==='SSR')overlay.classList.add('mv103Rare');document.dispatchEvent(new CustomEvent('mushiverse:rarity-reveal',{detail:{rarity:top}}));
+ const variants=['森の共鳴','星屑の召喚','古代遺跡の覚醒','月光の羽化'];
+ const variantIndex=Math.floor(Math.random()*variants.length);overlay.dataset.variant=String(variantIndex);
+ title.textContent=variants[variantIndex]+' · '+(got.length===10?'10連':'1回');
+ const phase=document.createElement('div');phase.className='mv88Phase';phase.setAttribute('aria-live','polite');
  const result=document.createElement('div');result.className='mv88Results';result.hidden=true;
  const btn=document.createElement('button');btn.type='button';btn.className='mv88Close';btn.textContent='結果を見る';
- inner.append(title,stage,result,btn);overlay.append(inner);document.body.append(overlay);
- let revealed=false;let timer;const previous=document.activeElement;
- const reveal=()=>{if(revealed)return;revealed=true;clearTimeout(timer);stage.hidden=true;result.hidden=false;result.replaceChildren(...got.map(c=>{const card=document.createElement('div');card.className='mv88Card mv88Card-'+c.rarity;const emblem=document.createElement('div');emblem.className='mv88Emblem';emblem.textContent=c.name.includes('チョウ')?'🦋':c.name.includes('テントウ')?'🐞':c.name.includes('バッタ')?'🦗':'🪲';const tier=document.createElement('strong');tier.textContent=c.rarity;const name=document.createElement('span');name.textContent=c.name;card.append(emblem,tier,name);return card}));btn.textContent='ガチャに戻る';if(top==='SSR'&&!matchMedia('(prefers-reduced-motion: reduce)').matches){overlay.classList.add('mv88Burst');try{navigator.vibrate?.([60,40,120])}catch(_){}}};
- const close=()=>{clearTimeout(timer);overlay.remove();document.removeEventListener('keydown',keyHandler);if(previous&&previous.isConnected)previous.focus()};
+ inner.append(title,phase,stage,result,btn);overlay.append(inner);document.body.append(overlay);
+ let revealed=false;let timer;let phaseTimer;const previous=document.activeElement;
+ const reveal=()=>{if(revealed)return;revealed=true;clearTimeout(timer);clearInterval(phaseTimer);phase.hidden=true;stage.hidden=true;result.hidden=false;result.replaceChildren(...got.map(c=>{const card=document.createElement('div');card.className='mv88Card mv88Card-'+c.rarity;const emblem=document.createElement('div');emblem.className='mv88Emblem';emblem.textContent=c.name.includes('チョウ')?'🦋':c.name.includes('テントウ')?'🐞':c.name.includes('バッタ')?'🦗':'🪲';const tier=document.createElement('strong');tier.textContent=c.rarity;const name=document.createElement('span');name.textContent=c.name;card.append(emblem,tier,name);return card}));btn.textContent='ガチャに戻る';if(top==='SSR'&&!matchMedia('(prefers-reduced-motion: reduce)').matches){overlay.classList.add('mv88Burst');try{navigator.vibrate?.([60,40,120])}catch(_){}}};
+ const close=()=>{clearTimeout(timer);clearInterval(phaseTimer);overlay.remove();document.removeEventListener('keydown',keyHandler);if(previous&&previous.isConnected)previous.focus()};
  const keyHandler=e=>{if(e.key==='Escape'){if(!revealed)reveal();else close()}if(e.key==='Tab'){e.preventDefault();btn.focus()}};
  document.addEventListener('keydown',keyHandler);btn.addEventListener('click',()=>revealed?close():reveal());
  overlay.addEventListener('click',e=>{if(e.target===overlay){if(!revealed)reveal();else close()}});
- timer=setTimeout(reveal,top==='SSR'?3900:top==='SR'?3100:got.length===10?2200:2700);btn.focus();
+ const reduced=window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
+ const phases=top==='SSR'
+ ?[['小さな命が目覚める','🪲'],['光が集まり、姿が変わる','✦'],['伝説の羽化！','🦋']]
+ :top==='SR'
+ ?[['カプセル起動','🪲'],['共鳴が強まる','✦'],['希少な羽化！','🦋']]
+ :[['カプセル起動','🪲'],['光の判定','✦'],['新たな発見！','🦋']];
+ const duration=reduced?1200:top==='SSR'?10500:top==='SR'?8500:got.length===10?7200:6500;
+ let phaseIndex=0;
+ const updatePhase=()=>{const p=phases[phaseIndex];phase.textContent='第'+(phaseIndex+1)+'段階 · '+p[0];stage.querySelector('.mv88Capsule').textContent=p[1];overlay.dataset.phase=String(phaseIndex+1)};
+ updatePhase();
+ if(!reduced)phaseTimer=setInterval(()=>{phaseIndex=Math.min(phaseIndex+1,2);updatePhase()},duration/3);
+ timer=setTimeout(reveal,duration);btn.focus();
 }
 
 function start(){ensure();render();document.addEventListener('click',e=>{if(e.target.closest?.('[data-tab="profile"]'))setTimeout(render,30)},true);document.addEventListener('visibilitychange',()=>{if(!document.hidden)render()});window.addEventListener('pageshow',render);setInterval(()=>{if(!document.hidden&&el('profile')&&!el('profile').classList.contains('hide'))render()},10000)}
@@ -4115,6 +4130,15 @@ document.addEventListener('mushiverse:gacha-drawn',()=>{
 })();
 </script>
 
+<style id="mvGachaMultiStage">
+.mv88Phase{min-height:34px;color:#fff3c5;font-size:clamp(15px,4vw,20px);font-weight:900;letter-spacing:.035em;text-shadow:0 0 12px #000;margin:8px auto}
+.mv88Reveal[data-variant="1"]{background:radial-gradient(circle at 50% 35%,#37466d,#0b1229 65%,#020710)}
+.mv88Reveal[data-variant="2"]{background:radial-gradient(circle at 50% 35%,#655026,#292012 65%,#080907)}
+.mv88Reveal[data-variant="3"]{background:radial-gradient(circle at 50% 35%,#2b5872,#0a2330 65%,#020b11)}
+.mv88Reveal[data-phase="2"] .mv88Capsule{filter:drop-shadow(0 0 36px #a7faff);transform:scale(1.15)}
+.mv88Reveal[data-phase="3"] .mv88Capsule{filter:drop-shadow(0 0 45px #ffe58c);font-size:112px}
+@media(prefers-reduced-motion:reduce){.mv88Reveal .mv88Capsule,.mv88Reveal .mv88Halo,.mv88Reveal .mv88Wait{animation:none!important;transition:none!important}}
+</style>
 <style id="mv103-rarity-style">
 .mv88Reveal.mv103Rare .mv88Title{animation:mv103Title .75s ease-in-out infinite alternate}
 .mv88Reveal.mv88-SSR{background:radial-gradient(circle at 50% 45%,#65429c,#141126 65%,#06040e)}
