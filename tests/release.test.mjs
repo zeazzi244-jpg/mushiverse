@@ -179,3 +179,14 @@ test('SSR reverse awakening appears only for a genuinely awarded SSR', () => {
   assert.match(html, /mvAwakeningBurst/, 'Final transformation class missing');
   assert.match(html, /prefers-reduced-motion:reduce/, 'Reduced-motion support missing');
 });
+
+test('gacha does not expose rarity via initial overlay CSS', () => {
+  const html = readFileSync('index.html', 'utf8');
+  const start = html.indexOf('function showGachaReveal(got){');
+  const end = html.indexOf('\nfunction start(){ensure();render();', start);
+  assert.ok(start >= 0 && end > start);
+  const reveal = html.slice(start, end);
+  assert.match(reveal, /overlay\.className='mv88Reveal';/, 'Initial reveal must be rarity-neutral');
+  assert.match(reveal, /revealed=true;overlay\.classList\.add\('mv88-'\+top\)/, 'Rarity colors should appear only at result reveal');
+  assert.match(html, /id="mvGachaSpoilerGuard"/, 'Spoiler protection CSS missing');
+});
