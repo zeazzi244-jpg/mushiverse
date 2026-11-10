@@ -271,3 +271,36 @@ body dialog { background: var(--mv-surface); color: var(--mv-text); border-color
 body .appCopyright { color: var(--mv-muted); }
 body .leaflet-control :is(a,label,span) { color: #173729; }
 body .leaflet-popup-content { color: #173729; }
+
+/* Finish night surfaces in nested cards, collection tiles and account details. */
+body :is(.mv114Post,.mv114PostPhoto,.mv114Avatar,.mv81Tile,#mv86ProfileBody,
+  #mv86Stats,#mv86ProfileEdit,.mv104Actions button,#mv105PublicProfile button,
+  #mv86AdvancedToggle,#mv86CoverButton,.mv80Dialog button,
+  .mv81Tile[class*="mv123Tier-"]) {
+  background: var(--mv-raised) !important;
+  color: var(--mv-text) !important;
+  border-color: #58785f !important;
+}
+body :is(.mv114PostAuthor b,.mv114Species,#mv86ProfileBody h2,
+  #mv86Stats b,.mv81Tile span,.mv81Tile small) { color: var(--mv-text) !important; }
+body :is(#mv86Bio,#mv86Stats small,.mv104Help) { color: var(--mv-muted) !important; }
+body .mv81Tile[class*="mv123Tier-"] { border-color: var(--tier, #58785f) !important; }
+body .mv114Action.liked { background: #44232e !important; color: #ffc1d0 !important; }
+body .mv114Action.active { background: #40371b !important; color: #ffe5a1 !important; }
+body .mv114Delete { color: #ffb9b2 !important; }
+body :is(#recordForm,.authpanel,.collectionTools) :is(button,input,select,textarea) {
+  min-height: 44px;
+}
+body :is(#home,#post,#gacha,#collection,#map,#profile) :is(button,input,select,textarea,a):focus-visible {
+  outline: 3px solid #e5bd64 !important;
+  outline-offset: 3px;
+}
+body :is(#home,#post,#gacha,#collection,#map,#profile) button:not(:disabled):active {
+  filter: brightness(1.15);
+}
+body :is(#home,#post,#gacha,#collection,#map,#profile) button:disabled { cursor: not-allowed; }
+@media (max-width: 380px) {
+  body .mv114Actions { gap: 6px; }
+  body .mv114Action { padding: 9px; min-height: 44px; }
+  body #mv86Stats { gap: 4px; }
+}
