@@ -666,3 +666,7 @@ Add for Reviewを実行し、画像不足が表示されなくなったことを
 ### AI昆虫100枚入り TestFlight 2141（2026-11-10）
 
 - 所有者承認後に開発ブランチで署名ワークフローを実行。[実行ログ](https://github.com/zeazzi244-jpg/mushiverse/actions/runs/42736567119)で署名IPA・アップロード成功。10:38 JST時点でApple処理VALID、内部READY_FOR_BETA_TESTING、外部READY_FOR_BETA_SUBMISSION。App Store Connectのブラウザーは認証画面へ遷移したため内部グループ割当と実機インストールは未確認。審査提出なし。
+
+### 図鑑を採集記録とAIカードに整理
+
+- 旧ガチャの実在昆虫カード一覧を図鑑とガチャ画面から外し、図鑑上部のAI昆虫カードタブに100枚を表示。採集記録・旧保存データと残高を保持。AIカード読込前のガチャ操作はコイン・チケットを消費せず停止する。2141には未反映。

@@ -17,8 +17,7 @@ test('draw retains collection beyond 300 and updates encyclopedia immediately',a
   await expect.poll(()=>page.evaluate(A=>JSON.parse(localStorage.getItem('mushiverse-v77-game:user:'+A)).cards.length,A)).toBe(301);
   await page.keyboard.press('Escape');await page.keyboard.press('Escape');
   await page.locator('.nav [data-tab="collection"]').click();await page.locator('#mv90GachaTab').click();
-  await expect(page.locator('#mv90Stats')).toContainText('所持 300枚');
-  await page.locator('#aiInsectCollection summary').click();
+  await expect(page.locator('#mv90CardList')).toHaveCount(0);
   await expect(page.locator('#aiInsectStatus')).toContainText('所持 1種類');
 });
 test('failed daily bonus save rolls back and purchases remain disabled',async({page})=>{
