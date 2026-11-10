@@ -39,6 +39,11 @@ jobs:
           BRANCH="automation/ai-$(date -u +%Y%m%d-%H%M%S)-$GITHUB_RUN_ID"
           git switch -c "$BRANCH"
           echo "name=$BRANCH" >> "$GITHUB_OUTPUT"
+      - name: Force API-key authentication (ignore cached ChatGPT sessions)
+        run: |
+          mkdir -p "$HOME/.codex"
+          printf 'forced_login_method = "apikey"\n' > "$HOME/.codex/config.toml"
+          rm -f "$HOME/.codex/auth.json"
       - name: Authenticate Codex using the repository secret
         run: |
           printf '%s' "$OPENAI_API_KEY" | npx --yes @openai/codex login --with-api-key
