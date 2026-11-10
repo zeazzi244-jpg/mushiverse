@@ -76,6 +76,17 @@ jobs:
             echo "::error::OpenAI Responses API returned HTTP $status. API key, model access, or API billing may need attention; stopping before coding."
             exit 1
           fi
+      - name: Confirm Codex CLI uses API credentials
+        shell: bash
+        run: |
+          set -euo pipefail
+          # Report only the auth mode, never token values or credential files.
+          mode=$(npx --yes @openai/codex login status 2>&1)
+          if ! printf '%s' "$mode" | grep -Eiq 'api.key|api key|api-key'; then
+            echo "::error::Codex is not reporting API-key authentication. Check the CLI login mode."
+            exit 1
+          fi
+          echo "Codex API-key authentication mode confirmed."
       - name: Run bounded AI coding task
         run: |
           npx --yes @openai/codex exec --config forced_login_method='"api"' --model gpt-5.1-codex-mini --sandbox workspace-write "You are working on the existing MUSHIVERSE application. Inspect the repository and its existing tests. Prioritize App Store release blockers: startup blank screen diagnostics, fatal runtime errors, login, privacy and safety, and release validation. Implement up to THREE related, independently verifiable improvements in this run, with regression tests for each. Avoid cosmetic work unless it fixes a release-blocking readability problem. Make the actual code change and add or update a relevant regression test. Never change credentials, GitHub Actions workflows, payment or billing logic, account security, or production configuration. Do not delete existing features. Do not use network services beyond the available development environment. Do not commit or push; the workflow will handle that. If no safe improvement is possible, make no changes."
