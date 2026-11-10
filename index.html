@@ -3998,17 +3998,19 @@ function showGachaReveal(got,discoveries){
  const overlay=document.createElement('div');overlay.id='mv88Reveal';overlay.className='mv88Reveal mv88-'+top;overlay.setAttribute('role','dialog');overlay.setAttribute('aria-modal','true');overlay.setAttribute('aria-label','ガチャ結果');
  const inner=document.createElement('div');inner.className='mv88Inner';
  const title=document.createElement('div');title.className='mv88Title';title.textContent=got.length===10?'✨ 10連ガチャ ✨':'✨ ムシガチャ ✨';
- const stage=document.createElement('div');stage.className='mv88Stage';stage.innerHTML='<div class="mv88Halo"></div><div class="mv88Capsule">🪲</div><div class="mv88Wait"></div>';stage.querySelector('.mv88Wait').textContent=top==='SSR'?'🌈 虹色覚醒… SSR確定！':top==='SR'?'💜 激アツ！ SR確定！':top==='R'?'✨ レアの気配！':'カプセルを開封中…';if(top==='SR'||top==='SSR')overlay.classList.add('mv103Rare');document.dispatchEvent(new CustomEvent('mushiverse:rarity-reveal',{detail:{rarity:top}}));
+ const stage=document.createElement('div');stage.className='mv88Stage';stage.innerHTML='<div class="mv88Halo"></div><div class="mv88Capsule" aria-hidden="true"></div><div class="mv88Wait"></div>';const wait=stage.querySelector('.mv88Wait');wait.textContent='カプセルが落ちてきた！';const hint={N:'カプセルが開く…',R:'青い光が漏れている…',SR:'紫の光があふれる…',SSR:'金色の光が広がる…'}[top];if(top==='SR'||top==='SSR')overlay.classList.add('mv103Rare');document.dispatchEvent(new CustomEvent('mushiverse:rarity-reveal',{detail:{rarity:top}}));
  const result=document.createElement('div');result.className='mv88Results';result.hidden=true;
  const btn=document.createElement('button');btn.type='button';btn.className='mv88Close';btn.textContent='結果を見る';
  inner.append(title,stage,result,btn);overlay.append(inner);document.body.append(overlay);
- let revealed=false;let timer;const previous=document.activeElement;
- const reveal=()=>{if(revealed)return;revealed=true;clearTimeout(timer);stage.hidden=true;result.hidden=false;result.replaceChildren(...got.map((c,index)=>{const card=document.createElement('div');card.className='mv88Card mv88Card-'+c.rarity;const emblem=document.createElement('div');emblem.className='mv88Emblem';emblem.textContent=c.name.includes('チョウ')?'🦋':c.name.includes('テントウ')?'🐞':c.name.includes('バッタ')?'🦗':'🪲';const tier=document.createElement('strong');tier.textContent=c.rarity;const name=document.createElement('span');name.textContent=c.name;if(/^AI-\d{3}$/.test(c.id)){const image=document.createElement('img');image.src='./assets/ai-insects/'+c.id+'.webp';image.alt=c.name;image.style.cssText='width:100%;height:auto;max-height:42vh;object-fit:contain';image.addEventListener('error',()=>image.replaceWith(emblem),{once:true});card.append(image)}else card.append(emblem);card.append(tier,name);if(discoveries.has(index)){const badge=document.createElement('strong');badge.className='mvNewDiscovery';badge.textContent='NEW · 初発見';card.prepend(badge)}return card}));btn.textContent='ガチャに戻る';if(top==='SSR'&&!matchMedia('(prefers-reduced-motion: reduce)').matches){overlay.classList.add('mv88Burst');try{navigator.vibrate?.([60,40,120])}catch(_){}}};
- const close=()=>{clearTimeout(timer);overlay.remove();document.removeEventListener('keydown',keyHandler);dismissReveal=null;render();if(previous&&previous.isConnected)previous.focus()};dismissReveal=close;
+ let revealed=false;let timer;let hintTimer;const previous=document.activeElement;
+ const reveal=()=>{if(revealed)return;revealed=true;clearTimeout(timer);clearTimeout(hintTimer);stage.hidden=true;result.hidden=false;result.replaceChildren(...got.map((c,index)=>{const card=document.createElement('div');card.className='mv88Card mv88Card-'+c.rarity;const emblem=document.createElement('div');emblem.className='mv88Emblem';emblem.textContent=c.name.includes('チョウ')?'🦋':c.name.includes('テントウ')?'🐞':c.name.includes('バッタ')?'🦗':'🪲';const tier=document.createElement('strong');tier.textContent=c.rarity;const name=document.createElement('span');name.textContent=c.name;if(/^AI-\d{3}$/.test(c.id)){const image=document.createElement('img');image.src='./assets/ai-insects/'+c.id+'.webp';image.alt=c.name;image.style.cssText='width:100%;height:auto;max-height:42vh;object-fit:contain';image.addEventListener('error',()=>image.replaceWith(emblem),{once:true});card.append(image)}else card.append(emblem);card.append(tier,name);if(discoveries.has(index)){const badge=document.createElement('strong');badge.className='mvNewDiscovery';badge.textContent='NEW · 初発見';card.prepend(badge)}return card}));title.textContent={N:'発見！',R:'レア発見！',SR:'スーパーレア発見！',SSR:'SSR · 伝説の発見！'}[top];overlay.classList.add('mvRevealSettled');btn.textContent='ガチャに戻る';if(top==='SSR'&&!matchMedia('(prefers-reduced-motion: reduce)').matches){overlay.classList.add('mv88Burst');try{navigator.vibrate?.([60,40,120])}catch(_){}}};
+ const close=()=>{clearTimeout(timer);clearTimeout(hintTimer);overlay.remove();document.removeEventListener('keydown',keyHandler);dismissReveal=null;render();if(previous&&previous.isConnected)previous.focus()};dismissReveal=close;
  const keyHandler=e=>{if(e.key==='Escape'){if(!revealed)reveal();else close()}if(e.key==='Tab'){e.preventDefault();btn.focus()}};
  document.addEventListener('keydown',keyHandler);btn.addEventListener('click',()=>revealed?close():reveal());
  overlay.addEventListener('click',e=>{if(e.target===overlay){if(!revealed)reveal();else close()}});
- timer=setTimeout(reveal,matchMedia('(prefers-reduced-motion: reduce)').matches?0:top==='SSR'?3900:top==='SR'?3100:got.length===10?2200:2700);btn.focus();
+ const reduced=matchMedia('(prefers-reduced-motion: reduce)').matches;
+ if(!reduced)hintTimer=setTimeout(()=>{wait.textContent=hint;stage.classList.add('mvCapsuleCharged')},550);
+ timer=setTimeout(reveal,reduced?0:top==='SSR'?2250:top==='SR'?1750:1400);btn.focus();
 }
 
 function start(){ensure();render();document.addEventListener('mushiverse:auth-changed',()=>{state=null;el('mv80Dialog')?.close();dismissReveal?.();render()});window.addEventListener('storage',e=>{if(e.key===storageKey()){state=read();render()}});window.addEventListener('focus',()=>{state=read();render()});document.addEventListener('click',e=>{if(e.target.closest?.('[data-tab="profile"]'))setTimeout(render,30)},true);document.addEventListener('visibilitychange',()=>{if(!document.hidden){state=read();render()}});window.addEventListener('pageshow',render);setInterval(()=>{if(!document.hidden&&el('profile')&&!el('profile').classList.contains('hide'))render()},10000)}
@@ -4196,7 +4198,7 @@ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',
 function init(){
  const mount=document.getElementById('mv86GachaMount');if(!mount||document.getElementById('mv101Machine'))return;
  const unit=document.createElement('section');unit.id='mv101Machine';unit.setAttribute('aria-label','ガシャポン筐体イラスト');
- unit.innerHTML='<h2>🌿 ムシガシャポン</h2><div class="mv101Glass"><span class="mv101Cap" style="background:#ffd47a"></span><span class="mv101Cap" style="background:#c6a4f8"></span><span class="mv101Cap" style="background:#81d4c4"></span></div><div class="mv101Base"><div class="mv101Knob">✣</div><div class="mv101Slot"></div></div><p style="margin:10px 0 0;font-size:13px">1回50コイン · 10連450コイン</p>';
+ unit.innerHTML='<h2>🌿 ムシガシャポン</h2><div class="mv101Glass"><span class="mv101Cap" style="background:#ffd47a"></span><span class="mv101Cap" style="background:#c6a4f8"></span><span class="mv101Cap" style="background:#81d4c4"></span></div><div class="mv101Base"><div class="mv101Knob">✣</div><div class="mv101Slot"></div></div>';
  mount.prepend(unit);
 }
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init,{once:true});else init();
@@ -4736,8 +4738,8 @@ function nativeStoreReady(){return window.MUSHIVERSE_NATIVE===true &&
  window.MushiverseStoreKit?.serverCreditEnabled===true}
 
 function mount(){const gacha=document.getElementById('gacha');if(!gacha||document.getElementById('mv134CoinStore'))return;
-const section=document.createElement('section');section.id='mv134CoinStore';section.setAttribute('aria-label','ガチャコインショップ');
-const h=document.createElement('h2');h.textContent='🪙 ガチャコインショップ（準備中）';
+const section=document.createElement('details');section.id='mv134CoinStore';section.setAttribute('aria-label','ガチャコインショップ');
+const h=document.createElement('summary');h.textContent='購入コイン情報（販売準備中）';
 const intro=document.createElement('p');intro.textContent='アプリ内課金でコインを追加できる予定です。価格はAppleの販売設定が完了してから表示します。現在は購入・請求できません。';
 section.append(h,intro);
 for(const pack of packs){const row=document.createElement('div');row.className='mv134Pack';const name=document.createElement('strong');name.textContent=pack.coins.toLocaleString('ja-JP')+'コイン';const button=document.createElement('button');button.type='button';button.disabled=true;button.textContent='販売準備中';button.dataset.productId=pack.id;row.append(name,button);section.append(row)}

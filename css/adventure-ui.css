@@ -152,3 +152,39 @@ body.mv128Kids #mvDiscoveryTrail, body.mv128Kids .mvAdventurePrimary { display: 
   background: #d5f0ad;
   color: #173e30;
 }
+
+/* A capsule drops, charges, then gives way to the result cards. */
+#mv88Reveal { --capsule-light: #8fe6b7; }
+#mv88Reveal.mv88-R { --capsule-light: #76c9ff; }
+#mv88Reveal.mv88-SR { --capsule-light: #c58bff; }
+#mv88Reveal.mv88-SSR { --capsule-light: #ffdc78; }
+#mv88Reveal .mv88Capsule {
+  width: clamp(92px, 27vw, 132px);
+  aspect-ratio: 1;
+  border-radius: 50%;
+  border: 3px solid var(--capsule-light);
+  background: radial-gradient(circle at 27% 22%, #fff8, transparent 32%),
+    linear-gradient(160deg, #fff 0%, var(--capsule-light) 48%, #182926 49% 53%, #224a42 54% 100%);
+  box-shadow: 0 0 26px var(--capsule-light);
+  filter: none;
+  animation: none;
+}
+#mv88Reveal .mv88Wait { animation: none; }
+#mv88Reveal.mvRevealSettled .mv88Title { animation: none; }
+#mv134CoinStore > summary { cursor: pointer; font-weight: 750; padding-block: .5rem; }
+@media (prefers-reduced-motion: no-preference) {
+  #gacha:not(.hide) #mv101Machine { animation: mvAdventureReveal .4s ease-out both; }
+  #mv88Reveal .mv88Capsule { animation: mvCapsuleDrop .55s ease-out both; }
+  #mv88Reveal .mvCapsuleCharged .mv88Capsule {
+    animation: mvCapsuleCharge .55s ease-in-out 2 alternate both;
+  }
+  @keyframes mvCapsuleDrop {
+    0% { opacity: 0; transform: translateY(-68px) rotate(-22deg); }
+    72% { opacity: 1; transform: translateY(8px) rotate(8deg); }
+    100% { transform: translateY(0) rotate(0); }
+  }
+  @keyframes mvCapsuleCharge {
+    from { transform: scale(1); }
+    to { transform: scale(1.07); box-shadow: 0 0 52px var(--capsule-light); }
+  }
+}
