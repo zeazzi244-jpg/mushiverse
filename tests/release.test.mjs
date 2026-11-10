@@ -124,3 +124,11 @@ test('mobile forms retain readable placeholders and disabled states', () => {
   assert.match(css, /:disabled\{opacity:\.65;cursor:not-allowed\}/, 'Disabled action styling missing');
   assert.match(css, /forced-colors:active/, 'Forced-colors accessibility missing');
 });
+
+test('home quest avoids beta label and misleading coin reward promises', () => {
+  const html = readFileSync('index.html', 'utf8');
+  assert.match(html, /今日の撮影チャレンジ/, 'Friendly quest heading missing');
+  assert.doesNotMatch(html, /採集クエスト β/, 'Outdated beta label remains');
+  assert.doesNotMatch(html, /審査通過で100コイン（予定）/, 'Unimplemented reward is advertised');
+  assert.match(html, /報酬機能は準備中/, 'Reward status must be explicit');
+});
