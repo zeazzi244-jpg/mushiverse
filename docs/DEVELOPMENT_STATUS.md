@@ -662,3 +662,7 @@ Add for Reviewを実行し、画像不足が表示されなくなったことを
 
 - 100枚のWebPを480×720で確認。SHA-256は100枚すべて異なり、一覧を目視確認した。開発ブランチではコイン・チケット抽選、結果画像、AI図鑑の所持表示へ接続済み。既存の自然種コレクションと残高は保持。
 - 単体・カタログ検査成功。[ブラウザーCI](https://github.com/zeazzi244-jpg/mushiverse/actions/runs/42726178233)はガチャ関連を含む105件成功。会員状態の取得失敗時に未定義のcurrentPlanを参照する1件が失敗したため0e018a3で修正。再検証結果は未確認。[iOS Simulatorビルド](https://github.com/zeazzi244-jpg/mushiverse/actions/runs/42726178523)成功。署名付きTestFlight配布と実機は未確認。公開ゲート55%（11/20）。
+
+### AI昆虫100枚入り TestFlight 2141（2026-11-10）
+
+- 所有者承認後に開発ブランチで署名ワークフローを実行。[実行ログ](https://github.com/zeazzi244-jpg/mushiverse/actions/runs/42736567119)で署名IPA・アップロード成功。10:38 JST時点でApple処理VALID、内部READY_FOR_BETA_TESTING、外部READY_FOR_BETA_SUBMISSION。App Store Connectのブラウザーは認証画面へ遷移したため内部グループ割当と実機インストールは未確認。審査提出なし。
