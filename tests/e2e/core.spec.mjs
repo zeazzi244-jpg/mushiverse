@@ -135,7 +135,7 @@ test('paid draw controls stay disabled regardless of local tampering',async({pag
  expect(errors).toEqual([]);
 });
 
-test('adventure home actions open the existing record and collection tabs', async ({page}) => {
+test('adventure home actions open the record and gacha tabs', async ({page}) => {
   const errors = await setup(page);
   const nav = page.locator('.nav');
   await expect(page.locator('#home .mvAdventureHero')).toBeVisible();
@@ -143,7 +143,29 @@ test('adventure home actions open the existing record and collection tabs', asyn
   await expect(page.locator('#recordForm')).toBeVisible();
   await nav.locator('[data-tab="home"]').click();
   await page.locator('#home .mvAdventureSecondary').click();
-  await expect(page.locator('#collectionList')).toBeVisible();
+  await expect(page.locator('#gacha')).toBeVisible();
+  expect(errors).toEqual([]);
+});
+
+test('discovery trail opens only your real sightings and resets on sign-out', async ({page}) => {
+  const errors = await setup(page);
+  await expect(page.locator('#mvDiscoveryCount')).toHaveText('1 / 3');
+  await page.evaluate(B => {
+    window.records.push({...window.records[0], id: 'other', user_id: B, insect_name: 'トンボ'});
+  }, B);
+  const nav = page.locator('.nav');
+  await nav.locator('[data-tab="collection"]').click();
+  await page.locator('#mv90GachaTab').click();
+  await nav.locator('[data-tab="home"]').click();
+  await page.locator('#mvDiscoveryGuide').click();
+  await expect(page.locator('#mv90Wild')).toBeVisible();
+  await expect(page.locator('#collectionMine')).toBeChecked();
+  await expect(page.locator('#collectionList')).toContainText('カブトムシ');
+  await expect(page.locator('#collectionList')).not.toContainText('トンボ');
+  await page.evaluate(() => window.testSwitchUser(null));
+  await expect(page.locator('#collectionMine')).not.toBeChecked();
+  await expect(page.locator('#collectionMineLabel')).toBeHidden();
+  await expect(page.locator('#mvDiscoveryCount')).toHaveText('0 / 3');
   expect(errors).toEqual([]);
 });
 
