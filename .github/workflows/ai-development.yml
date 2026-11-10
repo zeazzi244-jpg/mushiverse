@@ -56,7 +56,7 @@ jobs:
       - name: Enforce safe file boundaries
         if: steps.changes.outputs.changed == 'true'
         run: |
-          if git status --porcelain | grep -E '(^|/)(\.github/|\.env|package(-lock)?\.json|capacitor\.config|ios/|android/)' ; then
+          if git status --porcelain | cut -c4- | grep -E '(^|/)(\.github/|\.env|package(-lock)?\.json|capacitor\.config|ios/|android/)' ; then
             echo "::error::Protected files were modified; refusing to publish."
             exit 1
           fi
