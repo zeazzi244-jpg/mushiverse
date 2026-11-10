@@ -75,3 +75,8 @@
 - 旧データのnullカードで初発見判定が止まる問題を修正。[Chromium/WebKit 114件](https://github.com/zeazzi244-jpg/mushiverse/actions/runs/42912209615) とiOS Simulatorが成功。
 - [署名ビルド #24](https://github.com/zeazzi244-jpg/mushiverse/actions/runs/42912429942) で2541の署名付きIPAを生成。TestFlightへのアップロードは未実施。アップロード有効の実行は自動承認審査が所有者の明確な承認不足として拒否。
 - 次回は所有者のTestFlightアップロード承認を確認し、既存の署名ワークフローで内部配布へ進む。App Store審査提出と正式公開は別途確認。最新のApple処理確認済みビルドは2441。2541の実機確認は未実施。
+
+
+### 2541 TestFlight内部配布確認（2026-11-11 JST）
+
+所有者の明示承認後、保存済みIPAをビルドし直さずアップロード。[配布実行 #25](https://github.com/zeazzi244-jpg/mushiverse/actions/runs/42913718781) が成功。Apple処理 `VALID`、内部状態 `IN_BETA_TESTING` を確認。グループ一覧はHTTP 403で未確認。iPhoneのインストールと実機確認は未実施。次はTestFlightで2541へ更新し、コールド起動・6タブ・ガチャ・BGMを確認する。App Store正式審査は今回未提出。
