@@ -658,8 +658,8 @@ header .topstats .stat small{opacity:1!important;font-weight:700!important}
 var booted=false;
 function check(){
  if(booted||!document.body||document.getElementById('mvStartupRecovery'))return;
- var main=document.querySelector('#home, #app, main, [role="main"]');
- var visible=main&&main.getBoundingClientRect().height>0&&getComputedStyle(main).display!=='none';
+ var roots=document.querySelectorAll('#home, #record, #gacha, #collection, #map, #profile, #app, main, [role="main"]');
+ var visible=Array.from(roots).some(function(main){return main.getBoundingClientRect().height>0&&getComputedStyle(main).display!=='none'});
  if(visible)return;
  var screen=document.createElement('div');screen.id='mvStartupRecovery';screen.setAttribute('role','alertdialog');screen.setAttribute('aria-label','起動できない場合の案内');
  var panel=document.createElement('div');panel.className='panel';
