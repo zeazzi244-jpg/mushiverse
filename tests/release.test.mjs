@@ -170,3 +170,12 @@ test('gacha avoids early rarity audio spoilers and cleans up replaced overlays',
   assert.match(reveal, /const reveal=\(\)=>\{[^\n]*mushiverse:rarity-reveal/, 'Rarity signal must occur at reveal');
   assert.doesNotMatch(reveal.split('const reveal=()=>')[0], /dispatchEvent\(new CustomEvent\('mushiverse:rarity-reveal'/, 'Rarity leaked before reveal');
 });
+
+test('SSR reverse awakening appears only for a genuinely awarded SSR', () => {
+  const html = readFileSync('index.html', 'utf8');
+  assert.match(html, /id="mvGachaAwakening"/, 'Awakening CSS missing');
+  assert.match(html, /const awakening=top==='SSR' && !reduced/, 'Awakening must require SSR and motion permission');
+  assert.match(html, /phaseIndex===2/, 'Awakening should be the final phase');
+  assert.match(html, /mvAwakeningBurst/, 'Final transformation class missing');
+  assert.match(html, /prefers-reduced-motion:reduce/, 'Reduced-motion support missing');
+});
