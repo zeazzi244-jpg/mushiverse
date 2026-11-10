@@ -690,3 +690,7 @@ Add for Reviewを実行し、画像不足が表示されなくなったことを
 - [引き継ぎ](MUSHIVERSE_RETURN_HANDOFF.md)にビルド・テスト・署名設定名と復元手順を追記。
 
 - V8検証対象 `f9804095f928ae11265b5785f3ba8b4b1310036f`。 [Web CI](https://github.com/zeazzi244-jpg/mushiverse/actions/runs/42788692955) と [iOS Simulator](https://github.com/zeazzi244-jpg/mushiverse/actions/runs/42788693016) を含む全7件のCIが成功。初回カタログ取得失敗、抽選未成立時の残高保持、再選択後の抽選と50コイン消費をChromium・WebKitで確認。2341は署名・IPA・内部テスト中を確認済み。V8は未配布。追記は資料のみ。
+
+### iOS配布前のカード同梱検査
+
+- `910da1fd311e82898b4609da56429b884d9cc753` で、公開対象のカード画像をソースと配布用Webバンドルでバイト比較し、欠落・不一致ならカードIDを表示してビルド検査を失敗させる。AI図鑑モジュールも起動アセットの検査に含めた。Node構文と正常・不一致・欠落のローカル試験が成功。既存の配布はTestFlight 2341、公開ゲート55%（11/20）。残りの公開準備は [復帰用引き継ぎ](MUSHIVERSE_RETURN_HANDOFF.md) を参照。
