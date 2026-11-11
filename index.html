@@ -1207,17 +1207,16 @@ async function openBillingPortal(){
   const billing=await syncBillingGuard();
   if(!user){toast('先にログインしてください');return}
   if(NATIVE_SHELL){
-    // Apple subscriptions are managed in the App Store, never in Stripe's portal.
-    if(!(billing.checkout_enabled&&billing.billing_mode==='live'&&billing.ios_iap_ready)){
-      toast('Apple課金は準備中です');return;
+    // Existing subscribers must be able to manage/cancel even when new sales
+    // are disabled. Never route an App Store subscription to Stripe.
+    if(nativePurchaseBridgeAvailable()){
+      try{
+        window.webkit.messageHandlers.mushiversePurchase.postMessage({action:'manageSubscriptions',appVersion:APP_VERSION});
+        return;
+      }catch(error){console.warn('Native subscription management failed',error)}
     }
-    if(!nativePurchaseBridgeAvailable()){toast('iOS会員管理はアプリ版で利用できます');return}
-    try{
-      window.webkit.messageHandlers.mushiversePurchase.postMessage({action:'manageSubscriptions',appVersion:APP_VERSION});
-    }catch(error){
-      console.warn('Native subscription management failed',error);
-      toast('Appleのサブスクリプション管理を開けませんでした');
-    }
+    // Apple's account subscriptions page remains available without our bridge.
+    location.href='https://apps.apple.com/account/subscriptions';
     return;
   }
   if(!MONETIZATION.billingEnabled){toast('会員管理は決済開始後に利用できます');return}
