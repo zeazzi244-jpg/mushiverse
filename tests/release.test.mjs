@@ -247,11 +247,11 @@ test('release preflight protects existing offline bundle on invalid source', () 
   assert.ok(preflight >= 0 && stagingReset > preflight && swap > stagingReset,
     'Source validation must precede staging and validated staging must precede replacement');
   const checks = build.slice(preflight, stagingReset);
-  assert.match(checks, /sourceHtml\\.includes\\('adventure-ui\\.css'\\)/, 'Preflight must verify CSS link');
-  assert.match(checks, /sourceCss\\.trim\\(\\)/, 'Preflight must reject empty CSS');
-  assert.match(checks, /sourceCss\\.includes\\('--mv-surface'\\)/, 'Preflight must verify forest palette');
-  assert.doesNotMatch(build, /rmSync\\(out, \\{ recursive: true, force: true \\}\\)/,
-    'A valid existing bundle must never be deleted before replacement');
+  for (const required of ["sourceHtml.includes('adventure-ui.css')", "sourceCss.trim()", "sourceCss.includes('--mv-surface')"]) {
+    assert.ok(checks.includes(required), 'Source preflight missing: ' + required);
+  }
+  assert.ok(!build.includes('rmSync(out, { recursive: true, force: true })'),
+    'Existing bundle must not be deleted before replacement');
 });
 
 test('source preflight recognizes valid HTML body and script tags', () => {
