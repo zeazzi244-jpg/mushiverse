@@ -78,8 +78,17 @@ Deno.serve(async(req)=>{
       status:"pending"
     }).select("id,status,created_at").single();
     if(error){
-      // A concurrent identical submission may have inserted the row first.
-      if(error.code==="23505") return json({error:"transaction_already_claimed"},409);
+      // A concurrent request may have won the unique transaction-ID insert race.
+      // Re-read its committed owner/product instead of treating a safe retry as a conflict.
+      // Never report success if the winner belongs to a different account or product.
+      if(error.code==="23505"){
+        const {data:winner,error:retryError}=await admin.from("apple_purchase_claims")
+          .select("id,user_id,product_id,status").eq("transaction_id",transactionId).limit(2);
+        if(retryError) throw retryError;
+        if(winner?.length===1 && winner[0].user_id===user.id && winner[0].product_id===productId)
+          return json({ok:true,claim_id:winner[0].id,status:winner[0].status});
+        return json({error:"transaction_already_claimed"},409);
+      }
       throw error;
     }
     return json({ok:true,claim_id:data.id,status:data.status});
