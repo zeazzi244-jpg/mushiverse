@@ -625,3 +625,18 @@ test('Apple purchase replay cannot change the original transaction chain', () =>
   assert.match(source, /winner\[0\]\.original_transaction_id===originalTransactionId/);
   assert.match(source, /transaction_already_claimed/);
 });
+
+
+test('coin shop retains readable text and disabled purchase controls on dark cards', () => {
+  const html = readFileSync('index.html', 'utf8');
+  const start = html.indexOf('<style id="mv134-coin-store-style">');
+  const end = html.indexOf('</style>', start);
+  assert.ok(start >= 0 && end > start, 'Coin shop styles must exist');
+  const css = html.slice(start, end);
+  assert.match(css, /#mv134CoinStore\{background:linear-gradient/);
+  assert.match(css, /color:#f4f9ef/);
+  assert.match(css, /#mv134CoinStore \.mv134Pack strong\{color:#fff/);
+  assert.match(css, /button:disabled\{opacity:1;background:#d2dcd0;color:#27382c/);
+  assert.match(css, /min-height:44px/);
+  assert.match(css, /@media\(max-width:380px\)/);
+});
