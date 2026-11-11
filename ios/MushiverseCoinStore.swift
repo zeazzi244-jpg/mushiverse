@@ -8,7 +8,7 @@ import Combine
 final class MushiverseCoinStore: ObservableObject {
     static let productIDs: Set<String> = [
         "mushiverse.coins.100",
-        "mushiverse.coins.550",
+        "mushiverse.coins.500",
         "mushiverse.coins.1200"
     ]
 
