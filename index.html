@@ -1170,10 +1170,19 @@ async function syncBillingGuard(){
 window.MUSHIVERSE_SYNC_BILLING_GUARD=syncBillingGuard;
 
 async function startPremiumCheckout(productKey='premium_annual'){
-  await syncBillingGuard();
+  const billing=await syncBillingGuard();
   if(!user){toast('Premium登録にはログインが必要です');tab('profile');return}
-  if(!MONETIZATION.billingEnabled){toast('Stripe本番商品の最終接続待ちです。決済はまだ発生しません');return}
   if(!['premium_monthly','premium_annual'].includes(productKey))productKey='premium_annual';
+  // App Store digital subscriptions must use Apple's native purchase channel.
+  // Never fall through to Stripe on iOS, even when Stripe is enabled for web.
+  if(NATIVE_SHELL){
+    if(!(billing.checkout_enabled&&billing.billing_mode==='live'&&billing.ios_iap_ready)){
+      toast('Appleアプリ内課金は準備中です。まだ決済は発生しません');return;
+    }
+    await requestNativePurchase(productKey);
+    return;
+  }
+  if(!MONETIZATION.billingEnabled){toast('Stripe本番商品の最終接続待ちです。決済はまだ発生しません');return}
   try{
     const {data,error}=await db.functions.invoke(MONETIZATION.checkoutFunction,{body:{product_key:productKey}});
     if(error)throw error;
