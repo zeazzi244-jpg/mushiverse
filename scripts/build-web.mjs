@@ -1,5 +1,5 @@
 import { existsSync, mkdirSync, readdirSync, cpSync, copyFileSync, rmSync, lstatSync, renameSync } from 'node:fs';
-import { join, extname, basename } from 'node:path';
+import { join, extname, basename, dirname } from 'node:path';
 import { spawnSync } from 'node:child_process';
 
 const root = process.cwd();
@@ -168,7 +168,8 @@ function validateBundledCss(directory) {
           decoded.split('/').includes('..')) {
         throw new Error('Bundled CSS has unsafe asset URL in ' + name + ': ' + raw);
       }
-      const asset = join(directory, decoded);
+      // CSS url() is resolved relative to the stylesheet, not the asset folder root.
+      const asset = join(dirname(file), decoded);
       if (!existsSync(asset) || !lstatSync(asset).isFile() || !readFileSync(asset).length) {
         throw new Error('Bundled CSS references missing local asset in ' + name + ': ' + raw);
       }
