@@ -30,6 +30,22 @@ function safeAsset(source) {
   return info.isDirectory() || (info.isFile() && allowedFile(source));
 }
 
+// Preflight source assets before deleting a previously usable offline bundle.
+const { readFileSync } = await import('node:fs');
+const sourceHtml = readFileSync(entry, 'utf8');
+const sourceCssPath = join(root, 'css', 'adventure-ui.css');
+if (!existsSync(sourceCssPath) || !lstatSync(sourceCssPath).isFile()) {
+  throw new Error('Source adventure stylesheet is missing');
+}
+const sourceCss = readFileSync(sourceCssPath, 'utf8');
+if (!/<body\\b/i.test(sourceHtml) || !/<script\\b/i.test(sourceHtml) ||
+    !sourceHtml.includes('adventure-ui.css')) {
+  throw new Error('Source index.html is missing required app startup markup');
+}
+if (!sourceCss.trim() || !sourceCss.includes('--mv-surface')) {
+  throw new Error('Source adventure stylesheet is empty or missing its forest palette');
+}
+
 // Build into a fresh directory. Preserve only explicitly public files.
 rmSync(out, { recursive: true, force: true });
 mkdirSync(out, { recursive: true });
@@ -56,7 +72,6 @@ for (const relative of requiredAssets) {
     throw new Error('Release bundle is missing required startup asset: ' + relative);
   }
 }
-const { readFileSync } = await import('node:fs');
 const html = readFileSync(join(out, 'index.html'), 'utf8');
 if (!/<body\b/i.test(html) || !/<script\b/i.test(html)) {
   throw new Error('Release index.html has no app body or startup script');
