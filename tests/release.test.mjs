@@ -419,3 +419,14 @@ test('Apple claim receipt never implies purchase verification or immediate rewar
   assert.match(html, /検証完了まで特典は付与されません/);
   assert.doesNotMatch(html, /購入情報を安全に同期しました/);
 });
+
+
+test('Apple purchase claim endpoint preserves status and never grants entitlements', () => {
+  const server = readFileSync('supabase/functions/submit-apple-purchase-claim/index.ts', 'utf8');
+  assert.match(server, /existing\[0\]\.status/, 'Duplicate claims must preserve existing verification status');
+  assert.match(server, /transaction_already_claimed/, 'Conflicting transaction owners must be rejected');
+  assert.match(server, /\.insert\(\{/, 'Claims must be inserted without resetting existing records');
+  assert.doesNotMatch(server, /\.upsert\(/, 'Client replay must not overwrite a verified claim');
+  assert.doesNotMatch(server, /updateUserById|gacha_coin_wallets|gacha_coin_purchase_credits/,
+    'Unverified claims must not grant paid privileges or coins');
+});
