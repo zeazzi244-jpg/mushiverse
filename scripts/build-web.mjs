@@ -159,7 +159,7 @@ function validateBundledCss(directory) {
     const stylesheet = readFileSync(file, 'utf8');
     // CSS @import dependencies are startup assets too. A missing nested theme
     // stylesheet can silently leave the native WebView with unreadable text.
-    for (const match of stylesheet.matchAll(/@import\\s+(?:url\\(\\s*)?(?:["']([^"']+)["']|([^\\s;)]+))\\s*\\)?/gi)) {
+    for (const match of stylesheet.matchAll(/@import\s+(?:url\(\s*)?(?:["']([^"']+)["']|([^\s;)]+))\s*\)?/gi)) {
       const raw = (match[1] || match[2] || '').trim();
       if (!raw || /^(?:data:|https?:|\\/\\/)/i.test(raw)) continue;
       const url = raw.split(/[?#]/, 1)[0];
