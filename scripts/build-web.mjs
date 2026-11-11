@@ -61,6 +61,11 @@ const html = readFileSync(join(out, 'index.html'), 'utf8');
 if (!/<body\b/i.test(html) || !/<script\b/i.test(html)) {
   throw new Error('Release index.html has no app body or startup script');
 }
+// A zero-byte stylesheet can leave the native WebView unreadable even when the file exists.
+const adventureCss = readFileSync(join(out, 'css/adventure-ui.css'), 'utf8');
+if (!adventureCss.trim() || !adventureCss.includes('--mv-surface')) {
+  throw new Error('Release adventure stylesheet is empty or missing its forest palette');
+}
 if (!html.includes('adventure-ui.css')) {
   throw new Error('Release index.html does not reference the bundled adventure UI stylesheet');
 }
