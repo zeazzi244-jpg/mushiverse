@@ -1,0 +1,39 @@
+name: Billing and release regression checks
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'index.html'
+      - 'scripts/**'
+      - 'tests/**'
+      - 'supabase/functions/**'
+      - 'package.json'
+      - '.github/workflows/billing-release-check.yml'
+  pull_request:
+    paths:
+      - 'index.html'
+      - 'scripts/**'
+      - 'tests/**'
+      - 'supabase/functions/**'
+      - 'package.json'
+      - '.github/workflows/billing-release-check.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  release-regression:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Check out source
+        uses: actions/checkout@v4
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Install dependencies
+        run: npm install --no-audit --no-fund
+      - name: Build offline web bundle and run release tests
+        run: npm run test:release
