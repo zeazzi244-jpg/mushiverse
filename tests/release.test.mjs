@@ -508,3 +508,16 @@ test('Apple claim history is scoped to the signed-in user and read-only', () => 
   assert.doesNotMatch(source, /\.update\(|\.upsert\(|gacha_coin_wallets/,
     'History viewer must never mutate claims or wallets');
 });
+
+
+test('Apple purchase claims are rate-limited after idempotent replay checks', () => {
+  const source = readFileSync('supabase/functions/submit-apple-purchase-claim/index.ts','utf8');
+  const lookup=source.indexOf('.eq("transaction_id",transactionId)');
+  const limit=source.indexOf('claim_rate_limited');
+  const insert=source.indexOf('.insert({');
+  assert.ok(lookup>=0&&limit>lookup&&insert>limit,
+    'Rate limit must apply only to new claims, not duplicate retries');
+  assert.match(source, /recentCount\?\?0\)\s*>=\s*30/);
+  assert.match(source, /\.gte\("created_at",since\)/);
+  assert.match(source, /claim_rate_limited"\},429/);
+});
