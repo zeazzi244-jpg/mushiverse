@@ -157,6 +157,25 @@ function validateBundledCss(directory) {
     }
     if (!info.isFile() || extname(name).toLowerCase() !== '.css') continue;
     const stylesheet = readFileSync(file, 'utf8');
+    // CSS @import dependencies are startup assets too. A missing nested theme
+    // stylesheet can silently leave the native WebView with unreadable text.
+    for (const match of stylesheet.matchAll(/@import\\s+(?:url\\(\\s*)?(?:["']([^"']+)["']|([^\\s;)]+))\\s*\\)?/gi)) {
+      const raw = (match[1] || match[2] || '').trim();
+      if (!raw || /^(?:data:|https?:|\\/\\/)/i.test(raw)) continue;
+      const url = raw.split(/[?#]/, 1)[0];
+      let decoded;
+      try { decoded = decodeURIComponent(url); }
+      catch { throw new Error('Bundled CSS has invalid import URL in ' + name + ': ' + raw); }
+      if (!decoded || decoded.startsWith('/') || decoded.includes('\\\\') ||
+          decoded.split('/').some(part => part === '..' || part === '.')) {
+        throw new Error('Bundled CSS has unsafe import URL in ' + name + ': ' + raw);
+      }
+      const imported = join(dirname(file), decoded);
+      if (extname(imported).toLowerCase() !== '.css' || !existsSync(imported) ||
+          !lstatSync(imported).isFile() || !readFileSync(imported).length) {
+        throw new Error('Bundled CSS references missing local import in ' + name + ': ' + raw);
+      }
+    }
     for (const match of stylesheet.matchAll(/url\(\s*(?:"([^"]+)"|'([^']+)'|([^\s)]+))\s*\)/gi)) {
       const raw = (match[1] || match[2] || match[3]).trim();
       if (!raw || raw.startsWith('#') || /^(?:data:|https?:|\/\/)/i.test(raw)) continue;
