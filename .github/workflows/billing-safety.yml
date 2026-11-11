@@ -1,0 +1,32 @@
+name: Billing and release safety
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'index.html'
+      - 'scripts/build-web.mjs'
+      - 'tests/release.test.mjs'
+      - 'supabase/functions/submit-apple-purchase-claim/**'
+      - '.github/workflows/billing-safety.yml'
+  pull_request:
+    paths:
+      - 'index.html'
+      - 'scripts/build-web.mjs'
+      - 'tests/release.test.mjs'
+      - 'supabase/functions/submit-apple-purchase-claim/**'
+      - '.github/workflows/billing-safety.yml'
+permissions:
+  contents: read
+jobs:
+  release-safety:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Build offline assets
+        run: node scripts/build-web.mjs
+      - name: Run release and billing tests
+        run: node --test tests/release.test.mjs
