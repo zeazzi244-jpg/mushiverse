@@ -26,6 +26,10 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
+      - name: Install project dependencies
+        run: npm install --no-package-lock --no-audit --no-fund
+      - name: Verify baseline release tests before spending AI tokens
+        run: npm run test:release
       - name: Verify AI key is configured
         run: |
           if [ -z "$OPENAI_API_KEY" ]; then
@@ -45,10 +49,6 @@ jobs:
             exit 1
           fi
           echo "OpenAI Platform API authentication succeeded (HTTP 200)."
-      - name: Install project dependencies
-        run: npm install --no-package-lock --no-audit --no-fund
-      - name: Verify baseline release tests before spending AI tokens
-        run: npm run test:release
       - name: Start isolated development branch
         id: branch
         run: |
