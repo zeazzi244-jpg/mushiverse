@@ -100,7 +100,7 @@ for (const match of html.matchAll(/\b(?:src|href)\s*=\s*["']([^"']+\.(?:js|css)(
   try { normalized = decodeURIComponent(url).replace(/^\/?/, ''); }
   catch { throw new Error('Release bundle has invalid startup asset URL: ' + url); }
   const segments = normalized.split('/');
-  if (segments.includes('..') || !normalized || !existsSync(join(staging, normalized))) {
+  if (segments.includes('..') || !normalized || !existsSync(join(staging, normalized)) || !lstatSync(join(staging, normalized)).isFile()) {
     throw new Error('Release bundle is missing referenced startup asset: ' + url);
   }
 }
