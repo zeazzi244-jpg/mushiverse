@@ -275,3 +275,14 @@ test('web bundle uses validated staging and rollback before replacing www', () =
   assert.match(build, /renameSync\(backup, out\)/);
   assert.doesNotMatch(build, /rmSync\(out, \{ recursive: true, force: true \}\)/);
 });
+
+test('interrupted iOS bundle swap restores previous working app', () => {
+  const build = readFileSync('scripts/build-web.mjs', 'utf8');
+  const restore = "if (!existsSync(out) && existsSync(backup)) renameSync(backup, out)";
+  assert.ok(build.includes(restore), 'Previous offline bundle must be restored before a new build');
+  assert.ok(build.indexOf(restore) < build.indexOf('// Preflight source assets'),
+    'Recovery must happen before source validation can throw');
+  const swap = build.slice(build.indexOf('// Only replace the previously usable offline bundle'));
+  assert.match(swap, /if \(existsSync\(out\)\)/, 'Backup must not be deleted without a current bundle');
+  assert.match(swap, /renameSync\(backup, out\)/, 'Failed swap must roll back');
+});
