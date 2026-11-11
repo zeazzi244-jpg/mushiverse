@@ -11,7 +11,8 @@ checks = {
     "purchase UI has release gate": "!purchasesEnabled || store.isPurchasing || store.isRetrying" in shop,
     "shop shows preparation notice": "現在は販売準備中です" in shop,
     "only supported products": all(p in store for p in (
-        "mushiverse.coins.100", "mushiverse.coins.550", "mushiverse.coins.1200")),
+        "mushiverse.coins.100", "mushiverse.coins.500", "mushiverse.coins.1200")),
+    "legacy 550-coin SKU is absent": "mushiverse.coins.550" not in store and "mushiverse.coins.550" not in shop,
     "purchase requires active shop": "guard isStarted, !Task.isCancelled" in store,
     "credit requests use signed transaction": "result.jwsRepresentation" in store,
     "credit endpoint restricted to HTTPS": 'creditEndpoint.scheme == "https"' in store,
