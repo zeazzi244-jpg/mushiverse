@@ -466,3 +466,14 @@ test('Apple purchase claim responses are non-cacheable', () => {
   assert.match(source, /"Cache-Control":"no-store"/);
   assert.match(source, /"X-Content-Type-Options":"nosniff"/);
 });
+
+
+test('subscription renewal claims cannot cross user accounts', () => {
+  const source = readFileSync('supabase/functions/submit-apple-purchase-claim/index.ts', 'utf8');
+  assert.match(source, /subscription_already_claimed/);
+  assert.match(source, /original_transaction_id",originalTransactionId/);
+  assert.match(source, /chain\[0\]\.user_id!==user\.id/);
+  assert.match(source, /invalid_original_transaction_id/);
+  assert.ok(source.indexOf('subscription_already_claimed') < source.indexOf('.insert({'),
+    'Renewal ownership must be checked before inserting a claim');
+});
