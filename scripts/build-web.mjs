@@ -1,5 +1,6 @@
 import { existsSync, mkdirSync, readdirSync, cpSync, copyFileSync, rmSync, lstatSync, renameSync } from 'node:fs';
 import { join, extname, basename } from 'node:path';
+import { spawnSync } from 'node:child_process';
 
 const root = process.cwd();
 const entry = join(root, 'index.html');
@@ -108,6 +109,13 @@ for (const match of html.matchAll(/\b(?:src|href)\s*=\s*["']([^"']+\.(?:js|css)(
   // leave Capacitor's offline WebView blank. Reject it before replacing www.
   if (!readFileSync(asset).length) {
     throw new Error('Release bundle has empty referenced startup asset: ' + url);
+  }
+  // Catch JavaScript parse errors before replacing the last working offline bundle.
+  if (extname(normalized).toLowerCase() === '.js') {
+    const syntax = spawnSync(process.execPath, ['--check', asset], { encoding: 'utf8' });
+    if (syntax.error || syntax.status !== 0) {
+      throw new Error('Release bundle has invalid startup JavaScript: ' + url + '\\n' + (syntax.stderr || syntax.error?.message || 'syntax check failed'));
+    }
   }
 }
 
