@@ -3403,11 +3403,37 @@ setTimeout(render,1200);window.addEventListener('online',()=>setTimeout(render,3
    if(!host||document.getElementById('v60AppleSync'))return null;
    const el=document.createElement('div');el.id='v60AppleSync';el.className='v60Panel';host.appendChild(el);return el;
  }
+ async function refreshClaimStatus(){
+   const target=document.getElementById('mvAppleClaimStatus');
+   if(!target)return;
+   const client=window.db,viewer=window.user;
+   if(!client?.from||!viewer?.id){
+     target.textContent='購入申請履歴：ログイン後に確認できます';return;
+   }
+   const uid=viewer.id;
+   try{
+     const {data,error}=await client.from('apple_purchase_claims')
+       .select('product_id,status,created_at')
+       .eq('user_id',uid).order('created_at',{ascending:false}).limit(5);
+     if(window.user?.id!==uid||!target.isConnected)return;
+     if(error){target.textContent='購入申請履歴を取得できませんでした';return}
+     const states={pending:'Apple検証待ち',verified:'サーバー検証済み',rejected:'申請却下'};
+     const rows=Array.isArray(data)?data:[];
+     target.textContent=rows.length
+       ?'購入申請履歴（最新5件）：'+rows.map(x=>String(x.product_id)+'／'+(states[x.status]||'状態確認中')).join('、')
+       :'購入申請履歴：まだありません';
+   }catch{if(target.isConnected)target.textContent='購入申請履歴を取得できませんでした'}
+ }
  function render(){
    const el=ensure();if(!el)return;
    const native=Boolean(window.__MUSHIVERSE_NATIVE_IOS__||window.webkit?.messageHandlers?.mushiversePurchase);
    el.innerHTML=`<div class="v60Top"><div><span class="v60Badge">🍎 APPLE IAP SERVER SYNC v60</span><h3 style="margin:8px 0 4px">購入情報のサーバー同期まで実装</h3><div class="fineprint">端末から受け取った取引IDは未検証の購入申請として保存されます。Appleのサーバー検証が完了するまで購入済みとは判定しません。</div></div><div class="v60Pct">準備中</div></div><div class="v60Grid"><div class="v60Cell"><small>StoreKit Transaction</small><b class="v60Wait">実機検証待ち</b></div><div class="v60Cell"><small>Supabase Claim Queue</small><b class="v60Ok">受付稼働中</b></div><div class="v60Cell"><small>権限の即時付与</small><b class="v60Ok">BLOCKED BY DESIGN</b></div><div class="v60Cell"><small>App Store Server API</small><b class="v60Wait">APPLE CREDENTIALS待ち</b></div><div class="v60Cell"><small>現在の環境</small><b class="${native?'v60Ok':'v60Wait'}">${native?'iOS NATIVE':'WEB'}</b></div><div class="v60Cell"><small>TestFlight実機検証</small><b class="v60Wait">OWNER STEP</b></div></div><div class="v60Note">セキュリティ上、端末から「購入済み」と送られただけではPremium権限を付けません。Apple側サーバー検証が成功した時だけ権限を確定する設計です。</div>`;
+   const history=document.createElement('p');history.id='mvAppleClaimStatus';history.className='fineprint';history.setAttribute('role','status');history.textContent='購入申請履歴を確認しています';el.append(history);
+   refreshClaimStatus();
  }
+ if(window.db?.auth?.onAuthStateChange)window.db.auth.onAuthStateChange(()=>setTimeout(refreshClaimStatus,0));
+ document.addEventListener('visibilitychange',()=>{if(!document.hidden)refreshClaimStatus()});
+ window.addEventListener('mushiverse:native',()=>setTimeout(refreshClaimStatus,1500));
  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',()=>setTimeout(render,1100));else setTimeout(render,1100);
 })();
 </script>
