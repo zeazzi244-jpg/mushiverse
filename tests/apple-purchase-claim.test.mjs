@@ -57,10 +57,10 @@ function createHarness() {
   };
   new Function('Deno','createClient','Response',source)(deno,()=>client,Response);
   assert.equal(typeof handler,'function','Deno.serve handler not registered');
-  async function send(body,raw=false) {
+  async function send(body,raw=false,bearer='Bearer test') {
     const req=new Request('https://example.invalid/claim',{
       method:'POST',
-      headers:{Authorization:'Bearer test'},
+      headers:bearer?{Authorization:bearer}:{},
       body:raw?body:JSON.stringify(body)
     });
     const res=await handler(req);
@@ -144,4 +144,13 @@ test('simultaneous insert by another account or product stays a conflict',async(
     assert.equal(r.status,409);
     assert.equal(h.rows.length,1);
   }
+});
+
+test('claim endpoint rejects missing and malformed bearer authorization',async()=>{
+  const h=createHarness();
+  for(const authorization of ['', 'invalid', 'Bearer', 'Basic abc']) {
+    const response=await h.send(coin('987654321'),false,authorization);
+    assert.equal(response.status,401,authorization);
+  }
+  assert.equal(h.rows.length,0);
 });
