@@ -311,3 +311,14 @@ test('startup dependency scanner matches local JS/CSS URLs and ignores remote UR
     'js/app.js', 'css/theme.css?v=2', 'https://cdn.example.org/app.js'
   ]);
 });
+
+
+test('offline startup dependency validation rejects directories masquerading as JS or CSS files', () => {
+  const build = readFileSync('scripts/build-web.mjs', 'utf8');
+  const start = build.indexOf('// Validate local script and stylesheet URLs');
+  const end = build.indexOf('// Only replace the previously usable offline bundle', start);
+  assert.ok(start >= 0 && end > start);
+  const validation = build.slice(start, end);
+  assert.match(validation, /!lstatSync\(join\(staging, normalized\)\)\.isFile\(\)/,
+    'A directory with a .js or .css name must not pass startup dependency validation');
+});
