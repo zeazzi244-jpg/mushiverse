@@ -459,3 +459,10 @@ test('Apple claim UI only acknowledges pending server claims', () => {
   assert.ok(start >= 0 && end > start);
   assert.match(html.slice(start, end), /data\.status==='pending'/);
 });
+
+
+test('Apple purchase claim responses are non-cacheable', () => {
+  const source = readFileSync('supabase/functions/submit-apple-purchase-claim/index.ts', 'utf8');
+  assert.match(source, /"Cache-Control":"no-store"/);
+  assert.match(source, /"X-Content-Type-Options":"nosniff"/);
+});
