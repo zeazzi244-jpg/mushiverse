@@ -242,12 +242,16 @@ test('iOS release build rejects empty or incomplete adventure stylesheet', () =>
 test('release preflight protects existing offline bundle on invalid source', () => {
   const build = readFileSync('scripts/build-web.mjs', 'utf8');
   const preflight = build.indexOf('// Preflight source assets before deleting');
-  const deletion = build.indexOf('rmSync(out, { recursive: true, force: true })');
-  assert.ok(preflight >= 0 && deletion > preflight, 'Source preflight must precede removal of previous bundle');
-  const checks = build.slice(preflight, deletion);
-  assert.match(checks, /sourceHtml\.includes\('adventure-ui\.css'\)/, 'Preflight must verify CSS link');
-  assert.match(checks, /sourceCss\.trim\(\)/, 'Preflight must reject empty CSS');
-  assert.match(checks, /sourceCss\.includes\('--mv-surface'\)/, 'Preflight must verify forest palette');
+  const stagingReset = build.indexOf('rmSync(staging, { recursive: true, force: true })');
+  const swap = build.indexOf('renameSync(staging, out)');
+  assert.ok(preflight >= 0 && stagingReset > preflight && swap > stagingReset,
+    'Source validation must precede staging and validated staging must precede replacement');
+  const checks = build.slice(preflight, stagingReset);
+  assert.match(checks, /sourceHtml\\.includes\\('adventure-ui\\.css'\\)/, 'Preflight must verify CSS link');
+  assert.match(checks, /sourceCss\\.trim\\(\\)/, 'Preflight must reject empty CSS');
+  assert.match(checks, /sourceCss\\.includes\\('--mv-surface'\\)/, 'Preflight must verify forest palette');
+  assert.doesNotMatch(build, /rmSync\\(out, \\{ recursive: true, force: true \\}\\)/,
+    'A valid existing bundle must never be deleted before replacement');
 });
 
 test('source preflight recognizes valid HTML body and script tags', () => {
