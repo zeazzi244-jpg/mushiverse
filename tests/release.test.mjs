@@ -298,3 +298,16 @@ test('offline iOS bundle validates referenced local startup assets before swap',
   assert.match(section, /segments\.includes\('\.\.'\)/, 'Path traversal must not escape staged assets');
   assert.match(section, /missing referenced startup asset/, 'Missing assets must fail the build');
 });
+
+test('startup dependency scanner matches local JS/CSS URLs and ignores remote URLs', () => {
+  const build = readFileSync('scripts/build-web.mjs', 'utf8');
+  const line = build.split('\n').find(value => value.includes('html.matchAll('));
+  assert.ok(line, 'Startup dependency scanner missing');
+  const expression = line.match(/html\.matchAll\((\/.*\/gi)\)/);
+  assert.ok(expression, 'Startup asset scanner must use a regex literal');
+  const pattern = Function('return ' + expression[1])();
+  const html = '<script src="js/app.js"></script><link href="css/theme.css?v=2"><script src="https://cdn.example.org/app.js"></script>';
+  assert.deepEqual([...html.matchAll(pattern)].map(match => match[1]), [
+    'js/app.js', 'css/theme.css?v=2', 'https://cdn.example.org/app.js'
+  ]);
+});
