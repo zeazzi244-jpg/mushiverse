@@ -668,7 +668,9 @@ function check(){
  panel.append(title,msg,button);screen.append(panel);document.body.append(screen);
 }
 window.addEventListener('load',function(){setTimeout(check,12000)},{once:true});
-window.addEventListener('pageshow',function(){booted=false});
+// Preserve the ready state across pageshow (including bfcache restores). Resetting
+// it after app-ready could falsely show the startup failure overlay.
+window.addEventListener('pageshow',function(event){if(event.persisted&&booted)document.getElementById('mvStartupRecovery')?.remove()});
 window.addEventListener('mushiverse:app-ready',function(){booted=true;document.getElementById('mvStartupRecovery')?.remove()});
 })();
 </script>
