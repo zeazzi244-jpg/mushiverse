@@ -249,3 +249,15 @@ test('release preflight protects existing offline bundle on invalid source', () 
   assert.match(checks, /sourceCss\.trim\(\)/, 'Preflight must reject empty CSS');
   assert.match(checks, /sourceCss\.includes\('--mv-surface'\)/, 'Preflight must verify forest palette');
 });
+
+test('source preflight recognizes valid HTML body and script tags', () => {
+  const build = readFileSync('scripts/build-web.mjs', 'utf8');
+  const preflight = build.slice(build.indexOf('// Preflight source assets'), build.indexOf('// Build into a fresh directory'));
+  const slash = String.fromCharCode(92);
+  for (const tag of ['body', 'script']) {
+    const correct = '/<' + tag + slash + 'b/i.test(sourceHtml)';
+    const incorrect = '/<' + tag + slash + slash + 'b/i.test(sourceHtml)';
+    assert.ok(preflight.includes(correct), tag + ' must use regex word boundary');
+    assert.ok(!preflight.includes(incorrect), tag + ' must not match literal backslash');
+  }
+});
