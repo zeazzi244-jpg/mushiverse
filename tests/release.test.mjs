@@ -580,3 +580,16 @@ test('unverified Apple claims do not persist a spoofed StoreKit environment', ()
   assert.match(source, /status:"pending"/);
   assert.doesNotMatch(source, /environment,\s*status:"pending"/);
 });
+
+
+test('startup recovery stays dismissed after app-ready and pageshow', () => {
+  const html = readFileSync('index.html', 'utf8');
+  const start = html.indexOf('id="mvStartupRecoveryScript"');
+  const end = html.indexOf('</script>', start);
+  assert.ok(start >= 0 && end > start);
+  const startup = html.slice(start, end);
+  assert.match(startup, /booted=true/);
+  assert.match(startup, /event\.persisted&&booted/);
+  assert.doesNotMatch(startup, /pageshow',function\(\)\{booted=false/);
+  assert.match(startup, /if\(booted\|\|!document\.body/);
+});
