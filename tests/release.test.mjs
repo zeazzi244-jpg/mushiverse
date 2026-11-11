@@ -228,3 +228,12 @@ test('web build validates HTML startup tags with word boundaries', () => {
   assert.ok(!build.includes(correctBody.replace('b/i', String.fromCharCode(92) + 'b/i')), 'Body regex must not match a literal backslash');
   assert.ok(!build.includes(correctScript.replace('b/i', String.fromCharCode(92) + 'b/i')), 'Script regex must not match a literal backslash');
 });
+
+test('iOS release build rejects empty or incomplete adventure stylesheet', () => {
+  const build = readFileSync('scripts/build-web.mjs', 'utf8');
+  assert.match(build, /adventureCss\.trim\(\)/, 'Empty CSS must fail release build');
+  assert.match(build, /adventureCss\.includes\('--mv-surface'\)/, 'Forest palette must be present');
+  const css = readFileSync('css/adventure-ui.css', 'utf8');
+  assert.ok(css.trim().length > 0);
+  assert.ok(css.includes('--mv-surface'));
+});
