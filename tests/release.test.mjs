@@ -521,3 +521,30 @@ test('Apple purchase claims are rate-limited after idempotent replay checks', ()
   assert.match(source, /\.gte\("created_at",since\)/);
   assert.match(source, /claim_rate_limited"\},429/);
 });
+
+
+test('coin shop preview shows agreed 100/500/1200 packs and proposed prices', () => {
+  const html = readFileSync('index.html', 'utf8');
+  const start = html.indexOf('<script id="mv134-coin-store">');
+  const end = html.indexOf('</script>', start);
+  assert.ok(start >= 0 && end > start);
+  const store = html.slice(start, end);
+  for (const [id, coins, price] of [
+    ['mushiverse.coins.100', 100, 160],
+    ['mushiverse.coins.500', 500, 480],
+    ['mushiverse.coins.1200', 1200, 980]
+  ]) {
+    assert.ok(store.includes("id:'" + id + "',coins:" + coins + ",priceYen:" + price),
+      id + ' should have the agreed coin count and proposed yen price');
+  }
+  assert.doesNotMatch(store, /mushiverse\.coins\.550/);
+  assert.match(store, /button\.disabled=true/, 'Purchases stay disabled until Apple verification');
+  assert.match(store, /正式な価格はAppleの商品登録後に確定します/);
+});
+
+test('server accepts the new 500-coin product ID, not the retired 550-coin ID', () => {
+  const source = readFileSync('supabase/functions/submit-apple-purchase-claim/index.ts','utf8');
+  for (const id of ['mushiverse.coins.100', 'mushiverse.coins.500', 'mushiverse.coins.1200'])
+    assert.ok(source.includes('"' + id + '"'), id + ' must be in the allowlist');
+  assert.doesNotMatch(source, /mushiverse\.coins\.550/);
+});
