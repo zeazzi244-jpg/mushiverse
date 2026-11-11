@@ -31,6 +31,12 @@ function safeAsset(source) {
   return info.isDirectory() || (info.isFile() && allowedFile(source));
 }
 
+// Recover a validated bundle if the previous process stopped after moving www
+// to its backup but before completing the staging swap. Never erase this backup
+// merely because a new build starts.
+const backup = join(root, 'www-build-previous');
+if (!existsSync(out) && existsSync(backup)) renameSync(backup, out);
+
 // Preflight source assets before deleting a previously usable offline bundle.
 const { readFileSync } = await import('node:fs');
 const sourceHtml = readFileSync(entry, 'utf8');
@@ -86,9 +92,11 @@ if (!html.includes('adventure-ui.css')) {
   throw new Error('Release index.html does not reference the bundled adventure UI stylesheet');
 }
 // Only replace the previously usable offline bundle after all checks succeed.
-const backup = join(root, 'www-build-previous');
-rmSync(backup, { recursive: true, force: true });
-if (existsSync(out)) renameSync(out, backup);
+if (existsSync(out)) {
+  // A leftover backup is safe to replace only when a current www exists.
+  rmSync(backup, { recursive: true, force: true });
+  renameSync(out, backup);
+}
 try {
   renameSync(staging, out);
 } catch (error) {
