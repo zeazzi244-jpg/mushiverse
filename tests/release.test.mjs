@@ -261,3 +261,13 @@ test('source preflight recognizes valid HTML body and script tags', () => {
     assert.ok(!preflight.includes(incorrect), tag + ' must not match literal backslash');
   }
 });
+
+
+test('web bundle uses validated staging and rollback before replacing www', () => {
+  const build = readFileSync('scripts/build-web.mjs', 'utf8');
+  assert.match(build, /const staging = join\(root, 'www-build-staging'\)/);
+  assert.match(build, /const backup = join\(root, 'www-build-previous'\)/);
+  assert.match(build, /renameSync\(staging, out\)/);
+  assert.match(build, /renameSync\(backup, out\)/);
+  assert.doesNotMatch(build, /rmSync\(out, \{ recursive: true, force: true \}\)/);
+});
