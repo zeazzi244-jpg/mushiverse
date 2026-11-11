@@ -145,6 +145,17 @@ for (const match of adventureCss.matchAll(/url\(\s*(?:"([^"]+)"|'([^']+)'|([^)\s
   }
 }
 
+// Reject truncated HTML before it reaches an iOS WebView. A partially written
+// entry point can pass basic <body>/<script> presence checks yet render blank.
+if (!/<\\/body\\s*>/i.test(html) || !/<\\/html\\s*>/i.test(html)) {
+  throw new Error('Release index.html is missing closing document tags');
+}
+const scriptOpenCount = [...html.matchAll(/<script\\b[^>]*>/gi)].length;
+const scriptCloseCount = [...html.matchAll(/<\\/script\\s*>/gi)].length;
+if (scriptOpenCount !== scriptCloseCount) {
+  throw new Error('Release index.html has unbalanced script tags: ' + scriptOpenCount + ' opened, ' + scriptCloseCount + ' closed');
+}
+
 // Validate inline startup scripts as well: MUSHIVERSE currently embeds much of
 // its app code directly in index.html, so checking external .js alone is not enough.
 let inlineScriptIndex = 0;
