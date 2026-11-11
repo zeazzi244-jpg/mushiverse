@@ -34,7 +34,7 @@ Deno.serve(async(req)=>{
       return json({error:"invalid_original_transaction_id"},400);
     if(typeof productId!=="string"||!["jp.mushiverse.premium.monthly","jp.mushiverse.premium.annual","mushiverse.coins.100","mushiverse.coins.500","mushiverse.coins.1200"].includes(productId))
       return json({error:"invalid_product_id"},400);
-    if(environment!==null&&(typeof environment!=="string"||!["Sandbox","Production","Xcode","storekit"].includes(environment)))
+    // Subscription chains must have an original transaction ID for ownership checks.\n    // This is still unverified metadata: only Apple-signed values can grant access.\n    if(productId.startsWith("jp.mushiverse.premium.") && !originalTransactionId)\n      return json({error:"original_transaction_id_required"},400);\n    if(environment!==null&&(typeof environment!=="string"||!["Sandbox","Production","Xcode","storekit"].includes(environment)))
       return json({error:"invalid_environment"},400);
 
     // Claims are only unverified reports. Replays must never reset a verified
