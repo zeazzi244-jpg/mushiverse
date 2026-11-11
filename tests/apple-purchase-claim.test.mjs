@@ -89,7 +89,7 @@ test('the same transaction ID cannot be claimed by another account or product',a
   h.setUser('user-b');
   assert.equal((await h.send(coin('123456789'))).status,409);
   h.setUser('user-a');
-  assert.equal((await h.send(coin('123456789','mushiverse.coins.550'))).status,409);
+  assert.equal((await h.send(coin('123456789','mushiverse.coins.500'))).status,409);
   assert.equal(h.rows.length,1);
 });
 test('a subscription original transaction cannot be reused by another account',async()=>{
