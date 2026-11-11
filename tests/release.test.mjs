@@ -697,7 +697,7 @@ test('release builder validates asset URLs in every shipped stylesheet', () => {
 
 test('nested CSS assets resolve relative to their stylesheet', () => {
   const build = readFileSync('scripts/build-web.mjs', 'utf8');
-  assert.match(build, /import \\{[^}]*dirname[^}]*\\} from 'node:path'/);
-  assert.match(build, /const asset = join\\(dirname\\(file\\), decoded\\)/);
-  assert.doesNotMatch(build, /const asset = join\\(directory, decoded\\)/);
+  assert.ok(build.includes("dirname } from 'node:path'"), 'dirname import required');
+  assert.ok(build.includes('join(dirname(file), decoded)'), 'CSS URL must use stylesheet directory');
+  assert.ok(!build.includes('join(directory, decoded)'), 'CSS URL must not use folder root');
 });
