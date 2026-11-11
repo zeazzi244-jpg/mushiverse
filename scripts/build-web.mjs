@@ -58,7 +58,7 @@ for (const relative of requiredAssets) {
 }
 const { readFileSync } = await import('node:fs');
 const html = readFileSync(join(out, 'index.html'), 'utf8');
-if (!/<body\\b/i.test(html) || !/<script\\b/i.test(html)) {
+if (!/<body\b/i.test(html) || !/<script\b/i.test(html)) {
   throw new Error('Release index.html has no app body or startup script');
 }
 if (!html.includes('adventure-ui.css')) {
