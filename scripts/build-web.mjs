@@ -47,4 +47,21 @@ for (const name of readdirSync(root)) {
   }
 }
 if (!existsSync(join(out, 'index.html'))) throw new Error('Release bundle has no index.html');
+// Fail the build before shipping a blank or unstyled native WebView.
+// These are required local startup assets, not optional network resources.
+const requiredAssets = ['index.html', 'css/adventure-ui.css'];
+for (const relative of requiredAssets) {
+  const target = join(out, relative);
+  if (!existsSync(target) || !lstatSync(target).isFile()) {
+    throw new Error('Release bundle is missing required startup asset: ' + relative);
+  }
+}
+const { readFileSync } = await import('node:fs');
+const html = readFileSync(join(out, 'index.html'), 'utf8');
+if (!/<body\\b/i.test(html) || !/<script\\b/i.test(html)) {
+  throw new Error('Release index.html has no app body or startup script');
+}
+if (!html.includes('adventure-ui.css')) {
+  throw new Error('Release index.html does not reference the bundled adventure UI stylesheet');
+}
 console.log('Web bundle generated at www/ — validate native startup and offline features before submission.');
