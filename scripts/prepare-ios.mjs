@@ -1,4 +1,4 @@
-import { existsSync } from 'node:fs';
+import { existsSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { spawnSync } from 'node:child_process';
 
@@ -11,6 +11,20 @@ const project = join('ios', 'App', 'App.xcodeproj', 'project.pbxproj');
 const icon = join('assets', 'MUSHIVERSE-AppIcon-1024.png');
 if (!existsSync(icon)) {
   console.error('Approved icon missing: ' + icon + '. Do not ship a placeholder.');
+  process.exit(1);
+}
+// Fail before touching the native project when the approved source is invalid.
+const bytes = readFileSync(icon);
+const pngSignature = Buffer.from([137, 80, 78, 71, 13, 10, 26, 10]);
+const validIcon = bytes.length >= 33
+  && bytes.subarray(0, 8).equals(pngSignature)
+  && bytes.toString('ascii', 12, 16) === 'IHDR'
+  && bytes.readUInt32BE(16) === 1024
+  && bytes.readUInt32BE(20) === 1024
+  && bytes[24] === 8
+  && bytes[25] === 2;
+if (!validIcon) {
+  console.error('Approved icon must be a 1024x1024 8-bit opaque RGB PNG: ' + icon);
   process.exit(1);
 }
 run('npm', ['run', 'build:web']);
