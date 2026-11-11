@@ -17,13 +17,15 @@ Do not expose a Supabase service-role key in frontend code.
 
 Supabase project mushi-log has coin wallet, credit, spend, and paid-draw tables. Its live credit RPC has three arguments (transaction ID, user ID, product ID), not the four-argument version in the checked-in migration. Do not apply that migration blindly.
 
-The deployed submit-apple-purchase-claim Edge Function only accepts premium product IDs and stores pending premium claims. It does not validate signed coin transactions or credit gacha coins. The native client expects a separate credit-apple-gacha-coins endpoint; do not enable purchase buttons until this authenticated endpoint is implemented and Apple-signed transaction verification is tested.
+The checked-in submit-apple-purchase-claim Edge Function accepts premium and 100/500/1200 coin product IDs, but stores unverified pending claims only. The currently deployed version must be checked independently before relying on it. It does not validate signed coin transactions or credit gacha coins. The native client expects a separate credit-apple-gacha-coins endpoint; do not enable purchase buttons until this authenticated endpoint is implemented and Apple-signed transaction verification is tested.
 
 The live credit, spend, and paid-draw RPCs deny execution to the authenticated database role. Keep service-role credentials exclusively on the server.
 
 Additional server requirements: validate the signed transaction against Apple trust, bundle ID, product ID, environment, revocation, and authenticated user's appAccountToken; reject wrong-account transactions; ensure a repeated transaction ID cannot credit a different account; return credited_or_previously_credited only for the same verified transaction and account; verify in Sandbox before enabling purchases.
 
-## Parallel release workstreams (2026-10-28)
+## Parallel release workstreams (originally 2026-10-28; reviewed 2026-11-11)
+
+Code safety improvements on 2026-11-11: native StoreKit product set aligned to 100/500/1200 coins; concurrent duplicate claim submissions can return an existing same-account claim without crediting coins; regression tests and static release gates were added. None of these changes establish Apple verification, live crediting, native build integration, or Sandbox purchase success.
 
 ### Native app and signing
 - [ ] Confirm actual Xcode project/workspace and target membership for both `ios/MushiverseCoinStore.swift` and `ios/MushiverseCoinShopView.swift`. Source files in GitHub do not prove the app compiles or calls them.
@@ -40,7 +42,7 @@ Additional server requirements: validate the signed transaction against Apple tr
 - [ ] Keep purchase buttons disabled until successful end-to-end Sandbox tests.
 
 ### User flows and regression tests
-- [ ] Purchase each of the 100, 550 and 1200 coin products in Sandbox and verify the exact wallet delta.
+- [ ] Purchase each of the 100, 500 and 1200 coin products in Sandbox and verify the exact wallet delta.
 - [ ] Retry after lost connectivity or a 503 response; the transaction must remain unfinished until server acknowledgement.
 - [ ] Re-deliver the same Apple transaction through purchase completion, transaction updates and unfinished retries; credit only once.
 - [ ] Verify account switching, invalid tokens, forged transactions, mismatched bundle IDs, revoked transactions and unexpected products cannot credit coins.
