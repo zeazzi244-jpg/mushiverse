@@ -207,3 +207,13 @@ test('startup recovery is non-destructive and supports all main tabs', () => {
   const recovery = html.slice(html.indexOf('id="mvStartupRecoveryScript"'), html.indexOf('</script>', html.indexOf('id="mvStartupRecoveryScript"')));
   assert.doesNotMatch(recovery, /localStorage\.clear|indexedDB\.deleteDatabase|sessionStorage\.clear/, 'Recovery must not erase user data');
 });
+
+
+test('dark forest surfaces keep controls readable on iPhone', () => {
+  const css = readFileSync(join('css', 'adventure-ui.css'), 'utf8');
+  assert.match(css, /V16: dark forest treatment/, 'Dark surface accessibility pass missing');
+  assert.match(css, /color-scheme:dark/, 'Dark surface native control theme missing');
+  assert.match(css, /color-scheme:light;\s*background:#fff;\s*color:#172b21/, 'Form controls must not inherit white-on-white text');
+  assert.match(css, /outline:3px solid #f3c76b/, 'Focused actions need a visible outline');
+  assert.match(css, /@media\(prefers-contrast:more\)/, 'High contrast dark surface fallback missing');
+});
