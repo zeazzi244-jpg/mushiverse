@@ -72,7 +72,9 @@ Deno.serve(async(req)=>{
       transaction_id:transactionId,
       original_transaction_id:originalTransactionId,
       product_id:productId,
-      environment,
+      // Never record an untrusted device-selected environment as Apple's verified environment.
+      // The trusted verification worker must populate it from Apple's signed transaction.
+      environment:null,
       status:"pending"
     }).select("id,status,created_at").single();
     if(error){
