@@ -91,6 +91,18 @@ if (!adventureCss.trim() || !adventureCss.includes('--mv-surface')) {
 if (!html.includes('adventure-ui.css')) {
   throw new Error('Release index.html does not reference the bundled adventure UI stylesheet');
 }
+// Validate local script and stylesheet URLs in the staged entry point. A missing
+// startup dependency can produce a blank iOS WebView despite a valid index.html.
+for (const match of html.matchAll(/\\b(?:src|href)\\s*=\\s*["']([^"']+\\.(?:js|css)(?:[?#][^"']*)?)["']/gi)) {
+  const url = match[1].split(/[?#]/, 1)[0];
+  if (/^(?:[a-z][a-z\\d+.-]*:|\\/\\/)/i.test(url)) continue; // Remote assets
+  const normalized = decodeURIComponent(url).replace(/^\\/?/, '');
+  const segments = normalized.split('/');
+  if (segments.includes('..') || !normalized || !existsSync(join(staging, normalized))) {
+    throw new Error('Release bundle is missing referenced startup asset: ' + url);
+  }
+}
+
 // Only replace the previously usable offline bundle after all checks succeed.
 if (existsSync(out)) {
   // A leftover backup is safe to replace only when a current www exists.
