@@ -4,6 +4,14 @@ on:
     branches: [main]
     paths:
       - 'index.html'
+      - 'css/**'
+      - 'js/**'
+      - 'assets/**'
+      - 'images/**'
+      - 'img/**'
+      - 'fonts/**'
+      - 'media/**'
+      - 'tests/release.test.mjs'
       - 'package.json'
       - 'capacitor.config.json'
       - 'scripts/**'
