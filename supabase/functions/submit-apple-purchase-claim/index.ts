@@ -34,6 +34,16 @@ Deno.serve(async(req)=>{
         return json({error:"transaction_already_claimed"},409);
       return json({ok:true,claim_id:existing[0].id,status:existing[0].status});
     }
+    // Subscription renewals have different transaction IDs but the same
+    // original transaction ID. Do not let a second account claim that chain.
+    if(originalTransactionId){
+      if(!/^\d{6,}$/.test(originalTransactionId)) return json({error:"invalid_original_transaction_id"},400);
+      const {data:chain,error:chainError}=await admin.from("apple_purchase_claims")
+        .select("user_id").eq("original_transaction_id",originalTransactionId).limit(1);
+      if(chainError) throw chainError;
+      if(chain?.length && chain[0].user_id!==user.id)
+        return json({error:"subscription_already_claimed"},409);
+    }
 
     const {data,error}=await admin.from("apple_purchase_claims").insert({
       user_id:user.id,
