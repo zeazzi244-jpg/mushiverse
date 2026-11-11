@@ -113,3 +113,23 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Hiragino Kaku Gothic ProN","Y
     border:2px solid #f3f8ef;
   }
 }
+
+/* V17: high-contrast, touch-friendly gacha presentation and quest readability.
+   Scoped to existing sections; does not alter rarity probabilities or draw logic. */
+#gacha :is(.panel,.card,.toolbar){border-color:rgba(188,222,192,.4);box-shadow:0 8px 24px rgba(4,20,12,.14)}
+#gacha :is(.panel,.card) :is(h2,h3,h4){line-height:1.35;overflow-wrap:anywhere}
+#gacha :is(button,[role="button"]){min-height:48px;line-height:1.4;white-space:normal;overflow-wrap:anywhere}
+#gacha :is(button,[role="button"]):active:not(:disabled){transform:scale(.985)}
+#gacha :is(.rarity,.rarity-label,[class*="rarity"],[class*="Rarity"]){font-weight:800;letter-spacing:.035em;text-shadow:0 1px 2px rgba(0,0,0,.45)}
+#gacha :is(.ssr,.SSR,[data-rarity="SSR"]){isolation:isolate;box-shadow:0 0 0 2px #f1c86f,0 0 24px rgba(241,200,111,.4)}
+#gacha :is(.sr,.SR,[data-rarity="SR"]){box-shadow:0 0 0 2px rgba(180,141,244,.7)}
+#home :is(.quest,.quest-card,[class*="questCard"]) :is(p,small,.hint){line-height:1.65;overflow-wrap:anywhere}
+#home :is(.quest,.quest-card,[class*="questCard"]) :is(button,[role="button"]){min-height:44px;white-space:normal}
+@media(prefers-reduced-motion:no-preference){
+  #gacha :is(.ssr,.SSR,[data-rarity="SSR"]){animation:mvSsrGlow 2.2s ease-in-out infinite alternate}
+  @keyframes mvSsrGlow{from{filter:brightness(1);box-shadow:0 0 0 2px #f1c86f,0 0 12px rgba(241,200,111,.25)}to{filter:brightness(1.12);box-shadow:0 0 0 2px #ffe6a1,0 0 32px rgba(255,218,123,.65)}}
+}
+@media(prefers-reduced-motion:reduce){
+  #gacha :is(.ssr,.SSR,[data-rarity="SSR"]){animation:none!important}
+  #gacha :is(button,[role="button"]):active:not(:disabled){transform:none}
+}
