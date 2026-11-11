@@ -571,3 +571,12 @@ test('all current embedded app scripts parse before release', () => {
   }
   assert.ok(count >= 30, 'Expected embedded app scripts to be scanned');
 });
+
+
+test('unverified Apple claims do not persist a spoofed StoreKit environment', () => {
+  const source = readFileSync('supabase/functions/submit-apple-purchase-claim/index.ts', 'utf8');
+  assert.match(source, /environment:null,/);
+  assert.match(source, /trusted verification worker/);
+  assert.match(source, /status:"pending"/);
+  assert.doesNotMatch(source, /environment,\s*status:"pending"/);
+});
