@@ -97,7 +97,7 @@ if (!html.includes('adventure-ui.css')) {
 for (const match of html.matchAll(/\b(?:src|href)\s*=\s*["']([^"']+\.(?:js|css)(?:[?#][^"']*)?)["']/gi)) {
   const url = match[1].split(/[?#]/, 1)[0];
   // A malformed URL can silently break startup in WKWebView.
-  if (!url || url.includes('\\\\')) {
+  if (!url || url.includes('\\')) {
     throw new Error('Release bundle has malformed startup asset URL: ' + match[1]);
   }
   if (/^(?:[a-z][a-z\d+.-]*:|\/\/)/i.test(url)) continue; // Remote assets
@@ -105,7 +105,7 @@ for (const match of html.matchAll(/\b(?:src|href)\s*=\s*["']([^"']+\.(?:js|css)(
   try { normalized = decodeURIComponent(url).replace(/^\/?/, ''); }
   catch { throw new Error('Release bundle has invalid startup asset URL: ' + url); }
   const segments = normalized.split('/');
-  if (normalized.startsWith('/') || normalized.includes('\\\\') || segments.includes('.')) {
+  if (normalized.includes('\\') || segments.includes('.')) {
     throw new Error('Release bundle has unsafe startup asset URL: ' + url);
   }
   const asset = join(staging, normalized);
