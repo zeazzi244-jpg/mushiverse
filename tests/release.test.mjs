@@ -367,3 +367,19 @@ test('offline startup asset scanner rejects malformed paths before replacing www
   assert.match(validation, /unsafe startup asset URL/);
   assert.match(validation, /segments\.includes\('\.'\)/);
 });
+
+
+test('native premium checkout never falls through to Stripe', () => {
+  const html = readFileSync('index.html', 'utf8');
+  const start = html.indexOf("async function startPremiumCheckout(productKey='premium_annual')");
+  const end = html.indexOf('async function openBillingPortal()', start);
+  assert.ok(start >= 0 && end > start, 'Premium checkout route missing');
+  const checkout = html.slice(start, end);
+  assert.match(checkout, /if\(NATIVE_SHELL\)/, 'Native purchase must have a dedicated branch');
+  assert.match(checkout, /billing\.ios_iap_ready/, 'Native purchase must require server readiness');
+  assert.match(checkout, /await requestNativePurchase\(productKey\)/, 'Native checkout must use Apple bridge');
+  assert.ok(checkout.indexOf('await requestNativePurchase(productKey)') < checkout.indexOf('MONETIZATION.billingEnabled'),
+    'Apple purchase must be routed before Stripe gating');
+  assert.match(checkout, /await requestNativePurchase\(productKey\);\s*return;/,
+    'Native checkout must not fall through to Stripe');
+});
