@@ -602,3 +602,17 @@ test('subscription claim requires original transaction chain before pending inse
   assert.match(source, /productId\.startsWith\("jp\.mushiverse\.premium\."\) && !originalTransactionId/);
   assert.match(source, /subscription_already_claimed/);
 });
+
+
+test('startup recovery arms on DOM readiness even when remote CDN blocks load', () => {
+  const html = readFileSync('index.html','utf8');
+  const start = html.indexOf('<script id="mvStartupRecoveryScript">');
+  const end = html.indexOf('</script>', start);
+  assert.ok(start >= 0 && end > start);
+  const source = html.slice(start,end);
+  assert.match(source, /DOMContentLoaded',armRecovery/);
+  assert.match(source, /window\.addEventListener\('load',armRecovery/);
+  assert.match(source, /recoveryTimer!==null/);
+  assert.match(source, /clearTimeout\(recoveryTimer\)/);
+  assert.match(source, /if\(booted\|\|recoveryTimer!==null\)return/);
+});
