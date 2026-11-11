@@ -237,3 +237,15 @@ test('iOS release build rejects empty or incomplete adventure stylesheet', () =>
   assert.ok(css.trim().length > 0);
   assert.ok(css.includes('--mv-surface'));
 });
+
+
+test('release preflight protects existing offline bundle on invalid source', () => {
+  const build = readFileSync('scripts/build-web.mjs', 'utf8');
+  const preflight = build.indexOf('// Preflight source assets before deleting');
+  const deletion = build.indexOf('rmSync(out, { recursive: true, force: true })');
+  assert.ok(preflight >= 0 && deletion > preflight, 'Source preflight must precede removal of previous bundle');
+  const checks = build.slice(preflight, deletion);
+  assert.match(checks, /sourceHtml\.includes\('adventure-ui\.css'\)/, 'Preflight must verify CSS link');
+  assert.match(checks, /sourceCss\.trim\(\)/, 'Preflight must reject empty CSS');
+  assert.match(checks, /sourceCss\.includes\('--mv-surface'\)/, 'Preflight must verify forest palette');
+});
