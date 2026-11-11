@@ -15,13 +15,26 @@ Deno.serve(async(req)=>{
     const {data:{user},error:uerr}=await userClient.auth.getUser();
     if(uerr||!user) return json({error:"unauthorized"},401);
 
-    const body=await req.json().catch(()=>({}));
-    const transactionId=String(body?.transaction_id||"").slice(0,120);
-    const originalTransactionId=body?.original_transaction_id?String(body.original_transaction_id).slice(0,120):null;
-    const productId=String(body?.product_id||"").slice(0,160);
-    const environment=body?.environment?String(body.environment).slice(0,32):null;
-    if(!/^\d{6,}$/.test(transactionId)) return json({error:"invalid_transaction_id"},400);
-    if(!["jp.mushiverse.premium.monthly","jp.mushiverse.premium.annual"].includes(productId)) return json({error:"invalid_product_id"},400);
+    // Claims are untrusted input: bound request size and validate full values
+    // rather than truncating strings into a potentially different transaction.
+    const length=Number(req.headers.get("content-length")||0);
+    if(length>4096) return json({error:"request_too_large"},413);
+    const rawBody=await req.text();
+    if(rawBody.length>4096) return json({error:"request_too_large"},413);
+    let body:Record<string,unknown>;
+    try{body=JSON.parse(rawBody)}catch{return json({error:"invalid_json"},400)}
+    if(!body||typeof body!=="object"||Array.isArray(body))return json({error:"invalid_body"},400);
+    const transactionId=body.transaction_id;
+    const originalTransactionId=body.original_transaction_id||null;
+    const productId=body.product_id;
+    const environment=body.environment||null;
+    if(typeof transactionId!=="string"||!/^\d{6,120}$/.test(transactionId)) return json({error:"invalid_transaction_id"},400);
+    if(originalTransactionId!==null&&(typeof originalTransactionId!=="string"||!/^\d{6,120}$/.test(originalTransactionId)))
+      return json({error:"invalid_original_transaction_id"},400);
+    if(typeof productId!=="string"||!["jp.mushiverse.premium.monthly","jp.mushiverse.premium.annual"].includes(productId))
+      return json({error:"invalid_product_id"},400);
+    if(environment!==null&&(typeof environment!=="string"||!["Sandbox","Production","Xcode","storekit"].includes(environment)))
+      return json({error:"invalid_environment"},400);
 
     // Claims are only unverified reports. Replays must never reset a verified
     // or rejected transaction to pending, nor reassign it to another user.
