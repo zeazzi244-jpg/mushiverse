@@ -221,8 +221,10 @@ test('dark forest surfaces keep controls readable on iPhone', () => {
 
 test('web build validates HTML startup tags with word boundaries', () => {
   const build = readFileSync('scripts/build-web.mjs', 'utf8');
-  assert.ok(build.includes(String.raw`/<body\\b/i`), 'Body tag check must use a regex word boundary');
-  assert.ok(build.includes(String.raw`/<script\\b/i`), 'Script tag check must use a regex word boundary');
-  assert.ok(!build.includes(String.raw`/<body\\\\b/i`), 'Body check must not match a literal backslash');
-  assert.ok(!build.includes(String.raw`/<script\\\\b/i`), 'Script check must not match a literal backslash');
+  const correctBody = '/' + '<body' + String.fromCharCode(92) + 'b/i';
+  const correctScript = '/' + '<script' + String.fromCharCode(92) + 'b/i';
+  assert.ok(build.includes(correctBody), 'Body tag check must use a regex word boundary');
+  assert.ok(build.includes(correctScript), 'Script tag check must use a regex word boundary');
+  assert.ok(!build.includes(correctBody.replace('b/i', String.fromCharCode(92) + 'b/i')), 'Body regex must not match a literal backslash');
+  assert.ok(!build.includes(correctScript.replace('b/i', String.fromCharCode(92) + 'b/i')), 'Script regex must not match a literal backslash');
 });
