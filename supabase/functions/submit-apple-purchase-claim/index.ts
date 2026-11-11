@@ -31,7 +31,7 @@ Deno.serve(async(req)=>{
     if(typeof transactionId!=="string"||!/^\d{6,120}$/.test(transactionId)) return json({error:"invalid_transaction_id"},400);
     if(originalTransactionId!==null&&(typeof originalTransactionId!=="string"||!/^\d{6,120}$/.test(originalTransactionId)))
       return json({error:"invalid_original_transaction_id"},400);
-    if(typeof productId!=="string"||!["jp.mushiverse.premium.monthly","jp.mushiverse.premium.annual"].includes(productId))
+    if(typeof productId!=="string"||!["jp.mushiverse.premium.monthly","jp.mushiverse.premium.annual","mushiverse.coins.100","mushiverse.coins.550","mushiverse.coins.1200"].includes(productId))
       return json({error:"invalid_product_id"},400);
     if(environment!==null&&(typeof environment!=="string"||!["Sandbox","Production","Xcode","storekit"].includes(environment)))
       return json({error:"invalid_environment"},400);
