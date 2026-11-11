@@ -693,3 +693,11 @@ test('release builder validates asset URLs in every shipped stylesheet', () => {
   assert.match(builder, /Bundled CSS references missing local asset/);
   assert.match(builder, /for \(const folder of publicFolders\)/);
 });
+
+
+test('nested CSS assets resolve relative to their stylesheet', () => {
+  const build = readFileSync('scripts/build-web.mjs', 'utf8');
+  assert.match(build, /import \\{[^}]*dirname[^}]*\\} from 'node:path'/);
+  assert.match(build, /const asset = join\\(dirname\\(file\\), decoded\\)/);
+  assert.doesNotMatch(build, /const asset = join\\(directory, decoded\\)/);
+});
