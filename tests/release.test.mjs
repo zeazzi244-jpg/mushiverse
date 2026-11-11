@@ -548,3 +548,26 @@ test('server accepts the new 500-coin product ID, not the retired 550-coin ID', 
     assert.ok(source.includes('"' + id + '"'), id + ' must be in the allowlist');
   assert.doesNotMatch(source, /mushiverse\.coins\.550/);
 });
+
+
+test('offline iOS build checks embedded JavaScript before replacing www', () => {
+  const build = readFileSync('scripts/build-web.mjs', 'utf8');
+  const validation = build.slice(build.indexOf('// Validate inline startup scripts'), build.indexOf('// Only replace the previously usable offline bundle'));
+  assert.match(validation, /spawnSync\(process\.execPath, \['--check'\]/);
+  assert.match(validation, /input: source/);
+  assert.match(validation, /invalid inline startup JavaScript/);
+  assert.match(validation, /syntax\.status !== 0/);
+});
+
+test('all current embedded app scripts parse before release', () => {
+  const html = readFileSync('index.html', 'utf8');
+  let count = 0;
+  for (const match of html.matchAll(/<script\b([^>]*)>([\s\S]*?)<\/script\s*>/gi)) {
+    const attrs = match[1], source = match[2];
+    if (!source.trim() || /\btype\s*=\s*["']?(?:application\/json|application\/ld\+json|importmap)\b/i.test(attrs)) continue;
+    const label = attrs.match(/\bid\s*=\s*["']([^"']+)["']/i)?.[1] || 'anonymous inline script';
+    assert.doesNotThrow(() => new Function(source), 'Script must parse: ' + label);
+    count++;
+  }
+  assert.ok(count >= 30, 'Expected embedded app scripts to be scanned');
+});
