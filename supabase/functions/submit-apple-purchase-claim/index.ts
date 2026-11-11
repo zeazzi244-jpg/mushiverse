@@ -58,6 +58,15 @@ Deno.serve(async(req)=>{
         return json({error:"subscription_already_claimed"},409);
     }
 
+    // Rate-limit new unverified claims. Replaying an existing transaction
+    // above remains idempotent and does not consume this quota.
+    const since=new Date(Date.now()-60*60*1000).toISOString();
+    const {count:recentCount,error:rateError}=await admin.from("apple_purchase_claims")
+      .select("id",{count:"exact",head:true}).eq("user_id",user.id)
+      .gte("created_at",since);
+    if(rateError) throw rateError;
+    if((recentCount??0)>=30) return json({error:"claim_rate_limited"},429);
+
     const {data,error}=await admin.from("apple_purchase_claims").insert({
       user_id:user.id,
       transaction_id:transactionId,
