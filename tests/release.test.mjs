@@ -286,3 +286,15 @@ test('interrupted iOS bundle swap restores previous working app', () => {
   assert.match(swap, /if \(existsSync\(out\)\)/, 'Backup must not be deleted without a current bundle');
   assert.match(swap, /renameSync\(backup, out\)/, 'Failed swap must roll back');
 });
+
+test('offline iOS bundle validates referenced local startup assets before swap', () => {
+  const build = readFileSync('scripts/build-web.mjs', 'utf8');
+  const validation = build.indexOf('// Validate local script and stylesheet URLs');
+  const swap = build.indexOf('// Only replace the previously usable offline bundle');
+  assert.ok(validation >= 0 && swap > validation, 'Dependency validation must precede bundle replacement');
+  const section = build.slice(validation, swap);
+  assert.match(section, /html\.matchAll/, 'Local HTML assets must be scanned');
+  assert.match(section, /existsSync\(join\(staging, normalized\)\)/, 'Staged asset existence must be checked');
+  assert.match(section, /segments\.includes\('\.\.'\)/, 'Path traversal must not escape staged assets');
+  assert.match(section, /missing referenced startup asset/, 'Missing assets must fail the build');
+});
