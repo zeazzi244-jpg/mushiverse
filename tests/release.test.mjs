@@ -294,7 +294,7 @@ test('offline iOS bundle validates referenced local startup assets before swap',
   assert.ok(validation >= 0 && swap > validation, 'Dependency validation must precede bundle replacement');
   const section = build.slice(validation, swap);
   assert.match(section, /html\.matchAll/, 'Local HTML assets must be scanned');
-  assert.match(section, /existsSync\(join\(staging, normalized\)\)/, 'Staged asset existence must be checked');
+  assert.match(section, /existsSync\(asset\)/, 'Staged asset existence must be checked');
   assert.match(section, /segments\.includes\('\.\.'\)/, 'Path traversal must not escape staged assets');
   assert.match(section, /missing referenced startup asset/, 'Missing assets must fail the build');
 });
@@ -319,7 +319,7 @@ test('offline startup dependency validation rejects directories masquerading as 
   const end = build.indexOf('// Only replace the previously usable offline bundle', start);
   assert.ok(start >= 0 && end > start);
   const validation = build.slice(start, end);
-  assert.match(validation, /!lstatSync\(join\(staging, normalized\)\)\.isFile\(\)/,
+  assert.match(validation, /!lstatSync\(asset\)\.isFile\(\)/,
     'A directory with a .js or .css name must not pass startup dependency validation');
 });
 
