@@ -411,3 +411,11 @@ test('native purchases validate product keys and handle bridge exceptions', () =
   assert.match(purchase, /catch\(error\)/);
   assert.match(purchase, /return false/);
 });
+
+
+test('Apple claim receipt never implies purchase verification or immediate rewards', () => {
+  const html = readFileSync('index.html', 'utf8');
+  assert.match(html, /購入申請を受け付けました。Appleの検証完了まで特典は付与されません/);
+  assert.match(html, /検証完了まで特典は付与されません/);
+  assert.doesNotMatch(html, /購入情報を安全に同期しました/);
+});
