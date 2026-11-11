@@ -126,6 +126,26 @@ for (const match of html.matchAll(/\b(?:src|href)\s*=\s*["']([^"']+\.(?:js|css)(
   }
 }
 
+// Validate inline startup scripts as well: MUSHIVERSE currently embeds much of
+// its app code directly in index.html, so checking external .js alone is not enough.
+let inlineScriptIndex = 0;
+for (const match of html.matchAll(/<script\b([^>]*)>([\s\S]*?)<\/script\s*>/gi)) {
+  const attributes = match[1];
+  const source = match[2];
+  if (!source.trim() || /\btype\s*=\s*["']?(?:application\/json|application\/ld\+json|importmap)\b/i.test(attributes)) continue;
+  inlineScriptIndex++;
+  const identifier = attributes.match(/\bid\s*=\s*["']([^"']+)["']/i)?.[1] || 'inline #' + inlineScriptIndex;
+  const syntax = spawnSync(process.execPath, ['--check'], {
+    input: source,
+    encoding: 'utf8',
+    maxBuffer: 1024 * 1024
+  });
+  if (syntax.error || syntax.status !== 0) {
+    throw new Error('Release bundle has invalid inline startup JavaScript (' + identifier + '):\n' +
+      (syntax.stderr || syntax.error?.message || 'syntax check failed'));
+  }
+}
+
 // Only replace the previously usable offline bundle after all checks succeed.
 if (existsSync(out)) {
   // A leftover backup is safe to replace only when a current www exists.
