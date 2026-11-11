@@ -1129,7 +1129,19 @@ function renderCreatorCard(){
 
 function preferredPurchaseChannel(){return NATIVE_SHELL?'apple_iap':'web_stripe'}
 function nativePurchaseBridgeAvailable(){return Boolean(window.webkit?.messageHandlers?.mushiversePurchase)}
-async function requestNativePurchase(plan='premium_monthly'){if(!NATIVE_SHELL)return false;if(nativePurchaseBridgeAvailable()){window.webkit.messageHandlers.mushiversePurchase.postMessage({plan,appVersion:APP_VERSION});return true}toast('iOS課金ブリッジはまだ接続されていません');return false}
+async function requestNativePurchase(plan='premium_monthly'){
+  if(!NATIVE_SHELL)return false;
+  if(!['premium_monthly','premium_annual'].includes(plan)){toast('無効な購入商品です');return false}
+  if(!nativePurchaseBridgeAvailable()){toast('iOS課金ブリッジはまだ接続されていません');return false}
+  try{
+    window.webkit.messageHandlers.mushiversePurchase.postMessage({plan,appVersion:APP_VERSION});
+    return true;
+  }catch(error){
+    console.warn('Native purchase bridge failed',error);
+    toast('Apple課金を開始できませんでした。時間をおいて再試行してください');
+    return false;
+  }
+}
 const MONETIZATION={
   billingEnabled:false,
   partnerSlotEnabled:false,
@@ -1192,8 +1204,22 @@ async function startPremiumCheckout(productKey='premium_annual'){
   }catch(e){toast('決済ページを開けませんでした：'+(e?.message||'不明なエラー'))}
 }
 async function openBillingPortal(){
-  await syncBillingGuard();
+  const billing=await syncBillingGuard();
   if(!user){toast('先にログインしてください');return}
+  if(NATIVE_SHELL){
+    // Apple subscriptions are managed in the App Store, never in Stripe's portal.
+    if(!(billing.checkout_enabled&&billing.billing_mode==='live'&&billing.ios_iap_ready)){
+      toast('Apple課金は準備中です');return;
+    }
+    if(!nativePurchaseBridgeAvailable()){toast('iOS会員管理はアプリ版で利用できます');return}
+    try{
+      window.webkit.messageHandlers.mushiversePurchase.postMessage({action:'manageSubscriptions',appVersion:APP_VERSION});
+    }catch(error){
+      console.warn('Native subscription management failed',error);
+      toast('Appleのサブスクリプション管理を開けませんでした');
+    }
+    return;
+  }
   if(!MONETIZATION.billingEnabled){toast('会員管理は決済開始後に利用できます');return}
   try{
     const {data,error}=await db.functions.invoke(MONETIZATION.portalFunction,{body:{return_url:location.origin+location.pathname}});
