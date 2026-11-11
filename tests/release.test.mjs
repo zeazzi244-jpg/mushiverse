@@ -383,3 +383,31 @@ test('native premium checkout never falls through to Stripe', () => {
   assert.match(checkout, /await requestNativePurchase\(productKey\);\s*return;/,
     'Native checkout must not fall through to Stripe');
 });
+
+
+test('native subscription management never opens Stripe customer portal', () => {
+  const html = readFileSync('index.html', 'utf8');
+  const start = html.indexOf('async function openBillingPortal()');
+  const end = html.indexOf('function premiumGateLabel(', start);
+  assert.ok(start >= 0 && end > start);
+  const portal = html.slice(start, end);
+  assert.match(portal, /if\(NATIVE_SHELL\)/);
+  assert.match(portal, /manageSubscriptions/);
+  assert.match(portal, /billing\.ios_iap_ready/);
+  assert.match(portal, /Native subscription management failed/);
+  assert.ok(portal.indexOf('manageSubscriptions') < portal.indexOf('MONETIZATION.billingEnabled'));
+  assert.match(portal, /return;\s*}\s*if\(!MONETIZATION\.billingEnabled\)/);
+});
+
+test('native purchases validate product keys and handle bridge exceptions', () => {
+  const html = readFileSync('index.html', 'utf8');
+  const start = html.indexOf("async function requestNativePurchase(plan='premium_monthly')");
+  const end = html.indexOf('const MONETIZATION=', start);
+  assert.ok(start >= 0 && end > start);
+  const purchase = html.slice(start, end);
+  assert.match(purchase, /premium_monthly/);
+  assert.match(purchase, /premium_annual/);
+  assert.match(purchase, /nativePurchaseBridgeAvailable\(\)/);
+  assert.match(purchase, /catch\(error\)/);
+  assert.match(purchase, /return false/);
+});
