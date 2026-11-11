@@ -616,3 +616,12 @@ test('startup recovery arms on DOM readiness even when remote CDN blocks load', 
   assert.match(source, /clearTimeout\(recoveryTimer\)/);
   assert.match(source, /if\(booted\|\|recoveryTimer!==null\)return/);
 });
+
+
+test('Apple purchase replay cannot change the original transaction chain', () => {
+  const source = readFileSync('supabase/functions/submit-apple-purchase-claim/index.ts', 'utf8');
+  assert.match(source, /\.select\("id,user_id,product_id,original_transaction_id,status"\)/);
+  assert.match(source, /row\.original_transaction_id!==originalTransactionId/);
+  assert.match(source, /winner\[0\]\.original_transaction_id===originalTransactionId/);
+  assert.match(source, /transaction_already_claimed/);
+});
