@@ -349,3 +349,12 @@ test('iOS approved icon preflight rejects truncated PNG before native changes', 
   assert.match(script, /end === bytes.length/);
   assert.ok(script.indexOf('if (!validIcon || !hasIend)') < script.indexOf("run('npm', ['run', 'build:web'])"));
 });
+
+
+test('offline release rejects syntax errors in referenced startup JavaScript', () => {
+  const build = readFileSync('scripts/build-web.mjs', 'utf8');
+  const validation = build.slice(build.indexOf('// Validate local script and stylesheet URLs'), build.indexOf('// Only replace the previously usable offline bundle'));
+  assert.match(validation, /spawnSync\(process\.execPath, \['--check', asset\]/);
+  assert.match(validation, /invalid startup JavaScript/);
+  assert.ok(validation.indexOf('invalid startup JavaScript') > validation.indexOf('empty referenced startup asset'));
+});
