@@ -685,3 +685,11 @@ test('Apple purchase claims cannot be accessed directly by app roles', () => {
   assert.match(endpoint, /SUPABASE_SERVICE_ROLE_KEY/);
   assert.match(endpoint, /status:"pending"/);
 });
+
+test('release builder validates asset URLs in every shipped stylesheet', () => {
+  const builder = readFileSync('scripts/build-web.mjs', 'utf8');
+  assert.match(builder, /function validateBundledCss\(directory\)/);
+  assert.match(builder, /validateBundledCss\(file\)/);
+  assert.match(builder, /Bundled CSS references missing local asset/);
+  assert.match(builder, /for \(const folder of publicFolders\)/);
+});
