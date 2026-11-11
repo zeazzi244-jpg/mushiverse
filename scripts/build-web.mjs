@@ -93,10 +93,12 @@ if (!html.includes('adventure-ui.css')) {
 }
 // Validate local script and stylesheet URLs in the staged entry point. A missing
 // startup dependency can produce a blank iOS WebView despite a valid index.html.
-for (const match of html.matchAll(/\\b(?:src|href)\\s*=\\s*["']([^"']+\\.(?:js|css)(?:[?#][^"']*)?)["']/gi)) {
+for (const match of html.matchAll(/\b(?:src|href)\s*=\s*["']([^"']+\.(?:js|css)(?:[?#][^"']*)?)["']/gi)) {
   const url = match[1].split(/[?#]/, 1)[0];
-  if (/^(?:[a-z][a-z\\d+.-]*:|\\/\\/)/i.test(url)) continue; // Remote assets
-  const normalized = decodeURIComponent(url).replace(/^\\/?/, '');
+  if (/^(?:[a-z][a-z\d+.-]*:|\/\/)/i.test(url)) continue; // Remote assets
+  let normalized;
+  try { normalized = decodeURIComponent(url).replace(/^\/?/, ''); }
+  catch { throw new Error('Release bundle has invalid startup asset URL: ' + url); }
   const segments = normalized.split('/');
   if (segments.includes('..') || !normalized || !existsSync(join(staging, normalized))) {
     throw new Error('Release bundle is missing referenced startup asset: ' + url);
