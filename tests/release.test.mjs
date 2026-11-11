@@ -477,3 +477,15 @@ test('subscription renewal claims cannot cross user accounts', () => {
   assert.ok(source.indexOf('subscription_already_claimed') < source.indexOf('.insert({'),
     'Renewal ownership must be checked before inserting a claim');
 });
+
+
+test('Apple claim endpoint validates untrusted payload without truncation', () => {
+  const source = readFileSync('supabase/functions/submit-apple-purchase-claim/index.ts', 'utf8');
+  assert.match(source, /request_too_large/);
+  assert.match(source, /invalid_json/);
+  assert.match(source, /invalid_original_transaction_id/);
+  assert.match(source, /invalid_environment/);
+  assert.match(source, /\\d\{6,120\}/);
+  assert.doesNotMatch(source, /\.slice\(0,120\)/, 'Truncation can change transaction identity');
+  assert.doesNotMatch(source, /\.slice\(0,160\)/, 'Truncation can change product identity');
+});
