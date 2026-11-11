@@ -393,8 +393,9 @@ test('native subscription management never opens Stripe customer portal', () => 
   const portal = html.slice(start, end);
   assert.match(portal, /if\(NATIVE_SHELL\)/);
   assert.match(portal, /manageSubscriptions/);
-  assert.match(portal, /billing\.ios_iap_ready/);
+  assert.match(portal, /https:\/\/apps\.apple\.com\/account\/subscriptions/);
   assert.match(portal, /Native subscription management failed/);
+  assert.doesNotMatch(portal.slice(portal.indexOf('if(NATIVE_SHELL)'), portal.indexOf('MONETIZATION.billingEnabled')), /billing\.ios_iap_ready/, 'Cancellation must work when checkout is off');
   assert.ok(portal.indexOf('manageSubscriptions') < portal.indexOf('MONETIZATION.billingEnabled'));
   assert.match(portal, /return;\s*}\s*if\(!MONETIZATION\.billingEnabled\)/);
 });
