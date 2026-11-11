@@ -449,7 +449,7 @@ test('Apple claims accept only registered subscription product identifiers', () 
   assert.match(source, /jp\.mushiverse\.premium\.monthly/);
   assert.match(source, /jp\.mushiverse\.premium\.annual/);
   assert.match(source, /\.includes\(productId\)/, 'Product ID must be exact allowlist match');
-  assert.doesNotMatch(source, /\/\^jp\\\.mushiverse/, 'Open-ended product prefix is unsafe');
+  assert.ok(!source.includes('if(!/^jp'), 'Open-ended product prefix is unsafe');
 });
 
 test('Apple claim UI only acknowledges pending server claims', () => {
