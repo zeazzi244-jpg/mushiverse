@@ -718,3 +718,22 @@ test('offline iOS build checks nested local CSS imports', () => {
     assert.equal(match?.[1] || match?.[2], expected);
   }
 });
+
+
+test('CSS import validator uses a working regex, not literal backslash escapes', () => {
+  const builder = readFileSync('scripts/build-web.mjs', 'utf8');
+  const line = builder.split('\n').find(line => line.includes('stylesheet.matchAll(/@import'));
+  assert.ok(line, 'release builder must scan CSS @import');
+  const literal = line.match(/matchAll\((\/@import.*\/gi)\)/)?.[1];
+  assert.ok(literal, 'extract actual production CSS import regex');
+  // Execute the actual regex literal from the release builder, not a test-only copy.
+  const productionRegex = new Function('return ' + literal)();
+  for (const [css, expected] of [
+    ['@import "theme.css";', 'theme.css'],
+    ['@import url("nested/theme.css") screen;', 'nested/theme.css'],
+    ['@import url(../outside.css);', '../outside.css']
+  ]) {
+    const match = [...css.matchAll(productionRegex)][0];
+    assert.equal(match?.[1] || match?.[2], expected);
+  }
+});
