@@ -72,7 +72,8 @@ jobs:
             -d '{"model":"gpt-5.4-mini","input":"Reply OK","max_output_tokens":128}' \
             https://api.openai.com/v1/responses)
           if [ "$status" != "200" ]; then
-            echo "::error::OpenAI Responses API returned HTTP $status; stopping before coding."\n            python3 - <<'PY'\n          import json\n          try:\n              with open("/tmp/mushiverse-responses-check.json") as f:\n                  err = json.load(f).get("error", {})\n              print("API error type:", str(err.get("type", "unknown"))[:100])\n              print("API error code:", str(err.get("code", "unknown"))[:100])\n              print("API error param:", str(err.get("param", "none"))[:100])\n          except (OSError, ValueError, AttributeError):\n              print("API error details unavailable")\n          PY
+            echo "::error::OpenAI Responses API returned HTTP $status; stopping before coding."
+            python3 -c 'import json; e=json.load(open("/tmp/mushiverse-responses-check.json")).get("error",{}); print("API error type:",str(e.get("type","unknown"))[:100]); print("API error code:",str(e.get("code","unknown"))[:100]); print("API error param:",str(e.get("param","none"))[:100])' || true
             exit 1
           fi
       - name: Run bounded AI coding task
