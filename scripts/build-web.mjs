@@ -100,8 +100,14 @@ for (const match of html.matchAll(/\b(?:src|href)\s*=\s*["']([^"']+\.(?:js|css)(
   try { normalized = decodeURIComponent(url).replace(/^\/?/, ''); }
   catch { throw new Error('Release bundle has invalid startup asset URL: ' + url); }
   const segments = normalized.split('/');
-  if (segments.includes('..') || !normalized || !existsSync(join(staging, normalized)) || !lstatSync(join(staging, normalized)).isFile()) {
+  const asset = join(staging, normalized);
+  if (segments.includes('..') || !normalized || !existsSync(asset) || !lstatSync(asset).isFile()) {
     throw new Error('Release bundle is missing referenced startup asset: ' + url);
+  }
+  // A zero-byte startup script or stylesheet exists on disk but can still
+  // leave Capacitor's offline WebView blank. Reject it before replacing www.
+  if (!readFileSync(asset).length) {
+    throw new Error('Release bundle has empty referenced startup asset: ' + url);
   }
 }
 
