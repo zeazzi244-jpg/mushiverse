@@ -358,3 +358,12 @@ test('offline release rejects syntax errors in referenced startup JavaScript', (
   assert.match(validation, /invalid startup JavaScript/);
   assert.ok(validation.indexOf('invalid startup JavaScript') > validation.indexOf('empty referenced startup asset'));
 });
+
+
+test('offline startup asset scanner rejects malformed paths before replacing www', () => {
+  const build = readFileSync('scripts/build-web.mjs', 'utf8');
+  const validation = build.slice(build.indexOf('// Validate local script and stylesheet URLs'), build.indexOf('// Only replace the previously usable offline bundle'));
+  assert.match(validation, /malformed startup asset URL/);
+  assert.match(validation, /unsafe startup asset URL/);
+  assert.match(validation, /segments\.includes\('\.'\)/);
+});
