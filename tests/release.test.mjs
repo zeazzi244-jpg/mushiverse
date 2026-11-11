@@ -217,3 +217,12 @@ test('dark forest surfaces keep controls readable on iPhone', () => {
   assert.match(css, /outline:3px solid #f3c76b/, 'Focused actions need a visible outline');
   assert.match(css, /@media\(prefers-contrast:more\)/, 'High contrast dark surface fallback missing');
 });
+
+
+test('web build validates HTML startup tags with word boundaries', () => {
+  const build = readFileSync('scripts/build-web.mjs', 'utf8');
+  assert.ok(build.includes(String.raw`/<body\\b/i`), 'Body tag check must use a regex word boundary');
+  assert.ok(build.includes(String.raw`/<script\\b/i`), 'Script tag check must use a regex word boundary');
+  assert.ok(!build.includes(String.raw`/<body\\\\b/i`), 'Body check must not match a literal backslash');
+  assert.ok(!build.includes(String.raw`/<script\\\\b/i`), 'Script check must not match a literal backslash');
+});
