@@ -88,3 +88,28 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Hiragino Kaku Gothic ProN","Y
 /* Avoid truncated rarity names, prices and quest descriptions on narrow screens. */
 #gacha :is(.panel,.toolbar),#home :is(.panel,.toolbar){min-width:0;overflow-wrap:anywhere}
 @media(prefers-reduced-motion:reduce){#gacha :is(button,[role="button"]),#home :is(button,[role="button"]){animation:none!important}}
+
+
+/* V16: dark forest treatment for navigation-adjacent surfaces and reliable
+   contrast for actionable controls. Keep light forms explicitly light. */
+:is(#home,#post,#collection,#gacha,#map,#profile) :is(.mvSectionIntro,.mvAdventureHero){
+  color-scheme:dark;
+}
+:is(#home,#post,#collection,#gacha,#map,#profile) :is(.mvSectionIntro,.mvAdventureHero) :is(button,[role="button"]):not(:disabled){
+  border-color:rgba(225,244,205,.55);
+}
+:is(#home,#post,#collection,#gacha,#map,#profile) :is(.mvSectionIntro,.mvAdventureHero) :is(button,[role="button"]):focus-visible{
+  outline:3px solid #f3c76b;
+  outline-offset:3px;
+}
+:is(#home,#post,#collection,#gacha,#map,#profile) :is(.mvSectionIntro,.mvAdventureHero) :is(input,textarea,select){
+  color-scheme:light;
+  background:#fff;
+  color:#172b21;
+  border:1px solid #779587;
+}
+@media(prefers-contrast:more){
+  :is(#home,#post,#collection,#gacha,#map,#profile) :is(.mvSectionIntro,.mvAdventureHero){
+    border:2px solid #f3f8ef;
+  }
+}
