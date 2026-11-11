@@ -654,3 +654,14 @@ test('coin catalog migration stays private and sale-disabled until Apple IAP is 
   ]) assert.ok(sql.includes("('" + id + "'," + coins + "," + yen + ",false)"));
   assert.doesNotMatch(sql, /mushiverse\.coins\.550/);
 });
+
+
+test('offline forest stylesheet assets are validated before replacing a working iOS bundle', () => {
+  const build = readFileSync('scripts/build-web.mjs', 'utf8');
+  const guard = build.slice(build.indexOf('// Ensure the forest theme'), build.indexOf('// Validate inline startup scripts'));
+  assert.match(guard, /adventureCss\.matchAll/);
+  assert.match(guard, /decodeURIComponent\(url\)/);
+  assert.match(guard, /parts\.includes\('\.\.'\)/);
+  assert.match(guard, /Release stylesheet references missing local asset/);
+  assert.ok(build.indexOf('// Ensure the forest theme') < build.indexOf('// Only replace the previously usable offline bundle'));
+});
