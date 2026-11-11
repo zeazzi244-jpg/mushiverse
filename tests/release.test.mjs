@@ -442,3 +442,20 @@ test('coin store stays disabled until verified native crediting and spending exi
   assert.match(coinStore, /現在は購入・請求できません/, 'Users must see clear unavailable status');
   assert.match(coinStore, /ガチャでの使用は準備中/, 'Purchased coin spending must not be implied ready');
 });
+
+
+test('Apple claims accept only registered subscription product identifiers', () => {
+  const source = readFileSync('supabase/functions/submit-apple-purchase-claim/index.ts', 'utf8');
+  assert.match(source, /jp\.mushiverse\.premium\.monthly/);
+  assert.match(source, /jp\.mushiverse\.premium\.annual/);
+  assert.match(source, /\.includes\(productId\)/, 'Product ID must be exact allowlist match');
+  assert.doesNotMatch(source, /\/\^jp\\\.mushiverse/, 'Open-ended product prefix is unsafe');
+});
+
+test('Apple claim UI only acknowledges pending server claims', () => {
+  const html = readFileSync('index.html', 'utf8');
+  const start = html.indexOf('/* MUSHIVERSE_V60_APPLE_IAP_SERVER_SYNC */');
+  const end = html.indexOf('async function submitMany(', start);
+  assert.ok(start >= 0 && end > start);
+  assert.match(html.slice(start, end), /data\.status==='pending'/);
+});
