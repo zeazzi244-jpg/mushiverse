@@ -430,3 +430,15 @@ test('Apple purchase claim endpoint preserves status and never grants entitlemen
   assert.doesNotMatch(server, /updateUserById|gacha_coin_wallets|gacha_coin_purchase_credits/,
     'Unverified claims must not grant paid privileges or coins');
 });
+
+
+test('coin store stays disabled until verified native crediting and spending exist', () => {
+  const html = readFileSync('index.html', 'utf8');
+  const start = html.indexOf('<script id="mv134-coin-store">');
+  assert.ok(start >= 0, 'Coin store preview missing');
+  const coinStore = html.slice(start, html.indexOf('</script>', start));
+  assert.match(coinStore, /button\.disabled=true/, 'Coin purchases must not be enabled by a preview');
+  assert.match(coinStore, /serverCreditEnabled===true/, 'Verified server credit gate missing');
+  assert.match(coinStore, /現在は購入・請求できません/, 'Users must see clear unavailable status');
+  assert.match(coinStore, /ガチャでの使用は準備中/, 'Purchased coin spending must not be implied ready');
+});
