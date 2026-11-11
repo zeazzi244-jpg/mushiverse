@@ -593,3 +593,12 @@ test('startup recovery stays dismissed after app-ready and pageshow', () => {
   assert.doesNotMatch(startup, /pageshow',function\(\)\{booted=false/);
   assert.match(startup, /if\(booted\|\|!document\.body/);
 });
+
+test('subscription claim requires original transaction chain before pending insert', () => {
+  const source = readFileSync('supabase/functions/submit-apple-purchase-claim/index.ts', 'utf8');
+  const validation = source.indexOf('original_transaction_id_required');
+  const insert = source.indexOf('.insert({');
+  assert.ok(validation > 0 && validation < insert);
+  assert.match(source, /productId\.startsWith\("jp\.mushiverse\.premium\."\) && !originalTransactionId/);
+  assert.match(source, /subscription_already_claimed/);
+});
