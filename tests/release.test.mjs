@@ -674,3 +674,14 @@ test('iOS offline build rejects truncated HTML and unmatched script tags', () =>
   assert.match(guard, /scriptOpenCount !== scriptCloseCount/);
   assert.ok(build.indexOf('// Reject truncated HTML') < build.indexOf('// Only replace the previously usable offline bundle'));
 });
+
+
+test('Apple purchase claims cannot be accessed directly by app roles', () => {
+  const sql = readFileSync('supabase/migrations/20261112043500_lock_down_apple_purchase_claims_direct_access.sql', 'utf8');
+  assert.match(sql, /REVOKE ALL PRIVILEGES ON TABLE public\.apple_purchase_claims FROM anon, authenticated;/);
+  assert.match(sql, /REVOKE ALL PRIVILEGES ON SEQUENCE public\.apple_purchase_claims_id_seq FROM anon, authenticated;/);
+  const endpoint = readFileSync('supabase/functions/submit-apple-purchase-claim/index.ts', 'utf8');
+  assert.match(endpoint, /auth\.getUser\(\)/);
+  assert.match(endpoint, /SUPABASE_SERVICE_ROLE_KEY/);
+  assert.match(endpoint, /status:"pending"/);
+});
