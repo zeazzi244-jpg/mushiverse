@@ -76,3 +76,15 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Hiragino Kaku Gothic ProN","Y
 :is(#home,#post,#collection,#gacha,#map,#profile) :is(.panel,.toolbar) :is(h1,h2,h3,h4){overflow-wrap:break-word}
 :is(#home,#post,#collection,#gacha,#map,#profile) :is(.panel,.toolbar) :is(input,textarea,select){box-sizing:border-box}
 @media(forced-colors:active){:is(#home,#post,#collection,#gacha,#map,#profile) :is(button,a,input,select,textarea):focus-visible{outline:3px solid Highlight}}
+
+/* V15: readable gacha and quest controls on both dark and light surfaces. */
+#gacha :is(button,[role="button"]),#home :is(button,[role="button"]){text-wrap:pretty}
+#gacha :is(button,[role="button"]):focus-visible,#home :is(button,[role="button"]):focus-visible{outline:3px solid #f3c76b;outline-offset:3px}
+/* Disabled actions must stay distinguishable without fading their labels away. */
+#gacha :is(button,[role="button"]):disabled,#home :is(button,[role="button"]):disabled{opacity:.82;filter:saturate(.65)}
+/* Form controls have their own light surface; never inherit white-on-white text. */
+#gacha :is(input,textarea,select),#home :is(input,textarea,select){background-color:#fff;color:#172b21;border-color:#779587}
+#gacha :is(input,textarea)::placeholder,#home :is(input,textarea)::placeholder{color:#52675a;opacity:1}
+/* Avoid truncated rarity names, prices and quest descriptions on narrow screens. */
+#gacha :is(.panel,.toolbar),#home :is(.panel,.toolbar){min-width:0;overflow-wrap:anywhere}
+@media(prefers-reduced-motion:reduce){#gacha :is(button,[role="button"]),#home :is(button,[role="button"]){animation:none!important}}
