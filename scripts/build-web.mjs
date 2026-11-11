@@ -147,11 +147,11 @@ for (const match of adventureCss.matchAll(/url\(\s*(?:"([^"]+)"|'([^']+)'|([^)\s
 
 // Reject truncated HTML before it reaches an iOS WebView. A partially written
 // entry point can pass basic <body>/<script> presence checks yet render blank.
-if (!/<\\/body\\s*>/i.test(html) || !/<\\/html\\s*>/i.test(html)) {
+if (!/<\/body\s*>/i.test(html) || !/<\/html\s*>/i.test(html)) {
   throw new Error('Release index.html is missing closing document tags');
 }
-const scriptOpenCount = [...html.matchAll(/<script\\b[^>]*>/gi)].length;
-const scriptCloseCount = [...html.matchAll(/<\\/script\\s*>/gi)].length;
+const scriptOpenCount = [...html.matchAll(/<script\b[^>]*>/gi)].length;
+const scriptCloseCount = [...html.matchAll(/<\/script\s*>/gi)].length;
 if (scriptOpenCount !== scriptCloseCount) {
   throw new Error('Release index.html has unbalanced script tags: ' + scriptOpenCount + ' opened, ' + scriptCloseCount + ' closed');
 }
