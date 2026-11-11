@@ -4,6 +4,7 @@ on:
     branches: [main]
     paths:
       - 'index.html'
+      - 'ios/**'
       - 'scripts/**'
       - 'tests/**'
       - 'supabase/functions/**'
@@ -12,6 +13,7 @@ on:
   pull_request:
     paths:
       - 'index.html'
+      - 'ios/**'
       - 'scripts/**'
       - 'tests/**'
       - 'supabase/functions/**'
@@ -35,5 +37,7 @@ jobs:
           node-version: '22'
       - name: Install dependencies
         run: npm install --no-audit --no-fund
+      - name: Check native coin release safety gates
+        run: python3 scripts/check_coin_release_gates.py
       - name: Build offline web bundle and run release tests
         run: npm run test:release
