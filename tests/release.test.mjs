@@ -322,3 +322,11 @@ test('offline startup dependency validation rejects directories masquerading as 
   assert.match(validation, /!lstatSync\(join\(staging, normalized\)\)\.isFile\(\)/,
     'A directory with a .js or .css name must not pass startup dependency validation');
 });
+
+
+test('offline bundle refuses empty referenced startup scripts and stylesheets', () => {
+  const build = readFileSync('scripts/build-web.mjs', 'utf8');
+  const validation = build.slice(build.indexOf('// Validate local script and stylesheet URLs'), build.indexOf('// Only replace the previously usable offline bundle'));
+  assert.match(validation, /!readFileSync\(asset\)\.length/, 'Empty startup JS/CSS must fail before bundle swap');
+  assert.match(validation, /empty referenced startup asset/, 'Failure should identify the empty startup dependency');
+});
