@@ -1,4 +1,4 @@
-import { existsSync, mkdirSync, readdirSync, cpSync, copyFileSync, rmSync, lstatSync } from 'node:fs';
+import { existsSync, mkdirSync, readdirSync, cpSync, copyFileSync, rmSync, lstatSync, renameSync } from 'node:fs';
 import { join, extname, basename } from 'node:path';
 
 const root = process.cwd();
@@ -6,8 +6,9 @@ const entry = join(root, 'index.html');
 if (!existsSync(entry)) throw new Error('Root index.html not found');
 
 const out = join(root, 'www');
+const staging = join(root, 'www-build-staging');
 const allowedExtensions = new Set(['.html','.js','.css','.json','.svg','.png','.jpg','.jpeg','.webp','.gif','.ico','.woff','.woff2','.mp3','.wav','.webmanifest']);
-const excluded = new Set(['node_modules','ios','android','www','.git','.github','scripts']);
+const excluded = new Set(['node_modules','ios','android','www','www-build-staging','www-build-previous','.git','.github','scripts']);
 const publicFolders = new Set(['assets','images','img','css','js','fonts','media']);
 
 function allowedName(name) {
@@ -47,8 +48,8 @@ if (!sourceCss.trim() || !sourceCss.includes('--mv-surface')) {
 }
 
 // Build into a fresh directory. Preserve only explicitly public files.
-rmSync(out, { recursive: true, force: true });
-mkdirSync(out, { recursive: true });
+rmSync(staging, { recursive: true, force: true });
+mkdirSync(staging, { recursive: true });
 for (const name of readdirSync(root)) {
   if (excluded.has(name) || !allowedName(name)) continue;
   const src = join(root, name);
@@ -56,32 +57,43 @@ for (const name of readdirSync(root)) {
   if (info.isSymbolicLink()) continue;
   if (info.isDirectory()) {
     if (publicFolders.has(name)) {
-      cpSync(src, join(out, name), { recursive: true, filter: safeAsset });
+      cpSync(src, join(staging, name), { recursive: true, filter: safeAsset });
     }
   } else if (info.isFile() && allowedFile(src)) {
-    copyFileSync(src, join(out, name));
+    copyFileSync(src, join(staging, name));
   }
 }
-if (!existsSync(join(out, 'index.html'))) throw new Error('Release bundle has no index.html');
+if (!existsSync(join(staging, 'index.html'))) throw new Error('Release bundle has no index.html');
 // Fail the build before shipping a blank or unstyled native WebView.
 // These are required local startup assets, not optional network resources.
 const requiredAssets = ['index.html', 'css/adventure-ui.css'];
 for (const relative of requiredAssets) {
-  const target = join(out, relative);
+  const target = join(staging, relative);
   if (!existsSync(target) || !lstatSync(target).isFile()) {
     throw new Error('Release bundle is missing required startup asset: ' + relative);
   }
 }
-const html = readFileSync(join(out, 'index.html'), 'utf8');
+const html = readFileSync(join(staging, 'index.html'), 'utf8');
 if (!/<body\b/i.test(html) || !/<script\b/i.test(html)) {
   throw new Error('Release index.html has no app body or startup script');
 }
 // A zero-byte stylesheet can leave the native WebView unreadable even when the file exists.
-const adventureCss = readFileSync(join(out, 'css/adventure-ui.css'), 'utf8');
+const adventureCss = readFileSync(join(staging, 'css/adventure-ui.css'), 'utf8');
 if (!adventureCss.trim() || !adventureCss.includes('--mv-surface')) {
   throw new Error('Release adventure stylesheet is empty or missing its forest palette');
 }
 if (!html.includes('adventure-ui.css')) {
   throw new Error('Release index.html does not reference the bundled adventure UI stylesheet');
 }
+// Only replace the previously usable offline bundle after all checks succeed.
+const backup = join(root, 'www-build-previous');
+rmSync(backup, { recursive: true, force: true });
+if (existsSync(out)) renameSync(out, backup);
+try {
+  renameSync(staging, out);
+} catch (error) {
+  if (existsSync(backup) && !existsSync(out)) renameSync(backup, out);
+  throw error;
+}
+rmSync(backup, { recursive: true, force: true });
 console.log('Web bundle generated at www/ — validate native startup and offline features before submission.');
