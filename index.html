@@ -3374,8 +3374,10 @@ setTimeout(render,1200);window.addEventListener('online',()=>setTimeout(render,3
      const {data,error}=await window.db.functions.invoke('submit-apple-purchase-claim',{
        body:{transaction_id,original_transaction_id,product_id,environment:'storekit'}
      });
-     if(error) return false;
-     return !!data?.ok;
+     if(error||!data?.ok) return false;
+     // A claim is not proof of purchase. Never treat rejected or unknown
+     // verification states as a successful pending submission.
+     return data.status==='pending';
    }catch{return false}
  }
  async function submitMany(list){
