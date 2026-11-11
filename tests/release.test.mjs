@@ -640,3 +640,17 @@ test('coin shop retains readable text and disabled purchase controls on dark car
   assert.match(css, /min-height:44px/);
   assert.match(css, /@media\(max-width:380px\)/);
 });
+
+
+test('coin catalog migration stays private and sale-disabled until Apple IAP is verified', () => {
+  const sql = readFileSync('supabase/migrations/20261112023700_apple_coin_pack_catalog_disabled.sql','utf8');
+  assert.match(sql, /enable row level security/i);
+  assert.match(sql, /revoke all on public\.apple_coin_pack_catalog from anon, authenticated/i);
+  assert.match(sql, /is_sale_enabled boolean not null default false check \(is_sale_enabled = false\)/);
+  for (const [id, coins, yen] of [
+    ['mushiverse.coins.100', 100, 160],
+    ['mushiverse.coins.500', 500, 480],
+    ['mushiverse.coins.1200', 1200, 980]
+  ]) assert.ok(sql.includes("('" + id + "'," + coins + "," + yen + ",false)"));
+  assert.doesNotMatch(sql, /mushiverse\.coins\.550/);
+});
