@@ -38,7 +38,7 @@ if (!existsSync(sourceCssPath) || !lstatSync(sourceCssPath).isFile()) {
   throw new Error('Source adventure stylesheet is missing');
 }
 const sourceCss = readFileSync(sourceCssPath, 'utf8');
-if (!/<body\\b/i.test(sourceHtml) || !/<script\\b/i.test(sourceHtml) ||
+if (!/<body\b/i.test(sourceHtml) || !/<script\b/i.test(sourceHtml) ||
     !sourceHtml.includes('adventure-ui.css')) {
   throw new Error('Source index.html is missing required app startup markup');
 }
