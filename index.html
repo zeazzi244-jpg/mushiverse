@@ -3390,11 +3390,11 @@ setTimeout(render,1200);window.addEventListener('online',()=>setTimeout(render,3
        originalTransactionId:p.originalTransactionId,
        productId:p.productId
      });
-     if(ok) window.toast?.('購入情報を安全に同期しました');
+     if(ok) window.toast?.('購入申請を受け付けました。Appleの検証完了まで特典は付与されません');
    }
    if((d.type==='restore'||d.type==='premiumStatus')&&p.ok&&Array.isArray(p.transactions)){
      const n=await submitMany(p.transactions);
-     if(n>0) window.toast?.(`Apple購入情報を${n}件同期しました`);
+     if(n>0) window.toast?.(`Apple購入申請を${n}件受け付けました。検証完了まで特典は付与されません`);
    }
  });
  function ensure(){
