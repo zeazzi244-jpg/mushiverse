@@ -21,7 +21,7 @@ Deno.serve(async(req)=>{
     const productId=String(body?.product_id||"").slice(0,160);
     const environment=body?.environment?String(body.environment).slice(0,32):null;
     if(!/^\d{6,}$/.test(transactionId)) return json({error:"invalid_transaction_id"},400);
-    if(!/^jp\.mushiverse\.premium\./.test(productId)) return json({error:"invalid_product_id"},400);
+    if(!["jp.mushiverse.premium.monthly","jp.mushiverse.premium.annual"].includes(productId)) return json({error:"invalid_product_id"},400);
 
     // Claims are only unverified reports. Replays must never reset a verified
     // or rejected transaction to pending, nor reassign it to another user.
