@@ -7,7 +7,7 @@ Deno.serve(async(req)=>{
   if(req.method!=="POST") return json({error:"method_not_allowed"},405);
   try{
     const auth=req.headers.get("Authorization")||"";
-    if(!/^Bearer\\s+\\S+$/i.test(auth)) return json({error:"unauthorized"},401);
+    if(!/^Bearer\s+\S+$/i.test(auth)) return json({error:"unauthorized"},401);
     const url=Deno.env.get("SUPABASE_URL")!;
     const anon=Deno.env.get("SUPABASE_ANON_KEY")!;
     const service=Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
