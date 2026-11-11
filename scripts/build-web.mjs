@@ -145,6 +145,41 @@ for (const match of adventureCss.matchAll(/url\(\s*(?:"([^"]+)"|'([^']+)'|([^)\s
   }
 }
 
+// Validate all shipped stylesheets, not only adventure-ui.css. A missing font
+// or image in a secondary theme can make an otherwise healthy WebView unreadable.
+function validateBundledCss(directory) {
+  for (const name of readdirSync(directory)) {
+    const file = join(directory, name);
+    const info = lstatSync(file);
+    if (info.isDirectory()) {
+      validateBundledCss(file);
+      continue;
+    }
+    if (!info.isFile() || extname(name).toLowerCase() !== '.css') continue;
+    const stylesheet = readFileSync(file, 'utf8');
+    for (const match of stylesheet.matchAll(/url\(\s*(?:"([^"]+)"|'([^']+)'|([^\s)]+))\s*\)/gi)) {
+      const raw = (match[1] || match[2] || match[3]).trim();
+      if (!raw || raw.startsWith('#') || /^(?:data:|https?:|\/\/)/i.test(raw)) continue;
+      const url = raw.split(/[?#]/, 1)[0];
+      let decoded;
+      try { decoded = decodeURIComponent(url); }
+      catch { throw new Error('Bundled CSS has invalid asset URL in ' + name + ': ' + raw); }
+      if (!decoded || decoded.startsWith('/') || decoded.includes('\\') ||
+          decoded.split('/').includes('..')) {
+        throw new Error('Bundled CSS has unsafe asset URL in ' + name + ': ' + raw);
+      }
+      const asset = join(directory, decoded);
+      if (!existsSync(asset) || !lstatSync(asset).isFile() || !readFileSync(asset).length) {
+        throw new Error('Bundled CSS references missing local asset in ' + name + ': ' + raw);
+      }
+    }
+  }
+}
+for (const folder of publicFolders) {
+  const directory = join(staging, folder);
+  if (existsSync(directory)) validateBundledCss(directory);
+}
+
 // Reject truncated HTML before it reaches an iOS WebView. A partially written
 // entry point can pass basic <body>/<script> presence checks yet render blank.
 if (!/<\/body\s*>/i.test(html) || !/<\/html\s*>/i.test(html)) {
