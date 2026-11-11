@@ -665,3 +665,12 @@ test('offline forest stylesheet assets are validated before replacing a working 
   assert.match(guard, /Release stylesheet references missing local asset/);
   assert.ok(build.indexOf('// Ensure the forest theme') < build.indexOf('// Only replace the previously usable offline bundle'));
 });
+
+test('iOS offline build rejects truncated HTML and unmatched script tags', () => {
+  const build = readFileSync('scripts/build-web.mjs', 'utf8');
+  const guard = build.slice(build.indexOf('// Reject truncated HTML'), build.indexOf('// Validate inline startup scripts'));
+  assert.match(guard, /Release index\.html is missing closing document tags/);
+  assert.match(guard, /Release index\.html has unbalanced script tags/);
+  assert.match(guard, /scriptOpenCount !== scriptCloseCount/);
+  assert.ok(build.indexOf('// Reject truncated HTML') < build.indexOf('// Only replace the previously usable offline bundle'));
+});
