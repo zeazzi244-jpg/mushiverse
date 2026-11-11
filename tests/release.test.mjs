@@ -330,3 +330,22 @@ test('offline bundle refuses empty referenced startup scripts and stylesheets', 
   assert.match(validation, /!readFileSync\(asset\)\.length/, 'Empty startup JS/CSS must fail before bundle swap');
   assert.match(validation, /empty referenced startup asset/, 'Failure should identify the empty startup dependency');
 });
+
+
+test('gacha rarity emphasis stays readable and respects reduced motion', () => {
+  const css = readFileSync('css/adventure-ui.css', 'utf8');
+  assert.match(css, /V17: high-contrast/);
+  assert.match(css, /data-rarity="SSR"/);
+  assert.match(css, /@keyframes mvSsrGlow/);
+  assert.match(css, /prefers-reduced-motion:reduce/);
+  assert.match(css, /min-height:48px/);
+  assert.match(css, /quest-card/);
+});
+
+test('iOS approved icon preflight rejects truncated PNG before native changes', () => {
+  const script = readFileSync('scripts/prepare-ios.mjs', 'utf8');
+  assert.match(script, /hasIend/);
+  assert.match(script, /type === 'IEND'/);
+  assert.match(script, /end === bytes.length/);
+  assert.ok(script.indexOf('if (!validIcon || !hasIend)') < script.indexOf("run('npm', ['run', 'build:web'])"));
+});
