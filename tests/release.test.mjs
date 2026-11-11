@@ -490,3 +490,21 @@ test('Apple claim endpoint validates untrusted payload without truncation', () =
   assert.doesNotMatch(source, /\.slice\(0,120\)/, 'Truncation can change transaction identity');
   assert.doesNotMatch(source, /\.slice\(0,160\)/, 'Truncation can change product identity');
 });
+
+
+test('Apple claim history is scoped to the signed-in user and read-only', () => {
+  const html = readFileSync('index.html', 'utf8');
+  const start = html.indexOf('/* MUSHIVERSE_V60_APPLE_IAP_SERVER_SYNC */');
+  const end = html.indexOf('</script>', start);
+  assert.ok(start >= 0 && end > start);
+  const source = html.slice(start, end);
+  assert.match(source, /mvAppleClaimStatus/);
+  assert.match(source, /\.from\('apple_purchase_claims'\)/);
+  assert.match(source, /\.eq\('user_id',uid\)/);
+  assert.match(source, /\.limit\(5\)/);
+  assert.match(source, /window\.user\?\.id!==uid/);
+  assert.match(source, /target\.textContent=/);
+  assert.match(source, /Apple検証待ち/);
+  assert.doesNotMatch(source, /\.update\(|\.upsert\(|gacha_coin_wallets/,
+    'History viewer must never mutate claims or wallets');
+});
