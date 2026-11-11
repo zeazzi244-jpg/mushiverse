@@ -16,6 +16,7 @@ function createHarness() {
   let handler;
   const rows = [];
   let currentUser = 'user-a';
+  let insertRace = null;
   const queryFor = (options={}) => {
     const filters = [];
     const q = {
@@ -35,6 +36,11 @@ function createHarness() {
       insert:row=>({
         select:()=>({
           single:async()=>{
+            if(insertRace) {
+              const winner = insertRace(row);
+              insertRace = null;
+              if(winner) rows.push({...row, ...winner, id:rows.length+1,created_at:new Date().toISOString()});
+            }
             if(rows.some(x=>x.transaction_id===row.transaction_id))
               return {data:null,error:{code:'23505'}};
             const data={...row,id:rows.length+1,created_at:new Date().toISOString()};
@@ -60,7 +66,7 @@ function createHarness() {
     const res=await handler(req);
     return {status:res.status,data:await res.json()};
   }
-  return {send,rows,setUser:id=>{currentUser=id}};
+  return {send,rows,setUser:id=>{currentUser=id},setInsertRace:fn=>{insertRace=fn}};
 }
 const coin=(id,product='mushiverse.coins.100',original=null)=>({
   transaction_id:id,original_transaction_id:original,product_id:product,
@@ -117,4 +123,25 @@ test('rejects oversized and non-JSON requests',async()=>{
   const h=createHarness();
   assert.equal((await h.send('{invalid',true)).status,400);
   assert.equal((await h.send('x'.repeat(4200),true)).status,413);
+});
+
+test('simultaneous duplicate insert is idempotent for the same user and product',async()=>{
+  const h=createHarness();
+  h.setInsertRace(()=>({user_id:'user-a',product_id:'mushiverse.coins.100',status:'verified'}));
+  const r=await h.send(coin('567891234'));
+  assert.equal(r.status,200);
+  assert.equal(r.data.status,'verified');
+  assert.equal(h.rows.length,1);
+});
+test('simultaneous insert by another account or product stays a conflict',async()=>{
+  for(const winner of [
+    {user_id:'user-b',product_id:'mushiverse.coins.100'},
+    {user_id:'user-a',product_id:'mushiverse.coins.500'}
+  ]){
+    const h=createHarness();
+    h.setInsertRace(()=>winner);
+    const r=await h.send(coin('567891235'));
+    assert.equal(r.status,409);
+    assert.equal(h.rows.length,1);
+  }
 });
