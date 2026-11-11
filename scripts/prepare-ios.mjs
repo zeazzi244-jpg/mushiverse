@@ -22,9 +22,27 @@ const validIcon = bytes.length >= 33
   && bytes.readUInt32BE(16) === 1024
   && bytes.readUInt32BE(20) === 1024
   && bytes[24] === 8
-  && bytes[25] === 2;
-if (!validIcon) {
-  console.error('Approved icon must be a 1024x1024 8-bit opaque RGB PNG: ' + icon);
+  && bytes[25] === 2
+  && bytes[26] === 0 // PNG compression method
+  && bytes[27] === 0 // PNG filter method
+  && bytes[28] === 0; // Non-interlaced, as required for the approved icon
+// Verify the chunk boundaries and a terminal IEND chunk, not only the header.
+// A truncated PNG can have a valid IHDR but still fail during icon generation.
+let offset = 8;
+let hasIend = false;
+while (validIcon && offset + 12 <= bytes.length) {
+  const length = bytes.readUInt32BE(offset);
+  const end = offset + 12 + length;
+  if (end > bytes.length) break;
+  const type = bytes.toString('ascii', offset + 4, offset + 8);
+  if (type === 'IEND') {
+    hasIend = length === 0 && end === bytes.length;
+    break;
+  }
+  offset = end;
+}
+if (!validIcon || !hasIend) {
+  console.error('Approved icon must be a complete 1024x1024 8-bit opaque RGB PNG: ' + icon);
   process.exit(1);
 }
 run('npm', ['run', 'build:web']);
