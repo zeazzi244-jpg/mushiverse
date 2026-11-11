@@ -701,3 +701,20 @@ test('nested CSS assets resolve relative to their stylesheet', () => {
   assert.ok(build.includes('join(dirname(file), decoded)'), 'CSS URL must use stylesheet directory');
   assert.ok(!build.includes('join(directory, decoded)'), 'CSS URL must not use folder root');
 });
+
+
+test('offline iOS build checks nested local CSS imports', () => {
+  const source = readFileSync('scripts/build-web.mjs', 'utf8');
+  assert.match(source, /Bundled CSS references missing local import/);
+  assert.match(source, /Bundled CSS has unsafe import URL/);
+  assert.match(source, /join\(dirname\(file\), decoded\)/);
+  const imports = /@import\s+(?:url\(\s*)?(?:["']([^"']+)["']|([^\s;)]+))\s*\)?/gi;
+  for (const [css, expected] of [
+    ['@import "theme.css";', 'theme.css'],
+    ['@import url("nested/theme.css") screen;', 'nested/theme.css'],
+    ['@import url(../outside.css);', '../outside.css']
+  ]) {
+    const match = [...css.matchAll(imports)][0];
+    assert.equal(match?.[1] || match?.[2], expected);
+  }
+});
