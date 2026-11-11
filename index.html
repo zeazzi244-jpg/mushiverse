@@ -4744,7 +4744,7 @@ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',
 (()=>{'use strict';
 /* Store UI is a preview until Apple IAP, signed transaction verification,
    idempotent server credits and authoritative server spending are live. */
-const packs=[{id:'mushiverse.coins.100',coins:100},{id:'mushiverse.coins.550',coins:550},{id:'mushiverse.coins.1200',coins:1200}];
+const packs=[{id:'mushiverse.coins.100',coins:100,priceYen:160},{id:'mushiverse.coins.500',coins:500,priceYen:480},{id:'mushiverse.coins.1200',coins:1200,priceYen:980}];
 /* Native shell must explicitly expose verified StoreKit purchase capability.
    A browser, query parameter or localStorage must never enable purchases. */
 function nativeStoreReady(){return window.MUSHIVERSE_NATIVE===true &&
@@ -4755,9 +4755,9 @@ function nativeStoreReady(){return window.MUSHIVERSE_NATIVE===true &&
 function mount(){const gacha=document.getElementById('gacha');if(!gacha||document.getElementById('mv134CoinStore'))return;
 const section=document.createElement('section');section.id='mv134CoinStore';section.setAttribute('aria-label','ガチャコインショップ');
 const h=document.createElement('h2');h.textContent='🪙 ガチャコインショップ（準備中）';
-const intro=document.createElement('p');intro.textContent='アプリ内課金でコインを追加できる予定です。価格はAppleの販売設定が完了してから表示します。現在は購入・請求できません。';
+const intro=document.createElement('p');intro.textContent='販売予定価格を表示しています。正式な価格はAppleの商品登録後に確定します。現在は購入・請求できません。';
 section.append(h,intro);
-for(const pack of packs){const row=document.createElement('div');row.className='mv134Pack';const name=document.createElement('strong');name.textContent=pack.coins.toLocaleString('ja-JP')+'コイン';const button=document.createElement('button');button.type='button';button.disabled=true;button.textContent='販売準備中';button.dataset.productId=pack.id;row.append(name,button);section.append(row)}
+for(const pack of packs){const row=document.createElement('div');row.className='mv134Pack';const name=document.createElement('strong');name.textContent=pack.coins.toLocaleString('ja-JP')+'コイン · 予定 ¥'+pack.priceYen.toLocaleString('ja-JP');const button=document.createElement('button');button.type='button';button.disabled=true;button.textContent='販売準備中';button.dataset.productId=pack.id;row.append(name,button);section.append(row)}
 const wallet=document.createElement('p');wallet.id='mv135WalletStatus';wallet.setAttribute('role','status');wallet.textContent='購入コイン残高：ログイン後に確認できます';section.append(wallet);
 async function refreshWallet(){const status=document.getElementById('mv135WalletStatus');if(!status)return;const db=window.db,user=window.user;if(!db?.from||!user?.id){status.textContent='購入コイン残高：ログインすると確認できます';return}
 const userId=user.id;const {data,error}=await db.from('gacha_coin_wallets').select('balance').eq('user_id',userId).maybeSingle();if(window.user?.id!==userId)return;if(error){status.textContent='購入コイン残高：サーバー準備中（現在のガチャ残高には影響しません）';return}
