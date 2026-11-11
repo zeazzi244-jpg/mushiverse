@@ -44,11 +44,11 @@ Deno.serve(async(req)=>{
     // Claims are only unverified reports. Replays must never reset a verified
     // or rejected transaction to pending, nor reassign it to another user.
     const {data:existing,error:lookupError}=await admin.from("apple_purchase_claims")
-      .select("id,user_id,product_id,status")
+      .select("id,user_id,product_id,original_transaction_id,status")
       .eq("transaction_id",transactionId).limit(2);
     if(lookupError) throw lookupError;
     if(existing?.length){
-      if(existing.some((row:any)=>row.user_id!==user.id || row.product_id!==productId))
+      if(existing.some((row:any)=>row.user_id!==user.id || row.product_id!==productId || row.original_transaction_id!==originalTransactionId))
         return json({error:"transaction_already_claimed"},409);
       return json({ok:true,claim_id:existing[0].id,status:existing[0].status});
     }
@@ -88,9 +88,9 @@ Deno.serve(async(req)=>{
       // Never report success if the winner belongs to a different account or product.
       if(error.code==="23505"){
         const {data:winner,error:retryError}=await admin.from("apple_purchase_claims")
-          .select("id,user_id,product_id,status").eq("transaction_id",transactionId).limit(2);
+          .select("id,user_id,product_id,original_transaction_id,status").eq("transaction_id",transactionId).limit(2);
         if(retryError) throw retryError;
-        if(winner?.length===1 && winner[0].user_id===user.id && winner[0].product_id===productId)
+        if(winner?.length===1 && winner[0].user_id===user.id && winner[0].product_id===productId && winner[0].original_transaction_id===originalTransactionId)
           return json({ok:true,claim_id:winner[0].id,status:winner[0].status});
         return json({error:"transaction_already_claimed"},409);
       }
