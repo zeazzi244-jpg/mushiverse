@@ -4744,12 +4744,16 @@ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',
 </style>
 
 <style id="mv134-coin-store-style">
-#mv134CoinStore{background:#f5fbef;border:1px solid #b8d7b6;border-radius:16px;padding:16px;margin:18px 0;color:#224a34}
-#mv134CoinStore h2{margin:0 0 8px;font-size:19px}
-#mv134CoinStore .mv134Pack{display:flex;align-items:center;justify-content:space-between;gap:10px;border-top:1px solid #d1e4cc;padding:12px 0}
-#mv134CoinStore .mv134Pack button{background:#27694b;color:#fff;border:0;border-radius:10px;padding:10px 13px;font-weight:750}
-#mv134CoinStore .mv134Pack button:disabled{opacity:.5}
-#mv134CoinStore p{font-size:13px;line-height:1.55}
+/* Dark forest surface with explicit text colors: no white-on-white labels. */
+#mv134CoinStore{background:linear-gradient(145deg,#102b22,#1a4232);border:1px solid #658d75;border-radius:16px;padding:16px;margin:18px 0;color:#f4f9ef;color-scheme:dark}
+#mv134CoinStore h2{margin:0 0 8px;font-size:19px;color:#fff}
+#mv134CoinStore .mv134Pack{display:flex;align-items:center;justify-content:space-between;gap:10px;border-top:1px solid #648671;padding:12px 0;color:#f4f9ef}
+#mv134CoinStore .mv134Pack strong{color:#fff;line-height:1.5;overflow-wrap:anywhere}
+#mv134CoinStore .mv134Pack button{background:#e8d4a0;color:#192b20;border:1px solid #fff0be;border-radius:10px;padding:10px 13px;font-weight:750;min-height:44px}
+#mv134CoinStore .mv134Pack button:disabled{opacity:1;background:#d2dcd0;color:#27382c;border-color:#b5c8b6;cursor:not-allowed}
+#mv134CoinStore p{font-size:14px;line-height:1.65;color:#e3f1df}
+#mv134CoinStore :is(button,a):focus-visible{outline:3px solid #f6cf72;outline-offset:3px}
+@media(max-width:380px){#mv134CoinStore .mv134Pack{flex-wrap:wrap}#mv134CoinStore .mv134Pack button{width:100%}}
 </style>
 <script id="mv134-coin-store">
 (()=>{'use strict';
