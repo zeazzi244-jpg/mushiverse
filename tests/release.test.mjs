@@ -753,7 +753,7 @@ test('offline CSS validator ignores commented-out imports and assets', () => {
 
 test('forest CSS preflight ignores commented-out asset references', () => {
   const builder = readFileSync('scripts/build-web.mjs', 'utf8');
-  assert.match(builder, /adventureCss\.replace\(\/\\\/\\\*[\\s\\S]\*\?\\\*\\\/\/g, ''\)\.matchAll/);
+  assert.ok(builder.includes("adventureCss.replace(/\\/\\*[\\s\\S]*?\\*\\//g, '').matchAll"));
   const css = '/* url(missing-font.woff2) */\nbackground: url(real-image.png);';
   const active = css.replace(/\/\*[\s\S]*?\*\//g, '');
   assert.equal(active.includes('missing-font.woff2'), false);
