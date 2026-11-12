@@ -219,7 +219,11 @@ let inlineScriptIndex = 0;
 for (const match of html.matchAll(/<script\b([^>]*)>([\s\S]*?)<\/script\s*>/gi)) {
   const attributes = match[1];
   const source = match[2];
-  if (!source.trim() || /\btype\s*=\s*["']?(?:application\/json|application\/ld\+json|importmap)\b/i.test(attributes)) continue;
+  // Only executable JavaScript script types should be syntax-checked. HTML templates,
+  // JSON data and custom script payloads are inert in WKWebView.
+  const scriptType = attributes.match(/\btype\s*=\s*(?:["']([^"']+)["']|([^\s>]+))/i)?.[1] ||
+    attributes.match(/\btype\s*=\s*(?:["']([^"']+)["']|([^\s>]+))/i)?.[2];
+  if (!source.trim() || (scriptType && !/^(?:module|text\\/javascript|application\\/javascript|text\\/ecmascript|application\\/ecmascript)$/i.test(scriptType.trim()))) continue;
   inlineScriptIndex++;
   const identifier = attributes.match(/\bid\s*=\s*["']([^"']+)["']/i)?.[1] || 'inline #' + inlineScriptIndex;
   // Inline module scripts must be parsed as ESM; Node treats stdin as CommonJS
