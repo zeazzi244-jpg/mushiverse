@@ -156,7 +156,9 @@ function validateBundledCss(directory) {
       continue;
     }
     if (!info.isFile() || extname(name).toLowerCase() !== '.css') continue;
-    const stylesheet = readFileSync(file, 'utf8');
+    // Ignore commented-out imports and URLs: they are not fetched by WKWebView.
+    // Otherwise documentation examples can falsely fail an offline release build.
+    const stylesheet = readFileSync(file, 'utf8').replace(/\/\*[\s\S]*?\*\//g, '');
     // CSS @import dependencies are startup assets too. A missing nested theme
     // stylesheet can silently leave the native WebView with unreadable text.
     for (const match of stylesheet.matchAll(/@import\s+(?:url\(\s*)?(?:["']([^"']+)["']|([^\s;)]+))\s*\)?/gi)) {
