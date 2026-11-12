@@ -201,3 +201,30 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Hiragino Kaku Gothic ProN","Y
     transition:none!important;
   }
 }
+
+/* V21: prevent pale inherited text on explicitly white cards in every tab.
+   Include six-digit hex and compact RGB backgrounds emitted by inline styles. */
+:is(#home,#post,#collection,#gacha,#map,#profile)
+  :is(.panel,.card,.toolbar,.quest,.quest-card):is(
+    [style*="background:#ffffff"],[style*="background: #ffffff"],
+    [style*="background-color:#ffffff"],[style*="background-color: #ffffff"],
+    [style*="background:rgb(255,255,255)"],[style*="background: rgb(255,255,255)"],
+    [style*="background-color:rgb(255,255,255)"],
+    [style*="background-color: rgb(255,255,255)"]){
+  color:#172b21;
+  color-scheme:light;
+}
+:is(#home,#post,#collection,#gacha,#map,#profile)
+  :is(.panel,.card,.toolbar,.quest,.quest-card):is(
+    [style*="background:#ffffff"],[style*="background: #ffffff"],
+    [style*="background-color:#ffffff"],[style*="background-color: #ffffff"],
+    [style*="background:#fff"],[style*="background: #fff"],
+    [style*="background-color:#fff"],[style*="background-color: #fff"])
+  :is(p,small,.hint,.muted,.subtitle,li,label){
+  color:#354d3f;
+}
+/* Respect accessibility text scaling: do not clip expanded labels. */
+:is(#home,#post,#collection,#gacha,#map,#profile)
+  :is(.panel,.card,.toolbar,.quest,.quest-card) :is(p,small,.hint,.muted,.subtitle){
+  overflow-wrap:anywhere;
+}
