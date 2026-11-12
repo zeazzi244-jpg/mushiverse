@@ -4,7 +4,7 @@
 export function validateVerifiedAppleCoinTransaction(transaction, expected) {
   if (!transaction || typeof transaction !== 'object' || !expected) throw new Error('invalid_transaction');
   const { bundleId, productId, environment, transactionId, originalTransactionId,
-    revocationDate, purchaseDate, type, appAccountToken } = transaction;
+    revocationDate, purchaseDate, type, appAccountToken, quantity, inAppOwnershipType } = transaction;
   if (bundleId !== 'com.rikuto.mushiverse') throw new Error('bundle_mismatch');
   if (!['Sandbox', 'Production'].includes(environment) || environment !== expected.environment)
     throw new Error('environment_mismatch');
@@ -16,6 +16,12 @@ export function validateVerifiedAppleCoinTransaction(transaction, expected) {
   if (!Object.hasOwn(packs, productId) || productId !== expected.productId)
     throw new Error('product_mismatch');
   if (type !== 'Consumable') throw new Error('type_mismatch');
+  // A multi-unit purchase must not be silently credited as a single pack.
+  // Apple may omit quantity on older transactions; when supplied, require exactly one.
+  if (quantity != null && quantity !== 1) throw new Error('unsupported_quantity');
+  // Family-shared transactions cannot establish an independently paid consumable purchase.
+  if (inAppOwnershipType != null && inAppOwnershipType !== 'PURCHASED')
+    throw new Error('unsupported_ownership_type');
   if (typeof transactionId !== 'string' || !/^[0-9]{1,30}$/.test(transactionId))
     throw new Error('invalid_transaction_id');
   if (typeof originalTransactionId !== 'string' || !/^[0-9]{1,30}$/.test(originalTransactionId))
