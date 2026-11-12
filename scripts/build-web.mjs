@@ -8,7 +8,7 @@ if (!existsSync(entry)) throw new Error('Root index.html not found');
 
 const out = join(root, 'www');
 const staging = join(root, 'www-build-staging');
-const allowedExtensions = new Set(['.html','.js','.css','.json','.svg','.png','.jpg','.jpeg','.webp','.gif','.ico','.woff','.woff2','.mp3','.wav','.webmanifest']);
+const allowedExtensions = new Set(['.html','.js','.mjs','.css','.json','.svg','.png','.jpg','.jpeg','.webp','.gif','.ico','.woff','.woff2','.mp3','.wav','.webmanifest']);
 const excluded = new Set(['node_modules','ios','android','www','www-build-staging','www-build-previous','.git','.github','scripts']);
 const publicFolders = new Set(['assets','images','img','css','js','fonts','media']);
 
@@ -94,7 +94,7 @@ if (!html.includes('adventure-ui.css')) {
 }
 // Validate local script and stylesheet URLs in the staged entry point. A missing
 // startup dependency can produce a blank iOS WebView despite a valid index.html.
-for (const match of html.matchAll(/\b(?:src|href)\s*=\s*["']([^"']+\.(?:js|css)(?:[?#][^"']*)?)["']/gi)) {
+for (const match of html.matchAll(/\b(?:src|href)\s*=\s*["']([^"']+\.(?:mjs|js|css)(?:[?#][^"']*)?)["']/gi)) {
   const url = match[1].split(/[?#]/, 1)[0];
   // A malformed URL can silently break startup in WKWebView.
   if (!url || url.includes('\\')) {
@@ -118,7 +118,7 @@ for (const match of html.matchAll(/\b(?:src|href)\s*=\s*["']([^"']+\.(?:js|css)(
     throw new Error('Release bundle has empty referenced startup asset: ' + url);
   }
   // Catch JavaScript parse errors before replacing the last working offline bundle.
-  if (extname(normalized).toLowerCase() === '.js') {
+  if (['.js', '.mjs'].includes(extname(normalized).toLowerCase())) {
     const syntax = spawnSync(process.execPath, ['--check', asset], { encoding: 'utf8' });
     if (syntax.error || syntax.status !== 0) {
       throw new Error('Release bundle has invalid startup JavaScript: ' + url + '\\n' + (syntax.stderr || syntax.error?.message || 'syntax check failed'));
