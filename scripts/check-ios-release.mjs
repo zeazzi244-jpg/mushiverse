@@ -12,6 +12,26 @@ if (config.appId !== 'com.rikuto.mushiverse') problems.push('Bundle ID does not 
 if (!existsSync(join('ios', 'App', 'App.xcodeproj', 'project.pbxproj'))) problems.push('Native Xcode project not generated');
 if (!existsSync('www/index.html')) problems.push('Bundled web assets missing');
 if (!existsSync(theme)) problems.push('Adventure UI stylesheet missing from bundled web assets');
+if (existsSync('www/index.html')) {
+  try {
+    const html = readFileSync('www/index.html', 'utf8');
+    if (!/<body\b/i.test(html) || !/<\/body\s*>/i.test(html) ||
+        !/<\/html\s*>/i.test(html) || !/<script\b/i.test(html)) {
+      problems.push('Bundled index.html is incomplete or missing app startup markup');
+    }
+    if (!html.includes('adventure-ui.css')) {
+      problems.push('Bundled index.html does not reference the forest theme');
+    }
+  } catch (error) { problems.push('Unable to read bundled index.html: ' + error.message); }
+}
+if (existsSync(theme)) {
+  try {
+    const css = readFileSync(theme, 'utf8');
+    if (!css.trim() || !css.includes('--mv-surface')) {
+      problems.push('Bundled adventure stylesheet is empty or missing its palette');
+    }
+  } catch (error) { problems.push('Unable to read bundled stylesheet: ' + error.message); }
+}
 if (!existsSync(approvedSource)) problems.push('Approved source icon missing');
 if (config.webDir !== 'www') problems.push('Capacitor webDir must be www');
 if (config.server?.url) problems.push('Remote server.url is not allowed for offline packaged release');
