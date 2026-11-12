@@ -16,7 +16,8 @@ if (!existsSync(theme)) problems.push('Adventure UI stylesheet missing from bund
 if (existsSync('www/index.html')) {
   try {
     const html = readFileSync('www/index.html', 'utf8');
-    if (!/<!doctype\s+html\b/i.test(html) || !/<html\b/i.test(html) || !/<head\b/i.test(html) || !/<\/head\s*>/i.test(html) ||\n        !/<body\b/i.test(html) || !/<\/body\s*>/i.test(html) ||
+    if (!/<!doctype\s+html\b/i.test(html) || !/<html\b/i.test(html) || !/<head\b/i.test(html) || !/<\/head\s*>/i.test(html) ||
+        !/<body\b/i.test(html) || !/<\/body\s*>/i.test(html) ||
         !/<\/html\s*>/i.test(html) || !/<script\b/i.test(html)) {
       problems.push('Bundled index.html is incomplete or missing app startup markup');
     }
