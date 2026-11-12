@@ -555,7 +555,7 @@ test('server accepts the new 500-coin product ID, not the retired 550-coin ID', 
 test('offline iOS build checks embedded JavaScript before replacing www', () => {
   const build = readFileSync('scripts/build-web.mjs', 'utf8');
   const validation = build.slice(build.indexOf('// Validate inline startup scripts'), build.indexOf('// Only replace the previously usable offline bundle'));
-  assert.match(validation, /spawnSync\(process\.execPath, \['--check'\]/);
+  assert.match(validation, /spawnSync\(process\.execPath,\s*isModule\s*\?\s*\['--input-type=module',\s*'--check'\]\s*:\s*\['--check'\]/);
   assert.match(validation, /input: source/);
   assert.match(validation, /invalid inline startup JavaScript/);
   assert.match(validation, /syntax\.status !== 0/);
