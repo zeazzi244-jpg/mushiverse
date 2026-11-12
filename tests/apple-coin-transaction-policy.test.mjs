@@ -6,10 +6,12 @@ const base = {
   bundleId: 'com.rikuto.mushiverse', productId: 'mushiverse.coins.100',
   environment: 'Sandbox', transactionId: '1234567890', originalTransactionId: '1234567890',
   purchaseDate: 1730000000000, type: 'Consumable',
+  appAccountToken: '123e4567-e89b-42d3-a456-426614174000',
 };
 const expected = {
   productId: base.productId, environment: base.environment,
   transactionId: base.transactionId, originalTransactionId: base.originalTransactionId,
+  appAccountToken: base.appAccountToken,
 };
 test('valid post-verification consumable returns catalog amount', () => {
   assert.equal(validate(base, expected).coins, 100);
@@ -32,7 +34,11 @@ test('rejects mismatched transaction ownership', () =>
 test('binds signed transaction to trusted app account token when required', () => {
   const appAccountToken = '123e4567-e89b-42d3-a456-426614174000';
   assert.equal(validate({...base, appAccountToken}, {...expected, appAccountToken}).coins, 100);
-  assert.throws(() => validate(base, {...expected, appAccountToken}), /app_account_token_mismatch/);
+  assert.throws(() => validate({...base, appAccountToken:undefined}, {...expected, appAccountToken}), /app_account_token_mismatch/);
   assert.throws(() => validate({...base, appAccountToken:'123e4567-e89b-42d3-a456-426614174001'}, {...expected, appAccountToken}), /app_account_token_mismatch/);
   assert.throws(() => validate({...base, appAccountToken}, {...expected, appAccountToken:'not-a-uuid'}), /app_account_token_mismatch/);
+});
+
+test('refuses a purchase if the trusted account binding is missing', () => {
+  assert.throws(() => validate(base, {...expected, appAccountToken:undefined}), /app_account_token_mismatch/);
 });
