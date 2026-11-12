@@ -153,3 +153,21 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Hiragino Kaku Gothic ProN","Y
 @media(prefers-contrast:more){
   #gacha :is(button,[role="button"]):focus-visible{outline-width:4px}
 }
+
+/* V19: iOS inline styles frequently use background-color rather than the
+   background shorthand. Match those explicit light cards too, without
+   changing dark forest cards or globally overriding text colors. */
+:is(#home,#gacha,#post,#collection,#map,#profile)
+  :is(.panel,.card,.toolbar,.quest,.quest-card)
+  :is([style*="background-color: white"],[style*="background-color:white"],
+      [style*="background-color: #fff"],[style*="background-color:#fff"],
+      [style*="background-color: rgb(255, 255, 255)"],
+      [style*="background-color:rgb(255,255,255)"]){
+  color:#172b21;
+}
+:is(#home,#gacha,#post,#collection,#map,#profile)
+  :is(.panel,.card,.toolbar,.quest,.quest-card)
+  :is([style*="background-color: white"],[style*="background-color:white"],
+      [style*="background-color: #fff"],[style*="background-color:#fff"]){
+  color-scheme:light;
+}
