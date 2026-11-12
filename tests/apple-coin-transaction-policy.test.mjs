@@ -28,3 +28,11 @@ for (const [name, change, match] of [
 ]) test('rejects '+name, () => assert.throws(() => validate({...base,...change},expected), match));
 test('rejects mismatched transaction ownership', () =>
   assert.throws(() => validate(base,{...expected,transactionId:'987654321'}),/transaction_mismatch/));
+
+test('binds signed transaction to trusted app account token when required', () => {
+  const appAccountToken = '123e4567-e89b-42d3-a456-426614174000';
+  assert.equal(validate({...base, appAccountToken}, {...expected, appAccountToken}).coins, 100);
+  assert.throws(() => validate(base, {...expected, appAccountToken}), /app_account_token_mismatch/);
+  assert.throws(() => validate({...base, appAccountToken:'123e4567-e89b-42d3-a456-426614174001'}, {...expected, appAccountToken}), /app_account_token_mismatch/);
+  assert.throws(() => validate({...base, appAccountToken}, {...expected, appAccountToken:'not-a-uuid'}), /app_account_token_mismatch/);
+});
