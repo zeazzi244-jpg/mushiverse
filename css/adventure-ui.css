@@ -251,3 +251,41 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Hiragino Kaku Gothic ProN","Y
     [style*="background:white"],[style*="background: white"],
     [style*="background-color:#fff"],[style*="background-color: #fff"])
   :is(a:not(.button),.hint,.muted,.subtitle){text-decoration-thickness:from-font}
+
+
+/* V23: make the gacha action state obvious without changing draw probability.
+   Loading and disabled controls must not look like tappable active actions. */
+#gacha :is(button,[role="button"])[aria-busy="true"]{
+  cursor:progress;
+  pointer-events:none;
+  position:relative;
+  filter:saturate(.8);
+}
+#gacha :is(button,[role="button"])[aria-busy="true"]::before{
+  content:"";
+  display:inline-block;
+  width:1em;
+  height:1em;
+  margin-inline-end:.55em;
+  vertical-align:-.12em;
+  border:2px solid currentColor;
+  border-inline-end-color:transparent;
+  border-radius:50%;
+  animation:mvGachaBusy .8s linear infinite;
+}
+@keyframes mvGachaBusy{to{transform:rotate(360deg)}}
+#gacha :is(button,[role="button"]):disabled{
+  cursor:not-allowed;
+}
+#gacha :is(button,[role="button"]):active:not(:disabled):not([aria-busy="true"]){
+  filter:brightness(1.08);
+}
+@media(prefers-reduced-motion:reduce){
+  #gacha :is(button,[role="button"])[aria-busy="true"]::before{
+    animation:none;
+    border-style:dotted;
+  }
+  #gacha :is(button,[role="button"]):active:not(:disabled){
+    transform:none;
+  }
+}
