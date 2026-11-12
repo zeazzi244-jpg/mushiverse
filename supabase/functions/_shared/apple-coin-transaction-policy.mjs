@@ -23,9 +23,9 @@ export function validateVerifiedAppleCoinTransaction(transaction, expected) {
   if (revocationDate != null) throw new Error('revoked');
   if (!Number.isSafeInteger(purchaseDate) || purchaseDate <= 0 || purchaseDate > Date.now() + 300000)
     throw new Error('invalid_purchase_date');
-  // Only compare tokens supplied by the trusted server-side account mapping.
+  // Require a trusted server-side account mapping for every consumable credit.
   // Never derive expected.appAccountToken from the untrusted client claim.
-  if (expected.appAccountToken != null) {
+  {
     const uuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
     if (typeof expected.appAccountToken !== 'string' || !uuid.test(expected.appAccountToken) ||
         typeof appAccountToken !== 'string' || appAccountToken.toLowerCase() !== expected.appAccountToken.toLowerCase())
