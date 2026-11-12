@@ -222,7 +222,10 @@ for (const match of html.matchAll(/<script\b([^>]*)>([\s\S]*?)<\/script\s*>/gi))
   if (!source.trim() || /\btype\s*=\s*["']?(?:application\/json|application\/ld\+json|importmap)\b/i.test(attributes)) continue;
   inlineScriptIndex++;
   const identifier = attributes.match(/\bid\s*=\s*["']([^"']+)["']/i)?.[1] || 'inline #' + inlineScriptIndex;
-  const syntax = spawnSync(process.execPath, ['--check'], {
+  // Inline module scripts must be parsed as ESM; Node treats stdin as CommonJS
+  // unless --input-type=module is supplied, rejecting valid import/export syntax.
+  const isModule = /\btype\s*=\s*(?:["']module["']|module(?=\s|$))/i.test(attributes);
+  const syntax = spawnSync(process.execPath, isModule ? ['--input-type=module', '--check'] : ['--check'], {
     input: source,
     encoding: 'utf8',
     maxBuffer: 1024 * 1024
