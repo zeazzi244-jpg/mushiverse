@@ -199,7 +199,9 @@ test('third gacha phase gets screen time before final result', () => {
 test('startup recovery is non-destructive and supports all main tabs', () => {
   const html = readFileSync('index.html', 'utf8');
   assert.match(html, /id="mvStartupRecoveryScript"/);
-  assert.match(html, /setTimeout\(check,12000\)/);
+  assert.match(html, /recoveryTimer=setTimeout\(function\(\)\{recoveryTimer=null;check\(\)\},12000\)/, 'Recovery timer fires after 12 seconds');
+  assert.match(html, /DOMContentLoaded',armRecovery/, 'Recovery must arm without waiting for remote assets');
+  assert.match(html, /clearTimeout\(recoveryTimer\)/, 'Successful startup must cancel recovery');
   assert.match(html, /window\.dispatchEvent\(new Event\('mushiverse:app-ready'\)\)/);
   assert.match(html, /window\.addEventListener\('mushiverse:app-ready'/);
   assert.doesNotMatch(html.slice(html.indexOf('id="mvStartupRecoveryScript"'), html.indexOf('</script>', html.indexOf('id="mvStartupRecoveryScript"'))), /if\(visible\)return/, 'Static markup must not conceal initialization failure');
