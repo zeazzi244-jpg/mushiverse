@@ -16,12 +16,14 @@ if (!existsSync(theme)) problems.push('Adventure UI stylesheet missing from bund
 if (existsSync('www/index.html')) {
   try {
     const html = readFileSync('www/index.html', 'utf8');
-    if (!/<!doctype\s+html\b/i.test(html) || !/<html\b/i.test(html) || !/<head\b/i.test(html) || !/<\/head\s*>/i.test(html) ||
-        !/<body\b/i.test(html) || !/<\/body\s*>/i.test(html) ||
-        !/<\/html\s*>/i.test(html) || !/<script\b/i.test(html)) {
+    // Comments can contain example markup; they must not satisfy release startup checks.
+    const activeHtml = html.replace(/<!--[\s\S]*?-->/g, '');
+    if (!/<!doctype\s+html\b/i.test(activeHtml) || !/<html\b/i.test(activeHtml) || !/<head\b/i.test(activeHtml) || !/<\/head\s*>/i.test(activeHtml) ||
+        !/<body\b/i.test(activeHtml) || !/<\/body\s*>/i.test(activeHtml) ||
+        !/<\/html\s*>/i.test(activeHtml) || !/<script\b/i.test(activeHtml)) {
       problems.push('Bundled index.html is incomplete or missing app startup markup');
     }
-    if (!html.includes('adventure-ui.css')) {
+    if (!activeHtml.includes('adventure-ui.css')) {
       problems.push('Bundled index.html does not reference the forest theme');
     }
   } catch (error) { problems.push('Unable to read bundled index.html: ' + error.message); }
