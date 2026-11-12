@@ -35,6 +35,9 @@ if (existsSync(theme)) {
 if (!existsSync(approvedSource)) problems.push('Approved source icon missing');
 if (config.webDir !== 'www') problems.push('Capacitor webDir must be www');
 if (config.server?.url) problems.push('Remote server.url is not allowed for offline packaged release');
+if (config.server?.cleartext === true) problems.push('Cleartext WebView traffic is forbidden for App Store release');
+if (Array.isArray(config.server?.allowNavigation) && config.server.allowNavigation.length > 0) problems.push('WebView allowNavigation must be empty for offline packaged release');
+if (config.server?.allowNavigation && !Array.isArray(config.server.allowNavigation)) problems.push('Invalid WebView allowNavigation configuration');
 if (!existsSync(image) || !existsSync(metadata)) problems.push('Approved AppIcon assets are missing');
 else {
   try {
