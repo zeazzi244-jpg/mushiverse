@@ -154,9 +154,17 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Hiragino Kaku Gothic ProN","Y
   #gacha :is(button,[role="button"]):focus-visible{outline-width:4px}
 }
 
-/* V19: iOS inline styles frequently use background-color rather than the
-   background shorthand. Match those explicit light cards too, without
-   changing dark forest cards or globally overriding text colors. */
+/* V19: explicitly light cards must not inherit white-on-white text.
+   Cover both the card itself and light sub-panels; leave dark surfaces alone. */
+:is(#home,#gacha,#post,#collection,#map,#profile)
+  :is(.panel,.card,.toolbar,.quest,.quest-card):is(
+    [style*="background-color: white"],[style*="background-color:white"],
+    [style*="background-color: #fff"],[style*="background-color:#fff"],
+    [style*="background-color: rgb(255, 255, 255)"],
+    [style*="background-color:rgb(255,255,255)"]){
+  color:#172b21;
+  color-scheme:light;
+}
 :is(#home,#gacha,#post,#collection,#map,#profile)
   :is(.panel,.card,.toolbar,.quest,.quest-card)
   :is([style*="background-color: white"],[style*="background-color:white"],
@@ -164,10 +172,5 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Hiragino Kaku Gothic ProN","Y
       [style*="background-color: rgb(255, 255, 255)"],
       [style*="background-color:rgb(255,255,255)"]){
   color:#172b21;
-}
-:is(#home,#gacha,#post,#collection,#map,#profile)
-  :is(.panel,.card,.toolbar,.quest,.quest-card)
-  :is([style*="background-color: white"],[style*="background-color:white"],
-      [style*="background-color: #fff"],[style*="background-color:#fff"]){
   color-scheme:light;
 }
