@@ -737,3 +737,15 @@ test('CSS import validator uses a working regex, not literal backslash escapes',
     assert.equal(match?.[1] || match?.[2], expected);
   }
 });
+
+
+test('offline CSS validator ignores commented-out imports and assets', () => {
+  const builder = readFileSync('scripts/build-web.mjs', 'utf8');
+  assert.match(builder, /const stylesheet = readFileSync\(file, 'utf8'\)\.replace\(/);
+  const strip = (css) => css.replace(/\/\*[\s\S]*?\*\//g, '');
+  const css = '/* @import "missing.css"; url(missing.png) */\n@import "real.css";';
+  const imports = /@import\s+(?:url\(\s*)?(?:["']([^"']+)["']|([^\s;)]+))\s*\)?/gi;
+  const urls = /url\(\s*(?:"([^"]+)"|'([^']+)'|([^\s)]+))\s*\)/gi;
+  assert.deepEqual([...strip(css).matchAll(imports)].map(m => m[1] || m[2]), ['real.css']);
+  assert.equal([...strip(css).matchAll(urls)].length, 0);
+});
