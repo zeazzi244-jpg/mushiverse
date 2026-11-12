@@ -128,7 +128,7 @@ for (const match of html.matchAll(/\b(?:src|href)\s*=\s*["']([^"']+\.(?:js|css)(
 
 // Ensure the forest theme does not silently reference missing local font/image
 // assets. WKWebView cannot recover those assets when the device is offline.
-for (const match of adventureCss.matchAll(/url\(\s*(?:"([^"]+)"|'([^']+)'|([^)\s]+))\s*\)/gi)) {
+for (const match of adventureCss.replace(/\/\*[\s\S]*?\*\//g, '').matchAll(/url\(\s*(?:"([^"]+)"|'([^']+)'|([^)\s]+))\s*\)/gi)) {
   const url = (match[1] || match[2] || match[3]).trim().split(/[?#]/, 1)[0];
   if (!url || url.startsWith('#') || /^(?:data:|https?:|\/\/)/i.test(url)) continue;
   if (url.includes('\\')) throw new Error('Release stylesheet has malformed asset URL: ' + url);
