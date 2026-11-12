@@ -659,7 +659,7 @@ test('coin catalog migration stays private and sale-disabled until Apple IAP is 
 test('offline forest stylesheet assets are validated before replacing a working iOS bundle', () => {
   const build = readFileSync('scripts/build-web.mjs', 'utf8');
   const guard = build.slice(build.indexOf('// Ensure the forest theme'), build.indexOf('// Validate inline startup scripts'));
-  assert.match(guard, /adventureCss\.matchAll/);
+  assert.match(guard, /adventureCss\.replace\([^\n]+\.matchAll/, 'CSS references are scanned after comments are stripped');
   assert.match(guard, /decodeURIComponent\(url\)/);
   assert.match(guard, /parts\.includes\('\.\.'\)/);
   assert.match(guard, /Release stylesheet references missing local asset/);
