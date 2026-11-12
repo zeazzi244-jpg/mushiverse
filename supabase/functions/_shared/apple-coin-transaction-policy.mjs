@@ -4,7 +4,7 @@
 export function validateVerifiedAppleCoinTransaction(transaction, expected) {
   if (!transaction || typeof transaction !== 'object' || !expected) throw new Error('invalid_transaction');
   const { bundleId, productId, environment, transactionId, originalTransactionId,
-    revocationDate, purchaseDate, type } = transaction;
+    revocationDate, purchaseDate, type, appAccountToken } = transaction;
   if (bundleId !== 'com.rikuto.mushiverse') throw new Error('bundle_mismatch');
   if (!['Sandbox', 'Production'].includes(environment) || environment !== expected.environment)
     throw new Error('environment_mismatch');
@@ -23,7 +23,7 @@ export function validateVerifiedAppleCoinTransaction(transaction, expected) {
   if (revocationDate != null) throw new Error('revoked');
   if (!Number.isSafeInteger(purchaseDate) || purchaseDate <= 0 || purchaseDate > Date.now() + 300000)
     throw new Error('invalid_purchase_date');
-  if (expected.transactionId !== transactionId) throw new Error('transaction_mismatch');
+  // Only compare tokens supplied by the trusted server-side account mapping.\n  // Never derive expected.appAccountToken from the untrusted client claim.\n  if (expected.appAccountToken != null) {\n    const uuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;\n    if (typeof expected.appAccountToken !== 'string' || !uuid.test(expected.appAccountToken) ||\n        typeof appAccountToken !== 'string' || appAccountToken.toLowerCase() !== expected.appAccountToken.toLowerCase())\n      throw new Error('app_account_token_mismatch');\n  }\n  if (expected.transactionId !== transactionId) throw new Error('transaction_mismatch');
   if (expected.originalTransactionId !== originalTransactionId) throw new Error('original_transaction_mismatch');
   return Object.freeze({ transactionId, originalTransactionId, productId, environment, coins: packs[productId] });
 }
