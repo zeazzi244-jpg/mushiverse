@@ -133,3 +133,23 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Hiragino Kaku Gothic ProN","Y
   #gacha :is(.ssr,.SSR,[data-rarity="SSR"]){animation:none!important}
   #gacha :is(button,[role="button"]):active:not(:disabled){transform:none}
 }
+
+/* V18: fix white-on-light labels in gacha/quest cards without changing draw logic.
+   Explicit light card surfaces must retain dark foregrounds even when nested
+   inside a dark forest section. Native form controls keep their own palette. */
+#gacha :is(.panel,.card,.toolbar)[style*="background: white"],
+#gacha :is(.panel,.card,.toolbar)[style*="background:#fff"],
+#home :is(.quest,.quest-card)[style*="background: white"],
+#home :is(.quest,.quest-card)[style*="background:#fff"]{
+  color:#172b21;
+}
+/* Rarity labels must be readable without relying on a black shadow on light cards. */
+#gacha :is(.rarity,.rarity-label,[class*="rarity"],[class*="Rarity"]){
+  text-shadow:none;
+}
+/* Preserve readable captions and clear affordances on native iPhone layouts. */
+#gacha :is(button,[role="button"]):disabled{opacity:1;filter:none;cursor:not-allowed}
+#gacha :is(button,[role="button"]):disabled::after{opacity:.7}
+@media(prefers-contrast:more){
+  #gacha :is(button,[role="button"]):focus-visible{outline-width:4px}
+}
