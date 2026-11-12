@@ -9,6 +9,7 @@ const metadata = join(icon, 'Contents.json');
 const approvedSource = join('assets', 'MUSHIVERSE-AppIcon-1024.png');
 const theme = join('www', 'css', 'adventure-ui.css');
 if (config.appId !== 'com.rikuto.mushiverse') problems.push('Bundle ID does not match com.rikuto.mushiverse');
+if (config.appName !== 'MUSHIVERSE') problems.push('App display name must be MUSHIVERSE');
 if (!existsSync(join('ios', 'App', 'App.xcodeproj', 'project.pbxproj'))) problems.push('Native Xcode project not generated');
 if (!existsSync('www/index.html')) problems.push('Bundled web assets missing');
 if (!existsSync(theme)) problems.push('Adventure UI stylesheet missing from bundled web assets');
