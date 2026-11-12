@@ -174,3 +174,30 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Hiragino Kaku Gothic ProN","Y
   color:#172b21;
   color-scheme:light;
 }
+
+/* V20: foreground contrast for light card content rendered with inline shorthand
+   backgrounds. Earlier rules covered background-color but not background: #fff,
+   and a dark parent could still supply inherited pale caption colors. */
+:is(#home,#post,#collection,#gacha,#map,#profile)
+  :is(.panel,.card,.toolbar,.quest,.quest-card):is(
+    [style*="background: white"],[style*="background:white"],
+    [style*="background: #fff"],[style*="background:#fff"],
+    [style*="background: rgb(255, 255, 255)"],
+    [style*="background:rgb(255,255,255)"]){
+  color:#172b21;
+  color-scheme:light;
+}
+:is(#home,#post,#collection,#gacha,#map,#profile)
+  :is(.panel,.card,.toolbar,.quest,.quest-card):is(
+    [style*="background: white"],[style*="background:white"],
+    [style*="background: #fff"],[style*="background:#fff"])
+  :is(p,small,.hint,.muted,.subtitle){
+  color:#354d3f;
+}
+/* iOS users with reduced motion should not see persistent rarity glow. */
+@media(prefers-reduced-motion:reduce){
+  #gacha :is(.ssr,.SSR,[data-rarity="SSR"]){
+    animation:none!important;
+    transition:none!important;
+  }
+}
