@@ -138,6 +138,8 @@ for (const match of html.matchAll(/\b(?:src|poster)\s*=\s*["']([^"']+\.(?:mp3|wa
   let decoded;
   try { decoded = decodeURIComponent(url).replace(/^\/?/, ''); }
   catch { throw new Error('Release bundle has invalid media URL: ' + raw); }
+  // Accept browser-relative media paths without allowing parent traversal.
+  decoded = decoded.replace(/^(?:\.\/)+/, '');
   const segments = decoded.split('/');
   if (!decoded || decoded.includes('\\') || segments.some(part => part === '..' || part === '.') ||
       !allowedExtensions.has(extname(decoded).toLowerCase())) {
