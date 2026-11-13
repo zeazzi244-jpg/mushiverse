@@ -126,6 +126,26 @@ for (const match of html.matchAll(/\b(?:src|href)\s*=\s*["']([^"']+\.(?:mjs|js|c
   }
 }
 
+// Catch missing local media before shipping the offline iOS bundle. A missing
+// sound or animation can otherwise fail silently in WKWebView.
+for (const match of html.matchAll(/\\b(?:src|poster)\\s*=\\s*["']([^"']+\\.(?:mp3|wav|m4a|aac|ogg|mp4|webm)(?:[?#][^"']*)?)["']/gi)) {
+  const raw = match[1];
+  if (/^(?:[a-z][a-z\\d+.-]*:|\\/\\/)/i.test(raw)) continue;
+  const url = raw.split(/[?#]/, 1)[0];
+  let decoded;
+  try { decoded = decodeURIComponent(url).replace(/^\\/?/, ''); }
+  catch { throw new Error('Release bundle has invalid media URL: ' + raw); }
+  const segments = decoded.split('/');
+  if (!decoded || decoded.includes('\\\\') || segments.some(part => part === '..' || part === '.') ||
+      !allowedExtensions.has(extname(decoded).toLowerCase())) {
+    throw new Error('Release bundle has unsafe media URL: ' + raw);
+  }
+  const asset = join(staging, decoded);
+  if (!existsSync(asset) || !lstatSync(asset).isFile() || !readFileSync(asset).length) {
+    throw new Error('Release bundle is missing local media asset: ' + raw);
+  }
+}
+
 // Ensure the forest theme does not silently reference missing local font/image
 // assets. WKWebView cannot recover those assets when the device is offline.
 for (const match of adventureCss.replace(/\/\*[\s\S]*?\*\//g, '').matchAll(/url\(\s*(?:"([^"]+)"|'([^']+)'|([^)\s]+))\s*\)/gi)) {
