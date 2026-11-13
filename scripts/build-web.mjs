@@ -177,6 +177,9 @@ function validateBundledCss(directory) {
       let decoded;
       try { decoded = decodeURIComponent(url); }
       catch { throw new Error('Bundled CSS has invalid import URL in ' + name + ': ' + raw); }
+      // Browser-valid ./ imports resolve relative to the current stylesheet.
+      // Keep rejecting ../ traversal and absolute paths.
+      decoded = decoded.replace(/^(?:\.\/)+/, '');
       if (!decoded || decoded.startsWith('/') || decoded.includes('\\') ||
           decoded.split('/').some(part => part === '..' || part === '.')) {
         throw new Error('Bundled CSS has unsafe import URL in ' + name + ': ' + raw);
