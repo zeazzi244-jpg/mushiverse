@@ -345,7 +345,8 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Hiragino Kaku Gothic ProN","Y
     animation:mvRareReveal .7s cubic-bezier(.2,.8,.2,1) both;
     transform-origin:center bottom;
   }
-  #gacha [data-rarity="SSR"]{animation:mvRareReveal .7s cubic-bezier(.2,.8,.2,1) both,mvSsrGlow 2.2s ease-in-out .7s infinite alternate}\n  @keyframes mvRareReveal{
+  #gacha [data-rarity="SSR"]{animation:mvRareReveal .7s cubic-bezier(.2,.8,.2,1) both,mvSsrGlow 2.2s ease-in-out .7s infinite alternate}
+  @keyframes mvRareReveal{
     0%{opacity:.35;transform:translateY(18px) scale(.94)}
     65%{opacity:1;transform:translateY(-3px) scale(1.025)}
     100%{opacity:1;transform:translateY(0) scale(1)}
