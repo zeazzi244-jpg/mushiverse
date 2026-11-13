@@ -707,7 +707,7 @@ const $=id=>document.getElementById(id);
 const APP_VERSION='133.0.0';
 // v66: expose version to legacy release scripts outside the core closure.
 Object.defineProperty(window,'APP_VERSION',{configurable:true,get:()=>APP_VERSION});
-const NATIVE_SHELL=Boolean(window.MUSHIVERSE_NATIVE===true||new URLSearchParams(location.search).get('native')==='1');
+const NATIVE_SHELL=Boolean(window.Capacitor?.getPlatform?.()==='ios'||window.MUSHIVERSE_NATIVE===true||new URLSearchParams(location.search).get('native')==='1');
 const IS_STANDALONE=Boolean(window.matchMedia?.('(display-mode: standalone)').matches||navigator.standalone===true);
 const HIDDEN_POSTS_KEY='mushiverse-hidden-posts-v1',BLOCKED_USERS_KEY='mushiverse-blocked-users-v1',LOCAL_REPORTS_KEY='mushiverse-local-reports-v1';
 function readIdSet(key){try{return new Set(JSON.parse(localStorage.getItem(key)||'[]'))}catch{return new Set()}}
@@ -3343,7 +3343,7 @@ setTimeout(render,1200);window.addEventListener('online',()=>setTimeout(render,3
 <script id="mushiverse-v59-script">
 /* MUSHIVERSE_V59_NATIVE_STOREKIT_HANDOFF */
 (()=>{
- const isNative=()=>Boolean(window.__MUSHIVERSE_NATIVE_IOS__||window.webkit?.messageHandlers?.mushiversePurchase);
+ const isNative=()=>Boolean(window.Capacitor?.getPlatform?.()==='ios'||window.__MUSHIVERSE_NATIVE_IOS__||window.webkit?.messageHandlers?.mushiversePurchase);
  const originalCheckout=window.startPremiumCheckout;
  if(typeof originalCheckout==='function'){
    window.startPremiumCheckout=async function(productKey='premium_annual'){
@@ -3460,7 +3460,7 @@ setTimeout(render,1200);window.addEventListener('online',()=>setTimeout(render,3
  }
  function render(){
    const el=ensure();if(!el)return;
-   const native=Boolean(window.__MUSHIVERSE_NATIVE_IOS__||window.webkit?.messageHandlers?.mushiversePurchase);
+   const native=Boolean(window.Capacitor?.getPlatform?.()==='ios'||window.__MUSHIVERSE_NATIVE_IOS__||window.webkit?.messageHandlers?.mushiversePurchase);
    el.innerHTML=`<div class="v60Top"><div><span class="v60Badge">🍎 APPLE IAP SERVER SYNC v60</span><h3 style="margin:8px 0 4px">購入情報のサーバー同期まで実装</h3><div class="fineprint">端末から受け取った取引IDは未検証の購入申請として保存されます。Appleのサーバー検証が完了するまで購入済みとは判定しません。</div></div><div class="v60Pct">準備中</div></div><div class="v60Grid"><div class="v60Cell"><small>StoreKit Transaction</small><b class="v60Wait">実機検証待ち</b></div><div class="v60Cell"><small>Supabase Claim Queue</small><b class="v60Ok">受付稼働中</b></div><div class="v60Cell"><small>権限の即時付与</small><b class="v60Ok">BLOCKED BY DESIGN</b></div><div class="v60Cell"><small>App Store Server API</small><b class="v60Wait">APPLE CREDENTIALS待ち</b></div><div class="v60Cell"><small>現在の環境</small><b class="${native?'v60Ok':'v60Wait'}">${native?'iOS NATIVE':'WEB'}</b></div><div class="v60Cell"><small>TestFlight実機検証</small><b class="v60Wait">OWNER STEP</b></div></div><div class="v60Note">セキュリティ上、端末から「購入済み」と送られただけではPremium権限を付けません。Apple側サーバー検証が成功した時だけ権限を確定する設計です。</div>`;
    const history=document.createElement('p');history.id='mvAppleClaimStatus';history.className='fineprint';history.setAttribute('role','status');history.textContent='購入申請履歴を確認しています';el.append(history);
    refreshClaimStatus();
@@ -3525,7 +3525,7 @@ setTimeout(render,1200);window.addEventListener('online',()=>setTimeout(render,3
  }
  function render(){
    const el=ensure();if(!el)return;
-   const native=Boolean(window.__MUSHIVERSE_NATIVE_IOS__||window.webkit?.messageHandlers?.mushiversePurchase);
+   const native=Boolean(window.Capacitor?.getPlatform?.()==='ios'||window.__MUSHIVERSE_NATIVE_IOS__||window.webkit?.messageHandlers?.mushiversePurchase);
    el.innerHTML=`<div class="v62Head"><div><span class="v62Badge">🚀 APP STORE RELEASE PACK v62</span><h3 style="margin:8px 0 4px">提出資料の下準備まで完了</h3><div class="fineprint">App Store Connectに入力する説明文・審査メモ・スクリーンショット計画・IAP登録手順を提出パックとして整理しました。</div></div><div class="v62Pct">82%</div></div><div class="v62Grid"><div class="v62Cell"><small>アプリ説明/サブタイトル</small><b class="v62Ok">DRAFT READY</b></div><div class="v62Cell"><small>審査メモ</small><b class="v62Ok">DRAFT READY</b></div><div class="v62Cell"><small>Privacy回答</small><b class="v62Ok">DRAFT READY</b></div><div class="v62Cell"><small>スクショ計画</small><b class="v62Ok">READY</b></div><div class="v62Cell"><small>現在の環境</small><b class="${native?'v62Ok':'v62Wait'}">${native?'iOS NATIVE':'WEB'}</b></div><div class="v62Cell"><small>App Store Connect入力</small><b class="v62Wait">OWNER STEP</b></div></div><div class="v62Note">Apple側の本人確認・契約・税務/銀行・IAP商品作成・署名・TestFlight提出はアカウント所有者の操作が必要です。アプリ側はそこへ接続できる状態まで先に準備しています。</div>`;
  }
  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',()=>setTimeout(render,1250));else setTimeout(render,1250);
