@@ -384,3 +384,16 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Hiragino Kaku Gothic ProN","Y
   border-style:solid;
   box-shadow:0 0 0 2px rgba(241,200,111,.65);
 }
+
+/* V28: custom gacha controls need the same keyboard focus feedback as buttons.
+   A role=button element is not matched by the existing button-only focus rule. */
+#gacha [role="button"]:focus-visible{
+  outline:3px solid #e5bd64;
+  outline-offset:3px;
+}
+/* Disabled native buttons and aria-disabled custom controls must not show
+   a pressed state; keep the focus outline for accessible keyboard navigation. */
+#gacha :is(button,[role="button"]):is(:disabled,[aria-disabled="true"]):active{
+  transform:none;
+  filter:none;
+}
