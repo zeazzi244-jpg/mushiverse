@@ -397,3 +397,20 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Hiragino Kaku Gothic ProN","Y
   transform:none;
   filter:none;
 }
+
+/* V29: the pale home toolbar needs readable interactive text too.
+   Inherited forest-white link and placeholder colors otherwise disappear on
+   its light surface. Do not recolor filled action buttons or dark hero cards. */
+#home .toolbar:not(.mvSectionIntro):not(.mvAdventureHero) a:not(.button):not([role="button"]){
+  color:#174b36;
+  text-decoration-color:currentColor;
+  text-underline-offset:2px;
+}
+#home .toolbar :is(input,textarea)::placeholder{
+  color:#53685b;
+  opacity:1;
+}
+#home .toolbar :is(input,select,textarea):focus-visible{
+  outline:3px solid #946516;
+  outline-offset:2px;
+}
