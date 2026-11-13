@@ -8,9 +8,9 @@ if (!existsSync(entry)) throw new Error('Root index.html not found');
 
 const out = join(root, 'www');
 const staging = join(root, 'www-build-staging');
-const allowedExtensions = new Set(['.html','.js','.mjs','.css','.json','.svg','.png','.jpg','.jpeg','.webp','.gif','.ico','.woff','.woff2','.mp3','.wav','.webmanifest']);
+const allowedExtensions = new Set(['.html','.js','.mjs','.css','.json','.svg','.png','.jpg','.jpeg','.webp','.gif','.ico','.woff','.woff2','.mp3','.wav','.m4a','.aac','.ogg','.mp4','.webm','.webmanifest']);
 const excluded = new Set(['node_modules','ios','android','www','www-build-staging','www-build-previous','.git','.github','scripts']);
-const publicFolders = new Set(['assets','images','img','css','js','fonts','media']);
+const publicFolders = new Set(['assets','images','img','css','js','fonts','media','audio','sounds','video']);
 
 function allowedName(name) {
   const lower = name.toLowerCase();
