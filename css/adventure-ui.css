@@ -365,3 +365,22 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Hiragino Kaku Gothic ProN","Y
     transform:none!important;
   }
 }
+
+/* V27: disabled draw controls must not look identical to enabled controls.
+   Earlier V18 styling forced full opacity, concealing the disabled state.
+   Keep labels opaque for contrast and distinguish the control by its border. */
+#gacha :is(button,[role="button"]):disabled,
+#gacha :is(button,[role="button"])[aria-disabled="true"]{
+  cursor:not-allowed;
+  border-style:dashed;
+  box-shadow:inset 0 0 0 2px rgba(125,143,130,.55);
+}
+#gacha :is(button,[role="button"])[aria-disabled="true"]{
+  pointer-events:none;
+}
+/* Do not paint the loading spinner onto disabled controls: the action is
+   unavailable, not pending. A busy draw remains visually distinct. */
+#gacha :is(button,[role="button"])[aria-busy="true"]:not(:disabled):not([aria-disabled="true"]){
+  border-style:solid;
+  box-shadow:0 0 0 2px rgba(241,200,111,.65);
+}
