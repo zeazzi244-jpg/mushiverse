@@ -341,11 +341,16 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Hiragino Kaku Gothic ProN","Y
    Only rarity-tagged cards animate; no changes to gacha odds or input handling.
    A single reveal is preferable to a constantly moving whole card. */
 @media(prefers-reduced-motion:no-preference){
-  #gacha :is([data-rarity="SR"],[data-rarity="SSR"]){
+  #gacha :is(.sr,.SR,.ssr,.SSR,[data-rarity="SR"],[data-rarity="SSR"]){
     animation:mvRareReveal .7s cubic-bezier(.2,.8,.2,1) both;
     transform-origin:center bottom;
   }
-  #gacha [data-rarity="SSR"]{animation:mvRareReveal .7s cubic-bezier(.2,.8,.2,1) both,mvSsrGlow 2.2s ease-in-out .7s infinite alternate}
+  /* Match both class-based and data-rarity cards. Previously the more specific
+     reveal selector suppressed the existing .ssr/.SSR glow indefinitely. */
+  #gacha :is(.ssr,.SSR,[data-rarity="SSR"]){
+    animation:mvRareReveal .7s cubic-bezier(.2,.8,.2,1) both,
+      mvSsrGlow 2.2s ease-in-out .7s infinite alternate;
+  }
   @keyframes mvRareReveal{
     0%{opacity:.35;transform:translateY(18px) scale(.94)}
     65%{opacity:1;transform:translateY(-3px) scale(1.025)}
@@ -355,7 +360,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Hiragino Kaku Gothic ProN","Y
 /* The existing SSR glow must remain visible after the entrance. A separate
    pseudo-element supplies its repeating shine without moving the card. */
 @media(prefers-reduced-motion:reduce){
-  #gacha :is([data-rarity="SR"],[data-rarity="SSR"]){
+  #gacha :is(.sr,.SR,.ssr,.SSR,[data-rarity="SR"],[data-rarity="SSR"]){
     animation:none!important;
     transform:none!important;
   }
