@@ -863,7 +863,7 @@ async function renderMap(){
   }
   setTimeout(()=>{insectMap.invalidateSize();if(placedPoints.length===1)insectMap.setView(placedPoints[0],8);else if(placedPoints.length>1)insectMap.fitBounds(placedPoints,{padding:[28,28],maxZoom:9})},80)
 }
-function tab(name){document.querySelectorAll('main section').forEach(el=>el.classList.toggle('hide',el.id!==name));document.querySelectorAll('.nav button').forEach(el=>el.classList.toggle('active',el.dataset.tab===name));if(name==='map')renderMap();window.scrollTo({top:0,behavior:'smooth'})}
+function tab(name){document.querySelectorAll('main > section').forEach(el=>el.classList.toggle('hide',el.id!==name));document.querySelectorAll('.nav button').forEach(el=>el.classList.toggle('active',el.dataset.tab===name));if(name==='map')renderMap();window.scrollTo({top:0,behavior:'smooth'})}
 document.querySelectorAll('.nav button').forEach(b=>b.onclick=()=>tab(b.dataset.tab));
 function safePhoto(r,cls='photo'){if(!r.image_url)return `<div class="${cls==='photo'?'placeholder':'miniPlaceholder'}">🪲</div>`;try{const u=new URL(r.image_url);if(u.protocol!=='https:')throw Error();return `<img src="${esc(u.href)}" class="${cls}" loading="lazy" alt="${esc(r.insect_name)}の写真">`}catch{return '<div class="placeholder">🪲</div>'}}
 
@@ -2101,7 +2101,30 @@ document.addEventListener('click',async e=>{
  if(e.target.closest?.('#copyGlobalMigration')){const payload=JSON.stringify(buildGlobalMigrationPayload(),null,2);try{await navigator.clipboard.writeText(payload);toast(globalLang()==='en'?'Migration JSON copied':'移行JSONをコピーしました')}catch{toast(globalLang()==='en'?'Copy failed':'コピーできませんでした')}return}
  if(e.target.closest?.('#exportGlobalMigration')){const payload=JSON.stringify(buildGlobalMigrationPayload(),null,2),blob=new Blob([payload],{type:'application/json'}),a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=`mushiverse-global-migration-${new Date().toISOString().slice(0,10)}.json`;a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1200);toast(globalLang()==='en'?'Migration JSON exported':'移行JSONを書き出しました');return}
 });
-async function init(){if(!db){toast('接続ライブラリの読み込みに失敗しました');return}const {data}=await db.auth.getUser();user=data?.user||null;window.user=user;authUI();await load();await syncBillingGuard();await syncBillingPlan();render();window.dispatchEvent(new Event('mushiverse:app-ready'));await handleBillingReturn();db.auth.onAuthStateChange(async(_event,session)=>{user=session?.user||null;window.user=user;syncedBillingPlan=null;authUI();await syncBillingGuard();await syncBillingPlan();render()});setInterval(()=>{if(document.visibilityState==='visible'){load();syncBillingGuard()}},60000)}init();
+async function init(){
+  // Let local navigation and the first render work before any network request.
+  render();
+  window.dispatchEvent(new Event('mushiverse:app-ready'));
+  if(!db){toast('通信機能を読み込めませんでした。接続を確認して再読み込みしてください。');return}
+  try{
+    const {data}=await db.auth.getUser();
+    user=data?.user||null;
+    window.user=user;
+  }catch(e){
+    console.warn('startup auth unavailable',e);
+  }
+  authUI();
+  await load();
+  await syncBillingGuard();
+  await syncBillingPlan();
+  render();
+  await handleBillingReturn();
+  db.auth.onAuthStateChange(async(_event,session)=>{user=session?.user||null;window.user=user;syncedBillingPlan=null;authUI();await syncBillingGuard();await syncBillingPlan();render()});
+  setInterval(()=>{if(document.visibilityState==='visible'){load();syncBillingGuard()}},60000);
+}
+document.addEventListener('DOMContentLoaded',()=>{
+  init().catch(e=>console.error('startup failed',e));
+},{once:true});
 })();
 </script>
 <script id="mushiverse-v32-script">
@@ -4078,7 +4101,7 @@ function initProfile(){
  refreshPosts();
 }
 function initGacha(){const nav=document.querySelector('.nav button[data-tab="gacha"]');if(!nav)return;
- nav.onclick=()=>{document.querySelectorAll('main section').forEach(el=>el.classList.toggle('hide',el.id!=='gacha'));document.querySelectorAll('.nav button').forEach(el=>el.classList.toggle('active',el===nav));window.scrollTo(0,0);moveGacha();};
+ nav.onclick=()=>{document.querySelectorAll('main > section').forEach(el=>el.classList.toggle('hide',el.id!=='gacha'));document.querySelectorAll('.nav button').forEach(el=>el.classList.toggle('active',el===nav));window.scrollTo(0,0);moveGacha();};
  function moveGacha(){const panel=$('mvDailyGame'),mount=$('mv86GachaMount');if(panel&&mount&&panel.parentElement!==mount){mount.replaceChildren(panel)}}
  moveGacha();new MutationObserver(moveGacha).observe(document.body,{childList:true,subtree:true});
 }

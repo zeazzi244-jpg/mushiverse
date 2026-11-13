@@ -2,6 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { existsSync, readFileSync, readdirSync, statSync, lstatSync } from 'node:fs';
 import { spawnSync } from 'node:child_process';
+import { runInNewContext } from 'node:vm';
 import { join, relative } from 'node:path';
 
 test('release scripts parse', () => {
@@ -583,6 +584,27 @@ test('unverified Apple claims do not persist a spoofed StoreKit environment', ()
   assert.doesNotMatch(source, /environment,\s*status:"pending"/);
 });
 
+
+for (const backendAvailable of [false, true]) {
+  test(`startup renders before ${backendAvailable ? 'a stalled auth request' : 'a missing backend library'}`, async () => {
+    const html = readFileSync('index.html', 'utf8');
+    const source = html.match(/async function init\(\)\{[\s\S]*?\n\}\n(?=document\.addEventListener\('DOMContentLoaded')/);
+    assert.ok(source, 'The startup function must be present');
+    const calls = [];
+    const db = backendAvailable ? {
+      auth: { getUser() { calls.push('auth'); return new Promise(() => {}); } }
+    } : undefined;
+    const pending = runInNewContext(source[0] + '\ninit()', {
+      db,
+      render: () => calls.push('render'),
+      Event,
+      window: { dispatchEvent: event => calls.push(event.type) },
+      toast: () => calls.push('toast')
+    });
+    assert.deepEqual(calls, ['render', 'mushiverse:app-ready', backendAvailable ? 'auth' : 'toast']);
+    if (!backendAvailable) await pending;
+  });
+}
 
 test('startup recovery stays dismissed after app-ready and pageshow', () => {
   const html = readFileSync('index.html', 'utf8');
