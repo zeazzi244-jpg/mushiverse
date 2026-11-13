@@ -415,10 +415,10 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Hiragino Kaku Gothic ProN","Y
   outline-offset:2px;
 }
 
-/* V30: iPhone gacha controls need a reliable 44px touch target. The older
-   global 40px minimum is too small for closely spaced draw actions. */
+/* V30: preserve the 48px gacha target introduced in V17. A later 44px
+   override unintentionally shrank draw controls on iPhone. */
 #gacha :is(button,[role="button"]){
-  min-height:44px;
+  min-height:48px;
   -webkit-tap-highlight-color:transparent;
 }
 /* Safari can retain its own blue text fill on light form fields despite the
