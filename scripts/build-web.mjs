@@ -104,8 +104,11 @@ for (const match of html.matchAll(/\b(?:src|href)\s*=\s*["']([^"']+\.(?:mjs|js|c
   let normalized;
   try { normalized = decodeURIComponent(url).replace(/^\/?/, ''); }
   catch { throw new Error('Release bundle has invalid startup asset URL: ' + url); }
+  // Browser-relative ./assets/app.js is valid; normalize it before checking
+  // the staged file, while continuing to reject parent traversal.
+  normalized = normalized.replace(/^(?:\.\/)+/, '');
   const segments = normalized.split('/');
-  if (normalized.includes('\\') || segments.includes('.')) {
+  if (normalized.includes('\\') || segments.includes('.') || segments.includes('..')) {
     throw new Error('Release bundle has unsafe startup asset URL: ' + url);
   }
   const asset = join(staging, normalized);
