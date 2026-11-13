@@ -151,24 +151,8 @@ for (const match of html.matchAll(/\b(?:src|poster)\s*=\s*["']([^"']+\.(?:mp3|wa
   }
 }
 
-// Ensure the forest theme does not silently reference missing local font/image
-// assets. WKWebView cannot recover those assets when the device is offline.
-for (const match of adventureCss.replace(/\/\*[\s\S]*?\*\//g, '').matchAll(/url\(\s*(?:"([^"]+)"|'([^']+)'|([^)\s]+))\s*\)/gi)) {
-  const url = (match[1] || match[2] || match[3]).trim().split(/[?#]/, 1)[0];
-  if (!url || url.startsWith('#') || /^(?:data:|https?:|\/\/)/i.test(url)) continue;
-  if (url.includes('\\')) throw new Error('Release stylesheet has malformed asset URL: ' + url);
-  let decoded;
-  try { decoded = decodeURIComponent(url); }
-  catch { throw new Error('Release stylesheet has invalid asset URL: ' + url); }
-  const parts = decoded.split('/');
-  if (decoded.startsWith('/') || parts.includes('..') || parts.includes('.')) {
-    throw new Error('Release stylesheet has unsafe asset URL: ' + url);
-  }
-  const asset = join(staging, 'css', decoded);
-  if (!existsSync(asset) || !lstatSync(asset).isFile() || !readFileSync(asset).length) {
-    throw new Error('Release stylesheet references missing local asset: ' + url);
-  }
-}
+// All CSS asset references are validated below, including the forest theme.
+// Use the same stylesheet-relative resolution for ./ paths across every CSS file.
 
 // Validate all shipped stylesheets, not only adventure-ui.css. A missing font
 // or image in a secondary theme can make an otherwise healthy WebView unreadable.
