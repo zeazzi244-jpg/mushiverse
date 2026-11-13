@@ -42,3 +42,10 @@ Never place account credentials, provisioning keys, private user details, or med
 
 ## Resume checklist
 Open the repo; check latest commits and CI; read this file; run release tests; fix the highest-impact verified failure; commit and push; update this file with results. Request user action only for necessary authentication, device checks, or explicit high-impact approvals.
+
+## V12 release verification (2026-11-13 JST)
+
+- PR #4 merged as `b862707` (initial render before auth and nested panel visibility). PR #6 merged as `95cbade` (recognize Capacitor iOS for native payment routing). PR #5 merged as `5e878f1` (restore the approved icon and Xcode project, sync in CI, and allocate unique archive build numbers).
+- Integrated `5e878f1`: 128 local release tests passed, iOS structural preflight and purchase gate checks passed. [Simulator CI](https://github.com/zeazzi244-jpg/mushiverse/actions/runs/43413643309) compiled and verified Bundle ID and camera, photo and location purpose strings.
+- [Signed archive #26](https://github.com/zeazzi244-jpg/mushiverse/actions/runs/43413731784) signed/exported build 2741 and uploaded it to App Store Connect successfully. Apple processing, tester availability, device smoke tests and review metadata are unverified. The last independently verified internal beta state is 2541. Verify 2741 cold launch, six tabs and photo cancel on iPhone once available.
+- Supabase checkout and iOS IAP readiness are off. No database or Edge Function deployment in V12. Apple product prices, verified credit end to end, restore and refund behavior still require Apple/Sandbox verification. Keep production off.
