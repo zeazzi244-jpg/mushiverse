@@ -32,7 +32,7 @@
 .v35State{display:inline-flex;align-items:center;padding:4px 8px;border-radius:999px;font-size:11px;font-weight:900;background:#edf0ed;color:#526058;white-space:nowrap}.v35State.ok{background:#e1f5e8;color:#17643c}.v35State.wait{background:#fff2cf;color:#745718}.v35State.block{background:#ffe5e2;color:#9a2f27}
 .v35Actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}.v35Log{margin-top:10px;padding:10px 11px;border-radius:12px;background:#102a22;color:#dcf8e8;font:11px/1.55 ui-monospace,SFMono-Regular,Menlo,monospace;white-space:pre-wrap;word-break:break-word;max-height:180px;overflow:auto}
 @media(max-width:640px){.v35Grid{grid-template-columns:1fr}.v35Actions .btn{flex:1 1 145px}}
-</style><link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"><style>#insectMap{height:62vh;min-height:420px;border-radius:18px;overflow:hidden;border:1px solid #dfe9dc}.mapNote{margin:10px 0 14px;padding:10px 12px;border-radius:12px;background:#f8fbf6;border:1px solid #dfe9dc;font-size:13px}.nav button{min-width:0}</style>
+</style><link rel="stylesheet" href="assets/vendor/leaflet/leaflet.css"><style>#insectMap{height:62vh;min-height:420px;border-radius:18px;overflow:hidden;border:1px solid #dfe9dc}.mapNote{margin:10px 0 14px;padding:10px 12px;border-radius:12px;background:#f8fbf6;border:1px solid #dfe9dc;font-size:13px}.nav button{min-width:0}</style>
 <style id="mushiverse-theme-v4">
 :root{--mv-bg-top:#f5fbf0;--mv-bg-mid:#edf7e8;--mv-bg-bottom:#dcefd7;--mv-card:rgba(255,255,255,.84);--mv-line:rgba(47,92,53,.12);--mv-shadow:0 14px 32px rgba(39,82,51,.12)}
 html{background:linear-gradient(180deg,var(--mv-bg-top),var(--mv-bg-bottom))}
@@ -647,10 +647,11 @@ header .topstats .stat small{opacity:1!important;font-weight:700!important}
 @media(max-width:360px){.mvSectionIntro{padding:20px 16px}}
 </style><link rel="stylesheet" href="css/adventure-ui.css">
 <style id="mvStartupRecoveryStyle">
-#mvStartupRecovery{position:fixed;z-index:2147483646;inset:0;display:flex;align-items:center;justify-content:center;padding:24px;background:#092b20;color:#f3fff5;font:16px/1.6 system-ui,-apple-system,sans-serif}
+#mvStartupRecovery{position:fixed;z-index:2147483646;inset:0;display:flex;align-items:center;justify-content:center;overflow:auto;padding:24px;background:#092b20;color:#f3fff5;font:16px/1.6 system-ui,-apple-system,sans-serif}
 #mvStartupRecovery[hidden]{display:none!important}
-#mvStartupRecovery .panel{width:min(100%,440px);background:#174633;border:1px solid #7db59a;border-radius:18px;padding:24px;text-align:center;box-shadow:0 20px 70px #0008}
-#mvStartupRecovery button{background:#d3f5bb;color:#103724;border:0;border-radius:12px;padding:12px 22px;font:700 16px system-ui}
+#mvStartupRecovery .mvStartupRecoveryCard{color:#f3fff5!important;box-sizing:border-box;width:min(100%,440px);background:#174633!important;border:1px solid #7db59a;border-radius:18px;padding:24px;text-align:center;box-shadow:0 20px 70px #0008}
+#mvStartupRecovery :is(h2,p){color:#f3fff5!important}
+#mvStartupRecovery button{min-height:48px;background:#d3f5bb!important;color:#103724!important;border:0;border-radius:12px;padding:12px 22px;font:700 16px system-ui}
 </style>
 <script id="mvStartupRecoveryScript">
 (function(){
@@ -661,9 +662,9 @@ function check(){
  // Static HTML can be visible even when application initialization has failed.
  // Only the app-ready event confirms that initialization reached its first render.
  var screen=document.createElement('div');screen.id='mvStartupRecovery';screen.setAttribute('role','alertdialog');screen.setAttribute('aria-label','起動できない場合の案内');
- var panel=document.createElement('div');panel.className='panel';
+ var panel=document.createElement('div');panel.className='mvStartupRecoveryCard';
  var title=document.createElement('h2');title.textContent='ムシバースを起動できませんでした';
- var msg=document.createElement('p');msg.textContent='通信状態を確認して再読み込みしてください。改善しない場合はアプリを再起動してください。記録データは削除しません。';
+ var msg=document.createElement('p');msg.textContent='「再読み込み」を押して、もう一度開いてください。保存した記録はそのままです。';
  var button=document.createElement('button');button.type='button';button.textContent='再読み込み';button.addEventListener('click',function(){location.reload()});
  panel.append(title,msg,button);screen.append(panel);document.body.append(screen);
 }
@@ -696,12 +697,24 @@ window.addEventListener('mushiverse:app-ready',function(){booted=true;if(recover
   <div id="mapPostList" style="margin-top:16px"></div>
 </section></main><footer class="appCopyright" aria-label="著作権情報"><div class="copyrightBrand">MUSHIVERSE / ムシバース <span class="versionPill">v90</span></div><div>© 2026 川村　陸都. All Rights Reserved.</div></footer></div>
 <nav class="nav" aria-label="メインメニュー"><button data-tab="home" class="active navHomeBtn"><b>🏡</b>ホーム<span id="navNoticeBadge" class="navNoticeBadge" hidden>0</span></button><button data-tab="post"><b>➕</b>記録</button><button data-tab="gacha"><b><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 36 36" width="27" height="27" role="img" aria-label="ガシャポン" style="vertical-align:middle"><rect x="5" y="2" width="26" height="22" rx="5" fill="#e8f6e4" stroke="#2e6d4d" stroke-width="2"/><path d="M8 10a10 10 0 0 1 20 0v8H8z" fill="#8fd1bb"/><circle cx="13" cy="13" r="4" fill="#ffbe7d"/><circle cx="22" cy="12" r="4" fill="#c4a2f5"/><rect x="9" y="24" width="18" height="9" rx="2" fill="#236e53"/><circle cx="18" cy="22" r="5" fill="#fff" stroke="#236e53" stroke-width="2"/><path d="M18 19v6m-3-3h6" stroke="#236e53" stroke-width="2"/></svg></b>ガチャ</button><button data-tab="collection"><b>📗</b>図鑑</button><button data-tab="map"><b>🗺️</b>マップ</button><button data-tab="profile"><b>👤</b>マイページ</button></nav><div id="toast" class="toast" role="status" aria-live="polite" aria-atomic="true"></div>
-<div id="detailModal" class="detailModal" aria-hidden="true"><div class="detailSheet"><button id="detailClose" class="detailClose" type="button" aria-label="閉じる">×</button><div id="detailContent"></div></div></div><script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script><script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<div id="detailModal" class="detailModal" aria-hidden="true"><div class="detailSheet"><button id="detailClose" class="detailClose" type="button" aria-label="閉じる">×</button><div id="detailContent"></div></div></div><script src="assets/vendor/leaflet/leaflet.js"></script><script src="assets/vendor/supabase/supabase.js"></script>
 <script>
 (()=>{'use strict';
 const SUPABASE_URL='https://jhowxtdemlsmetcwhekr.supabase.co';
 const KEY='sb_publishable_b2n0sVChm2zvGQ5qIbz8Cw_B-wCOtVJ';
-const db=window.supabase?.createClient(SUPABASE_URL,KEY);
+async function backendFetch(input,options={}){
+  const controller=new AbortController();
+  const signal=options.signal;
+  const cancel=()=>controller.abort();
+  if(signal?.aborted)cancel();
+  else signal?.addEventListener('abort',cancel,{once:true});
+  const timer=setTimeout(cancel,12000);
+  try{return await fetch(input,{...options,signal:controller.signal})}
+  finally{clearTimeout(timer);signal?.removeEventListener('abort',cancel)}
+}
+let db;
+try{db=window.supabase?.createClient(SUPABASE_URL,KEY,{global:{fetch:backendFetch}})}
+catch(e){console.warn('MUSHIVERSE startup: client initialization',e?.name||'Error')}
 window.db=db;
 const $=id=>document.getElementById(id);
 const APP_VERSION='133.0.0';
@@ -716,6 +729,8 @@ let hiddenPosts=readIdSet(HIDDEN_POSTS_KEY),blockedUsers=readIdSet(BLOCKED_USERS
 function readLocalReports(){try{const x=JSON.parse(localStorage.getItem(LOCAL_REPORTS_KEY)||'[]');return Array.isArray(x)?x:[]}catch{return []}}
 function saveLocalReports(x){try{localStorage.setItem(LOCAL_REPORTS_KEY,JSON.stringify(x.slice(-100)))}catch{}}
 function runtimeMode(){return NATIVE_SHELL?'iOSネイティブ連携':IS_STANDALONE?'ホーム画面アプリ':'Web版'}
+window.runtimeMode=runtimeMode;
+window.globalLang=globalLang;
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 // v70: make HTML escaping available to later script blocks.
 window.esc=esc;
@@ -743,7 +758,7 @@ function authUI(){
  $('postAuth').textContent=user?'ログイン中：写真と昆虫の記録を公開できます。':'投稿するには「マイページ」から会員登録・ログインしてください。';
  $('recordForm').querySelector('button[type="submit"]').disabled=!user;$('aiIdentify').disabled=!user||!selectedPhoto;
  if(user){$('signOut').onclick=async()=>{const {error}=await db.auth.signOut();if(error)toast(error.message)}}
- else {for(const [id,mode] of [['signUp','up'],['signIn','in']])$(id).onclick=async()=>{const email=$('authEmail').value.trim(),password=$('authPassword').value;if(!email||password.length<6){toast('メールアドレスと6文字以上のパスワードを入力してください');return}$(id).disabled=true;try{const {data,error}=mode==='up'?await db.auth.signUp({email,password,emailRedirectTo:location.origin+location.pathname}):await db.auth.signInWithPassword({email,password});if(error)throw error;toast(mode==='up'?'確認メールを送信しました。メールをご確認ください':'ログインしました');if(data?.session)tab('home')}catch(e){toast('認証エラー：'+e.message)}finally{const b=$(id);if(b)b.disabled=false}}}
+ else {for(const [id,mode] of [['signUp','up'],['signIn','in']]){$(id).disabled=!db;$(id).onclick=async()=>{const email=$('authEmail').value.trim(),password=$('authPassword').value;if(!email||password.length<6){toast('メールアドレスと6文字以上のパスワードを入力してください');return}$(id).disabled=true;try{const {data,error}=mode==='up'?await db.auth.signUp({email,password,emailRedirectTo:location.origin+location.pathname}):await db.auth.signInWithPassword({email,password});if(error)throw error;toast(mode==='up'?'確認メールを送信しました。メールをご確認ください':'ログインしました');if(data?.session)tab('home')}catch(e){toast('認証エラー：'+e.message)}finally{const b=$(id);if(b)b.disabled=false}}}}
 }
 const MAP_GEO_CACHE_KEY='mushiverse_map_geocode_v2';
 let mapGeoCache={};
@@ -2101,29 +2116,54 @@ document.addEventListener('click',async e=>{
  if(e.target.closest?.('#copyGlobalMigration')){const payload=JSON.stringify(buildGlobalMigrationPayload(),null,2);try{await navigator.clipboard.writeText(payload);toast(globalLang()==='en'?'Migration JSON copied':'移行JSONをコピーしました')}catch{toast(globalLang()==='en'?'Copy failed':'コピーできませんでした')}return}
  if(e.target.closest?.('#exportGlobalMigration')){const payload=JSON.stringify(buildGlobalMigrationPayload(),null,2),blob=new Blob([payload],{type:'application/json'}),a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=`mushiverse-global-migration-${new Date().toISOString().slice(0,10)}.json`;a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1200);toast(globalLang()==='en'?'Migration JSON exported':'移行JSONを書き出しました');return}
 });
-async function init(){
-  // Let local navigation and the first render work before any network request.
-  render();
-  window.dispatchEvent(new Event('mushiverse:app-ready'));
-  if(!db){toast('通信機能を読み込めませんでした。接続を確認して再読み込みしてください。');return}
-  try{
-    const {data}=await db.auth.getUser();
-    user=data?.user||null;
-    window.user=user;
-  }catch(e){
-    console.warn('startup auth unavailable',e);
-  }
+let backendSync=null,authSubscribed=false,authRevision=0;
+function applyStartupUser(next){
+  const changed=user?.id!==next?.id||typeof window.user==='undefined';
+  user=next;window.user=user;
+  if(changed){syncedBillingPlan=null;authUI()}
+}
+function syncStartupBackend(){
+  if(!db||!navigator.onLine||backendSync)return backendSync;
+  backendSync=(async()=>{
+    const revision=authRevision;
+    const {data,error}=await db.auth.getUser();
+    if(error&&error.name!=='AuthSessionMissingError')throw error;
+    if(revision===authRevision)applyStartupUser(data?.user||null);
+    if(!authSubscribed){
+      db.auth.onAuthStateChange((event,session)=>{
+        if(event==='INITIAL_SESSION')return;
+        const next=session?.user||null;
+        if(user?.id===next?.id)return;
+        authRevision++;
+        applyStartupUser(next);
+        setTimeout(()=>{void syncStartupBackend()},0);
+      });
+      authSubscribed=true;
+    }
+    await load();
+    await syncBillingGuard();
+    await syncBillingPlan();
+    render();
+    await handleBillingReturn();
+  })().catch(e=>console.warn('MUSHIVERSE startup: backend sync',e?.name||'Error'))
+    .finally(()=>{backendSync=null});
+  return backendSync;
+}
+function init(){
   authUI();
-  await load();
-  await syncBillingGuard();
-  await syncBillingPlan();
-  render();
-  await handleBillingReturn();
-  db.auth.onAuthStateChange(async(_event,session)=>{user=session?.user||null;window.user=user;syncedBillingPlan=null;authUI();await syncBillingGuard();await syncBillingPlan();render()});
-  setInterval(()=>{if(document.visibilityState==='visible'){load();syncBillingGuard()}},60000);
+  window.dispatchEvent(new Event('mushiverse:app-ready'));
+  try{render()}catch(e){
+    console.error('MUSHIVERSE startup: optional render failed',e?.name||'Error',e instanceof ReferenceError ? e.message : '');
+  }
+  if(!db){toast('通信機能を読み込めませんでした。再読み込みすると再試行できます。');return}
+  window.addEventListener('online',syncStartupBackend);
+  window.addEventListener('pageshow',event=>{if(event.persisted)void syncStartupBackend()});
+  document.addEventListener('visibilitychange',()=>{if(!document.hidden)void syncStartupBackend()});
+  setInterval(()=>{if(!document.hidden)void syncStartupBackend()},60000);
+  void syncStartupBackend();
 }
 document.addEventListener('DOMContentLoaded',()=>{
-  init().catch(e=>console.error('startup failed',e));
+  init();
 },{once:true});
 })();
 </script>
@@ -2146,7 +2186,7 @@ function v32Integrity(){
  return {score,critical,warnings,dupeIds:dupeIds.size,invalidDate,missingName,missingCategory,missingArea,missingPhoto};
 }
 function v32HealthScore(){
- const i=v32Integrity();let score=100;if(!navigator.onLine)score-=15;if(window.runtimeErrorsV30?.length)score-=Math.min(25,window.runtimeErrorsV30.length*5);if(globalDbCapabilityV30?.checked&&!globalDbCapabilityV30.available)score-=8;if(!user)score-=3;score=Math.min(score,i.score);return Math.max(0,score)
+ const i=v32Integrity();let score=100;if(!navigator.onLine)score-=15;if(window.runtimeErrorsV30?.length)score-=Math.min(25,window.runtimeErrorsV30.length*5);if(globalDbCapabilityV30?.checked&&!globalDbCapabilityV30.available)score-=8;if(!window.user)score-=3;score=Math.min(score,i.score);return Math.max(0,score)
 }
 function renderV32Release(){
  const el=document.getElementById('v32ReleaseCenter');if(!el)return;const en=globalLang?.()==='en';const integrity=v32Integrity(),health=v32HealthScore();const changed=v32PrevVersion&&v32PrevVersion!==APP_VERSION;
@@ -2193,9 +2233,9 @@ function v33HasServiceRoleLeak(){
 function v33ClientChecks(){
  const secure=v33SecureContext();
  const storage=(()=>{try{const k='__mv33';localStorage.setItem(k,'1');localStorage.removeItem(k);return true}catch{return false}})();
- const supabaseReady=!!window.supabase&&!!db;
+ const supabaseReady=!!window.supabase&&!!window.db;
  const noSecret=!v33HasServiceRoleLeak();
- const authReady=!!db?.auth;
+ const authReady=!!window.db?.auth;
  const globalDb=!!globalDbCapabilityV30?.available;
  const serverEndpoints=Object.values(V33_ENDPOINTS).filter(Boolean).length;
  const scoreParts=[secure,storage,supabaseReady,noSecret,authReady];

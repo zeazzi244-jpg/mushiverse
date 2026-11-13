@@ -489,7 +489,7 @@ test('Apple claim endpoint validates untrusted payload without truncation', () =
   assert.match(source, /invalid_json/);
   assert.match(source, /invalid_original_transaction_id/);
   assert.match(source, /invalid_environment/);
-  assert.match(source, /\\d\{6,120\}/);
+  assert.match(source, /\\d\{6,30\}/);
   assert.doesNotMatch(source, /\.slice\(0,120\)/, 'Truncation can change transaction identity');
   assert.doesNotMatch(source, /\.slice\(0,160\)/, 'Truncation can change product identity');
 });
@@ -585,26 +585,52 @@ test('unverified Apple claims do not persist a spoofed StoreKit environment', ()
 });
 
 
-for (const backendAvailable of [false, true]) {
-  test(`startup renders before ${backendAvailable ? 'a stalled auth request' : 'a missing backend library'}`, async () => {
-    const html = readFileSync('index.html', 'utf8');
-    const source = html.match(/async function init\(\)\{[\s\S]*?\n\}\n(?=document\.addEventListener\('DOMContentLoaded')/);
-    assert.ok(source, 'The startup function must be present');
+for (const scenario of ['online', 'offline', 'missing library', 'render exception']) {
+  test(`startup exposes basic UI during ${scenario}`, () => {
+    const html = readFileSync('www/index.html', 'utf8');
+    const source = html.match(/function init\(\)\{\n  authUI\(\);[\s\S]*?\n\}/)?.[0];
+    assert.ok(source);
     const calls = [];
-    const db = backendAvailable ? {
-      auth: { getUser() { calls.push('auth'); return new Promise(() => {}); } }
-    } : undefined;
-    const pending = runInNewContext(source[0] + '\ninit()', {
-      db,
-      render: () => calls.push('render'),
+    runInNewContext(source + '\ninit()', {
+      authUI: () => calls.push('auth UI'),
+      render: () => {
+        calls.push('render');
+        if (scenario === 'render exception') throw new ReferenceError('optional renderer missing');
+      },
       Event,
-      window: { dispatchEvent: event => calls.push(event.type) },
-      toast: () => calls.push('toast')
+      ReferenceError,
+      console: { error: () => calls.push('diagnostic') },
+      db: scenario === 'missing library' ? undefined : {},
+      window: { dispatchEvent: event => calls.push(event.type), addEventListener() {} },
+      document: { addEventListener() {} },
+      setInterval() {},
+      toast: () => calls.push('toast'),
+      syncStartupBackend: () => { if (scenario !== 'offline') calls.push('network'); }
     });
-    assert.deepEqual(calls, ['render', 'mushiverse:app-ready', backendAvailable ? 'auth' : 'toast']);
-    if (!backendAvailable) await pending;
+    assert.deepEqual(calls.slice(0, 3), ['auth UI', 'mushiverse:app-ready', 'render']);
+    if (scenario === 'render exception') assert.ok(calls.includes('diagnostic'));
+    if (scenario === 'missing library') assert.deepEqual(calls.slice(3), ['toast']);
+    if (scenario === 'offline') assert.equal(calls.includes('network'), false);
   });
 }
+
+test('startup fetch aborts stalled requests at the network deadline', async () => {
+  const html = readFileSync('www/index.html', 'utf8');
+  const source = html.match(/async function backendFetch[^]*?\n\}/)?.[0];
+  assert.ok(source);
+  let deadline, cleared = false;
+  const pending = runInNewContext(source + "\nbackendFetch('test')", {
+    AbortController,
+    setTimeout(callback, delay) { assert.equal(delay, 12000); deadline = callback; return 1; },
+    clearTimeout(id) { assert.equal(id, 1); cleared = true; },
+    fetch(input, { signal }) {
+      return new Promise((_, reject) => signal.addEventListener('abort', () => reject(new Error('timed out'))));
+    }
+  });
+  deadline();
+  await assert.rejects(pending, /timed out/);
+  assert.equal(cleared, true);
+});
 
 test('startup recovery stays dismissed after app-ready and pageshow', () => {
   const html = readFileSync('index.html', 'utf8');
@@ -682,12 +708,12 @@ test('coin catalog migration stays private and sale-disabled until Apple IAP is 
 
 test('offline forest stylesheet assets are validated before replacing a working iOS bundle', () => {
   const build = readFileSync('scripts/build-web.mjs', 'utf8');
-  const guard = build.slice(build.indexOf('// Ensure the forest theme'), build.indexOf('// Validate inline startup scripts'));
-  assert.match(guard, /adventureCss\.replace\([^\n]+\.matchAll/, 'CSS references are scanned after comments are stripped');
+  const guard = build.slice(build.indexOf('function validateBundledCss'), build.indexOf('// Validate inline startup scripts'));
   assert.match(guard, /decodeURIComponent\(url\)/);
-  assert.match(guard, /parts\.includes\('\.\.'\)/);
-  assert.match(guard, /Release stylesheet references missing local asset/);
-  assert.ok(build.indexOf('// Ensure the forest theme') < build.indexOf('// Only replace the previously usable offline bundle'));
+  assert.match(guard, /includes\('\.\.'\)/);
+  assert.match(guard, /references missing local asset/);
+  assert.match(guard, /validateBundledCss\(directory\)/);
+  assert.ok(build.indexOf('validateBundledCss(directory)') < build.indexOf('// Only replace the previously usable offline bundle'));
 });
 
 test('iOS offline build rejects truncated HTML and unmatched script tags', () => {
@@ -777,7 +803,7 @@ test('offline CSS validator ignores commented-out imports and assets', () => {
 
 test('forest CSS preflight ignores commented-out asset references', () => {
   const builder = readFileSync('scripts/build-web.mjs', 'utf8');
-  assert.ok(builder.includes("adventureCss.replace(/\\/\\*[\\s\\S]*?\\*\\//g, '').matchAll"));
+  assert.ok(builder.includes("readFileSync(file, 'utf8').replace(/\\/\\*[\\s\\S]*?\\*\\//g, '');"));
   const css = '/* url(missing-font.woff2) */\nbackground: url(real-image.png);';
   const active = css.replace(/\/\*[\s\S]*?\*\//g, '');
   assert.equal(active.includes('missing-font.woff2'), false);
