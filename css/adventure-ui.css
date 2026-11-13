@@ -308,3 +308,31 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Hiragino Kaku Gothic ProN","Y
   background:#fff;
   color:#172b21;
 }
+
+/* V25: make the rare-card reveal feel deliberate, without changing draw logic.
+   The glint is decorative and cannot intercept card taps. */
+#gacha [data-rarity="SSR"]{
+  position:relative;
+  overflow:hidden;
+}
+#gacha [data-rarity="SSR"]::after{
+  content:"";
+  position:absolute;
+  inset:-60%;
+  pointer-events:none;
+  background:linear-gradient(110deg,transparent 43%,rgba(255,245,194,.04) 47%,rgba(255,249,212,.42) 50%,rgba(255,245,194,.04) 53%,transparent 57%);
+  transform:translateX(-80%) rotate(-12deg);
+  z-index:1;
+}
+@media(prefers-reduced-motion:no-preference){
+  #gacha [data-rarity="SSR"]::after{
+    animation:mvSsrSweep 3.6s ease-in-out infinite;
+  }
+  @keyframes mvSsrSweep{
+    0%,20%{transform:translateX(-80%) rotate(-12deg)}
+    60%,100%{transform:translateX(80%) rotate(-12deg)}
+  }
+}
+@media(prefers-reduced-motion:reduce){
+  #gacha [data-rarity="SSR"]::after{display:none}
+}
