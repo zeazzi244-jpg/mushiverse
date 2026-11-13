@@ -289,3 +289,22 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Hiragino Kaku Gothic ProN","Y
     transform:none;
   }
 }
+
+/* V24: the home toolbar is explicitly pale (#f3f7f0 above), but forest
+   sections may supply white inherited text. Match its actual background rather
+   than relying on inline-style selectors, which do not see stylesheet rules. */
+#home .toolbar:not(.mvSectionIntro):not(.mvAdventureHero){
+  color:#172b21;
+  color-scheme:light;
+}
+#home .toolbar:not(.mvSectionIntro):not(.mvAdventureHero) :is(h1,h2,h3,h4,strong){
+  color:#173e30;
+}
+#home .toolbar:not(.mvSectionIntro):not(.mvAdventureHero) :is(p,small,.hint,.muted,.subtitle,label){
+  color:#354d3f;
+}
+/* Inputs keep a distinct, readable surface regardless of inherited theme. */
+#home .toolbar :is(input,select,textarea){
+  background:#fff;
+  color:#172b21;
+}
