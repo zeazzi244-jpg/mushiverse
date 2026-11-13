@@ -336,3 +336,26 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Hiragino Kaku Gothic ProN","Y
 @media(prefers-reduced-motion:reduce){
   #gacha [data-rarity="SSR"]::after{display:none}
 }
+
+/* V26: give newly revealed rare cards a short, readable entrance.
+   Only rarity-tagged cards animate; no changes to gacha odds or input handling.
+   A single reveal is preferable to a constantly moving whole card. */
+@media(prefers-reduced-motion:no-preference){
+  #gacha :is([data-rarity="SR"],[data-rarity="SSR"]){
+    animation:mvRareReveal .7s cubic-bezier(.2,.8,.2,1) both;
+    transform-origin:center bottom;
+  }
+  @keyframes mvRareReveal{
+    0%{opacity:.35;transform:translateY(18px) scale(.94)}
+    65%{opacity:1;transform:translateY(-3px) scale(1.025)}
+    100%{opacity:1;transform:translateY(0) scale(1)}
+  }
+}
+/* The existing SSR glow must remain visible after the entrance. A separate
+   pseudo-element supplies its repeating shine without moving the card. */
+@media(prefers-reduced-motion:reduce){
+  #gacha :is([data-rarity="SR"],[data-rarity="SSR"]){
+    animation:none!important;
+    transform:none!important;
+  }
+}
