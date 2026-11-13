@@ -414,3 +414,21 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Hiragino Kaku Gothic ProN","Y
   outline:3px solid #946516;
   outline-offset:2px;
 }
+
+/* V30: iPhone gacha controls need a reliable 44px touch target. The older
+   global 40px minimum is too small for closely spaced draw actions. */
+#gacha :is(button,[role="button"]){
+  min-height:44px;
+  -webkit-tap-highlight-color:transparent;
+}
+/* Safari can retain its own blue text fill on light form fields despite the
+   declared color. Keep input and autofilled values visible on white. */
+#gacha :is(input,textarea,select),
+#home .toolbar :is(input,textarea,select){
+  -webkit-text-fill-color:#172b21;
+  caret-color:#172b21;
+}
+#gacha :is(input,textarea):disabled,
+#home .toolbar :is(input,textarea):disabled{
+  -webkit-text-fill-color:#354d3f;
+}
