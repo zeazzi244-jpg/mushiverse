@@ -128,15 +128,15 @@ for (const match of html.matchAll(/\b(?:src|href)\s*=\s*["']([^"']+\.(?:mjs|js|c
 
 // Catch missing local media before shipping the offline iOS bundle. A missing
 // sound or animation can otherwise fail silently in WKWebView.
-for (const match of html.matchAll(/\\b(?:src|poster)\\s*=\\s*["']([^"']+\\.(?:mp3|wav|m4a|aac|ogg|mp4|webm)(?:[?#][^"']*)?)["']/gi)) {
+for (const match of html.matchAll(/\b(?:src|poster)\s*=\s*["']([^"']+\.(?:mp3|wav|m4a|aac|ogg|mp4|webm)(?:[?#][^"']*)?)["']/gi)) {
   const raw = match[1];
-  if (/^(?:[a-z][a-z\\d+.-]*:|\\/\\/)/i.test(raw)) continue;
+  if (/^(?:[a-z][a-z\d+.-]*:|\/\/)/i.test(raw)) continue;
   const url = raw.split(/[?#]/, 1)[0];
   let decoded;
-  try { decoded = decodeURIComponent(url).replace(/^\\/?/, ''); }
+  try { decoded = decodeURIComponent(url).replace(/^\/?/, ''); }
   catch { throw new Error('Release bundle has invalid media URL: ' + raw); }
   const segments = decoded.split('/');
-  if (!decoded || decoded.includes('\\\\') || segments.some(part => part === '..' || part === '.') ||
+  if (!decoded || decoded.includes('\\') || segments.some(part => part === '..' || part === '.') ||
       !allowedExtensions.has(extname(decoded).toLowerCase())) {
     throw new Error('Release bundle has unsafe media URL: ' + raw);
   }
