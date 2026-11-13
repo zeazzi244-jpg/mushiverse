@@ -3,8 +3,8 @@
 from pathlib import Path
 
 root = Path(__file__).resolve().parents[1]
-store = (root / "ios/MushiverseCoinStore.swift").read_text(encoding="utf-8")
-shop = (root / "ios/MushiverseCoinShopView.swift").read_text(encoding="utf-8")
+store = (root / "ios/App/App/MushiverseCoinStore.swift").read_text(encoding="utf-8")
+shop = (root / "ios/App/App/MushiverseCoinShopView.swift").read_text(encoding="utf-8")
 backend = (root / "supabase/functions/credit-apple-gacha-coins/index.ts").read_text(encoding="utf-8")
 
 checks = {

@@ -1,18 +1,30 @@
 name: Generate iOS Xcode project
 on:
   workflow_dispatch:
-  push:
-    branches: [main]
+  pull_request:
     paths:
+      - 'ios/**'
+      - 'assets/MUSHIVERSE-AppIcon-1024.png'
       - 'package.json'
       - 'capacitor.config.json'
       - 'scripts/build-web.mjs'
+      - 'scripts/check-ios-release.mjs'
+      - '.github/workflows/generate-ios-project.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'ios/**'
+      - 'assets/MUSHIVERSE-AppIcon-1024.png'
+      - 'package.json'
+      - 'capacitor.config.json'
+      - 'scripts/build-web.mjs'
+      - 'scripts/check-ios-release.mjs'
       - '.github/workflows/generate-ios-project.yml'
 permissions:
   contents: read
 jobs:
   generate-native:
-    runs-on: macos-latest
+    runs-on: macos-26-intel
     timeout-minutes: 35
     steps:
       - uses: actions/checkout@v4
@@ -25,8 +37,8 @@ jobs:
         run: |
           npm run build:web
           node scripts/verify-web.mjs
-      - name: Generate Capacitor iOS project
-        run: npx cap add ios
+      - name: Sync checked-in Capacitor iOS project
+        run: npx cap sync ios
       - name: Run iOS release structure checks
         run: npm run ios:check
       - name: Declare iOS camera and location permissions

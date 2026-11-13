@@ -1,15 +1,11 @@
 name: iOS signed archive (manual)
 on:
   workflow_dispatch:
-  push:
-    branches: [main]
-    paths:
-      - '.github/workflows/ios-signed-archive.yml'
 permissions:
   contents: read
 jobs:
   signed-archive:
-    runs-on: macos-latest
+    runs-on: macos-26-intel
     timeout-minutes: 60
     concurrency:
       group: mushiverse-ios-signed-archive
@@ -43,7 +39,9 @@ jobs:
           npm install --no-audit --no-fund
           npm run build:web
           node scripts/verify-web.mjs
-          npx cap add ios
+          npx cap sync ios
+      - name: Allocate unique TestFlight build number
+        run: node scripts/set-signed-build-number.mjs
       - name: Run iOS release structure checks
         run: npm run ios:check
       - name: Declare iOS camera and location permissions

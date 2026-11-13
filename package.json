@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "build:web": "node scripts/build-web.mjs",
-    "ios:add": "npm run build:web && npx cap add ios",
+    "ios:add": "npm run ios:sync",
     "ios:sync": "npm run build:web && npx cap sync ios",
     "ios:open": "npx cap open ios",
     "ios:check": "node scripts/check-ios-release.mjs",
@@ -14,10 +14,10 @@
     "test:release": "npm run build:web && node --test tests/*.test.mjs"
   },
   "dependencies": {
-    "@capacitor/core": "^8.5.2",
-    "@capacitor/ios": "^8.5.2"
+    "@capacitor/core": "8.5.3",
+    "@capacitor/ios": "8.5.3"
   },
   "devDependencies": {
-    "@capacitor/cli": "^8.5.2"
+    "@capacitor/cli": "8.5.3"
   }
 }
