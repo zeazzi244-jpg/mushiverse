@@ -649,15 +649,16 @@ body[data-screen="profile"] .wrap > header { display: none; }
 /* Keep large gacha artwork from pushing the draw controls several screens
    below the fold on short iPhone viewports. Do not constrain tiny badges. */
 #gacha :is(.gacha-card,.gacha-result) :is(img,video){
-  max-height:70vh;
-  max-height:70dvh;
+  /* Keep the draw action close to the reveal on compact portrait screens. */
+  max-height:48vh;
+  max-height:48dvh;
   width:auto;
   object-fit:contain;
 }
 @media(max-height:480px) and (orientation:landscape){
   #gacha :is(.gacha-card,.gacha-result) :is(img,video){
-    max-height:45vh;
-    max-height:45dvh;
+    max-height:32vh;
+    max-height:32dvh;
   }
 }
 /* Keep the profile editor readable when Safari inherits a dark color scheme
