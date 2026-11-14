@@ -34,9 +34,10 @@ Deno.serve(async(req)=>{
       return json({error:"invalid_original_transaction_id"},400);
     if(typeof productId!=="string"||!["jp.mushiverse.premium.monthly","jp.mushiverse.premium.annual","mushiverse.coins.100","mushiverse.coins.500","mushiverse.coins.1200"].includes(productId))
       return json({error:"invalid_product_id"},400);
-    // Subscription chains must have an original transaction ID for ownership checks.
+    // Every Apple transaction, including consumable coin packs, has an original transaction ID.
+    // Require it at claim time so the Sandbox verifier cannot be bypassed or dead-ended.
     // This is still unverified metadata: only Apple-signed values can grant access.
-    if(productId.startsWith("jp.mushiverse.premium.") && !originalTransactionId)
+    if(!originalTransactionId)
       return json({error:"original_transaction_id_required"},400);
     if(environment!==null&&(typeof environment!=="string"||!["Sandbox","Production","Xcode","storekit"].includes(environment)))
       return json({error:"invalid_environment"},400);
