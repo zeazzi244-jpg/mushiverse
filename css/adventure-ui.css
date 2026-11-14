@@ -475,3 +475,14 @@ body[data-screen="profile"] .wrap > header { display: none; }
 #profile #mv86Stats :is(b, small) { color: #f4fff7; }
 #profile #mv86ProfileEditor { background: #f3fff7; color: #173d2f; }
 #profile #mv86ProfileEditor :is(input, textarea) { color: #173d2f; background: #fff; max-width: 100%; min-height: 44px; }
+
+#profile #mv86Stats { grid-template-columns: repeat(auto-fit, minmax(88px, 1fr)); }
+#profile #mv86RecentPosts { margin: 1rem 0; }
+#profile #mv86RecentPosts h3 { color: #f4fff7; }
+#profile #mv86RecentPosts article {
+  display: flex; align-items: center; gap: .75rem; padding: .6rem;
+  margin-block: .4rem; background: #1f4939; border-radius: .75rem;
+}
+#profile #mv86RecentPosts img { width: 3rem; height: 3rem; object-fit: cover; border-radius: .5rem; }
+#profile #mv86RecentPosts small { margin-inline-start: auto; color: #def3e4; }
+#profile #mv86ProfileEditor input[type="checkbox"] { min-height: auto; }

@@ -1,17 +1,12 @@
 import {apple} from './restore-ios-signing.mjs';
-let version=process.env.SIGNED_BUILD_NUMBER;
-if(version && !/^\d+$/.test(version))throw Error('Invalid signed build number');
+const version=process.env.SIGNED_BUILD_NUMBER;
+if(!version||!/^\d+$/.test(version))throw Error('Missing or invalid signed build number');
 const apps=await apple('apps?filter%5BbundleId%5D=com.rikuto.mushiverse');
 const appID=apps.data?.[0]?.id;
 if(!appID)throw Error('App not found');
-if(!version){
- const latest=await apple('builds?filter%5Bapp%5D='+appID+'&sort=-uploadedDate&limit=1');
- version=latest.data?.[0]?.attributes?.version;
- if(!version){console.log('No uploaded builds found');process.exit(0);}
-}
 for(let attempt=0;attempt<18;attempt++){
  const result=await apple('builds?filter%5Bapp%5D='+appID+'&filter%5Bversion%5D='+version+'&limit=10');
- const build=result.data?.[0];
+ const build=result.data?.find(item=>item.attributes?.version===version);
  if(build){
   const state=build.attributes.processingState;
   console.log(JSON.stringify({buildNumber:version,buildID:build.id,processingState:state}));
