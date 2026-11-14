@@ -4,7 +4,7 @@
 export function validateVerifiedAppleCoinTransaction(transaction, expected) {
   if (!transaction || typeof transaction !== 'object' || !expected) throw new Error('invalid_transaction');
   const { bundleId, productId, environment, transactionId, originalTransactionId,
-    revocationDate, purchaseDate, signedDate, type, appAccountToken, quantity, inAppOwnershipType } = transaction;
+    revocationDate, revocationReason, isUpgraded, purchaseDate, signedDate, type, appAccountToken, quantity, inAppOwnershipType } = transaction;
   if (bundleId !== 'com.rikuto.mushiverse') throw new Error('bundle_mismatch');
   if (!['Sandbox', 'Production'].includes(environment) || environment !== expected.environment)
     throw new Error('environment_mismatch');
@@ -26,7 +26,7 @@ export function validateVerifiedAppleCoinTransaction(transaction, expected) {
     throw new Error('invalid_transaction_id');
   if (typeof originalTransactionId !== 'string' || !/^[0-9]{1,30}$/.test(originalTransactionId))
     throw new Error('invalid_original_transaction_id');
-  if (revocationDate != null) throw new Error('revoked');
+  // Fail closed on contradictory Apple revocation / upgrade indicators even if the\n  // revocation timestamp is unexpectedly absent. Neither can fund consumable coins.\n  if (revocationDate != null || revocationReason != null) throw new Error('revoked');\n  if (isUpgraded === true) throw new Error('upgraded_transaction');
   if (!Number.isSafeInteger(purchaseDate) || purchaseDate <= 0 || purchaseDate > Date.now() + 300000)
     throw new Error('invalid_purchase_date');
   // Apple signs the transaction after the purchase. Reject implausible signed
