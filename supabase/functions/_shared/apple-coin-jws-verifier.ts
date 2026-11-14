@@ -44,8 +44,14 @@ export async function verifyAppleCoinJws(signedTransaction: string, expected: {
     throw new Error("invalid_apple_root_certificates");
   const environment = expected.environment === "Sandbox" ? Environment.SANDBOX : Environment.PRODUCTION;
   const appAppleIdRaw = Deno.env.get("APPLE_IAP_APP_APPLE_ID");
-  const appAppleId = appAppleIdRaw && /^\d+$/.test(appAppleIdRaw) ? Number(appAppleIdRaw) : undefined;
-  if (expected.environment === "Production" && (!appAppleId || !Number.isSafeInteger(appAppleId)))
+  // Never silently ignore a malformed configured Apple app ID, even in Sandbox.
+  // Number conversion must not round a large decimal into a different app ID.
+  if (appAppleIdRaw != null &&
+      (!/^[1-9]\\d*$/.test(appAppleIdRaw) ||
+       !Number.isSafeInteger(Number(appAppleIdRaw))))
+    throw new Error("invalid_apple_app_id");
+  const appAppleId = appAppleIdRaw == null ? undefined : Number(appAppleIdRaw);
+  if (expected.environment === "Production" && appAppleId === undefined)
     throw new Error("apple_app_id_not_configured");
 
   // The Apple library validates the JWS signature, certificate chain, certificate
