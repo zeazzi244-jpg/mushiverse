@@ -678,3 +678,37 @@ body[data-screen="profile"] .wrap > header { display: none; }
 #profile #mv86ProfileEditor :is(input,textarea,select):disabled{
   -webkit-text-fill-color:#354d3f;
 }
+
+
+/* V31: iPhone Safari may size replaced elements by intrinsic width even in
+   narrow grid tracks. Limit artwork by both axes and keep action rows usable. */
+#gacha :is(.gacha-card,.gacha-result) :is(img,video){
+  box-sizing:border-box;
+  max-width:100%;
+  max-height:48vh;
+  max-height:48dvh;
+  object-fit:contain;
+}
+#gacha :is(.gacha-controls,.gacha-actions){
+  box-sizing:border-box;
+  width:100%;
+  flex-wrap:wrap;
+}
+#gacha :is(.gacha-controls,.gacha-actions) :is(button,[role="button"]){
+  min-width:0;
+  flex-shrink:1;
+}
+/* A busy draw must remain visually distinct on a dark button, and its spinner
+   should not disappear when the system requests increased contrast. */
+@media(prefers-contrast:more){
+  #gacha :is(button,[role="button"])[aria-busy="true"]:not(:disabled){
+    outline:2px solid currentColor;
+    outline-offset:2px;
+  }
+}
+@media(max-height:480px) and (orientation:landscape){
+  #gacha :is(.gacha-card,.gacha-result) :is(img,video){
+    max-height:32vh;
+    max-height:32dvh;
+  }
+}
