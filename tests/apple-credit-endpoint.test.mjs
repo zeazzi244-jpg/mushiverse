@@ -18,7 +18,7 @@ function harness({user = {id:'user-a'}, configured = true} = {}) {
   };
   const client = {
     auth:{getUser:async()=>{calls.getUser++; return {data:{user},error:null}}},
-    from:()=>({select:()=>({eq:()=>({limit:async()=>({data:[{user_id:user.id,transaction_id:"123456",original_transaction_id:"123456",product_id:"mushiverse.coins.100"}]})})})}),
+    from:()=>({select:()=>({eq:()=>({limit:async()=>({data:[{user_id:user.id,transaction_id:"123456",original_transaction_id:"123456",product_id:"mushiverse.coins.100",status:"pending"}]})})})}),
     rpc:()=>{calls.rpc++; throw new Error('Coin credit RPC must never run before verification')}
   };
   const createClient = ()=>{calls.client++; return client};
