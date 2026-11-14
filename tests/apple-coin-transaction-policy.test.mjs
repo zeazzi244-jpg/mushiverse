@@ -25,6 +25,9 @@ for (const [name, change, match] of [
   ['subscription', {type:'Auto-Renewable Subscription'}, /type_mismatch/],
   ['revoked', {revocationDate:1730000000001}, /revoked/],
   ['future purchase', {purchaseDate:Date.now()+86400000}, /invalid_purchase_date/],
+  ['signed before purchase', {signedDate:base.purchaseDate-1}, /invalid_signed_date/],
+  ['future signed date', {signedDate:Date.now()+86400000}, /invalid_signed_date/],
+  ['invalid signed date', {signedDate:'not-a-date'}, /invalid_signed_date/],
   ['missing transaction', {transactionId:''}, /invalid_transaction_id/],
   ['wrong original transaction', {originalTransactionId:'999999'}, /original_transaction_mismatch/],
 ]) test('rejects '+name, () => assert.throws(() => validate({...base,...change},expected), match));
@@ -41,4 +44,8 @@ test('binds signed transaction to trusted app account token when required', () =
 
 test('refuses a purchase if the trusted account binding is missing', () => {
   assert.throws(() => validate(base, {...expected, appAccountToken:undefined}), /app_account_token_mismatch/);
+});
+
+test('accepts a plausible Apple signed timestamp', () => {
+  assert.equal(validate({...base, signedDate:base.purchaseDate+1000}, expected).coins, 100);
 });
