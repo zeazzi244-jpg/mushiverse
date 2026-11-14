@@ -645,3 +645,35 @@ body[data-screen="profile"] .wrap > header { display: none; }
 @media(max-height:480px) and (orientation:landscape){
   #gacha{padding-bottom:calc(2rem + env(safe-area-inset-bottom,0px));}
 }
+
+/* Keep large gacha artwork from pushing the draw controls several screens
+   below the fold on short iPhone viewports. Do not constrain tiny badges. */
+#gacha :is(.gacha-card,.gacha-result) :is(img,video){
+  max-height:70vh;
+  max-height:70dvh;
+  width:auto;
+  object-fit:contain;
+}
+@media(max-height:480px) and (orientation:landscape){
+  #gacha :is(.gacha-card,.gacha-result) :is(img,video){
+    max-height:45vh;
+    max-height:45dvh;
+  }
+}
+/* Keep the profile editor readable when Safari inherits a dark color scheme
+   from the surrounding forest card. Native select fields and placeholders
+   need explicit foregrounds, not only the input/textarea backgrounds. */
+#profile #mv86ProfileEditor :is(input,textarea,select){
+  color-scheme:light;
+  background-color:#fff;
+  color:#173d2f;
+  -webkit-text-fill-color:#173d2f;
+  caret-color:#173d2f;
+}
+#profile #mv86ProfileEditor :is(input,textarea)::placeholder{
+  color:#52675a;
+  opacity:1;
+}
+#profile #mv86ProfileEditor :is(input,textarea,select):disabled{
+  -webkit-text-fill-color:#354d3f;
+}
