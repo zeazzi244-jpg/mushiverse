@@ -25,6 +25,15 @@ export async function verifyAppleCoinJws(signedTransaction: string, expected: {
     throw new Error("invalid_signed_transaction");
   if (!expected || !["Sandbox", "Production"].includes(expected.environment))
     throw new Error("invalid_expected_environment");
+  // Validate server-derived claim fields before network-backed certificate checks.
+  // A malformed or unsupported claim must never reach Apple verification.
+  if (!["mushiverse.coins.100", "mushiverse.coins.500", "mushiverse.coins.1200"].includes(expected.productId))
+    throw new Error("invalid_expected_product");
+  if (!/^\d{6,30}$/.test(expected.transactionId) ||
+      !/^\d{6,30}$/.test(expected.originalTransactionId))
+    throw new Error("invalid_expected_transaction_id");
+  if (!/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(expected.appAccountToken))
+    throw new Error("invalid_expected_account_token");
   // No caller may opt into live fulfillment merely by passing "Production".
   // Keep production verification unavailable until an independently audited
   // release explicitly enables it after end-to-end Sandbox purchase proof.
