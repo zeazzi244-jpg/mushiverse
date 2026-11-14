@@ -27,7 +27,8 @@ Deno.serve(async (request: Request) => {
     if (!body || typeof body !== "object" || Array.isArray(body)) return json({ error: "invalid_body" }, 400);
     const { transaction_id, signed_transaction } = body;
     if (typeof transaction_id !== "string" || !idPattern.test(transaction_id) ||
-        typeof signed_transaction !== "string" || signed_transaction.length > 32768)
+        typeof signed_transaction !== "string" || signed_transaction.length > 16384 ||
+        !/^[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+$/.test(signed_transaction))
       return json({ error: "invalid_transaction" }, 400);
     const admin = createClient(url, service);
     const { data: claims, error: claimError } = await admin.from("apple_purchase_claims")
