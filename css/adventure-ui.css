@@ -596,11 +596,25 @@ body[data-screen="profile"] .wrap > header { display: none; }
 /* Keep the last gacha controls clear of the iPhone home indicator in the
    native WebView. This space is inside the scrollable tab, not an overlay. */
 #gacha {
-  padding-bottom: max(1.5rem, env(safe-area-inset-bottom, 0px));
+  /* Reserve a full tap-target gap ABOVE the system gesture area, rather
+     than choosing whichever of the two paddings is larger. */
+  padding-bottom: calc(1.5rem + env(safe-area-inset-bottom, 0px));
   min-width: 0;
 }
 /* Long localized draw labels and card names must not force horizontal scrolling. */
 #gacha :is(button,[role="button"],[data-rarity]) {
   max-width: 100%;
   overflow-wrap: anywhere;
+}
+
+/* Keep draw feedback and rarity captions visible when iOS increases text size.
+   Do not let flex children force the gacha panel wider than the viewport. */
+#gacha :is(.gacha-card,.gacha-result,.gacha-controls,.gacha-actions) {
+  min-width:0;
+  max-width:100%;
+}
+#gacha :is(button,[role="button"]) {
+  white-space:normal;
+  overflow-wrap:anywhere;
+  line-height:1.35;
 }
