@@ -486,3 +486,22 @@ body[data-screen="profile"] .wrap > header { display: none; }
 #profile #mv86RecentPosts img { width: 3rem; height: 3rem; object-fit: cover; border-radius: .5rem; }
 #profile #mv86RecentPosts small { margin-inline-start: auto; color: #def3e4; }
 #profile #mv86ProfileEditor input[type="checkbox"] { min-height: auto; }
+
+/* Profile photo cards must remain usable on narrow iPhones. Long post text
+   previously forced the flex row wider than the viewport. */
+#profile #mv86RecentPosts article { min-width:0; max-width:100%; overflow-wrap:anywhere; }
+#profile #mv86RecentPosts article > :not(img) { min-width:0; }
+#profile #mv86RecentPosts article img { flex:0 0 3rem; }
+#profile #mv86RecentPosts article small { flex-shrink:0; }
+#profile :is(#mv86CoverButton,#mv86ProfileEdit,#mv86CancelProfile):focus-visible {
+  outline:3px solid #e5bd64;
+  outline-offset:3px;
+}
+#profile #mv86ProfileEditor :is(input,textarea):focus-visible {
+  outline:3px solid #946516;
+  outline-offset:2px;
+}
+@media(max-width:360px) {
+  #profile #mv86RecentPosts article { flex-wrap:wrap; }
+  #profile #mv86RecentPosts article small { margin-inline-start:0; }
+}
