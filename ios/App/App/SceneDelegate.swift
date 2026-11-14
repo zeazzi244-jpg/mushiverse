@@ -5,7 +5,7 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
     var window: UIWindow?
     private var launchOverlay: UIView?
     private var launchOverlayDismissal: DispatchWorkItem?
-    private static let launchLogoDuration: TimeInterval = 1.8
+    private static let launchLogoDuration: TimeInterval = 3.0
     private static let launchFadeDuration: TimeInterval = 0.18
 
     func scene(_ scene: UIScene, willConnectTo session: UISceneSession, options connectionOptions: UIScene.ConnectionOptions) {
@@ -47,7 +47,7 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         }
         launchOverlayDismissal = dismissal
         DispatchQueue.main.asyncAfter(
-            deadline: .now() + Self.launchLogoDuration - fadeDuration,
+            deadline: .now() + Self.launchLogoDuration,
             execute: dismissal
         )
     }
