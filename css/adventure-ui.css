@@ -618,3 +618,19 @@ body[data-screen="profile"] .wrap > header { display: none; }
   overflow-wrap:anywhere;
   line-height:1.35;
 }
+
+/* Gacha artwork and result media must scale down inside narrow iPhone WebViews.
+   An intrinsic-width image/video/canvas otherwise overflows even when its card
+   has max-width:100%, hiding the draw action off the right edge. */
+#gacha :is(img,video,canvas,svg){
+  max-width:100%;
+  height:auto;
+}
+#gacha :is(.gacha-card,.gacha-result,.gacha-controls,.gacha-actions) > *{
+  min-width:0;
+}
+/* Keep the last result legible in short landscape viewports without clipping
+   the final action against the system gesture area. */
+@media(max-height:480px) and (orientation:landscape){
+  #gacha{padding-bottom:calc(2rem + env(safe-area-inset-bottom,0px));}
+}
