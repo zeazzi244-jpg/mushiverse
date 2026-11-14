@@ -24,11 +24,11 @@ function harness({user = {id:'user-a'}, configured = true} = {}) {
   const createClient = ()=>{calls.client++; return client};
   new Function('Deno','createClient','Response','verifyAppleCoinJws',source)(deno,createClient,Response,async()=>{calls.verifier++;throw Error('invalid signature')});
   assert.equal(typeof handler,'function');
-  const send = async (method='POST', bearer='Bearer valid-token')=>{
+  const send = async (method='POST', bearer='Bearer valid-token', signedTransaction='fake.payload.signature')=>{
     const headers = bearer?{Authorization:bearer}:undefined;
     const response = await handler(new Request('https://example.invalid/credit',{
       method,headers,
-      ...(method==='POST'?{body:JSON.stringify({transaction_id:'123456',signed_transaction:'fake-jws'})}:{})
+      ...(method==='POST'?{body:JSON.stringify({transaction_id:'123456',signed_transaction:signedTransaction})}:{})
     }));
     return {status:response.status,body:await response.json(),headers:response.headers};
   };
@@ -48,6 +48,15 @@ test('credit endpoint rejects invalid methods without touching a wallet',async()
   const h=harness();
   const result=await h.send('GET');
   assert.equal(result.status,405);
+  assert.equal(h.calls.rpc,0);
+});
+
+test('credit endpoint rejects malformed JWS before calling the verifier or wallet',async()=>{
+  const h=harness();
+  const result=await h.send('POST','Bearer valid-token','fake-jws');
+  assert.equal(result.status,400);
+  assert.equal(result.body.error,'invalid_transaction');
+  assert.equal(h.calls.verifier,0);
   assert.equal(h.calls.rpc,0);
 });
 

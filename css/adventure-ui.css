@@ -571,3 +571,24 @@ body[data-screen="profile"] .wrap > header { display: none; }
 }
 #profile #mv86Avatar { height:6rem; }
 #profile #mv86RecentPosts article img { height:3rem; }
+
+#profile #mvFirstSteps {
+  padding: .9rem;
+  margin: 0 0 1rem;
+  color: #def3e4;
+  background: #173d2f;
+  border: 1px solid #6a967b;
+  border-radius: .875rem;
+}
+#profile #mvFirstSteps h3 { margin: 0; color: #f4fff7; }
+#profile #mvFirstSteps p { margin: .4rem 0 .8rem; }
+#profile .mvFirstStepActions { display: flex; flex-wrap: wrap; gap: .5rem; }
+#profile .mvFirstStepActions button,
+#profile #mv86RecentPosts > button {
+  min-height: 44px;
+  white-space: normal;
+}
+#profile #mvFirstSteps button.outline { color: #173d2f; background: #f3fff7; }
+#profile #authArea { scroll-margin-block: 8rem; }
+
+#post #mvPostSignIn:not([hidden]) { display:block; min-height:44px; margin-top:.6rem; }
