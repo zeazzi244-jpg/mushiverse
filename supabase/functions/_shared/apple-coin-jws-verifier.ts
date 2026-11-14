@@ -47,7 +47,7 @@ export async function verifyAppleCoinJws(signedTransaction: string, expected: {
   // Never silently ignore a malformed configured Apple app ID, even in Sandbox.
   // Number conversion must not round a large decimal into a different app ID.
   if (appAppleIdRaw != null &&
-      (!/^[1-9]\\d*$/.test(appAppleIdRaw) ||
+      (!/^[1-9]\d*$/.test(appAppleIdRaw) ||
        !Number.isSafeInteger(Number(appAppleIdRaw))))
     throw new Error("invalid_apple_app_id");
   const appAppleId = appAppleIdRaw == null ? undefined : Number(appAppleIdRaw);
