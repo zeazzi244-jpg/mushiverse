@@ -26,7 +26,11 @@ export async function verifyAppleCoinJws(signedTransaction: string, expected: {
 
   const bundleId = Deno.env.get("APPLE_IAP_BUNDLE_ID");
   const roots = Deno.env.get("APPLE_IAP_ROOT_CERTS_DER_BASE64");
-  if (!bundleId || !roots) throw new Error("apple_verification_not_configured");
+  // Never let a misconfigured deployment trust a different App Store app.
+  // SignedDataVerifier checks the JWS against this ID, but the ID itself must
+  // also be pinned server-side to MUSHIVERSE's immutable iOS bundle identity.
+  if (bundleId !== "com.rikuto.mushiverse" || !roots)
+    throw new Error("apple_verification_not_configured");
   const certificates = roots.split(",").map(v => decodeDer(v.trim()));
   if (certificates.length < 1 || certificates.length > 5)
     throw new Error("invalid_apple_root_certificates");
