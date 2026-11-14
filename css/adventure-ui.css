@@ -592,3 +592,15 @@ body[data-screen="profile"] .wrap > header { display: none; }
 #profile #authArea { scroll-margin-block: 8rem; }
 
 #post #mvPostSignIn:not([hidden]) { display:block; min-height:44px; margin-top:.6rem; }
+
+/* Keep the last gacha controls clear of the iPhone home indicator in the
+   native WebView. This space is inside the scrollable tab, not an overlay. */
+#gacha {
+  padding-bottom: max(1.5rem, env(safe-area-inset-bottom, 0px));
+  min-width: 0;
+}
+/* Long localized draw labels and card names must not force horizontal scrolling. */
+#gacha :is(button,[role="button"],[data-rarity]) {
+  max-width: 100%;
+  overflow-wrap: anywhere;
+}
