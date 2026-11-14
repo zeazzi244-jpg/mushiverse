@@ -214,6 +214,34 @@ for (const folder of publicFolders) {
   if (existsSync(directory)) validateBundledCss(directory);
 }
 
+// Dynamically loaded scripts may not appear in index.html's src attributes.
+// Parse every bundled JavaScript file so a broken lazy-loaded tab cannot ship
+// as a seemingly healthy offline iOS build.
+function validateBundledScripts(directory) {
+  for (const name of readdirSync(directory)) {
+    const file = join(directory, name);
+    const info = lstatSync(file);
+    if (info.isDirectory()) {
+      validateBundledScripts(file);
+      continue;
+    }
+    if (!info.isFile() || !['.js', '.mjs'].includes(extname(name).toLowerCase())) continue;
+    if (!readFileSync(file).length) {
+      throw new Error('Release bundle has empty JavaScript asset: ' + file.slice(staging.length + 1));
+    }
+    const syntax = spawnSync(process.execPath, ['--check', file], {
+      encoding: 'utf8',
+      maxBuffer: 1024 * 1024
+    });
+    if (syntax.error || syntax.status !== 0) {
+      throw new Error('Release bundle has invalid JavaScript asset: ' +
+        file.slice(staging.length + 1) + '\\n' +
+        (syntax.stderr || syntax.error?.message || 'syntax check failed'));
+    }
+  }
+}
+validateBundledScripts(staging);
+
 // Reject truncated HTML before it reaches an iOS WebView. A partially written
 // entry point can pass basic <body>/<script> presence checks yet render blank.
 if (!/<\/body\s*>/i.test(html) || !/<\/html\s*>/i.test(html)) {
