@@ -622,9 +622,20 @@ body[data-screen="profile"] .wrap > header { display: none; }
 /* Gacha artwork and result media must scale down inside narrow iPhone WebViews.
    An intrinsic-width image/video/canvas otherwise overflows even when its card
    has max-width:100%, hiding the draw action off the right edge. */
-#gacha :is(img,video,canvas,svg){
+#gacha :is(img,video,canvas){
+  display:block;
   max-width:100%;
   height:auto;
+  object-fit:contain;
+}
+/* SVG rarity badges and inline icons use their own intrinsic height. Forcing
+   height:auto on every SVG can stretch or collapse icons in the iOS WebView. */
+#gacha svg{max-width:100%;}
+/* Flex and grid result media can otherwise retain their intrinsic minimum
+   width and push the draw button beyond the viewport. */
+#gacha :is(.gacha-card,.gacha-result,.gacha-controls,.gacha-actions) :is(img,video,canvas){
+  min-width:0;
+  min-height:0;
 }
 #gacha :is(.gacha-card,.gacha-result,.gacha-controls,.gacha-actions) > *{
   min-width:0;
