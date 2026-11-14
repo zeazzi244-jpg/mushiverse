@@ -457,7 +457,20 @@ body[data-screen="profile"] .wrap > header { display: none; }
   color: #173d2f;
   font-weight: 750;
 }
-#profile .mvProfileIdentity { margin-top: 1.25rem; }
+/* Keep the avatar visually attached to the cover while preserving the cover
+   action buttons and the profile text in normal document flow. */
+#profile .mvProfileIdentity {
+  position:relative;
+  z-index:1;
+  margin-top:-3.25rem;
+  padding-inline:1rem;
+}
+#profile #mv86Cover { padding-bottom:3.75rem; }
+#profile #mv86ProfileBody { min-width:0; }
+#profile #mv86RecentPosts article > :not(img) { overflow-wrap:anywhere; }
+@media(max-width:360px){
+  #profile .mvProfileIdentity { margin-top:-2.5rem; }
+}
 #profile #mv86Avatar {
   display: block;
   position: static;
