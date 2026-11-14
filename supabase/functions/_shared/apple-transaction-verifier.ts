@@ -38,10 +38,10 @@ export async function verifyAppleTransaction(
     appAppleId?: number;
   },
 ): Promise<VerifiedAppleTransaction> {
-  if (!/^[A-Za-z0-9_-]+\\.[A-Za-z0-9_-]+\\.[A-Za-z0-9_-]+$/.test(signedTransaction) ||
+  if (!/^[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+$/.test(signedTransaction) ||
       signedTransaction.length > 16384) throw new Error("invalid_signed_transaction");
   if (!PRODUCTS.has(expectedProductId)) throw new Error("unknown_product");
-  if (!/^\\d{6,30}$/.test(expectedTransactionId)) throw new Error("invalid_transaction_id");
+  if (!/^\d{6,30}$/.test(expectedTransactionId)) throw new Error("invalid_transaction_id");
   if (!config.rootCertificates.length || config.rootCertificates.some(c => c.length < 500))
     throw new Error("apple_roots_not_configured");
   if (config.bundleId !== "com.rikuto.mushiverse") throw new Error("bundle_mismatch");
