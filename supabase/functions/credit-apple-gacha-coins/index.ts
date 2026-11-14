@@ -32,7 +32,7 @@ Deno.serve(async (request: Request) => {
       return json({ error: "invalid_transaction" }, 400);
     const admin = createClient(url, service);
     const { data: claims, error: claimError } = await admin.from("apple_purchase_claims")
-      .select("user_id,transaction_id,original_transaction_id,product_id,status")
+      .select("user_id,transaction_id,original_transaction_id,product_id,status,environment")
       .eq("transaction_id", transaction_id).limit(2);
     if (claimError) return json({ error: "unavailable" }, 503);
     if (!claims || claims.length !== 1 || claims[0].user_id !== user.id)
@@ -41,6 +41,8 @@ Deno.serve(async (request: Request) => {
     // A rejected or already-finalized claim must not be revalidated through the
     // staging endpoint. Only pending claims are eligible for Sandbox proof.
     // Fulfillment remains disabled regardless of verification outcome.
+    if (claim.environment !== "Sandbox")
+      return json({ error: "claim_environment_not_sandbox", credited_or_previously_credited: false }, 409);
     if (claim.status !== "pending")
       return json({ error: "claim_not_pending", credited_or_previously_credited: false }, 409);
     if (!["mushiverse.coins.100", "mushiverse.coins.500", "mushiverse.coins.1200"].includes(claim.product_id))
