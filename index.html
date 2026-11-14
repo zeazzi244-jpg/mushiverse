@@ -2120,7 +2120,7 @@ let backendSync=null,authSubscribed=false,authRevision=0;
 function applyStartupUser(next){
   const changed=user?.id!==next?.id||typeof window.user==='undefined';
   user=next;window.user=user;
-  if(changed){syncedBillingPlan=null;authUI()}
+  if(changed){syncedBillingPlan=null;authUI();document.dispatchEvent(new Event('mushiverse:profile-account'))}
 }
 function syncStartupBackend(){
   if(!db||!navigator.onLine||backendSync)return backendSync;
@@ -4027,7 +4027,7 @@ function ensure(){const profile=el('profile');if(!profile)return;let panel=el('m
 function render(){if(!ensure())return;const key=userKey();if(key!==lastUserKey||!state){lastUserKey=key;state=read()}const day=currentDay(),claimed=state.lastClaim===today();el('mv77Coins').innerHTML='<span class="mv118CoinRow">'+(document.querySelector('.mv117CoinIcon')?.outerHTML||'●')+'<span>'+Math.max(0,Math.floor(Number(state.coins)||0)).toLocaleString('ja-JP')+' コイン</span></span>';el('mv77Tickets').textContent='🎟️ '+state.tickets+' 枚';el('mv77Streak').textContent='🔥 '+state.streak+' 日目';el('mv77Days').innerHTML=Array.from({length:7},(_,i)=>`<div class="mv77Day ${day===i+1?'isCurrent':''}">DAY ${i+1}<strong>${i===2?'🎟️ 1枚':i===5?'🎟️ 2枚':i===6?'🎟️ 1枚':('<span class="mv118CoinRow">'+(document.querySelector('.mv117CoinIcon')?.outerHTML||'●')+'<span>'+REWARDS[i]+'</span></span>')}</strong></div>`).join('');el('mv77Claim').disabled=claimed||working;el('mv77Claim').textContent=claimed?'✓ 本日は受取済み':'🎁 今日のボーナスを受け取る';el('mv77Draw').disabled=working||(state.coins<COST&&state.tickets<1);el('mv77Ten').disabled=working||state.coins<450;for(const id of ['mv77Draw','mv77Ten'])el(id).setAttribute('aria-busy',String(working));el('mv77Count').textContent='('+state.cards.length+'枚)';const unique=new Set(state.cards.map(c=>c.name));const progress=el('mv79Progress');if(progress)progress.textContent='収集 '+unique.size+' / '+INSECTS.length+' 種類 · '+Math.round(unique.size/INSECTS.length*100)+'%';const catalogue=el('mv81Catalogue');if(catalogue){const owned=new Set(state.cards.map(c=>c.name));catalogue.replaceChildren(...INSECTS.map(([name,rarity],i)=>{const tile=document.createElement('div');tile.className='mv81Tile mv123Tier-'+rarity+' '+(owned.has(name)?'mv81Owned':'mv81Locked');const num=document.createElement('small');num.textContent=String(i+1).padStart(3,'0');const symbol=document.createElement('span');symbol.textContent=owned.has(name)?(name.includes('チョウ')?'🦋':name.includes('トンボ')?'🪰':name.includes('テントウ')?'🐞':'🪲'):'❔';const label=document.createElement('strong');label.textContent=owned.has(name)?name:'？？？';const tier=document.createElement('small');tier.textContent=rarity;tile.append(num,symbol,label,tier);if(owned.has(name)){tile.setAttribute('role','button');tile.tabIndex=0;tile.addEventListener('click',()=>openCardDetail(name));tile.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();openCardDetail(name)}})}return tile}))}const counts={};for(const card of state.cards){const name=String(card.name||'');counts[name]=(counts[name]||0)+1}el('mv77Cards').replaceChildren(...Object.entries(counts).slice(-30).reverse().map(([name,n])=>{const item=document.createElement('div');item.className='mv77Card mv78Collectible';const sample=state.cards.find(c=>c.name===name);const rarity=['N','R','SR','SSR'].includes(sample?.rarity)?sample.rarity:'N';item.classList.add('mv123Tier-'+rarity);const emoji=name.includes('チョウ')?'🦋':name.includes('テントウ')?'🐞':'🪲';const art=document.createElement('div');art.className='mv78Art';if(name==='モンシロチョウ'){art.innerHTML='<svg viewBox="0 0 120 100" width="94" height="80" role="img" aria-label="白い翅のモンシロチョウのイラスト"><g fill="#fffdf4" stroke="#596b59" stroke-width="2.5"><path d="M59 49 C43 2 5 9 13 39 C16 53 41 57 59 54Z"/><path d="M61 49 C77 2 115 9 107 39 C104 53 79 57 61 54Z"/><path d="M58 54 C23 43 17 84 45 86 C55 84 59 68 60 57Z"/><path d="M62 54 C97 43 103 84 75 86 C65 84 61 68 60 57Z"/></g><g fill="#414a40"><ellipse cx="60" cy="54" rx="3.8" ry="22"/><circle cx="60" cy="31" r="4"/><circle cx="31" cy="31" r="5"/><circle cx="89" cy="31" r="5"/></g><path d="M59 30 Q48 12 44 16 M61 30 Q72 12 76 16" fill="none" stroke="#414a40" stroke-width="2"/></svg>';}else{art.textContent=emoji;}const title=document.createElement('strong');title.textContent=name;const meta=document.createElement('span');meta.className='mv78Rarity mv78'+rarity;meta.textContent=rarity+' · '+n+'枚';item.classList.add('mv78Tier'+rarity);item.setAttribute('role','button');item.setAttribute('tabindex','0');item.setAttribute('aria-label',name+'の詳細を見る');item.addEventListener('click',()=>openCardDetail(name));item.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();openCardDetail(name)}});item.append(art,title,meta);return item}));if(!state.cards.length)el('mv77Cards').textContent='まだカードがありません。';const history=el('mv78History');if(history){history.replaceChildren(...state.history.slice(-5).reverse().map(h=>{const row=document.createElement('div');row.className='mv78HistoryRow';const date=document.createElement('small');const d=new Date(h.at);date.textContent=Number.isNaN(d.getTime())?'ガチャ履歴':d.toLocaleString('ja-JP');const result=document.createElement('span');result.textContent=Array.isArray(h.results)?h.results.join(' / '):'';row.append(date,result);return row}));if(!state.history.length)history.textContent='まだガチャ履歴はありません。'}}
 function claim(){if(working)return;working=true;try{render();if(state.lastClaim===today()){message('今日はすでに受け取り済みです。');return}const before=JSON.parse(JSON.stringify(state));const day=currentDay();if(day===3)state.tickets+=1;else if(day===6)state.tickets+=2;else if(day===7)state.tickets+=1;else state.coins+=REWARDS[day-1];state.streak=day;state.lastClaim=today();if(!save()){state=before;return}message('DAY '+day+' のログインボーナスを受け取りました！'+(day===7?'（通常券1枚）':''))}finally{working=false;render()}}
 function pick(){const roll=Math.floor(Math.random()*1000);const rarity=roll<1?'SSR':roll<20?'SR':roll<200?'R':'N';const pool=INSECTS.filter(x=>x[1]===rarity);const entry=pool[Math.floor(Math.random()*pool.length)];return {name:entry[0],rarity:entry[1],at:new Date().toISOString()}}
-function draw(n){if(working)return;working=true;try{render();const before=JSON.parse(JSON.stringify(state));const cost=n===10?450:COST;if(n===1&&state.tickets>0){state.tickets--}else if(state.coins>=cost){state.coins-=cost}else{message('コインまたはチケットが足りません。');return}const got=Array.from({length:n},pick);state.cards.push(...got);state.cards=state.cards.slice(-300);state.history.push({at:new Date().toISOString(),results:got.map(x=>x.rarity+':'+x.name)});state.history=state.history.slice(-50);if(!save()){state=before;render();return}render();document.dispatchEvent(new CustomEvent('mushiverse:gacha-drawn',{detail:{count:n}}));showGachaReveal(got);message('🎉 '+got.map(x=>'['+x.rarity+'] '+x.name).join(' / '))}finally{working=false;render()}}
+function draw(n){if(working||document.getElementById('mv88Reveal'))return;working=true;try{render();const before=JSON.parse(JSON.stringify(state));const cost=n===10?450:COST;if(n===1&&state.tickets>0){state.tickets--}else if(state.coins>=cost){state.coins-=cost}else{message('コインまたはチケットが足りません。');return}const got=Array.from({length:n},pick);state.cards.push(...got);state.cards=state.cards.slice(-300);state.history.push({at:new Date().toISOString(),results:got.map(x=>x.rarity+':'+x.name)});state.history=state.history.slice(-50);if(!save()){state=before;render();return}render();document.dispatchEvent(new CustomEvent('mushiverse:gacha-drawn',{detail:{count:n}}));document.dispatchEvent(new Event('mushiverse:gacha-audio-start'));showGachaReveal(got);message('🎉 '+got.map(x=>'['+x.rarity+'] '+x.name).join(' / '))}finally{working=false;render()}}
 function showGachaReveal(got){
  const rank={N:0,R:1,SR:2,SSR:3};const top=got.reduce((a,c)=>rank[c.rarity]>rank[a]?c.rarity:a,'N');
  if(typeof window.mvCloseGachaReveal==='function')window.mvCloseGachaReveal();else document.getElementById('mv88Reveal')?.remove();
@@ -4058,7 +4058,7 @@ function showGachaReveal(got){
  :[['カプセル起動','🪲'],['光の判定','✦'],['新たな発見！','🦋']];
  const duration=reduced?0:top==='SSR'?10500:top==='SR'?8500:got.length===10?7200:6500;
  let phaseIndex=0;
- const updatePhase=()=>{const p=phases[phaseIndex];phase.textContent='第'+(phaseIndex+1)+'段階 · '+p[0];stage.querySelector('.mv88Capsule').textContent=p[1];overlay.dataset.phase=String(phaseIndex+1);awakeningLabel.textContent=awakening&&phaseIndex===2?'逆転覚醒 · 虹色の羽化！':'';if(awakening&&phaseIndex===2)overlay.classList.add('mvAwakeningBurst')};
+ const updatePhase=()=>{const p=phases[phaseIndex];phase.textContent='第'+(phaseIndex+1)+'段階 · '+p[0];stage.querySelector('.mv88Capsule').textContent=p[1];overlay.dataset.phase=String(phaseIndex+1);if(!reduced)document.dispatchEvent(new CustomEvent('mushiverse:gacha-audio-phase',{detail:phaseIndex}));awakeningLabel.textContent=awakening&&phaseIndex===2?'逆転覚醒 · 虹色の羽化！':'';if(awakening&&phaseIndex===2)overlay.classList.add('mvAwakeningBurst')};
  updatePhase();
  if(!reduced)phaseTimer=setInterval(()=>{phaseIndex=Math.min(phaseIndex+1,2);updatePhase();if(phaseIndex===2)clearInterval(phaseTimer)},duration/4);
  if(reduced)reveal();else timer=setTimeout(reveal,duration);btn.focus();
@@ -4121,17 +4121,22 @@ document.addEventListener('visibilitychange',()=>{if(document.hidden)stop()});
 <script id="mv86Script">
 (function(){'use strict';
 const $=id=>document.getElementById(id);
-const key='mushiverse-profile-v86';
-function load(){try{return JSON.parse(localStorage.getItem(key)||'{}')||{}}catch{return {}}}
-function save(p){try{localStorage.setItem(key,JSON.stringify(p));return true}catch{return false}}
+const legacyKey='mushiverse-profile-v86';
+function profileKey(){return legacyKey+':'+(window.user?.id?'user:'+window.user.id:'guest')}
+function load(key=profileKey()){
+ try{const value=JSON.parse(localStorage.getItem(key)||'null');return value&&typeof value==='object'&&!Array.isArray(value)?value:{}}
+ catch{return {}}
+}
+function save(key,profile){try{localStorage.setItem(key,JSON.stringify(profile));return true}catch{return false}}
 function initProfile(){
  const root=$('profile');if(!root||$('mv86ProfileCard'))return;
  const card=document.createElement('section');card.id='mv86ProfileCard';
- card.innerHTML='<div id="mv86Cover"><div class="mvProfileActions"><button type="button" id="mv86ProfileEdit" aria-expanded="false" aria-controls="mv86ProfileEditor">プロフィール編集</button><button id="mv86CoverButton" type="button">背景を変更</button></div><div class="mvProfileIdentity"><img id="mv86Avatar" alt="プロフィール画像"><h2 id="mv86Name">昆虫採集家</h2></div></div><div id="mv86ProfileBody"><p id="mv86Bio"></p><div id="mv86Stats"><div><b id="mv86Posts">0</b><small>採集記録</small></div><div><b id="mv109Followers">0</b><small>フォロワー</small></div></div><div id="mv86ProfileEditor" hidden><label>表示名<input id="mv86EditName" type="text" maxlength="30" placeholder="表示名"></label><label>自己紹介<textarea id="mv86EditBio" rows="3" maxlength="160" placeholder="好きな昆虫や採集のこと"></textarea></label><label>プロフィール写真<input id="mv86AvatarFile" type="file" accept="image/*"></label><label>カバー写真<input id="mv86CoverFile" type="file" accept="image/*"></label><button type="button" id="mv86SaveProfile" class="btn">保存する</button><button type="button" id="mv86CancelProfile">キャンセル</button><p id="mv86ProfileStatus" role="status"></p><p style="font-size:11px">写真とプロフィールはこの端末内に保存されます。他の利用者には公開されません。</p></div></div>';
+ card.innerHTML='<div id="mv86Cover"><div class="mvProfileActions"><button type="button" id="mv86ProfileEdit" aria-expanded="false" aria-controls="mv86ProfileEditor">プロフィール編集</button><button id="mv86CoverButton" type="button">背景を変更</button></div><div class="mvProfileIdentity"><img id="mv86Avatar" alt="プロフィール画像"><h2 id="mv86Name">昆虫採集家</h2></div></div><div id="mv86ProfileBody"><p id="mv86Bio"></p><div id="mv86Stats"><div><b id="mv86Posts">0</b><small>採集記録</small></div><div><b id="mv109Followers">0</b><small>フォロワー</small></div><div><b id="mv86Following">0</b><small>フォロー</small></div><div><b id="mv86Species">0</b><small>発見した種類</small></div><div><b id="mv86CardRate">0%</b><small>カード収集率</small></div></div><div id="mv86ProfileEditor" hidden><label>表示名<input id="mv86EditName" type="text" maxlength="30" placeholder="表示名"></label><label>自己紹介<textarea id="mv86EditBio" rows="3" maxlength="160" placeholder="好きな昆虫や採集のこと"></textarea></label><label>プロフィール写真<input id="mv86AvatarFile" type="file" accept="image/*"></label><label><input id="mv86RemoveAvatar" type="checkbox"> プロフィール写真を削除</label><label>カバー写真<input id="mv86CoverFile" type="file" accept="image/*"></label><label><input id="mv86RemoveCover" type="checkbox"> カバー写真を削除</label><button type="button" id="mv86ImportLegacy" hidden>以前の端末プロフィールを読み込む</button><button type="button" id="mv86SaveProfile" class="btn">保存する</button><button type="button" id="mv86CancelProfile">キャンセル</button><p id="mv86ProfileStatus" role="status"></p><p style="font-size:11px">写真とプロフィールはこの端末内に保存されます。他の利用者には公開されません。</p></div><section id="mv86RecentPosts" aria-label="自分の投稿"></section></div>';
  root.prepend(card);
  const toggle=document.createElement('button');toggle.id='mv86AdvancedToggle';toggle.type='button';toggle.textContent='⚙️ 設定・その他の機能を表示';card.after(toggle);
  toggle.addEventListener('click',()=>{const on=root.classList.toggle('mv86Expanded');toggle.textContent=on?'▲ 設定・その他の機能を閉じる':'⚙️ 設定・その他の機能を表示';});
  const editor=$('mv86ProfileEditor'),edit=$('mv86ProfileEdit');
+ let editorKey,editorRevision=0,importedProfile=null;
  function paint(){
   const p=load();
   $('mv86Name').textContent=p.name||'昆虫採集家';
@@ -4142,18 +4147,27 @@ function initProfile(){
  }
  function openEditor(){
   if(editor.hidden){
-   const p=load();
+   editorKey=profileKey();importedProfile=null;
+   const p=load(editorKey);
+   $('mv86ImportLegacy').hidden=Object.keys(load(legacyKey)).length===0;
    $('mv86EditName').value=p.name||'';
    $('mv86EditBio').value=p.bio||'';
    editor.hidden=false;edit.setAttribute('aria-expanded','true');
   }
  }
  function closeEditor(){
-  editor.hidden=true;edit.setAttribute('aria-expanded','false');
+  editorRevision++;editor.hidden=true;edit.setAttribute('aria-expanded','false');
   $('mv86AvatarFile').value='';$('mv86CoverFile').value='';
+  $('mv86RemoveAvatar').checked=false;$('mv86RemoveCover').checked=false;
   $('mv86ProfileStatus').textContent='';edit.focus({preventScroll:true});
  }
  paint();
+ $('mv86ImportLegacy').onclick=()=>{
+  importedProfile=load(legacyKey);
+  $('mv86EditName').value=importedProfile.name||'';
+  $('mv86EditBio').value=importedProfile.bio||'';
+  $('mv86ProfileStatus').textContent='以前の写真とプロフィールを読み込みました。保存すると反映されます。';
+ };
  edit.onclick=()=>{openEditor();$('mv86EditName').focus()};
  $('mv86CoverButton').onclick=()=>{openEditor();$('mv86CoverFile').click()};
  $('mv86CancelProfile').onclick=()=>{if(!$('mv86SaveProfile').disabled)closeEditor()};
@@ -4176,19 +4190,67 @@ function initProfile(){
  $('mv86SaveProfile').onclick=async()=>{
   const button=$('mv86SaveProfile');button.disabled=true;
   try{
-   const p=load();
+   const key=editorKey,revision=editorRevision;
+   const p={...(importedProfile||load(key))};
    p.name=$('mv86EditName').value.trim();p.bio=$('mv86EditBio').value.trim();
-   const avatar=await imageFile($('mv86AvatarFile').files[0],384);
-   const cover=await imageFile($('mv86CoverFile').files[0],1200);
+   const [avatar,cover]=await Promise.all([imageFile($('mv86AvatarFile').files[0],384),imageFile($('mv86CoverFile').files[0],1200)]);
+   if(key!==profileKey()||revision!==editorRevision)return;
    if(avatar)p.avatar=avatar;
+   else if($('mv86RemoveAvatar').checked)delete p.avatar;
    if(cover)p.cover=cover;
-   if(!save(p))throw Error('端末に保存できませんでした。空き容量を確認してください。');
+   else if($('mv86RemoveCover').checked)delete p.cover;
+   if(!save(key,p))throw Error('端末に保存できませんでした。空き容量を確認してください。');
    paint();closeEditor();window.toast?.('プロフィールを保存しました');
   }catch(e){$('mv86ProfileStatus').textContent=e.message}
   finally{button.disabled=false}
  };
- function refreshPosts(){try{const u=window.db?.auth;if(!u)return;u.getUser().then(({data})=>{const id=data?.user?.id;if(!id)return;window.db.from('insect_posts').select('id',{count:'exact',head:true}).eq('user_id',id).then(({count,error})=>{if(!error&&count!=null)$('mv86Posts').textContent=count})})}catch{}}
- refreshPosts();
+ let request=0,statsOwner;
+ async function refreshPosts(){
+  const id=window.user?.id;
+  const client=window.db;
+  const current=++request;
+  const recent=$('mv86RecentPosts');
+  if(statsOwner!==id){
+   statsOwner=id;
+   for(const key of ['mv86Posts','mv109Followers','mv86Following','mv86Species'])$(key).textContent='0';
+   recent.replaceChildren();
+  }
+  if(!id||!client||document.body.classList.contains('mv128Kids'))return;
+  try{
+   const results=await Promise.all([
+    client.from('insect_posts').select('insect_name,image_url,observed_at',{count:'exact'}).eq('user_id',id).order('created_at',{ascending:false}).limit(1000),
+    client.from('user_follows').select('follower_id',{count:'exact',head:true}).eq('followed_id',id),
+    client.from('user_follows').select('followed_id',{count:'exact',head:true}).eq('follower_id',id)
+   ]);
+   if(current!==request||id!==window.user?.id)return;
+   for(const [offset,key] of [[1,'mv109Followers'],[2,'mv86Following']]){
+    if(!results[offset].error)$(key).textContent=results[offset].count??0;
+   }
+   const posts=results[0];
+   if(posts.error||!posts.data)return;
+   $('mv86Posts').textContent=posts.count??posts.data.length;
+   const species=new Set(posts.data.map(post=>post.insect_name?.trim().toLocaleLowerCase('ja-JP')).filter(Boolean)).size;
+   $('mv86Species').textContent=(posts.count>posts.data.length?'≥':'')+species;
+   const heading=document.createElement('h3');heading.textContent='最近の投稿';
+   recent.replaceChildren(heading);
+   for(const post of posts.data.slice(0,6)){
+    const entry=document.createElement('article');
+    const name=document.createElement('b');name.textContent=post.insect_name||'名前未設定';
+    const date=document.createElement('small');date.textContent=post.observed_at||'';
+    let url;try{url=new URL(post.image_url)}catch{}
+    if(url?.protocol==='https:'){const img=document.createElement('img');img.src=url.href;img.alt='';img.loading='lazy';entry.append(img)}
+    entry.append(name,date);recent.append(entry);
+   }
+   if(!posts.data.length){const empty=document.createElement('p');empty.textContent='まだ投稿がありません。';recent.append(empty)}
+  }catch(e){console.warn('MUSHIVERSE profile refresh',e?.name||'Error')}
+ }
+ document.addEventListener('mushiverse:profile-account',()=>{
+  if(!editor.hidden)closeEditor();
+  paint();void refreshPosts();
+ });
+ document.querySelector('.nav [data-tab=profile]').addEventListener('click',refreshPosts);
+ window.addEventListener('online',refreshPosts);
+ void refreshPosts();
 }
 function initGacha(){const nav=document.querySelector('.nav button[data-tab="gacha"]');if(!nav)return;
  nav.onclick=()=>{document.body.dataset.screen='gacha';document.querySelector('.skipLink').href='#gacha';document.querySelectorAll('main > section').forEach(el=>el.classList.toggle('hide',el.id!=='gacha'));document.querySelectorAll('.nav button').forEach(el=>el.classList.toggle('active',el===nav));window.scrollTo(0,0);moveGacha();};
@@ -4242,11 +4304,18 @@ window.addEventListener('pageshow',clean);
 const species=[["ナナホシテントウ","N"],["モンシロチョウ","N"],["アブラゼミ","N"],["ミンミンゼミ","N"],["ツクツクボウシ","N"],["クマゼミ","N"],["ニイニイゼミ","N"],["ショウリョウバッタ","N"],["オンブバッタ","N"],["トノサマバッタ","N"],["エンマコオロギ","N"],["スズムシ","N"],["マツムシ","N"],["カネタタキ","N"],["オオカマキリ","N"],["ハラビロカマキリ","N"],["コカマキリ","N"],["ナミテントウ","N"],["アオスジアゲハ","N"],["キアゲハ","N"],["モンキチョウ","N"],["ヤマトシジミ","N"],["ベニシジミ","N"],["オツネントンボ","N"],["シオカラトンボ","N"],["オオシオカラトンボ","N"],["アキアカネ","N"],["ナツアカネ","N"],["コシアキトンボ","N"],["ハグロトンボ","N"],["クロアゲハ","N"],["カナブン","N"],["コガネムシ","N"],["シロテンハナムグリ","N"],["マメコガネ","N"],["ゴマダラカミキリ","N"],["アメンボ","N"],["ゲンゴロウモドキ","N"],["オケラ","N"],["クビキリギス","N"],["アゲハチョウ","R"],["カブトムシ","R"],["ミヤマカラスアゲハ","R"],["ナガサキアゲハ","R"],["ジャコウアゲハ","R"],["オオムラサキ","R"],["ルリタテハ","R"],["アサギマダラ","R"],["キタテハ","R"],["ツマグロヒョウモン","R"],["ヒオドシチョウ","R"],["ミドリヒョウモン","R"],["オニヤンマ","R"],["ギンヤンマ","R"],["ウチワヤンマ","R"],["チョウトンボ","R"],["ルリボシヤンマ","R"],["タガメ","R"],["タイコウチ","R"],["ミズカマキリ","R"],["ヤマトタマムシ","R"],["ウバタマムシ","R"],["ノコギリカミキリ","R"],["キボシカミキリ","R"],["センチコガネ","R"],["オオセンチコガネ","R"],["ミヤマクワガタ","R"],["コクワガタ","R"],["ヒラタクワガタ","R"],["アオカナブン","R"],["ノコギリクワガタ","SR"],["オオクワガタ","SR"],["ネブトクワガタ","SR"],["スジクワガタ","SR"],["アカアシクワガタ","SR"],["ヒメオオクワガタ","SR"],["オオゴマダラ","SR"],["ミカドアゲハ","SR"],["ギフチョウ","SR"],["ヒメギフチョウ","SR"],["ウスバシロチョウ","SR"],["クジャクチョウ","SR"],["コムラサキ","SR"],["ムラサキシジミ","SR"],["ミドリシジミ","SR"],["ハンミョウ","SR"],["ニワハンミョウ","SR"],["ルリボシカミキリ","SR"],["ゴマダラチョウ","SR"],["アオヤンマ","SR"],["ニジイロクワガタ","SSR"],["ヘラクレスオオカブト","SSR"],["コーカサスオオカブト","SSR"],["アトラスオオカブト","SSR"],["エレファスゾウカブト","SSR"],["ネプチューンオオカブト","SSR"],["サタンオオカブト","SSR"],["ギラファノコギリクワガタ","SSR"],["パラワンオオヒラタクワガタ","SSR"],["マンディブラリスフタマタクワガタ","SSR"]];
 const $=id=>document.getElementById(id);
 function readCards(){try{const key='mushiverse-v77-game:'+(window.user?.id?'user:'+window.user.id:'guest');const v=JSON.parse(localStorage.getItem(key)||'{}');return Array.isArray(v.cards)?v.cards:[]}catch{return []}}
+function updateProfileRate(){
+ const output=$('mv86CardRate');if(!output)return;
+ const owned=new Set(readCards().map(card=>card?.name));
+ const found=species.filter(([name])=>owned.has(name)).length;
+ output.textContent=Math.floor(found*100/species.length)+'%';
+}
+
 function emojiFor(name){return name.includes('チョウ')||(name.endsWith('ガ')&&!name.includes('クワガタ'))?'🦋':name.includes('テントウ')?'🐞':name.includes('トンボ')?'🪰':name.includes('セミ')?'🪲':name.includes('バッタ')?'🦗':name.includes('ハチ')?'🐝':name.includes('アリ')?'🐜':'🪲'}
 function detail(name,rarity,count){let d=$('mv90Dialog');if(!d){d=document.createElement('dialog');d.id='mv90Dialog';d.className='mv90Dialog';document.body.append(d);d.addEventListener('click',e=>{if(e.target===d)d.close()})}d.replaceChildren();const close=document.createElement('button');close.type='button';close.className='mv90Close';close.setAttribute('aria-label','閉じる');close.textContent='×';close.onclick=()=>d.close();const h=document.createElement('h2');h.textContent=emojiFor(name)+' '+name;const p=document.createElement('p');p.textContent='レア度：'+rarity+' ／ 所持：'+count+'枚';const note=document.createElement('p');note.textContent='これはガチャで入手したカードです。実際に野外で記録した昆虫とは別に管理されています。';d.append(close,h,p,note);if(!d.open)d.showModal();close.focus()}
 function render(){const mount=$('mv90CardList');if(!mount)return;const cards=readCards();const counts=new Map();for(const c of cards){const name=String(c?.name||'');if(!name)continue;const curr=counts.get(name)||{n:0,rarity:String(c?.rarity||'N')};curr.n++;counts.set(name,curr)}const order=species.length?species.map(([name,rarity])=>[name,rarity]):[];for(const [name,c] of counts){if(!order.some(([x])=>x===name))order.push([name,c.rarity])}const unique=counts.size;$('mv90Stats').textContent='🎴 所持 '+cards.length+'枚 ／ 収集 '+unique+' / '+(species.length||order.length)+' 種類';const filter=$('mv90Filter')?.value||'all';const items=order.filter(([name])=>filter==='all'||(filter==='owned'?counts.has(name):!counts.has(name)));mount.replaceChildren();if(!items.length){const p=document.createElement('p');p.className='mv90Empty';p.textContent=filter==='owned'?'まだ所持カードがありません。':'表示するカードがありません。';mount.append(p);return}const frag=document.createDocumentFragment();items.forEach(([name,baseTier],idx)=>{const data=counts.get(name);const owned=!!data;const rarity=owned?data.rarity:baseTier;const tile=document.createElement('button');tile.type='button';tile.className='mv90Tile '+(owned?'mv90Tier'+rarity:'mv90Unowned');tile.disabled=!owned;const num=document.createElement('span');num.className='mv90Num';num.textContent='No.'+String(species.findIndex(s=>s[0]===name)+1||idx+1).padStart(3,'0');const emoji=document.createElement('span');emoji.className='mv90Emoji';emoji.textContent=owned?emojiFor(name):'❔';const title=document.createElement('strong');title.textContent=owned?name:'？？？';const tier=document.createElement('span');tier.className='mv90Tier';tier.textContent=rarity+(owned?' · '+data.n+'枚':' · 未所持');tile.append(num,emoji,title,tier);if(owned)tile.addEventListener('click',()=>detail(name,rarity,data.n));frag.append(tile)});mount.append(frag)}
 function activate(which){const isGacha=which==='gacha';$('mv90Wild').hidden=isGacha;$('mv90Gacha').hidden=!isGacha;$('mv90WildTab').classList.toggle('mv90Active',!isGacha);$('mv90GachaTab').classList.toggle('mv90Active',isGacha);$('mv90WildTab').setAttribute('aria-selected',String(!isGacha));$('mv90GachaTab').setAttribute('aria-selected',String(isGacha));if(isGacha)render()}
-function init(){if(!$('mv90WildTab'))return;$('mv90WildTab').addEventListener('click',()=>activate('wild'));$('mv90GachaTab').addEventListener('click',()=>activate('gacha'));$('mv90Filter').addEventListener('change',render);window.addEventListener('storage',()=>{if(!$('mv90Gacha').hidden)render()});window.addEventListener('focus',()=>{if(!$('mv90Gacha').hidden)render()});document.addEventListener('visibilitychange',()=>{if(!document.hidden&&!$('mv90Gacha').hidden)render()});}
+function init(){if(!$('mv90WildTab'))return;updateProfileRate();for(const event of ['mushiverse:gacha-drawn','mushiverse:profile-account'])document.addEventListener(event,updateProfileRate);$('mv90WildTab').addEventListener('click',()=>activate('wild'));$('mv90GachaTab').addEventListener('click',()=>activate('gacha'));$('mv90Filter').addEventListener('change',render);window.addEventListener('storage',()=>{if(!$('mv90Gacha').hidden)render()});window.addEventListener('focus',()=>{if(!$('mv90Gacha').hidden)render()});document.addEventListener('visibilitychange',()=>{if(!document.hidden&&!$('mv90Gacha').hidden)render()});}
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init,{once:true});else init();
 })();
 </script>
@@ -4391,12 +4460,22 @@ function tone(f,start,duration,gain,kind){
  g.gain.setValueAtTime(.0001,t);g.gain.exponentialRampToValueAtTime(gain,t+.015);g.gain.exponentialRampToValueAtTime(.0001,t+duration);
  o.connect(g).connect(audio.destination);o.start(t);o.stop(t+duration+.01);
 }
+function audible(){try{return localStorage.getItem('mushiverse-tap-sounds-enabled')!=='false'}catch{return false}}
+document.addEventListener('mushiverse:gacha-audio-start',()=>{
+ if(!audible())return;
+ const Audio=window.AudioContext||window.webkitAudioContext;
+ if(!Audio)return;
+ try{audio=audio||new Audio();if(audio.state!=='running')void audio.resume().catch(()=>{})}catch{}
+});
+document.addEventListener('mushiverse:gacha-audio-phase',event=>{
+ if(!audio||!audible())return;
+ const notes=[[110,165],[220,330],[330,495,660]][event.detail];
+ for(const [index,frequency] of notes.entries())tone(frequency,index*.07,.14,.035,'triangle');
+});
 document.addEventListener('mushiverse:rarity-reveal',e=>{
  try{
-  if(localStorage.getItem('mushiverse-tap-sounds-enabled')==='false')return;
+  if(!audio||!audible())return;
   const rank=e.detail?.rarity;if(rank!=='SR'&&rank!=='SSR')return;
-  const AC=window.AudioContext||window.webkitAudioContext;if(!AC)return;
-  audio=audio||new AC();if(audio.state==='suspended')audio.resume().catch(()=>{});
   const notes=rank==='SSR'?[523,659,784,1047,1319]:[392,494,587];
   notes.forEach((f,i)=>tone(f,i*.13,.25,rank==='SSR'?.055:.035,'triangle'));
   if(!window.matchMedia?.('(prefers-reduced-motion: reduce)').matches)navigator.vibrate?.(rank==='SSR'?[60,40,120]:[40]);
@@ -4567,7 +4646,7 @@ function init(){
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init,{once:true});else init();
 })();
 </script>
-<script id="mv109-follower-count">(()=>{'use strict';async function refresh(){const label=document.getElementById('mv109Followers');if(!label)return;const user=window.user,db=window.db;if(!user?.id||!db?.from){label.textContent='0';return}const {count,error}=await db.from('user_follows').select('follower_id',{head:true,count:'exact'}).eq('followed_id',user.id);if(!error)label.textContent=String(count||0)}function init(){refresh();document.addEventListener('click',e=>{if(e.target.closest?.('[data-tab="profile"]'))setTimeout(refresh,250)},true);document.addEventListener('visibilitychange',()=>{if(!document.hidden)refresh()});window.addEventListener('focus',refresh)}if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init,{once:true});else init()})();</script>
+
 <style id="mv110-follow-feed-style">
 #mv110FollowFeed{margin:12px 0 18px;padding:14px;border:1px solid #bcdcc4;border-radius:17px;background:#f3fff5;color:#214532}
 #mv110FollowFeed h2{font-size:18px;margin:0 0 8px}

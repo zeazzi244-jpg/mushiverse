@@ -1,4 +1,4 @@
-import {readFileSync,writeFileSync} from 'node:fs';
+import {readFileSync,writeFileSync,appendFileSync} from 'node:fs';
 
 // Assign a unique, monotonically increasing CFBundleVersion for signed CI archives.
 // The existing TestFlight build 139 must never be overwritten.
@@ -15,5 +15,7 @@ export function assignBuildNumber(project, runNumber, attempt) {
 if(process.argv[1] && import.meta.url===new URL('file://'+process.argv[1]).href){
  const path=process.argv[2]||'ios/App/App.xcodeproj/project.pbxproj';
  const {updated,build}=assignBuildNumber(readFileSync(path,'utf8'),process.env.GITHUB_RUN_NUMBER,process.env.GITHUB_RUN_ATTEMPT);
- writeFileSync(path,updated);console.log('Signed archive build number: '+build);
+ writeFileSync(path,updated);
+ if(process.env.GITHUB_ENV)appendFileSync(process.env.GITHUB_ENV,'SIGNED_BUILD_NUMBER='+build+'\n');
+ console.log('Signed archive build number: '+build);
 }
