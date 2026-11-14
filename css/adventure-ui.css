@@ -551,3 +551,23 @@ body[data-screen="profile"] .wrap > header { display: none; }
   #profile .mvProfileActions { align-items:stretch; }
   #profile .mvProfileActions > :is(button,[role="button"]) { flex:1 1 9rem; }
 }
+
+/* Keep long discovery captions readable without forcing the timestamp outside
+   the viewport. The caption may shrink; the image keeps its fixed thumbnail. */
+#profile #mv86RecentPosts article > :not(img):not(small) {
+  flex:1 1 0;
+  min-width:0;
+  overflow-wrap:anywhere;
+}
+#profile #mv86RecentPosts article small {
+  flex:0 1 auto;
+  min-width:0;
+  overflow-wrap:anywhere;
+}
+/* Image previews and editable profile media must never stretch narrow WebViews. */
+#profile :is(#mv86ProfileCard,#mv86ProfileEditor) img {
+  max-width:100%;
+  height:auto;
+}
+#profile #mv86Avatar { height:6rem; }
+#profile #mv86RecentPosts article img { height:3rem; }
