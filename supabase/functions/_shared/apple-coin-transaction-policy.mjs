@@ -4,7 +4,7 @@
 export function validateVerifiedAppleCoinTransaction(transaction, expected) {
   if (!transaction || typeof transaction !== 'object' || !expected) throw new Error('invalid_transaction');
   const { bundleId, productId, environment, transactionId, originalTransactionId,
-    revocationDate, purchaseDate, type, appAccountToken, quantity, inAppOwnershipType } = transaction;
+    revocationDate, purchaseDate, signedDate, type, appAccountToken, quantity, inAppOwnershipType } = transaction;
   if (bundleId !== 'com.rikuto.mushiverse') throw new Error('bundle_mismatch');
   if (!['Sandbox', 'Production'].includes(environment) || environment !== expected.environment)
     throw new Error('environment_mismatch');
@@ -29,6 +29,11 @@ export function validateVerifiedAppleCoinTransaction(transaction, expected) {
   if (revocationDate != null) throw new Error('revoked');
   if (!Number.isSafeInteger(purchaseDate) || purchaseDate <= 0 || purchaseDate > Date.now() + 300000)
     throw new Error('invalid_purchase_date');
+  // Apple signs the transaction after the purchase. Reject implausible signed
+  // timestamps instead of accepting stale or future-dated transaction evidence.
+  if (signedDate != null && (!Number.isSafeInteger(signedDate) ||
+      signedDate < purchaseDate || signedDate > Date.now() + 300000))
+    throw new Error('invalid_signed_date');
   // Require a trusted server-side account mapping for every consumable credit.
   // Never derive expected.appAccountToken from the untrusted client claim.
   {
