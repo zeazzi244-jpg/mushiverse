@@ -9,9 +9,9 @@ import { readFileSync } from 'node:fs';
 test('unverified Apple IAP endpoint cannot grant gacha coins', () => {
   const source = readFileSync('supabase/functions/credit-apple-gacha-coins/index.ts', 'utf8');
   assert.match(source, /auth\.getUser\s*\(/, 'Authenticated caller must be checked');
-  assert.match(source, /apple_verification_not_configured/);
+  assert.match(source, /fulfillment: "disabled_pending_sandbox_proof"/);
   assert.match(source, /credited_or_previously_credited:\s*false/);
-  assert.match(source, /\}\s*,\s*503\)/, 'Verification unavailable must return HTTP 503');
+  assert.match(source, /\}\s*,\s*422\)/, 'Invalid signature must return HTTP 422');
   assert.doesNotMatch(source, /\.rpc\s*\(|\.insert\s*\(|\.upsert\s*\(|\.update\s*\(/,
     'Fail-closed endpoint must not write purchase credits or balances');
 });

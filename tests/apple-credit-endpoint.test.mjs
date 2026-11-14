@@ -7,26 +7,28 @@ import {readFileSync} from 'node:fs';
 function harness({user = {id:'user-a'}, configured = true} = {}) {
   const source = readFileSync('supabase/functions/credit-apple-gacha-coins/index.ts','utf8')
     .replace(/^import .*;\s*$/gm,'')
-    .replace('data: Record<string, unknown>, status: number','data, status')
+    .replace('(body: Record<string, unknown>, status', '(body, status')
+    .replace('let body: Record<string, unknown>;','let body;')
     .replace('request: Request','request');
   let handler;
-  const calls = {client:0, rpc:0, getUser:0};
+  const calls = {client:0, rpc:0, getUser:0, verifier:0};
   const deno = {
     env:{get:()=>configured?'configured-value':undefined},
     serve:fn=>{handler=fn}
   };
   const client = {
     auth:{getUser:async()=>{calls.getUser++; return {data:{user},error:null}}},
+    from:()=>({select:()=>({eq:()=>({limit:async()=>({data:[{user_id:user.id,transaction_id:"123456",original_transaction_id:"123456",product_id:"mushiverse.coins.100"}]})})})}),
     rpc:()=>{calls.rpc++; throw new Error('Coin credit RPC must never run before verification')}
   };
   const createClient = ()=>{calls.client++; return client};
-  new Function('Deno','createClient','Response',source)(deno,createClient,Response);
+  new Function('Deno','createClient','Response','verifyAppleCoinJws',source)(deno,createClient,Response,async()=>{calls.verifier++;throw Error('invalid signature')});
   assert.equal(typeof handler,'function');
   const send = async (method='POST', bearer='Bearer valid-token')=>{
     const headers = bearer?{Authorization:bearer}:undefined;
     const response = await handler(new Request('https://example.invalid/credit',{
       method,headers,
-      ...(method==='POST'?{body:JSON.stringify({signed_transaction:'fake-jws'})}:{})
+      ...(method==='POST'?{body:JSON.stringify({transaction_id:'123456',signed_transaction:'fake-jws'})}:{})
     }));
     return {status:response.status,body:await response.json(),headers:response.headers};
   };
@@ -52,8 +54,9 @@ test('credit endpoint rejects invalid methods without touching a wallet',async()
 test('credit endpoint does not trust a signed-transaction string as proof of coins',async()=>{
   const h=harness();
   const result=await h.send();
-  assert.equal(result.status,503);
-  assert.equal(result.body.error,'apple_verification_not_configured');
+  assert.equal(result.status,422);
+  assert.equal(result.body.error,'apple_transaction_verification_failed');
+  assert.equal(h.calls.verifier,1);
   assert.equal(result.body.credited_or_previously_credited,false);
   assert.equal(result.headers.get('cache-control'),'no-store');
   assert.equal(h.calls.rpc,0);
