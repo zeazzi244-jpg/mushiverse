@@ -10,7 +10,7 @@ const idPattern = /^\d{6,30}$/;
 Deno.serve(async (request: Request) => {
   if (request.method !== "POST") return json({ error: "method_not_allowed" }, 405);
   const authorization = request.headers.get("authorization") ?? "";
-  if (!/^Bearer\s+\\S+$/i.test(authorization)) return json({ error: "unauthorized" }, 401);
+  if (!/^Bearer\s+\S+$/i.test(authorization)) return json({ error: "unauthorized" }, 401);
   const url = Deno.env.get("SUPABASE_URL");
   const anon = Deno.env.get("SUPABASE_ANON_KEY");
   const service = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
