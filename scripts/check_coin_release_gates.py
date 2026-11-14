@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 """Fail-closed release invariants; static checks do not replace device or Apple Sandbox tests."""
 from pathlib import Path
+import re
 
 root = Path(__file__).resolve().parents[1]
 store = (root / "ios/App/App/MushiverseCoinStore.swift").read_text(encoding="utf-8")
@@ -18,9 +19,9 @@ checks = {
     "credit endpoint restricted to HTTPS": 'creditEndpoint.scheme == "https"' in store,
     "transaction finished after server acknowledgment": store.index("receipt.creditedOrPreviouslyCredited") < store.index("await transaction.finish()"),
     "unfinished purchase retries supported": "Transaction.unfinished" in store,
-    "backend currently rejects unverified purchases": '"apple_verification_not_configured"' in backend,
-    "backend does not currently credit wallets": "credit_verified_gacha_purchase" not in backend and "service_role" not in backend.lower(),
-    "backend requires authenticated user": "client.auth.getUser()" in backend,
+    "backend rejects unverified purchases": '"apple_transaction_verification_failed"' in backend,
+    "backend does not currently credit wallets": not re.search(r"\.(rpc|insert|upsert|update|delete)\s*\(", backend),
+    "backend requires authenticated user": ".auth.getUser()" in backend,
     "backend returns no-store": '"cache-control": "no-store"' in backend,
 }
 

@@ -68,7 +68,7 @@ function createHarness() {
   }
   return {send,rows,setUser:id=>{currentUser=id},setInsertRace:fn=>{insertRace=fn}};
 }
-const coin=(id,product='mushiverse.coins.100',original=null)=>({
+const coin=(id,product='mushiverse.coins.100',original=id)=>({
   transaction_id:id,original_transaction_id:original,product_id:product,
   environment:'storekit'
 });
