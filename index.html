@@ -4111,6 +4111,10 @@ document.addEventListener('visibilitychange',()=>{if(document.hidden)stop()});
 #mv86Stats{display:grid;grid-template-columns:repeat(3,1fr);gap:5px;border-top:1px solid #e5eee5;margin-top:14px;padding-top:14px;text-align:center}
 #mv86Stats b{display:block;font-size:21px;color:#214a35}#mv86Stats small{display:block;font-size:11px;color:#6c7d72}
 #mv86ProfileEditor{margin-top:12px;padding:12px;background:#f5faf5;border-radius:12px}#mv86ProfileEditor label{display:block;margin:8px 0;font-size:13px}
+#mv86Username{color:#e4f7e9;margin:0;overflow-wrap:anywhere}
+#mv86UsernameForm{margin:0 0 12px;padding:10px 0 14px;border-bottom:1px solid #bacfbd}
+#mv86UsernameForm button{min-height:44px}
+#mv86UsernameForm small,#mv86UsernameStatus{display:block;color:#24513a;margin:6px 0}
 #mv86ProfileEditor input[type=text],#mv86ProfileEditor textarea{width:100%;box-sizing:border-box;padding:9px;border:1px solid #bacfbd;border-radius:8px;font:inherit}
 #profile #mv86AdvancedToggle{display:block!important;width:100%;padding:14px;border:1px solid #bfd8c3;border-radius:13px;background:#edf7ee;color:#23543c;font-weight:750;font-size:15px;margin:12px 0}
 #profile.mv86Expanded> :not(h1):not(#mv86ProfileCard):not(#mv86AdvancedToggle){display:block}
@@ -4131,12 +4135,76 @@ function save(key,profile){try{localStorage.setItem(key,JSON.stringify(profile))
 function initProfile(){
  const root=$('profile');if(!root||$('mv86ProfileCard'))return;
  const card=document.createElement('section');card.id='mv86ProfileCard';
- card.innerHTML='<div id="mv86Cover"><div class="mvProfileActions"><button type="button" id="mv86ProfileEdit" aria-expanded="false" aria-controls="mv86ProfileEditor">プロフィール編集</button><button id="mv86CoverButton" type="button">背景を変更</button></div><div class="mvProfileIdentity"><img id="mv86Avatar" alt="プロフィール画像"><h2 id="mv86Name">昆虫採集家</h2></div></div><div id="mv86ProfileBody"><p id="mv86Bio"></p><div id="mv86Stats"><div><b id="mv86Posts">0</b><small>採集記録</small></div><div><b id="mv109Followers">0</b><small>フォロワー</small></div><div><b id="mv86Following">0</b><small>フォロー</small></div><div><b id="mv86Species">0</b><small>発見した種類</small></div><div><b id="mv86CardRate">0%</b><small>カード収集率</small></div></div><div id="mv86ProfileEditor" hidden><label>表示名<input id="mv86EditName" type="text" maxlength="30" placeholder="表示名"></label><label>自己紹介<textarea id="mv86EditBio" rows="3" maxlength="160" placeholder="好きな昆虫や採集のこと"></textarea></label><label>プロフィール写真<input id="mv86AvatarFile" type="file" accept="image/*"></label><label><input id="mv86RemoveAvatar" type="checkbox"> プロフィール写真を削除</label><label>カバー写真<input id="mv86CoverFile" type="file" accept="image/*"></label><label><input id="mv86RemoveCover" type="checkbox"> カバー写真を削除</label><button type="button" id="mv86ImportLegacy" hidden>以前の端末プロフィールを読み込む</button><button type="button" id="mv86SaveProfile" class="btn">保存する</button><button type="button" id="mv86CancelProfile">キャンセル</button><p id="mv86ProfileStatus" role="status"></p><p style="font-size:11px">写真とプロフィールはこの端末内に保存されます。他の利用者には公開されません。</p></div><section id="mv86RecentPosts" aria-label="自分の投稿"></section></div>';
+ card.innerHTML='<div id="mv86Cover"><div class="mvProfileActions"><button type="button" id="mv86ProfileEdit" aria-expanded="false" aria-controls="mv86ProfileEditor">プロフィール編集</button><button id="mv86CoverButton" type="button">背景を変更</button></div><div class="mvProfileIdentity"><img id="mv86Avatar" alt="プロフィール画像"><h2 id="mv86Name">昆虫採集家</h2><p id="mv86Username" hidden></p></div></div><div id="mv86ProfileBody"><p id="mv86Bio"></p><div id="mv86Stats"><div><b id="mv86Posts">0</b><small>採集記録</small></div><div><b id="mv109Followers">0</b><small>フォロワー</small></div><div><b id="mv86Following">0</b><small>フォロー</small></div><div><b id="mv86Species">0</b><small>発見した種類</small></div><div><b id="mv86CardRate">0%</b><small>カード収集率</small></div></div><div id="mv86ProfileEditor" hidden><form id="mv86UsernameForm"><label for="mv86EditUsername">ユーザー名</label><input id="mv86EditUsername" type="text" autocomplete="username" autocapitalize="none" spellcheck="false" aria-describedby="mv86UsernameHelp" placeholder="例 mushi_123"><small id="mv86UsernameHelp">半角英数字と _ で3〜24文字。英字は小文字で登録されます。</small><button type="submit" id="mv86SaveUsername" class="btn">ユーザー名を保存</button><p id="mv86UsernameStatus" role="status"></p></form><label>表示名<input id="mv86EditName" type="text" maxlength="30" placeholder="表示名"></label><label>自己紹介<textarea id="mv86EditBio" rows="3" maxlength="160" placeholder="好きな昆虫や採集のこと"></textarea></label><label>プロフィール写真<input id="mv86AvatarFile" type="file" accept="image/*"></label><label><input id="mv86RemoveAvatar" type="checkbox"> プロフィール写真を削除</label><label>カバー写真<input id="mv86CoverFile" type="file" accept="image/*"></label><label><input id="mv86RemoveCover" type="checkbox"> カバー写真を削除</label><button type="button" id="mv86ImportLegacy" hidden>以前の端末プロフィールを読み込む</button><button type="button" id="mv86SaveProfile" class="btn">保存する</button><button type="button" id="mv86CancelProfile">キャンセル</button><p id="mv86ProfileStatus" role="status"></p><p style="font-size:11px">表示名・自己紹介・写真はこの端末内に保存されます。</p></div><section id="mv86RecentPosts" aria-label="自分の投稿"></section></div>';
  root.prepend(card);
  const toggle=document.createElement('button');toggle.id='mv86AdvancedToggle';toggle.type='button';toggle.textContent='⚙️ 設定・その他の機能を表示';card.after(toggle);
  toggle.addEventListener('click',()=>{const on=root.classList.toggle('mv86Expanded');toggle.textContent=on?'▲ 設定・その他の機能を閉じる':'⚙️ 設定・その他の機能を表示';});
  const editor=$('mv86ProfileEditor'),edit=$('mv86ProfileEdit');
  let editorKey,editorRevision=0,importedProfile=null;
+ const usernameInput=$('mv86EditUsername'),usernameButton=$('mv86SaveUsername');
+ const usernameStatus=$('mv86UsernameStatus'),usernameLabel=$('mv86Username');
+ let usernameOwner,savedUsername='',usernameBusy=false,usernameRequest=0;
+ async function requestUsername(query){
+  const controller=new AbortController();
+  const timeout=setTimeout(()=>controller.abort(),10000);
+  try{return await query.abortSignal(controller.signal)}
+  finally{clearTimeout(timeout)}
+ }
+ function showUsername(){
+  usernameLabel.textContent=savedUsername?'@'+savedUsername:'';
+  usernameLabel.hidden=!savedUsername;
+  usernameInput.disabled=usernameButton.disabled=!usernameOwner||!window.db||usernameBusy;
+ }
+ async function refreshUsername(){
+  const id=window.user?.id,client=window.db;
+  if(usernameOwner!==id){
+   usernameOwner=id;savedUsername='';usernameInput.value='';usernameBusy=false;
+  }else if(usernameBusy)return;
+  const current=++usernameRequest;
+  showUsername();
+  if(!id||!client){
+   usernameStatus.textContent='ログインするとユーザー名を登録できます。';
+   return;
+  }
+  usernameStatus.textContent='';
+  const previous=savedUsername;
+  try{
+   const {data,error}=await requestUsername(client.from('profile_usernames').select('username').eq('user_id',id).maybeSingle());
+   if(current!==usernameRequest||id!==window.user?.id)return;
+   if(error)throw error;
+   savedUsername=data?.username||'';
+   if(editor.hidden||usernameInput.value===previous)usernameInput.value=savedUsername;
+   showUsername();
+  }catch{
+   if(current===usernameRequest&&id===window.user?.id)usernameStatus.textContent='ユーザー名を読み込めませんでした。';
+  }
+ }
+ $('mv86UsernameForm').addEventListener('submit',async event=>{
+  event.preventDefault();
+  const id=window.user?.id,client=window.db;
+  if(!id||id!==usernameOwner||!client||usernameBusy)return;
+  const username=usernameInput.value.trim().normalize('NFKC').replace(/^@/,'').toLowerCase();
+  if(!/^[a-z0-9_]{3,24}$/.test(username)){
+   usernameStatus.textContent='半角英数字と _ で3〜24文字にしてください。';
+   return;
+  }
+  const current=++usernameRequest;
+  usernameBusy=true;showUsername();
+  usernameStatus.textContent='ユーザー名を保存しています…';
+  try{
+   const {error}=await requestUsername(client.from('profile_usernames').upsert({user_id:id,username},{onConflict:'user_id'}));
+   if(error)throw error;
+   if(current!==usernameRequest||id!==window.user?.id)return;
+   savedUsername=username;usernameInput.value=username;
+   usernameStatus.textContent='ユーザー名を保存しました。';
+  }catch(error){
+   if(current!==usernameRequest||id!==window.user?.id)return;
+   usernameStatus.textContent=error?.code==='23505'?'このユーザー名はすでに使われています。別の名前を入力してください。':'ユーザー名を保存できませんでした。通信状況を確認して、もう一度お試しください。';
+  }finally{
+   if(current===usernameRequest&&id===window.user?.id){usernameBusy=false;showUsername()}
+  }
+ });
+
  function paint(){
   const p=load();
   $('mv86Name').textContent=p.name||'昆虫採集家';
@@ -4152,7 +4220,9 @@ function initProfile(){
    $('mv86ImportLegacy').hidden=Object.keys(load(legacyKey)).length===0;
    $('mv86EditName').value=p.name||'';
    $('mv86EditBio').value=p.bio||'';
+   usernameInput.value=savedUsername;
    editor.hidden=false;edit.setAttribute('aria-expanded','true');
+   void refreshUsername();
   }
  }
  function closeEditor(){
@@ -4246,11 +4316,13 @@ function initProfile(){
  }
  document.addEventListener('mushiverse:profile-account',()=>{
   if(!editor.hidden)closeEditor();
-  paint();void refreshPosts();
+  usernameOwner=undefined;savedUsername='';usernameInput.value='';usernameBusy=false;showUsername();
+  paint();setTimeout(()=>{void refreshPosts();void refreshUsername()},0);
  });
  document.querySelector('.nav [data-tab=profile]').addEventListener('click',refreshPosts);
  window.addEventListener('online',refreshPosts);
- void refreshPosts();
+ window.addEventListener('online',refreshUsername);
+ void refreshPosts();void refreshUsername();
 }
 function initGacha(){const nav=document.querySelector('.nav button[data-tab="gacha"]');if(!nav)return;
  nav.onclick=()=>{document.body.dataset.screen='gacha';document.querySelector('.skipLink').href='#gacha';document.querySelectorAll('main > section').forEach(el=>el.classList.toggle('hide',el.id!=='gacha'));document.querySelectorAll('.nav button').forEach(el=>el.classList.toggle('active',el===nav));window.scrollTo(0,0);moveGacha();};
