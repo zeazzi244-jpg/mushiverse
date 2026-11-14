@@ -21,7 +21,7 @@ export async function verifyAppleCoinJws(signedTransaction: string, expected: {
   // Reject malformed compact JWS before invoking the Apple verifier. Each segment
   // must be nonempty base64url; never accept padded or extra-segment tokens.
   if (typeof signedTransaction !== "string" || signedTransaction.length > 16384 ||
-      !/^[A-Za-z0-9_-]+\\.[A-Za-z0-9_-]+\\.[A-Za-z0-9_-]+$/.test(signedTransaction))
+      !/^[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+$/.test(signedTransaction))
     throw new Error("invalid_signed_transaction");
   if (!expected || !["Sandbox", "Production"].includes(expected.environment))
     throw new Error("invalid_expected_environment");
