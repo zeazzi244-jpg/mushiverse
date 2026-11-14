@@ -432,3 +432,46 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Hiragino Kaku Gothic ProN","Y
 #home .toolbar :is(input,textarea):disabled{
   -webkit-text-fill-color:#354d3f;
 }
+
+body[data-screen="profile"] .wrap > header { display: none; }
+#profile > .mvSectionIntro { display: none !important; }
+#profile #mv86ProfileCard { background: #102f25 !important; color: #f4fff7; }
+#profile #mv86Cover {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  min-height: 17rem;
+  height: auto;
+  padding: 1rem;
+  background-color: #103b2c;
+  background-image: linear-gradient(155deg, #32664e, #0b2d22 78%);
+}
+#profile .mvProfileActions { display: flex; flex-wrap: wrap; gap: .5rem; }
+#profile :is(#mv86CoverButton, #mv86ProfileEdit, #mv86CancelProfile) {
+  position: static;
+  min-height: 44px;
+  padding: .6rem .85rem;
+  border: 1px solid #b7d4c3;
+  border-radius: .75rem;
+  background: #f3fff7;
+  color: #173d2f;
+  font-weight: 750;
+}
+#profile .mvProfileIdentity { margin-top: 1.25rem; }
+#profile #mv86Avatar {
+  display: block;
+  position: static;
+  width: 6rem;
+  height: 6rem;
+  margin: 0 0 .6rem;
+  border: 3px solid #fff;
+  border-radius: 50%;
+  object-fit: cover;
+}
+#profile #mv86Name { margin: 0; color: #fff; font-size: 1.5rem; overflow-wrap: anywhere; }
+#profile #mv86ProfileBody { padding: 1rem; }
+#profile #mv86Bio { white-space: pre-wrap; overflow-wrap: anywhere; color: #e8f6ec; }
+#profile #mv86Stats > div { background: #1f4939; color: #f4fff7; }
+#profile #mv86Stats :is(b, small) { color: #f4fff7; }
+#profile #mv86ProfileEditor { background: #f3fff7; color: #173d2f; }
+#profile #mv86ProfileEditor :is(input, textarea) { color: #173d2f; background: #fff; max-width: 100%; min-height: 44px; }
