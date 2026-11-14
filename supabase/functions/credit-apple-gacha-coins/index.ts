@@ -37,6 +37,11 @@ Deno.serve(async (request: Request) => {
     if (!claims || claims.length !== 1 || claims[0].user_id !== user.id)
       return json({ error: "claim_not_owned" }, 403);
     const claim = claims[0];
+    // A rejected or already-finalized claim must not be revalidated through the
+    // staging endpoint. Only pending claims are eligible for Sandbox proof.
+    // Fulfillment remains disabled regardless of verification outcome.
+    if (claim.status !== "pending")
+      return json({ error: "claim_not_pending", credited_or_previously_credited: false }, 409);
     if (!["mushiverse.coins.100", "mushiverse.coins.500", "mushiverse.coins.1200"].includes(claim.product_id))
       return json({ error: "not_coin_product" }, 400);
     if (!claim.original_transaction_id || !idPattern.test(claim.original_transaction_id))
