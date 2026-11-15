@@ -5,6 +5,10 @@
     LR: 'albaseraph.webp'
   };
   const reported = new Set();
+  // Resolve assets from this script, not the current page URL. This also works
+  // when the WebView is opened through a nested route or a custom app origin.
+  const scriptUrl = document.currentScript?.src || document.baseURI;
+  const cardBase = new URL('../assets/cards/', scriptUrl);
 
   window.mushiverseCardArt = (rarity, eager = false) => {
     const art = document.createElement('div');
@@ -22,7 +26,7 @@
       art.textContent = 'イラストを表示できません';
       art.classList.add('mvCardArtUnavailable');
     }, {once:true});
-    image.src = 'assets/cards/' + imageName;
+    image.src = new URL(imageName, cardBase).href;
     art.append(image);
     return art;
   };
