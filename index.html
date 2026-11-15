@@ -4534,9 +4534,22 @@ function init(){
  const balance=unit.querySelector('.mvWoodBalance');
  const coins=document.getElementById('mv77Coins');
  if(coins)balance.append(coins);
- for(const id of ['mv77Draw','mv77Ten','mv77DrawHint']){
-  const control=document.getElementById(id);
-  if(control)controls.append(control);
+ // Gacha controls can mount after this section on slower iOS WebViews.
+ // Reconcile on later DOM mutations instead of leaving an empty action row.
+ const drawIds=['mv77Draw','mv77Ten','mv77DrawHint'];
+ function placeDrawControls(){
+  for(const id of drawIds){
+   const control=document.getElementById(id);
+   if(control&&control.parentElement!==controls)controls.append(control);
+  }
+  return drawIds.slice(0,2).every(id=>controls.contains(document.getElementById(id)));
+ }
+ if(!placeDrawControls()){
+  const observer=new MutationObserver(()=>{
+   if(placeDrawControls())observer.disconnect();
+  });
+  observer.observe(document.body,{childList:true,subtree:true});
+  window.addEventListener('pagehide',()=>observer.disconnect(),{once:true});
  }
  unit.querySelector('.mvWoodCollection').addEventListener('click',()=>{
   // Collection navigation is optional on older cached builds. Never let a
