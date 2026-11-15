@@ -850,3 +850,28 @@ body[data-screen="profile"] .wrap > header { display: none; }
   #gacha .gacha-result,
   #gacha .gacha-result *{transition-duration:0s!important;}
 }
+
+
+/* V35: The gacha result is inserted dynamically. A long insect name or
+   localized rarity caption must wrap instead of covering the draw controls.
+   Preserve explicit focus visibility for keyboard and switch-control users. */
+#gacha :is(.gacha-card,.gacha-result) {
+  overflow-wrap:anywhere;
+  word-break:normal;
+}
+#gacha :is(.gacha-card,.gacha-result) :is(h2,h3,h4,p,small,strong,[data-rarity]) {
+  max-width:100%;
+  overflow-wrap:anywhere;
+}
+/* Native disabled draw controls must look unavailable on both light and dark
+   gacha backgrounds, without suppressing readable text through opacity. */
+#gacha :is(.gacha-controls,.gacha-actions) > :is(button,[role="button"]):disabled {
+  cursor:not-allowed;
+  opacity:1;
+  color:#e8f3eb;
+  background:#43594b;
+  border-color:#839c89;
+}
+#gacha :is(.gacha-controls,.gacha-actions) > :is(button,[role="button"])[aria-busy="true"] {
+  cursor:progress;
+}
