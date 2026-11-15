@@ -753,3 +753,22 @@ body[data-screen="profile"] .wrap > header { display: none; }
   margin: .65rem .35rem .2rem;
   color: #e6eafa;
 }
+
+/* V32: animated gacha reveals can use canvas instead of image/video.
+   Apply the same viewport cap to canvas so a tall reveal does not push the
+   next draw button below the fold on compact iPhones. */
+#gacha :is(.gacha-card,.gacha-result) canvas{
+  box-sizing:border-box;
+  max-width:100%;
+  max-height:48vh;
+  max-height:48dvh;
+  width:auto;
+  height:auto;
+  object-fit:contain;
+}
+@media(max-height:480px) and (orientation:landscape){
+  #gacha :is(.gacha-card,.gacha-result) canvas{
+    max-height:32vh;
+    max-height:32dvh;
+  }
+}
