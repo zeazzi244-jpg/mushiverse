@@ -29,7 +29,8 @@ export function validateVerifiedAppleCoinTransaction(transaction, expected) {
   // Fail closed on contradictory Apple revocation / upgrade indicators even if the
   // revocation timestamp is unexpectedly absent. Neither can fund consumable coins.
   if (revocationDate != null || revocationReason != null) throw new Error('revoked');
-  // Apple defines this as a boolean. Fail closed on unexpected non-false values\n  // rather than silently treating malformed upgrade indicators as eligible.\n  if (isUpgraded != null && isUpgraded !== false) throw new Error('upgraded_transaction');
+  // Apple defines this as a boolean. Fail closed on unexpected non-false values
+  // rather than silently treating malformed upgrade indicators as eligible.\n  if (isUpgraded != null && isUpgraded !== false) throw new Error('upgraded_transaction');
   if (!Number.isSafeInteger(purchaseDate) || purchaseDate <= 0 || purchaseDate > Date.now() + 300000)
     throw new Error('invalid_purchase_date');
   // Apple signs the transaction after the purchase. Reject implausible signed
