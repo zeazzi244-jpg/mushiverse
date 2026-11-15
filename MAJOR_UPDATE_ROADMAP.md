@@ -25,7 +25,7 @@ Aim for a world-leading insect app. There is no guarantee of reaching #1, but do
 - Keep a meaningful free entry point and show earning rates, draw costs, and odds clearly. Keep test grants out of production and paid currency behind verified Apple purchase flows.
 
 ### Founder decision: limited LR insect card
-- Add LR above SSR. Launch with exactly one LR card design. The founder will choose its name; leave the name undecided until then.
+- Add LR above SSR. Launch with exactly one LR card design. Its official Japanese name is **創世の白蝶・アルバセラフ**. Its white butterfly motif connects to the MUSHIVERSE launch screen.
 - LR has a 0.01% chance per draw while copies are available. Limit issuance to ten copies total across all live servers.
 - Enforce the global issuance cap atomically on the server so simultaneous draws and request retries cannot create an eleventh copy. Clearly display the limit, odds while available, and sold-out status. Set LR odds to 0% after the tenth copy is issued.
 
