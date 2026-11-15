@@ -1,0 +1,35 @@
+{
+  "schemaVersion": 1,
+  "status": "proposal_only",
+  "bundleId": "com.rikuto.mushiverse",
+  "currency": "JPY",
+  "storefront": "JPN",
+  "purchaseEnabled": false,
+  "creditEnabled": false,
+  "note": "Prices are proposed display targets, not verified App Store Connect prices. Never trust this catalog as proof of payment or a server-authoritative credit amount. Reconcile existing Apple product IDs before creating products.",
+  "coinPacks": [
+    {"key":"coins_100","coins":100,"targetPriceJPY":160,"existing":true,"type":"consumable"},
+    {"key":"coins_300","coins":300,"targetPriceJPY":320,"existing":false,"type":"consumable"},
+    {"key":"coins_500","coins":500,"targetPriceJPY":480,"existing":true,"type":"consumable"},
+    {"key":"coins_1200","coins":1200,"targetPriceJPY":980,"existing":true,"type":"consumable"},
+    {"key":"coins_2500","coins":2500,"targetPriceJPY":1800,"existing":false,"type":"consumable"},
+    {"key":"coins_5500","coins":5500,"targetPriceJPY":3600,"existing":false,"type":"consumable"},
+    {"key":"coins_12000","coins":12000,"targetPriceJPY":7800,"existing":false,"type":"consumable"}
+  ],
+  "entitlements": [
+    {"key":"premium_monthly","targetPriceJPY":480,"type":"auto_renewable_subscription","restoreRequired":true,"benefits":["reduced_ads","profile_cosmetics","premium_quests"]},
+    {"key":"adventure_pass_30d","targetPriceJPY":980,"type":"non_renewing_subscription","durationDays":30,"benefits":["season_quests","cosmetic_titles","earned_rewards"]}
+  ],
+  "securityRequirements": {
+    "kidModePurchasesDisabled": true,
+    "respectStoreKitCanMakePayments": true,
+    "appleSignedJwsVerificationRequired": true,
+    "checkBundleProductEnvironmentRevocationOwnership": true,
+    "atomicIdempotentWalletCreditRequired": true,
+    "sandboxProofRequiredBeforeEnablement": true,
+    "productionDisabledUntilExplicitRelease": true,
+    "noClientPriceOrCoinAmountAuthority": true,
+    "restoreSubscriptionByVerifiedOriginalTransactionId": true,
+    "neverRestoreConsumableCoinsByRecrediting": true
+  }
+}
