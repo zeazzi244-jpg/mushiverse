@@ -4568,7 +4568,20 @@ function init(){
  });
  mount.prepend(unit);
 }
-if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init,{once:true});else init();
+// The gacha mount may be injected after DOMContentLoaded on slow iOS WebViews.
+// Retry when it appears; disconnect once initialized to avoid perpetual work.
+function bootGashapon(){
+ init();
+ if(document.getElementById('mv101Machine'))return;
+ const watcher=new MutationObserver(()=>{
+  if(!document.getElementById('mv86GachaMount'))return;
+  init();
+  if(document.getElementById('mv101Machine'))watcher.disconnect();
+ });
+ watcher.observe(document.body,{childList:true,subtree:true});
+ window.addEventListener('pagehide',()=>watcher.disconnect(),{once:true});
+}
+if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',bootGashapon,{once:true});else bootGashapon();
 })();
 </script>
 
