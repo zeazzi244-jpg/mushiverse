@@ -19,6 +19,11 @@ Aim for a world-leading insect app. There is no guarantee of reaching #1, but do
 - Track activation, retained explorers, purchase conversion, refunds, satisfaction and real operating costs.
 - Protect user trust and wildlife conservation as competitive advantages.
 
+### Founder decision: insect coin scarcity (2026-11-15)
+- Protect the scarcity and value of insect coins (虫コイン). Paid coin packs are a core monetization feature, and preserving their value is essential to sustainable MUSHIVERSE revenue.
+- Keep recurring free awards modest across login bonuses, quests, and events. Evaluate their combined amount in coins and equivalent gacha draws before increasing rewards, adding grants, or changing draw costs.
+- Keep a meaningful free entry point and show earning rates, draw costs, and odds clearly. Keep test grants out of production and paid currency behind verified Apple purchase flows.
+
 ## Product vision
 Turn MUSHIVERSE into a joyful insect discovery adventure: **find real insects, document sightings, learn responsibly, connect with other explorers, and collect fantasy insect cards**. Keep real wildlife observations clearly separate from fictional gacha cards.
 
