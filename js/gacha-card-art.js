@@ -10,6 +10,11 @@
   const scriptUrl = document.currentScript?.src || document.baseURI;
   const cardBase = new URL('../assets/cards/', scriptUrl);
   const rootCardBase = new URL('assets/cards/', document.baseURI);
+  // Resolve against the actual script directory first. A custom WebView base
+  // element must not silently redirect artwork to an unrelated route.
+  const scriptCardBase = document.currentScript?.src
+    ? new URL('../assets/cards/', document.currentScript.src)
+    : cardBase;
 
   window.mushiverseCardArt = (rarity, eager = false) => {
     const art = document.createElement('div');
@@ -37,7 +42,7 @@
       art.textContent = 'イラストを表示できません';
       art.classList.add('mvCardArtUnavailable');
     });
-    image.src = new URL(imageName, cardBase).href;
+    image.src = new URL(imageName, scriptCardBase).href;
     art.append(image);
     return art;
   };
