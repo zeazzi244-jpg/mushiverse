@@ -24,6 +24,20 @@ test('web bundle contains usable entry point', () => {
   assert.match(html, /<body\b/i);
   assert.ok(html.length > 500, 'Web entry is unexpectedly small');
 });
+test('shared heading and web icons use the approved iOS icon', () => {
+  const approved = 'assets/MUSHIVERSE-AppIcon-1024.png';
+  const bundled = readFileSync(join('www', 'index.html'), 'utf8');
+  const heading = bundled.match(/<header\b[^>]*>[\s\S]*?<\/header>/)?.[0];
+  assert.ok(heading?.includes(`<img src="${approved}"`), 'Shared heading uses a different logo');
+  for (const relation of ['icon', 'apple-touch-icon']) {
+    const link = bundled.match(new RegExp(`<link rel="${relation}"[^>]*>`))?.[0];
+    assert.ok(link?.includes(`href="${approved}"`), `Wrong asset for ${relation}`);
+  }
+  assert.deepEqual(
+    readFileSync(join('www', approved)),
+    readFileSync(join('ios', 'App', 'App', 'Assets.xcassets', 'AppIcon.appiconset', 'AppIcon-512@2x.png'))
+  );
+});
 test('adventure theme ships in offline web bundle', () => {
   const html = readFileSync(join('www', 'index.html'), 'utf8');
   const css = join('www', 'css', 'adventure-ui.css');
