@@ -772,3 +772,23 @@ body[data-screen="profile"] .wrap > header { display: none; }
     max-height:32dvh;
   }
 }
+
+/* Keep the globally limited LR card preview within the collection viewport.
+   The full-width artwork previously had no height cap outside the gacha tab,
+   forcing collection actions far below the fold on compact iPhones. */
+#collection .mvAlbaseraph img{
+  box-sizing:border-box;
+  max-width:100%;
+  max-height:48vh;
+  max-height:48dvh;
+  width:auto;
+  height:auto;
+  margin-inline:auto;
+  object-fit:contain;
+}
+@media(max-height:480px) and (orientation:landscape){
+  #collection .mvAlbaseraph img{
+    max-height:32vh;
+    max-height:32dvh;
+  }
+}
