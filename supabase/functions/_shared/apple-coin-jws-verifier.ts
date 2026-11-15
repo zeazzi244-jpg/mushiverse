@@ -37,8 +37,7 @@ export async function verifyAppleCoinJws(signedTransaction: string, expected: {
   // No caller may opt into live fulfillment merely by passing "Production".
   // Keep production verification unavailable until an independently audited
   // release explicitly enables it after end-to-end Sandbox purchase proof.
-  if (expected.environment === "Production" &&
-      Deno.env.get("APPLE_IAP_PRODUCTION_VERIFICATION_ENABLED") !== "true")
+  if (expected.environment === "Production")
     throw new Error("production_verification_disabled");
 
   const bundleId = Deno.env.get("APPLE_IAP_BUNDLE_ID");
