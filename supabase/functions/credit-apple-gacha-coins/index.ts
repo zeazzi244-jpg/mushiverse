@@ -52,15 +52,20 @@ Deno.serve(async (request: Request) => {
     // Fail closed if the same Apple original transaction is claimed by another
     // account. This is a preflight ownership check, not a substitute for the
     // atomic uniqueness enforcement required when fulfillment is enabled.
-    const { data: originalOwners, error: ownershipError } = await admin.from("apple_purchase_claims")
-      .select("user_id,transaction_id,product_id").eq("original_transaction_id", claim.original_transaction_id)
-      .limit(2);
+    // Query conflicts directly: a limited unfiltered result can miss a later
+    // conflicting row when multiple claims share the same original transaction.
+    const { data: foreignOwners, error: ownershipError } = await admin.from("apple_purchase_claims")
+      .select("transaction_id").eq("original_transaction_id", claim.original_transaction_id)
+      .neq("user_id", user.id).limit(1);
     if (ownershipError) return json({ error: "unavailable", credited_or_previously_credited: false }, 503);
-    // A consumable's original transaction must identify one purchase only.
-    // Reject cross-account reuse and conflicting same-account claims before JWS work.
-    if (originalOwners?.some(owner => owner.user_id !== user.id))
+    if (foreignOwners?.length)
       return json({ error: "original_transaction_owned_by_other_account", credited_or_previously_credited: false }, 409);
-    if (originalOwners?.some(owner => owner.transaction_id !== claim.transaction_id || owner.product_id !== claim.product_id))
+    const { data: conflictingClaims, error: conflictError } = await admin.from("apple_purchase_claims")
+      .select("transaction_id").eq("original_transaction_id", claim.original_transaction_id)
+      .eq("user_id", user.id)
+      .or(`transaction_id.neq.${claim.transaction_id},product_id.neq.${claim.product_id}`).limit(1);
+    if (conflictError) return json({ error: "unavailable", credited_or_previously_credited: false }, 503);
+    if (conflictingClaims?.length)
       return json({ error: "original_transaction_claim_conflict", credited_or_previously_credited: false }, 409);
     // Never accept environment or app-account ownership from request metadata.
     // This staging endpoint deliberately accepts Sandbox only.
