@@ -27,8 +27,8 @@ Aim for a world-leading insect app. There is no guarantee of reaching #1, but do
 ### Founder decision: limited LR insect card
 - Add LR above SSR. Launch with exactly one LR card design. Its official Japanese name is **創世の白蝶・アルバセラフ**. Its white butterfly motif connects to the MUSHIVERSE launch screen.
 - Approved card artwork: the diamond-winged Albaseraph against a platinum solar eclipse, above the first dawn. Use the approved [創世のダイヤモンド白蝶.png](https://chatgpt.com/library?file_id=libfile_56d375da5408819186c280e6177487a4&account_id=personal) as the source artwork.
-- LR has a 0.01% chance per draw while copies are available. Limit issuance to ten copies total across all live servers.
-- Enforce the global issuance cap atomically on the server so simultaneous draws and request retries cannot create an eleventh copy. Clearly display the limit, odds while available, and sold-out status. Set LR odds to 0% after the tenth copy is issued.
+- LR has a 0.01% chance per draw while copies are available. Limit issuance to three copies total across all live servers.
+- Enforce the global issuance cap atomically on the server so simultaneous draws and request retries cannot create a fourth copy. Clearly display the limit, odds while available, and sold-out status. Set LR odds to 0% after the third copy is issued.
 
 ## Product vision
 Turn MUSHIVERSE into a joyful insect discovery adventure: **find real insects, document sightings, learn responsibly, connect with other explorers, and collect fantasy insect cards**. Keep real wildlife observations clearly separate from fictional gacha cards.
