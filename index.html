@@ -4539,10 +4539,19 @@ function init(){
   if(control)controls.append(control);
  }
  unit.querySelector('.mvWoodCollection').addEventListener('click',()=>{
-  document.querySelector('nav [data-tab="collection"]').click();
-  document.getElementById('mv90GachaTab').click();
-  document.getElementById('mv90Filter').value='owned';
-  document.getElementById('mv90Filter').dispatchEvent(new Event('change'));
+  // Collection navigation is optional on older cached builds. Never let a
+  // missing tab crash the gacha controls or leave the user with no feedback.
+  const collectionTab=document.querySelector('nav [data-tab="collection"]');
+  const gachaTab=document.getElementById('mv90GachaTab');
+  const filter=document.getElementById('mv90Filter');
+  if(!collectionTab){
+   const status=document.getElementById('mvWoodStatus');
+   if(status)status.textContent='所持カード画面を準備できません。アプリを再起動してお試しください。';
+   return;
+  }
+  collectionTab.click();
+  if(gachaTab)gachaTab.click();
+  if(filter){filter.value='owned';filter.dispatchEvent(new Event('change',{bubbles:true}));}
  });
  mount.prepend(unit);
 }
