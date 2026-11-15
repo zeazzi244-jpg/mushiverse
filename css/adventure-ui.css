@@ -915,11 +915,13 @@ body[data-screen="profile"] .wrap > header { display: none; }
   100% { box-shadow:0 0 10px rgba(246,205,106,.22); filter:brightness(1); }
 }
 @media (prefers-reduced-motion:no-preference) {
+  #gacha :is(.gacha-card,.gacha-result):is([data-rarity="SSR"],[data-rarity="LR"],.rarity-ssr,.rarity-lr),
   #gacha :is(.gacha-card,.gacha-result) :is([data-rarity="SSR"],[data-rarity="LR"],.rarity-ssr,.rarity-lr) {
     animation:mvRareRevealGlow 1.25s ease-out both;
   }
 }
 @media (prefers-reduced-motion:reduce) {
+  #gacha :is(.gacha-card,.gacha-result):is([data-rarity="SSR"],[data-rarity="LR"],.rarity-ssr,.rarity-lr),
   #gacha :is(.gacha-card,.gacha-result) :is([data-rarity="SSR"],[data-rarity="LR"],.rarity-ssr,.rarity-lr) {
     animation:none!important;
     filter:none!important;
