@@ -100,7 +100,7 @@ test('forest theme text contrast meets WCAG AA on known solid surfaces', () => {
 });
 
 test('release bundle contains no symlinks or unsupported asset extensions', () => {
-  const allowed = new Set(['.html','.js','.css','.json','.svg','.png','.jpg','.jpeg','.webp','.gif','.ico','.woff','.woff2','.mp3','.wav','.webmanifest']);
+  const allowed = new Set(['.html','.js','.mjs','.css','.json','.svg','.png','.jpg','.jpeg','.webp','.gif','.ico','.woff','.woff2','.mp3','.wav','.m4a','.aac','.ogg','.mp4','.webm','.webmanifest']);
   const walk = dir => {
     for (const name of readdirSync(dir)) {
       const path = join(dir, name);
