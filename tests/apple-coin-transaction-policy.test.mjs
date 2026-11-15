@@ -5,7 +5,7 @@ import { validateVerifiedAppleCoinTransaction as validate } from '../supabase/fu
 const base = {
   bundleId: 'com.rikuto.mushiverse', productId: 'mushiverse.coins.100',
   environment: 'Sandbox', transactionId: '1234567890', originalTransactionId: '1234567890',
-  purchaseDate: 1730000000000, type: 'Consumable',
+  purchaseDate: 1730000000000, signedDate: 1730000001000, type: 'Consumable',
   appAccountToken: '123e4567-e89b-42d3-a456-426614174000',
 };
 const expected = {
