@@ -23,7 +23,12 @@
       art.textContent = 'イラストを表示できません';
       art.classList.add('mvCardArtUnavailable');
     };
-    const speciesUrl = window.mushiverseSpeciesIllustration?.(name,rarity);
+    let speciesUrl = '';
+    try {
+      speciesUrl = window.mushiverseSpeciesIllustration?.(name, rarity) || '';
+    } catch (error) {
+      console.warn('MUSHIVERSE species illustration lookup failed:', error);
+    }
     const legacyUrl = rarity === 'LR' ? new URL('albaseraph.webp', scriptCardBase).href : '';
     const source = speciesUrl || legacyUrl;
     if (!source) {
@@ -44,10 +49,11 @@
         image.src = alternative;
         return;
       }
+      image.remove();
       showUnavailable();
     });
-    image.src = source;
     art.append(image);
+    image.src = source;
     return art;
   };
 })();
