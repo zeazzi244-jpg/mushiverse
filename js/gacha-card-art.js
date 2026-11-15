@@ -49,6 +49,26 @@
         image.src = alternative;
         return;
       }
+      // Some iOS WebViews reject data: SVG images even though inline SVG works.
+      // Render only the locally generated SVG as a last-resort illustration.
+      if (source.startsWith('data:image/svg+xml;charset=UTF-8,') && source.length < 100000) {
+        try {
+          const markup = decodeURIComponent(source.slice('data:image/svg+xml;charset=UTF-8,'.length));
+          const svg = new DOMParser().parseFromString(markup, 'image/svg+xml').documentElement;
+          if (svg.localName === 'svg' && svg.namespaceURI === 'http://www.w3.org/2000/svg' && !svg.querySelector('script,foreignObject,image,use')) {
+            const unsafe = [...svg.querySelectorAll('*'), svg].some(node =>
+              [...node.attributes].some(attr => /^on/i.test(attr.name) || /(?:href|src)$/i.test(attr.name)));
+            if (!unsafe) {
+              svg.setAttribute('role', 'img');
+              svg.setAttribute('aria-label', image.alt);
+              image.replaceWith(document.importNode(svg, true));
+              return;
+            }
+          }
+        } catch (error) {
+          console.warn('MUSHIVERSE inline illustration fallback failed:', error);
+        }
+      }
       image.remove();
       showUnavailable();
     });
