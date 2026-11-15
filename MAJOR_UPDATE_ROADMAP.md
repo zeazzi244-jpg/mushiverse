@@ -24,6 +24,11 @@ Aim for a world-leading insect app. There is no guarantee of reaching #1, but do
 - Keep recurring free awards modest across login bonuses, quests, and events. Evaluate their combined amount in coins and equivalent gacha draws before increasing rewards, adding grants, or changing draw costs.
 - Keep a meaningful free entry point and show earning rates, draw costs, and odds clearly. Keep test grants out of production and paid currency behind verified Apple purchase flows.
 
+### Founder decision: limited LR insect card
+- Add LR above SSR. Launch with exactly one LR card design. The founder will choose its name; leave the name undecided until then.
+- LR has a 0.01% chance per draw while copies are available. Limit issuance to ten copies total across all live servers.
+- Enforce the global issuance cap atomically on the server so simultaneous draws and request retries cannot create an eleventh copy. Clearly display the limit, odds while available, and sold-out status. Set LR odds to 0% after the tenth copy is issued.
+
 ## Product vision
 Turn MUSHIVERSE into a joyful insect discovery adventure: **find real insects, document sightings, learn responsibly, connect with other explorers, and collect fantasy insect cards**. Keep real wildlife observations clearly separate from fictional gacha cards.
 
