@@ -41,7 +41,10 @@ Deno.serve(async (request: Request) => {
     // A rejected or already-finalized claim must not be revalidated through the
     // staging endpoint. Only pending claims are eligible for Sandbox proof.
     // Fulfillment remains disabled regardless of verification outcome.
-    if (claim.environment !== "Sandbox")
+    // Claim submission deliberately stores null until Apple signs the environment.
+    // Permit that untrusted pending state, but only verify an Apple-signed Sandbox JWS.
+    // Any pre-existing non-Sandbox environment is rejected; never trust device metadata.
+    if (claim.environment !== null && claim.environment !== "Sandbox")
       return json({ error: "claim_environment_not_sandbox", credited_or_previously_credited: false }, 409);
     if (claim.status !== "pending")
       return json({ error: "claim_not_pending", credited_or_previously_credited: false }, 409);
