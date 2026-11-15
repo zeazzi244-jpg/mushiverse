@@ -1023,3 +1023,52 @@ body[data-screen="profile"] .wrap > header { display: none; }
     grid-template-columns: minmax(0,1fr);
   }
 }
+
+/* V38: Target the actual mounted gashapon (#mv101Machine). Older #gacha
+   selectors alone miss the controls relocated into .mvWoodActions. */
+#gacha #mv101Machine .mvWoodMachine{
+  width:min(100%,360px);
+  margin:0 auto 6px;
+}
+#gacha #mv101Machine .mvWoodMachine > img{
+  display:block;
+  width:100%;
+  height:auto;
+  max-height:min(42dvh,340px);
+  object-fit:contain;
+}
+#gacha #mv101Machine .mvWoodActions{
+  display:grid;
+  grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:10px;
+  width:100%;
+  margin:6px auto 8px;
+  padding:0;
+}
+#gacha #mv101Machine .mvWoodActions > button{
+  display:block;
+  box-sizing:border-box;
+  width:100%;
+  min-width:0;
+  min-height:54px;
+  margin:0;
+  padding:10px 8px;
+  line-height:1.35;
+  white-space:normal;
+  overflow-wrap:anywhere;
+  touch-action:manipulation;
+}
+#gacha #mv101Machine .mvWoodActions #mv77DrawHint{
+  grid-column:1/-1;
+  margin:0;
+}
+#gacha #mv101Machine #mvWoodStatus{
+  margin:4px 0 8px;
+}
+#gacha #mv101Machine .mvWoodActions > button:focus-visible{
+  outline:3px solid #f5d17b;
+  outline-offset:2px;
+}
+@media(max-width:340px){
+  #gacha #mv101Machine .mvWoodActions{grid-template-columns:1fr}
+}
