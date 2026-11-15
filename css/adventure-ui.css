@@ -906,3 +906,27 @@ body[data-screen="profile"] .wrap > header { display: none; }
   min-width:0;
   max-width:100%;
 }
+
+/* V37: Give high-rarity reveals a distinct, restrained finish without moving
+   the draw controls. The effect stays on the card, not the entire gacha tab. */
+@keyframes mvRareRevealGlow {
+  0% { box-shadow:0 0 0 rgba(246,205,106,0); filter:brightness(.9); }
+  45% { box-shadow:0 0 26px rgba(246,205,106,.55); filter:brightness(1.16); }
+  100% { box-shadow:0 0 10px rgba(246,205,106,.22); filter:brightness(1); }
+}
+@media (prefers-reduced-motion:no-preference) {
+  #gacha :is(.gacha-card,.gacha-result) :is([data-rarity="SSR"],[data-rarity="LR"],.rarity-ssr,.rarity-lr) {
+    animation:mvRareRevealGlow 1.25s ease-out both;
+  }
+}
+@media (prefers-reduced-motion:reduce) {
+  #gacha :is(.gacha-card,.gacha-result) :is([data-rarity="SSR"],[data-rarity="LR"],.rarity-ssr,.rarity-lr) {
+    animation:none!important;
+    filter:none!important;
+  }
+}
+/* Keep rarity effects from intercepting taps or forcing horizontal scrolling. */
+#gacha :is(.gacha-card,.gacha-result) {
+  isolation:isolate;
+  overflow-wrap:anywhere;
+}
