@@ -712,3 +712,44 @@ body[data-screen="profile"] .wrap > header { display: none; }
     max-height:32dvh;
   }
 }
+
+:is(#gacha,#collection) .mvAlbaseraph {
+  max-width: 28rem;
+  margin: 1rem auto;
+  padding: .75rem;
+  border: 1px solid #b7bdd2;
+  border-radius: 1rem;
+  color: #f2f4fc;
+  background: linear-gradient(145deg, #101921, #262843);
+}
+:is(#gacha,#collection) .mvAlbaseraph summary {
+  min-height: 44px;
+  padding: .5rem;
+  cursor: pointer;
+  color: #f2f4fc;
+  overflow-wrap: anywhere;
+}
+:is(#gacha,#collection) .mvAlbaseraph summary:focus-visible {
+  outline: 2px solid #f5d997;
+  outline-offset: 2px;
+}
+:is(#gacha,#collection) .mvAlbaseraphTier {
+  margin-inline: .25rem .5rem;
+  color: #f5d997;
+  font-weight: 800;
+}
+:is(#gacha,#collection) .mvAlbaseraphState {
+  margin-inline-start: .5rem;
+  color: #e1e6ff;
+  font-size: .85em;
+}
+:is(#gacha,#collection) .mvAlbaseraph img {
+  display: block;
+  width: 100%;
+  height: auto;
+  border-radius: .625rem;
+}
+:is(#gacha,#collection) .mvAlbaseraph p {
+  margin: .65rem .35rem .2rem;
+  color: #e6eafa;
+}
