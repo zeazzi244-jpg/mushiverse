@@ -823,3 +823,30 @@ body[data-screen="profile"] .wrap > header { display: none; }
     min-height:48px;
   }
 }
+
+/* V34: Keep the gacha draw action accessible during reveal animations.
+   A delayed or animated result should not cover the next action on small
+   screens, and keyboard focus must remain visible above glowing rarity art. */
+#gacha :is(.gacha-controls,.gacha-actions){
+  position:relative;
+  z-index:1;
+  gap:max(.5rem,8px);
+}
+#gacha :is(.gacha-controls,.gacha-actions) > :is(button,[role="button"]){
+  box-sizing:border-box;
+  min-height:48px;
+  position:relative;
+  touch-action:manipulation;
+}
+#gacha :is(.gacha-controls,.gacha-actions) > :is(button,[role="button"]):focus-visible{
+  outline:3px solid #f3c76b;
+  outline-offset:3px;
+  z-index:2;
+}
+/* The result animation uses transforms and filters, which create stacking
+   contexts; keep them below the interactive draw controls. */
+#gacha .gacha-result{position:relative;z-index:0;min-width:0;}
+@media(prefers-reduced-motion:reduce){
+  #gacha .gacha-result,
+  #gacha .gacha-result *{transition-duration:0s!important;}
+}
