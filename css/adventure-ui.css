@@ -875,3 +875,34 @@ body[data-screen="profile"] .wrap > header { display: none; }
 #gacha :is(.gacha-controls,.gacha-actions) > :is(button,[role="button"])[aria-busy="true"] {
   cursor:progress;
 }
+
+/* V36: Long result captions must not hide the next draw action when iOS
+   Dynamic Type or landscape shrinks the usable WebView height. Keep the
+   result in normal document flow and preserve a visible focus landing area. */
+#gacha :is(.gacha-result,.gacha-card){
+  box-sizing:border-box;
+  max-width:100%;
+  min-width:0;
+}
+#gacha :is(.gacha-controls,.gacha-actions){
+  scroll-margin-block:1.5rem;
+}
+#gacha :is(.gacha-controls,.gacha-actions) > :is(button,[role="button"]){
+  overflow-wrap:anywhere;
+  white-space:normal;
+  line-height:1.4;
+}
+@media(max-height:480px) and (orientation:landscape){
+  #gacha :is(.gacha-card,.gacha-result) :is(img,video,canvas){
+    max-height:32dvh;
+  }
+  #gacha :is(.gacha-controls,.gacha-actions){
+    gap:.5rem;
+  }
+}
+/* Safari can honor min-content widths on grid children despite the outer
+   card's max-width; allow text and reveal artwork to shrink independently. */
+#gacha :is(.gacha-card,.gacha-result) > :is(div,figure,section,article){
+  min-width:0;
+  max-width:100%;
+}
