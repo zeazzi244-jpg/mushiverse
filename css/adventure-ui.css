@@ -985,3 +985,41 @@ body[data-screen="profile"] .wrap > header { display: none; }
 }
 #mv88Reveal .mvGachaSilhouette[hidden], #mv88Reveal .mv88Capsule[hidden],
 #mv88Reveal .mvGachaSilhouette.mvCardArtUnavailable { display: none !important; }
+
+/* V39: Keep the machine's primary draw actions together on compact iPhones.
+   Avoid tall artwork pushing both paid actions below the first viewport. */
+#gacha #mv101Machine .mvWoodActions {
+  position: relative;
+  z-index: 3;
+  margin-block: .4rem .65rem;
+  gap: .5rem;
+}
+#gacha #mv101Machine .mvWoodActions button {
+  min-height: 52px;
+  font-size: clamp(.9rem, 3.8vw, 1.05rem);
+  line-height: 1.35;
+  overflow-wrap: anywhere;
+}
+#gacha #mv101Machine :is(.mvWoodBalance,.mvGachaOdds) {
+  margin-block: .3rem;
+}
+#mv88Reveal .mvSharedCardArt {
+  width: min(100%, 19rem, 38dvh);
+  max-width: 100%;
+}
+#mv88Reveal .mvSharedCardArt img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+@media(max-width:390px) {
+  #gacha #mv101Machine .mvWoodActions {
+    grid-template-columns: repeat(2,minmax(0,1fr));
+  }
+}
+@media(max-width:320px) {
+  #gacha #mv101Machine .mvWoodActions {
+    grid-template-columns: minmax(0,1fr);
+  }
+}
