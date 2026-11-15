@@ -4484,7 +4484,7 @@ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',
 function init(){
  const mount=document.getElementById('mv86GachaMount');if(!mount||document.getElementById('mv101Machine'))return;
  const unit=document.createElement('section');unit.id='mv101Machine';unit.setAttribute('aria-label','ガシャポン筐体イラスト');
- unit.innerHTML='<h2>✦ 幻想昆虫ガチャ</h2><div class="mv101Glass"><span class="mv101Cap" style="background:#ffd47a"></span><span class="mv101Cap" style="background:#c6a4f8"></span><span class="mv101Cap" style="background:#81d4c4"></span></div><div class="mv101Base"><div class="mv101Knob">✣</div><div class="mv101Slot"></div></div><div class="mvGachaRarityHint" aria-label="最高レアリティSSRの紹介"><span class="mvGachaMystery" aria-hidden="true">✦ ? ✦</span><span><strong>SSR · 幻の昆虫</strong><small>出現率 0.1% · 何が出るかはお楽しみ</small></span></div><p style="margin:10px 0 0;font-size:13px">1回50コイン · 10連450コイン</p>';
+ unit.innerHTML='<h2>✦ 幻想昆虫ガチャ</h2><div class="mv101Glass"><span class="mv101Cap" style="background:#ffd47a"></span><span class="mv101Cap" style="background:#c6a4f8"></span><span class="mv101Cap" style="background:#81d4c4"></span></div><div class="mv101Base"><div class="mv101Knob">✣</div><div class="mv101Slot"></div></div><div class="mvGachaRarityHint" aria-label="SSRの紹介"><span class="mvGachaMystery" aria-hidden="true">✦ ? ✦</span><span><strong>SSR · 幻の昆虫</strong><small>出現率 0.1% · 何が出るかはお楽しみ</small></span></div><div class="mvGachaOdds" role="group" aria-label="ガチャの排出率"><h3>レア度別の排出率（1回あたり）</h3><dl><div><dt>SSR</dt><dd>0.1%</dd></div><div><dt>SR</dt><dd>1.9%</dd></div><div><dt>R</dt><dd>18%</dd></div><div><dt>N</dt><dd>80%</dd></div><div><dt>LR</dt><dd>0%（配信前）</dd></div></dl><p>LRは提供開始後、在庫がある間のみ0.01%。全サーバー合計3枚限定です。</p></div><p class="mvGachaPrice" style="margin:10px 0 0;font-size:13px">1回50コイン · 10連450コイン</p>';
  mount.prepend(unit);
 }
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init,{once:true});else init();
@@ -4502,6 +4502,17 @@ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',
 #mv101Machine .mvGachaMystery{display:grid;place-items:center;flex:none;width:56px;height:56px;border-radius:50%;background:radial-gradient(circle,#a98d55,#4a3420 68%,#1c231b);color:#fff3c0;font-size:18px}
 #mv101Machine .mvGachaRarityHint strong,#mv101Machine .mvGachaRarityHint small{display:block;color:#fff8d6}
 #mv101Machine .mvGachaRarityHint small{font-size:12px;line-height:1.5}
+#gacha #mv101Machine{background:#f4faf5!important;color:#173d2f}
+#gacha #mv101Machine h2,#gacha #mv101Machine .mvGachaPrice{color:#173d2f!important}
+#gacha #mv101Machine .mvGachaOdds{margin:12px 0 0;padding:12px;background:#f1f8f2;color:#173d2f;border:1px solid #9abda6;border-radius:14px;text-align:left}
+#gacha #mv101Machine .mvGachaOdds h3{margin:0;color:#173d2f;font-size:15px}
+#gacha #mv101Machine .mvGachaOdds dl{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:6px 12px;margin:10px 0}
+#gacha #mv101Machine .mvGachaOdds dl>div{display:flex;flex-wrap:wrap;justify-content:space-between;gap:3px 8px;border-bottom:1px solid #b3ccbb;padding-block:3px}
+#gacha #mv101Machine .mvGachaOdds dt{font-weight:800}
+#gacha #mv101Machine .mvGachaOdds dd{margin:0;font-variant-numeric:tabular-nums}
+#gacha #mv101Machine .mvGachaOdds p{margin:0;color:#365446;font-size:12px;line-height:1.6}
+@media(max-width:350px){#gacha #mv101Machine .mvGachaOdds dl{grid-template-columns:minmax(0,1fr)}}
+
 </style>
 <style id="mv102-polish">
 #mv88Reveal .mv88Stage[hidden],#mv88Reveal .mv88Results[hidden]{display:none!important}
