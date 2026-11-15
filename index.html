@@ -4063,7 +4063,7 @@ function showGachaReveal(got){
  const note=document.createElement('p');note.className='mv88Fairness';note.textContent='獲得カードは抽選時に確定済みです。演出・スキップ操作で結果や排出率は変わりません。';inner.append(title,phase,stage,result,note,btn);overlay.append(inner);document.body.append(overlay);
  let revealed=false;let timer;let phaseTimer;let preludeTimer;const previous=document.activeElement;
  const reveal=()=>{if(revealed)return;revealed=true;overlay.classList.add('mv88-'+top);clearTimeout(preludeTimer);prelude.hidden=true;document.dispatchEvent(new CustomEvent('mushiverse:rarity-reveal',{detail:{rarity:top}}));if(top==='SR'||top==='SSR')overlay.classList.add('mv103Rare');clearTimeout(timer);clearInterval(phaseTimer);phase.hidden=true;stage.hidden=true;result.hidden=false;result.replaceChildren(...got.map(c=>{const card=document.createElement('div');card.className='mv88Card mv88Card-'+c.rarity;const emblem=document.createElement('div');emblem.className='mv88Emblem';emblem.textContent=c.name.includes('チョウ')?'🦋':c.name.includes('テントウ')?'🐞':c.name.includes('バッタ')?'🦗':'🪲';const tier=document.createElement('strong');tier.textContent=c.rarity;const name=document.createElement('span');name.textContent=c.name;card.append(emblem,tier,name);return card}));btn.textContent='ガチャに戻る';btn.setAttribute('aria-label','ガチャ画面に戻る');if(top==='SSR'&&!matchMedia('(prefers-reduced-motion: reduce)').matches){overlay.classList.add('mv88Burst');try{navigator.vibrate?.([60,40,120])}catch(_){}}};
- const close=()=>{clearTimeout(timer);clearTimeout(preludeTimer);clearInterval(phaseTimer);overlay.remove();if(window.mvCloseGachaReveal===close)delete window.mvCloseGachaReveal;document.removeEventListener('keydown',keyHandler);if(previous&&previous.isConnected)previous.focus()};
+ const close=()=>{clearTimeout(timer);clearTimeout(preludeTimer);clearInterval(phaseTimer);document.dispatchEvent(new Event('mushiverse:gacha-audio-close'));overlay.remove();if(window.mvCloseGachaReveal===close)delete window.mvCloseGachaReveal;document.removeEventListener('keydown',keyHandler);if(previous&&previous.isConnected)previous.focus()};
  const keyHandler=e=>{if(e.key==='Escape'){e.preventDefault();if(!revealed)reveal();else close()}if(e.key==='Tab'){e.preventDefault();btn.focus()}};
  window.mvCloseGachaReveal=close;document.addEventListener('keydown',keyHandler);btn.addEventListener('click',()=>revealed?close():reveal());
  // Taps outside the button never dismiss the result by accident.
@@ -4090,6 +4090,7 @@ function showGachaReveal(got){
  else{
   stage.hidden=true;prelude.hidden=false;
   phase.textContent='ハンドルを回して、カプセルを取り出す…';
+  document.dispatchEvent(new Event('mushiverse:gacha-audio-prelude'));
   preludeTimer=setTimeout(startPhases,1050);
  }
  btn.focus();
@@ -4581,38 +4582,7 @@ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',
 @keyframes mv103Title{from{transform:scale(1);opacity:.8}to{transform:scale(1.08);opacity:1}}
 @media(prefers-reduced-motion:reduce){.mv88Reveal.mv103Rare .mv88Title{animation:none!important}}
 </style>
-<script id="mv103-rarity-sfx">
-(()=>{'use strict';
-let audio;
-function tone(f,start,duration,gain,kind){
- const o=audio.createOscillator(),g=audio.createGain(),t=audio.currentTime+start;
- o.type=kind||'sine';o.frequency.setValueAtTime(f,t);o.frequency.exponentialRampToValueAtTime(f*1.3,t+duration);
- g.gain.setValueAtTime(.0001,t);g.gain.exponentialRampToValueAtTime(gain,t+.015);g.gain.exponentialRampToValueAtTime(.0001,t+duration);
- o.connect(g).connect(audio.destination);o.start(t);o.stop(t+duration+.01);
-}
-function audible(){try{return localStorage.getItem('mushiverse-tap-sounds-enabled')!=='false'}catch{return false}}
-document.addEventListener('mushiverse:gacha-audio-start',()=>{
- if(!audible())return;
- const Audio=window.AudioContext||window.webkitAudioContext;
- if(!Audio)return;
- try{audio=audio||new Audio();if(audio.state!=='running')void audio.resume().catch(()=>{})}catch{}
-});
-document.addEventListener('mushiverse:gacha-audio-phase',event=>{
- if(!audio||!audible())return;
- const notes=[[110,165],[220,330],[330,495,660]][event.detail];
- for(const [index,frequency] of notes.entries())tone(frequency,index*.07,.14,.035,'triangle');
-});
-document.addEventListener('mushiverse:rarity-reveal',e=>{
- try{
-  if(!audio||!audible())return;
-  const rank=e.detail?.rarity;if(rank!=='SR'&&rank!=='SSR')return;
-  const notes=rank==='SSR'?[523,659,784,1047,1319]:[392,494,587];
-  notes.forEach((f,i)=>tone(f,i*.13,.25,rank==='SSR'?.055:.035,'triangle'));
-  if(!window.matchMedia?.('(prefers-reduced-motion: reduce)').matches)navigator.vibrate?.(rank==='SSR'?[60,40,120]:[40]);
- }catch{}
-});
-})();
-</script>
+<script src="js/forest-gacha-audio.js"></script>
 
 <style id="mv104-ranking-style">
 #mv104Ranking{margin:18px auto;padding:16px;border-radius:18px;background:#f0f9ed;border:1px solid #b1d4ae;color:#234b31;max-width:650px}
@@ -5005,10 +4975,7 @@ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',
 </script><script id="mv125RuntimeBannerMount">(function(){function move(){const banner=document.getElementById('v43RuntimeAlert'),hud=document.getElementById('mv116Hud');if(banner&&hud&&banner.parentNode!==hud.parentNode){hud.insertAdjacentElement('afterend',banner)}else if(banner&&hud&&banner.previousElementSibling!==hud)hud.insertAdjacentElement('afterend',banner)}if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',move);else move();})();</script><style id="mvKidPhotoStyles">#mvKidPhotoActions{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin:8px 0}#mvKidPhotoActions button{min-height:60px;white-space:normal;font-size:16px;font-weight:750;padding:12px 7px;border-radius:14px}#mvKidPhotoSelected{display:block;margin:4px 0 8px;color:#386448}@media(max-width:340px){#mvKidPhotoActions{grid-template-columns:1fr}}</style>
 <script id="mvKidPhotoScript">(function(){const photo=document.getElementById('photo');const camera=document.getElementById('mvKidTakePhoto');const choose=document.getElementById('mvKidChoosePhoto');const status=document.getElementById('mvKidPhotoSelected');if(!photo||!camera||!choose)return;camera.addEventListener('click',function(){photo.setAttribute('capture','environment');photo.click()});choose.addEventListener('click',function(){photo.removeAttribute('capture');photo.click()});photo.addEventListener('change',function(){status.textContent=photo.files&&photo.files.length?'選択した写真：'+photo.files[0].name:'写真はまだ選ばれていません'})})();</script>
 
-<!-- mv127-gacha-sound -->
-<script id="mv127-gacha-sound">
-(()=>{'use strict';const K='mushiverse-gacha-volume';let ctx;const read=()=>{try{const v=Number(localStorage.getItem(K));return localStorage.getItem(K)===null?.35:Math.max(0,Math.min(.6,Number.isFinite(v)?v:.35))}catch{return .35}};function sound(notes){if(document.hidden||read()===0||localStorage.getItem('mushiverse-tap-sounds-enabled')==='false')return;try{const AC=window.AudioContext||window.webkitAudioContext;if(!AC)return;ctx=ctx||new AC();if(ctx.state==='suspended')ctx.resume().catch(()=>{});const t=ctx.currentTime;notes.forEach(([hz,offset,duration],i)=>{const o=ctx.createOscillator(),g=ctx.createGain();o.type='sine';o.frequency.setValueAtTime(hz,t+offset);g.gain.setValueAtTime(.0001,t+offset);g.gain.exponentialRampToValueAtTime(read()*.065+.0001,t+offset+.025);g.gain.exponentialRampToValueAtTime(.0001,t+offset+duration);o.connect(g).connect(ctx.destination);o.start(t+offset);o.stop(t+offset+duration+.01)})}catch{}}document.addEventListener('mushiverse:rarity-reveal',e=>{const r=e.detail?.rarity;if(r==='N')sound([[440,0,.12],[550,.12,.18]]);else if(r==='R')sound([[523,0,.13],[659,.12,.16],[784,.24,.3]]);else if(r==='SR'||r==='SSR')sound([[220,0,.18],[330,.2,.25]])});document.addEventListener('click',e=>{if(e.target?.closest?.('#mv77Draw,#mv77Ten'))sound([[330,0,.1],[440,.1,.12],[660,.22,.2]])},true);})();
-</script>
+
 
 <style id="mv128-public-settings-style">
 #mv128Settings{background:#f4faf3;border:1px solid #b8d4bf;border-radius:16px;padding:15px;margin:12px 0;color:#204b33}
