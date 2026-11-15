@@ -80,6 +80,17 @@ for (const relative of requiredAssets) {
     throw new Error('Release bundle is missing required startup asset: ' + relative);
   }
 }
+// Every tier and the cabinet must be available offline in Capacitor.
+const gachaImages = [
+  'assets/gacha/forest-machine.webp',
+  ...['gacha-n', 'gacha-r', 'gacha-sr', 'gacha-ssr', 'albaseraph'].map(name => 'assets/cards/' + name + '.webp'),
+];
+for (const relative of gachaImages) {
+  const path = join(staging, relative);
+  if (!existsSync(path) || !lstatSync(path).isFile() || lstatSync(path).size === 0) {
+    throw new Error('Release bundle is missing gacha artwork: ' + relative);
+  }
+}
 const html = readFileSync(join(staging, 'index.html'), 'utf8');
 if (!/<body\b/i.test(html) || !/<script\b/i.test(html)) {
   throw new Error('Release index.html has no app body or startup script');

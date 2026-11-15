@@ -977,3 +977,11 @@ body[data-screen="profile"] .wrap > header { display: none; }
 #gacha #mv101Machine .mvWoodAudio summary { min-height: 36px; cursor: pointer; font-weight: 700; }
 #gacha #mv101Machine .mvWoodAudio label { display: flex; align-items: center; gap: .65rem; min-height: 44px; }
 #gacha #mv101Machine .mvWoodAudio input[type=range] { flex: 1; min-width: 0; }
+
+#mv88Reveal .mvGachaSilhouette {
+  width: min(55%, 10rem);
+  background: transparent;
+  filter: saturate(.35) brightness(.42) drop-shadow(0 0 12px #ffdb81);
+}
+#mv88Reveal .mvGachaSilhouette[hidden], #mv88Reveal .mv88Capsule[hidden],
+#mv88Reveal .mvGachaSilhouette.mvCardArtUnavailable { display: none !important; }
