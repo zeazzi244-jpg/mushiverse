@@ -11,6 +11,7 @@
   function volume() {
     try {
       if (localStorage.getItem('mushiverse-tap-sounds-enabled') === 'false') return 0;
+      if (localStorage.getItem('mushiverse-gacha-mute') === 'true') return 0;
       const stored = localStorage.getItem('mushiverse-gacha-volume');
       const level = stored === null ? 0.35 : Number(stored);
       return Math.min(0.6, Math.max(0, Number.isFinite(level) ? level : 0.35));
