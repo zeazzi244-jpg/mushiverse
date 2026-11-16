@@ -30,18 +30,16 @@
       console.warn('MUSHIVERSE species illustration lookup failed:', error);
     }
     const legacyUrl = rarity === 'LR' ? new URL('albaseraph.webp', scriptCardBase).href : '';
-    const source = speciesUrl || legacyUrl;
-    if (!source) {
-      showUnavailable();
-      return art;
-    }
+    // Missing species art must not leave ordinary N/R/SR/SSR cards blank.
+    // Use the bundled tier illustration even when the species resolver is absent.
+    const tierName = ['N', 'R', 'SR', 'SSR'].includes(rarity) ? 'gacha-' + rarity.toLowerCase() + '.webp' : 'albaseraph.webp';
+    const tierFallback = new URL(tierName, scriptCardBase).href;
+    const rootFallback = new URL(tierName, rootCardBase).href;
+    const source = speciesUrl || legacyUrl || tierFallback;
     const image = document.createElement('img');
     image.alt = name ? name + 'のイラスト' : 'LRカードのイラスト';
     image.loading = eager ? 'eager' : 'lazy';
     image.decoding = 'async';
-    const tierName = ['N', 'R', 'SR', 'SSR'].includes(rarity) ? 'gacha-' + rarity.toLowerCase() + '.webp' : 'albaseraph.webp';
-    const tierFallback = new URL(tierName, scriptCardBase).href;
-    const rootFallback = new URL(tierName, rootCardBase).href;
     let fallbackStage = 0;
     image.addEventListener('error', () => {
       // Older installed WebViews may retain a stale script URL after an update.
