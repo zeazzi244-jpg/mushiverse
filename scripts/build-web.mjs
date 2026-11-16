@@ -210,6 +210,19 @@ function validateBundledCss(directory) {
         throw new Error('Bundled CSS references missing local import in ' + name + ': ' + raw);
       }
     }
+    // Fonts are required for readable labels. Do not ship a font-face whose
+    // src silently depends on a CDN while the native WebView is offline.
+    for (const fontFace of stylesheet.matchAll(/@font-face\s*\{([^}]*)\}/gi)) {
+      const declarations = fontFace[1];
+      for (const src of declarations.matchAll(/(?:^|;)\s*src\s*:\s*([^;]+)/gi)) {
+        for (const url of src[1].matchAll(/url\(\s*(?:["']([^"']+)["']|([^\s)]+))\s*\)/gi)) {
+          const value = (url[1] || url[2] || '').trim();
+          if (/^(?:[a-z][a-z\d+.-]*:|\/\/)/i.test(value) && !/^data:/i.test(value)) {
+            throw new Error('Bundled CSS has remote font dependency in ' + name + ': ' + value);
+          }
+        }
+      }
+    }
     for (const match of stylesheet.matchAll(/url\(\s*(?:"([^"]+)"|'([^']+)'|([^\s)]+))\s*\)/gi)) {
       const raw = (match[1] || match[2] || match[3]).trim();
       if (!raw || raw.startsWith('#') || /^(?:data:|https?:|\/\/)/i.test(raw)) continue;
