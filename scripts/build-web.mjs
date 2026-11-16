@@ -190,7 +190,7 @@ function validateBundledCss(directory) {
       if (!raw) continue;
       // Imported stylesheets are required to render the native UI. A remote
       // import can disappear offline and leave labels unreadable.
-      if (/^(?:[a-z][a-z\\d+.-]*:|\\/\\/)/i.test(raw)) {
+      if (/^(?:[a-z][a-z\d+.-]*:|\/\/)/i.test(raw)) {
         throw new Error('Bundled CSS has remote import in ' + name + ': ' + raw);
       }
       const url = raw.split(/[?#]/, 1)[0];
