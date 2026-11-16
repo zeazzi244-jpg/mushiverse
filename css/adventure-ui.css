@@ -1087,3 +1087,19 @@ body[data-screen="profile"] .wrap > header { display: none; }
 .nav button.active{color:#123f2a;font-weight:800}
 .nav button:focus-visible{outline:3px solid #b87915;outline-offset:-3px}
 @media(max-width:350px){.nav{gap:0}.nav button{padding-inline:1px;font-size:10px}}
+
+/* Keep draw actions together even when the result media is tall. The two
+   controls share available space and wrap only on genuinely narrow screens. */
+#gacha :is(.gacha-controls,.gacha-actions){
+  display:flex;
+  align-items:stretch;
+  gap:.65rem;
+}
+#gacha :is(.gacha-controls,.gacha-actions) > :is(button,[role="button"]){
+  flex:1 1 9rem;
+  min-width:0;
+  margin-block:0;
+}
+@media(max-width:360px){
+  #gacha :is(.gacha-controls,.gacha-actions) > :is(button,[role="button"]){flex-basis:100%;}
+}
