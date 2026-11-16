@@ -1,5 +1,7 @@
 import "jsr:@supabase/functions-js/edge-runtime.d.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import { isAppleCoinProduct } from "../_shared/apple-coin-transaction-policy.mjs";
+const premiumProducts = new Set(["jp.mushiverse.premium.monthly", "jp.mushiverse.premium.annual"]);
 const cors={"Access-Control-Allow-Origin":"*","Access-Control-Allow-Headers":"authorization, x-client-info, apikey, content-type","Access-Control-Allow-Methods":"POST,OPTIONS"};
 const json=(b:any,s=200)=>new Response(JSON.stringify(b),{status:s,headers:{...cors,"Content-Type":"application/json","Cache-Control":"no-store","X-Content-Type-Options":"nosniff"}});
 Deno.serve(async(req)=>{
@@ -26,13 +28,13 @@ Deno.serve(async(req)=>{
     try{body=JSON.parse(rawBody)}catch{return json({error:"invalid_json"},400)}
     if(!body||typeof body!=="object"||Array.isArray(body))return json({error:"invalid_body"},400);
     const transactionId=body.transaction_id;
-    const originalTransactionId=body.original_transaction_id||null;
+    const originalTransactionId=body.original_transaction_id??null;
     const productId=body.product_id;
-    const environment=body.environment||null;
+    const environment=body.environment??null;
     if(typeof transactionId!=="string"||!/^\d{6,30}$/.test(transactionId)) return json({error:"invalid_transaction_id"},400);
     if(originalTransactionId!==null&&(typeof originalTransactionId!=="string"||!/^\d{6,30}$/.test(originalTransactionId)))
       return json({error:"invalid_original_transaction_id"},400);
-    if(typeof productId!=="string"||!["jp.mushiverse.premium.monthly","jp.mushiverse.premium.annual","mushiverse.coins.100","mushiverse.coins.500","mushiverse.coins.1200"].includes(productId))
+    if(typeof productId!=="string"||(!isAppleCoinProduct(productId)&&!premiumProducts.has(productId)))
       return json({error:"invalid_product_id"},400);
     // Every Apple transaction, including consumable coin packs, has an original transaction ID.
     // Require it at claim time so the Sandbox verifier cannot be bypassed or dead-ended.
@@ -58,10 +60,12 @@ Deno.serve(async(req)=>{
     if(originalTransactionId){
       if(!/^\d{6,}$/.test(originalTransactionId)) return json({error:"invalid_original_transaction_id"},400);
       const {data:chain,error:chainError}=await admin.from("apple_purchase_claims")
-        .select("user_id").eq("original_transaction_id",originalTransactionId).limit(1);
+        .select("user_id,product_id").eq("original_transaction_id",originalTransactionId).limit(2);
       if(chainError) throw chainError;
-      if(chain?.length && chain[0].user_id!==user.id)
+      if(chain?.some((row:any)=>row.user_id!==user.id))
         return json({error:"subscription_already_claimed"},409);
+      if(chain?.some((row:any)=>row.product_id!==productId))
+        return json({error:"original_transaction_chain_conflict"},409);
     }
 
     // Rate-limit new unverified claims. Replaying an existing transaction

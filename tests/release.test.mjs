@@ -456,7 +456,9 @@ test('coin store stays disabled until verified native crediting and spending exi
   assert.ok(start >= 0, 'Coin store preview missing');
   const coinStore = html.slice(start, html.indexOf('</script>', start));
   assert.match(coinStore, /button\.disabled=true/, 'Coin purchases must not be enabled by a preview');
-  assert.match(coinStore, /serverCreditEnabled===true/, 'Verified server credit gate missing');
+  const store = readFileSync('ios/App/App/MushiverseCoinStore.swift','utf8');
+  assert.match(store, /static let purchasesEnabled = false/, 'Native release gate must be closed');
+  assert.doesNotMatch(coinStore, /\.purchase\s*\(/, 'Web preview may only open the native viewer');
   assert.match(coinStore, /現在は購入・請求できません/, 'Users must see clear unavailable status');
   assert.match(coinStore, /ガチャでの使用は準備中/, 'Purchased coin spending must not be implied ready');
 });
@@ -466,7 +468,7 @@ test('Apple claims accept only registered subscription product identifiers', () 
   const source = readFileSync('supabase/functions/submit-apple-purchase-claim/index.ts', 'utf8');
   assert.match(source, /jp\.mushiverse\.premium\.monthly/);
   assert.match(source, /jp\.mushiverse\.premium\.annual/);
-  assert.match(source, /\.includes\(productId\)/, 'Product ID must be exact allowlist match');
+  assert.match(source, /premiumProducts\.has\(productId\)/, 'Subscription must match an exact product ID');
   assert.ok(!source.includes('if(!/^jp'), 'Open-ended product prefix is unsafe');
 });
 
@@ -490,7 +492,7 @@ test('subscription renewal claims cannot cross user accounts', () => {
   const source = readFileSync('supabase/functions/submit-apple-purchase-claim/index.ts', 'utf8');
   assert.match(source, /subscription_already_claimed/);
   assert.match(source, /original_transaction_id",originalTransactionId/);
-  assert.match(source, /chain\[0\]\.user_id!==user\.id/);
+  assert.match(source, /chain\?\.some\(.*?row\.user_id!==user\.id/);
   assert.match(source, /invalid_original_transaction_id/);
   assert.ok(source.indexOf('subscription_already_claimed') < source.indexOf('.insert({'),
     'Renewal ownership must be checked before inserting a claim');
@@ -540,7 +542,7 @@ test('Apple purchase claims are rate-limited after idempotent replay checks', ()
 });
 
 
-test('coin shop preview shows agreed 100/500/1200 packs and proposed prices', () => {
+test('coin shop preview shows seven packs and proposed prices', () => {
   const html = readFileSync('index.html', 'utf8');
   const start = html.indexOf('<script id="mv134-coin-store">');
   const end = html.indexOf('</script>', start);
@@ -548,22 +550,26 @@ test('coin shop preview shows agreed 100/500/1200 packs and proposed prices', ()
   const store = html.slice(start, end);
   for (const [id, coins, price] of [
     ['mushiverse.coins.100', 100, 160],
+    ['mushiverse.coins.300', 300, 320],
     ['mushiverse.coins.500', 500, 480],
-    ['mushiverse.coins.1200', 1200, 980]
+    ['mushiverse.coins.1200', 1200, 980],
+    ['mushiverse.coins.2500', 2500, 1800],
+    ['mushiverse.coins.5500', 5500, 3600],
+    ['mushiverse.coins.12000', 12000, 7800]
   ]) {
     assert.ok(store.includes("id:'" + id + "',coins:" + coins + ",priceYen:" + price),
       id + ' should have the agreed coin count and proposed yen price');
   }
-  assert.doesNotMatch(store, /mushiverse\.coins\.550/);
+  assert.doesNotMatch(store, /mushiverse\.coins\.550['"]/);
   assert.match(store, /button\.disabled=true/, 'Purchases stay disabled until Apple verification');
   assert.match(store, /正式な価格はAppleの商品登録後に確定します/);
 });
 
 test('server accepts the new 500-coin product ID, not the retired 550-coin ID', () => {
-  const source = readFileSync('supabase/functions/submit-apple-purchase-claim/index.ts','utf8');
+  const source = readFileSync('supabase/functions/_shared/apple-coin-transaction-policy.mjs','utf8');
   for (const id of ['mushiverse.coins.100', 'mushiverse.coins.500', 'mushiverse.coins.1200'])
-    assert.ok(source.includes('"' + id + '"'), id + ' must be in the allowlist');
-  assert.doesNotMatch(source, /mushiverse\.coins\.550/);
+    assert.ok(source.includes("'" + id + "'"), id + ' must be in the allowlist');
+  assert.doesNotMatch(source, /mushiverse\.coins\.550['"]/);
 });
 
 

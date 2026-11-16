@@ -1,6 +1,7 @@
 import "jsr:@supabase/functions-js/edge-runtime.d.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import { verifyAppleCoinJws } from "../_shared/apple-coin-jws-verifier.ts";
+import { isAppleCoinProduct } from "../_shared/apple-coin-transaction-policy.mjs";
 
 // Sandbox verification-only staging: do not persist trusted events or grant coins
 // before the release gate and atomic fulfillment integration are independently proven.
@@ -48,7 +49,7 @@ Deno.serve(async (request: Request) => {
       return json({ error: "claim_environment_not_sandbox", credited_or_previously_credited: false }, 409);
     if (claim.status !== "pending")
       return json({ error: "claim_not_pending", credited_or_previously_credited: false }, 409);
-    if (!["mushiverse.coins.100", "mushiverse.coins.500", "mushiverse.coins.1200"].includes(claim.product_id))
+    if (!isAppleCoinProduct(claim.product_id))
       return json({ error: "not_coin_product" }, 400);
     if (!claim.original_transaction_id || !idPattern.test(claim.original_transaction_id))
       return json({ error: "original_transaction_required" }, 400);

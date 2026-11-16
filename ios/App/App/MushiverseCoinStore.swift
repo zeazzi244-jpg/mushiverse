@@ -9,11 +9,24 @@ final class MushiverseCoinStore: ObservableObject {
     // Compile-time release gate. Never enable from JavaScript, remote config or localStorage.
     static let purchasesEnabled = false
 
-    static let productIDs: Set<String> = [
-        "mushiverse.coins.100",
-        "mushiverse.coins.500",
-        "mushiverse.coins.1200"
-    ]
+    static let coinPacks: [(id: String, coins: Int)] = [100, 300, 500, 1200, 2500, 5500, 12000].map {
+        ("mushiverse.coins.\($0)", $0)
+    }
+    static let premiumID = "jp.mushiverse.premium.monthly"
+    static let adventurePassID = "jp.mushiverse.adventure.pass.30d"
+    static let productIDs = Set(coinPacks.map { $0.id } + [premiumID, adventurePassID])
+
+    private static func expectedType(_ id: String) -> Product.ProductType? {
+        switch id {
+        case premiumID: return .autoRenewable
+        case adventurePassID: return .nonRenewable
+        default: return coinPacks.contains(where: { $0.id == id }) ? .consumable : nil
+        }
+    }
+
+    var canPurchase: Bool {
+        Self.purchasesEnabled && AppStore.canMakePayments && !isPurchasing && !isRetrying
+    }
 
     @Published private(set) var products: [Product] = []
     @Published private(set) var isPurchasing = false
@@ -81,8 +94,7 @@ final class MushiverseCoinStore: ObservableObject {
         let generation = productLoadGeneration
         do {
             let fetched = try await Product.products(for: Self.productIDs)
-                .filter { $0.type == .consumable }
-                .sorted { $0.price < $1.price }
+                .filter { Self.expectedType($0.id) == $0.type }
             guard !Task.isCancelled, productLoadGeneration == generation else { return }
             products = fetched
             lastError = nil
@@ -98,12 +110,15 @@ final class MushiverseCoinStore: ObservableObject {
             lastError = "現在は販売準備中です。購入はできません。"
             return
         }
-        guard isStarted, !Task.isCancelled, Self.productIDs.contains(product.id), product.type == .consumable, products.contains(where: { $0.id == product.id }), !isPurchasing, !isRetrying else { return }
+        guard isStarted, !Task.isCancelled, canPurchase, Self.expectedType(product.id) == .consumable,
+              product.type == .consumable, products.contains(where: { $0.id == product.id }) else { return }
+        let generation = lifecycleGeneration
         isPurchasing = true
         lastError = nil
         defer { isPurchasing = false }
         do {
             let accountID = try await appAccountToken()
+            guard isStarted, lifecycleGeneration == generation, !Task.isCancelled else { return }
             switch try await product.purchase(options: [.appAccountToken(accountID)]) {
             case .success(let verification):
                 await process(verification)
@@ -126,7 +141,7 @@ final class MushiverseCoinStore: ObservableObject {
             lastError = "Appleによる購入確認に失敗しました"
             return
         }
-        guard Self.productIDs.contains(transaction.productID),
+        guard Self.expectedType(transaction.productID) == .consumable,
               transaction.productType == .consumable,
               transaction.revocationDate == nil else { return }
         // Do not send concurrent credit requests for the same transaction.
@@ -142,19 +157,19 @@ final class MushiverseCoinStore: ObservableObject {
             guard creditEndpoint.scheme == "https", creditEndpoint.host?.lowercased() == "jhowxtdemlsmetcwhekr.supabase.co", creditEndpoint.path == "/functions/v1/credit-apple-gacha-coins" else {
                 throw PurchaseError.serverRejected
             }
-            var request = URLRequest(url: creditEndpoint)
-            request.timeoutInterval = 20
-            request.cachePolicy = .reloadIgnoringLocalCacheData
-            request.httpMethod = "POST"
-            request.setValue("Bearer " + token, forHTTPHeaderField: "Authorization")
-            request.setValue("application/json", forHTTPHeaderField: "Content-Type")
-            request.httpBody = try JSONEncoder().encode(CreditRequest(
-                signedTransaction: result.jwsRepresentation
-            ))
-            let (data, response) = try await URLSession.shared.data(for: request)
-            guard let http = response as? HTTPURLResponse, http.statusCode == 200 else {
-                throw PurchaseError.serverRejected
-            }
+            let claimEndpoint = creditEndpoint.deletingLastPathComponent().appendingPathComponent("submit-apple-purchase-claim")
+            let (_, claimResponse) = try await post(
+                ClaimRequest(transactionID: String(transaction.id),
+                             originalTransactionID: String(transaction.originalID), productID: transaction.productID),
+                to: claimEndpoint, token: token
+            )
+            guard claimResponse.statusCode == 200 else { throw PurchaseError.serverRejected }
+            guard isStarted, lifecycleGeneration == generation, !Task.isCancelled else { return }
+            let (data, response) = try await post(
+                CreditRequest(transactionID: String(transaction.id), signedTransaction: result.jwsRepresentation),
+                to: creditEndpoint, token: token
+            )
+            guard response.statusCode == 200 else { throw PurchaseError.serverRejected }
             let receipt = try JSONDecoder().decode(CreditResponse.self, from: data)
             guard isStarted, lifecycleGeneration == generation, !Task.isCancelled else { return }
             guard receipt.creditedOrPreviouslyCredited,
@@ -170,9 +185,35 @@ final class MushiverseCoinStore: ObservableObject {
         }
     }
 
+    private func post<Body: Encodable>(_ body: Body, to endpoint: URL, token: String) async throws -> (Data, HTTPURLResponse) {
+        var request = URLRequest(url: endpoint)
+        request.timeoutInterval = 20
+        request.cachePolicy = .reloadIgnoringLocalCacheData
+        request.httpMethod = "POST"
+        request.setValue("Bearer " + token, forHTTPHeaderField: "Authorization")
+        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        request.httpBody = try JSONEncoder().encode(body)
+        let (data, response) = try await URLSession.shared.data(for: request)
+        guard let response = response as? HTTPURLResponse else { throw PurchaseError.serverRejected }
+        return (data, response)
+    }
+
+    private struct ClaimRequest: Encodable {
+        let transactionID: String
+        let originalTransactionID: String
+        let productID: String
+        enum CodingKeys: String, CodingKey {
+            case transactionID = "transaction_id"
+            case originalTransactionID = "original_transaction_id"
+            case productID = "product_id"
+        }
+    }
+
     private struct CreditRequest: Encodable {
+        let transactionID: String
         let signedTransaction: String
         enum CodingKeys: String, CodingKey {
+            case transactionID = "transaction_id"
             case signedTransaction = "signed_transaction"
         }
     }

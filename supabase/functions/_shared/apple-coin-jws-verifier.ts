@@ -1,7 +1,7 @@
 // Server-only Apple JWS verification. NEVER trust decoded JWS payloads directly.
 // Requires Apple's pinned root certificates, provisioned securely as base64 DER.
 import { Environment, SignedDataVerifier } from "npm:@apple/app-store-server-library@1.5.0";
-import { validateVerifiedAppleCoinTransaction } from "./apple-coin-transaction-policy.mjs";
+import { isAppleCoinProduct, validateVerifiedAppleCoinTransaction } from "./apple-coin-transaction-policy.mjs";
 
 function decodeDer(encoded: string): Uint8Array {
   if (!/^[A-Za-z0-9+/]+={0,2}$/.test(encoded) || encoded.length > 16384)
@@ -27,7 +27,7 @@ export async function verifyAppleCoinJws(signedTransaction: string, expected: {
     throw new Error("invalid_expected_environment");
   // Validate server-derived claim fields before network-backed certificate checks.
   // A malformed or unsupported claim must never reach Apple verification.
-  if (!["mushiverse.coins.100", "mushiverse.coins.500", "mushiverse.coins.1200"].includes(expected.productId))
+  if (!isAppleCoinProduct(expected.productId))
     throw new Error("invalid_expected_product");
   if (!/^\d{6,30}$/.test(expected.transactionId) ||
       !/^\d{6,30}$/.test(expected.originalTransactionId))

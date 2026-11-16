@@ -1,10 +1,11 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
+import {isAppleCoinProduct} from '../supabase/functions/_shared/apple-coin-transaction-policy.mjs';
 
 // Exercise the checked-in fail-closed endpoint, not a mocked replacement response.
 // Before a trusted Apple JWS verifier is deployed, requests MUST NOT credit coins.
-function harness({user = {id:'user-a'}, configured = true} = {}) {
+function harness({user = {id:'user-a'}, configured = true, productId = 'mushiverse.coins.100', environment = null, validSignature = false} = {}) {
   const source = readFileSync('supabase/functions/credit-apple-gacha-coins/index.ts','utf8')
     .replace(/^import .*;\s*$/gm,'')
     .replace('(body: Record<string, unknown>, status', '(body, status')
@@ -19,16 +20,27 @@ function harness({user = {id:'user-a'}, configured = true} = {}) {
   const client = {
     auth:{getUser:async()=>{calls.getUser++; return {data:{user},error:null}}},
     from:()=>({select:()=>({eq:(column)=>column==="original_transaction_id"
-      ? {neq:()=>({limit:async()=>({data:[]})})}
+      ? {
+          neq:()=>({limit:async()=>({data:[]})}),
+          eq:()=>({or:()=>({limit:async()=>({data:[]})})})
+        }
       : {limit:async()=>({data:[{
           user_id:user.id,transaction_id:"123456",original_transaction_id:"123456",
-          product_id:"mushiverse.coins.100",status:"pending",environment:"Sandbox"
+          product_id:productId,status:"pending",environment
         }]})}
     })}),
     rpc:()=>{calls.rpc++; throw new Error('Coin credit RPC must never run before verification')}
   };
   const createClient = ()=>{calls.client++; return client};
-  new Function('Deno','createClient','Response','verifyAppleCoinJws',source)(deno,createClient,Response,async()=>{calls.verifier++;throw Error('invalid signature')});
+  new Function('Deno','createClient','Response','verifyAppleCoinJws','isAppleCoinProduct',source)(
+    deno,createClient,Response,async(_jws, expected)=>{
+      calls.verifier++;
+      assert.equal(expected.environment,'Sandbox');
+      assert.equal(expected.productId,productId);
+      if(!validSignature)throw Error('invalid signature');
+      return {transactionId:expected.transactionId};
+    }, isAppleCoinProduct
+  );
   assert.equal(typeof handler,'function');
   const send = async (method='POST', bearer='Bearer valid-token', signedTransaction='fake.payload.signature')=>{
     const headers = bearer?{Authorization:bearer}:undefined;
@@ -84,4 +96,14 @@ test('credit endpoint rejects unauthenticated sessions and missing backend confi
   const noConfig=harness({configured:false});
   assert.equal((await noConfig.send()).status,503);
   assert.equal(noConfig.calls.rpc,0);
+});
+
+test('a verified Sandbox transaction for a new pack still cannot write a wallet', async () => {
+  const h = harness({productId:'mushiverse.coins.2500', validSignature:true});
+  const result = await h.send();
+  assert.equal(result.status,200);
+  assert.equal(result.body.verification,'sandbox_signature_verified');
+  assert.equal(result.body.credited_or_previously_credited,false);
+  assert.equal(h.calls.verifier,1);
+  assert.equal(h.calls.rpc,0);
 });
