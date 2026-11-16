@@ -26,10 +26,10 @@ export function validateVerifiedAppleCoinTransaction(transaction, expected) {
     throw new Error('product_mismatch');
   if (type !== 'Consumable') throw new Error('type_mismatch');
   // A multi-unit purchase must not be silently credited as a single pack.
-  // Apple may omit quantity on older transactions; when supplied, require exactly one.
-  if (quantity != null && quantity !== 1) throw new Error('unsupported_quantity');
+  // Fail closed when quantity is absent or not exactly one. No ambiguous pack credits.
+  if (quantity !== 1) throw new Error('unsupported_quantity');
   // Family-shared transactions cannot establish an independently paid consumable purchase.
-  if (inAppOwnershipType != null && inAppOwnershipType !== 'PURCHASED')
+  if (inAppOwnershipType !== 'PURCHASED')
     throw new Error('unsupported_ownership_type');
   if (typeof transactionId !== 'string' || !/^[0-9]{1,30}$/.test(transactionId))
     throw new Error('invalid_transaction_id');
