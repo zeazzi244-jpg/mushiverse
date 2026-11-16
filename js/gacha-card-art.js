@@ -39,16 +39,13 @@
     image.alt = name ? name + 'のイラスト' : 'LRカードのイラスト';
     image.loading = eager ? 'eager' : 'lazy';
     image.decoding = 'async';
-    let fallbackAttempted = false;
+    const tierName = ['N', 'R', 'SR', 'SSR'].includes(rarity) ? 'gacha-' + rarity.toLowerCase() + '.webp' : 'albaseraph.webp';
+    const tierFallback = new URL(tierName, scriptCardBase).href;
+    const rootFallback = new URL(tierName, rootCardBase).href;
+    let fallbackStage = 0;
     image.addEventListener('error', () => {
       // Older installed WebViews may retain a stale script URL after an update.
       // Try the app document's asset root once before displaying an error.
-      const alternative = legacyUrl && new URL('albaseraph.webp', rootCardBase).href;
-      if (alternative && !fallbackAttempted && image.src !== alternative) {
-        fallbackAttempted = true;
-        image.src = alternative;
-        return;
-      }
       // Some iOS WebViews reject data: SVG images even though inline SVG works.
       // Render only the locally generated SVG as a last-resort illustration.
       if (source.startsWith('data:image/svg+xml;charset=UTF-8,') && source.length < 100000) {
@@ -68,6 +65,18 @@
         } catch (error) {
           console.warn('MUSHIVERSE inline illustration fallback failed:', error);
         }
+      }
+      // Prefer the species illustration, then the bundled rarity artwork.
+      // Both asset roots are tried to recover from stale iOS WebView bases.
+      if (fallbackStage === 0 && source !== tierFallback) {
+        fallbackStage = 1;
+        image.src = tierFallback;
+        return;
+      }
+      if (fallbackStage <= 1 && image.src !== rootFallback && tierFallback !== rootFallback) {
+        fallbackStage = 2;
+        image.src = rootFallback;
+        return;
       }
       image.remove();
       showUnavailable();
