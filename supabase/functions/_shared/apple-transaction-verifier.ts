@@ -74,6 +74,10 @@ export async function verifyAppleTransaction(
     throw new Error("signed_transaction_mismatch");
   if (decoded.revocationDate != null || decoded.revocationReason != null) throw new Error("transaction_revoked");
   const isPremium = expectedProductId.includes(".premium.");
+  // Restoring a subscription must be bound to the original Apple purchase chain.
+  // Never accept an unbound restore merely because its product ID is valid.
+  if (isPremium && expectedOriginalTransactionId === null)
+    throw new Error("subscription_original_transaction_required");
   if (decoded.type !== (isPremium ? "Auto-Renewable Subscription" : "Consumable"))
     throw new Error("transaction_type_mismatch");
   // A consumable purchase must be a standalone transaction, not a renewal
@@ -83,9 +87,9 @@ export async function verifyAppleTransaction(
   // An upgraded transaction cannot be used to grant fresh entitlements.
   if (decoded.isUpgraded != null && decoded.isUpgraded !== false)
     throw new Error("upgraded_transaction");
-  if (!isPremium && (decoded.quantity != null && decoded.quantity !== 1))
+  if (!isPremium && decoded.quantity !== 1)
     throw new Error("unsupported_coin_quantity");
-  if (decoded.inAppOwnershipType != null && decoded.inAppOwnershipType !== "PURCHASED")
+  if (decoded.inAppOwnershipType !== "PURCHASED")
     throw new Error("unsupported_ownership_type");
   if (!Number.isSafeInteger(decoded.purchaseDate) || decoded.purchaseDate <= 0 ||
       decoded.purchaseDate > Date.now() + 300000 ||
