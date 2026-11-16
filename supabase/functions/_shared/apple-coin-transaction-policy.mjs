@@ -14,6 +14,9 @@ export function isAppleCoinProduct(productId) {
 
 export function validateVerifiedAppleCoinTransaction(transaction, expected) {
   if (!transaction || typeof transaction !== 'object' || !expected) throw new Error('invalid_transaction');
+  // Defense in depth: even a valid Production JWS cannot pass this policy
+  // until real Sandbox purchases and atomic fulfillment have been proven.
+  if (expected.environment !== 'Sandbox') throw new Error('production_fulfillment_disabled');
   const { bundleId, productId, environment, transactionId, originalTransactionId,
     revocationDate, revocationReason, isUpgraded, purchaseDate, signedDate, type, appAccountToken, quantity, inAppOwnershipType } = transaction;
   if (bundleId !== 'com.rikuto.mushiverse') throw new Error('bundle_mismatch');
