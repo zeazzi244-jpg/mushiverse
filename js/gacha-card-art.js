@@ -31,6 +31,41 @@
     return document.importNode(svg, true);
   }
 
+  // Some WKWebView versions reject SVG in <img> while accepting inline SVG.
+  // Keep this fallback local to bundled original-card artwork.
+  async function inlineOriginalArt(url, name) {
+    const response = await fetch(url, { cache: 'force-cache' });
+    if (!response.ok) throw new Error('Original artwork unavailable');
+    const markup = await response.text();
+    if (markup.length > 100000) throw new Error('Original artwork too large');
+    const svg = new DOMParser().parseFromString(markup, 'image/svg+xml').documentElement;
+    if (svg.localName !== 'svg' || svg.namespaceURI !== svgNamespace ||
+        svg.querySelector('parsererror,script,foreignObject,image,use,style,a,animate,set')) {
+      throw new Error('Invalid original artwork');
+    }
+    if ([svg, ...svg.querySelectorAll('*')].some(node =>
+      [...node.attributes].some(attr => /^on/i.test(attr.name) || /(?:href|src|style)$/i.test(attr.name)))) {
+      throw new Error('Unsafe original artwork');
+    }
+    // Gradients from separate cards must not share document-global IDs.
+    const prefix = 'mvOriginalArt-' + ++nextArtId + '-';
+    for (const node of [svg, ...svg.querySelectorAll('*')]) {
+      const id = node.getAttribute('id');
+      if (id) node.setAttribute('id', prefix + id);
+      for (const attr of [...node.attributes]) {
+        if (/url\\(#([^)]+)\\)/.test(attr.value)) {
+          node.setAttribute(attr.name, attr.value.replace(/url\\(#([^)]+)\\)/g, (_, id) => 'url(#' + prefix + id + ')'));
+        }
+      }
+    }
+    svg.setAttribute('role', 'img');
+    svg.setAttribute('aria-label', name + 'のイラスト');
+    svg.setAttribute('width', '100%');
+    svg.setAttribute('height', '100%');
+    svg.style.display = 'block';
+    return document.importNode(svg, true);
+  }
+
   window.mushiverseCardArt = (name, rarity, eager = false) => {
     const art = document.createElement('div');
     art.className = 'mvSharedCardArt';
@@ -62,7 +97,13 @@
       image.decoding = 'async';
       image.addEventListener('error', () => {
         image.remove();
-        showUnavailable();
+        if (!original) return showUnavailable();
+        inlineOriginalArt(original.image, name)
+          .then(svg => art.append(svg))
+          .catch(error => {
+            console.warn('MUSHIVERSE original illustration fallback failed:', name, error);
+            showUnavailable();
+          });
       }, { once: true });
       art.append(image);
       image.src = original?.image ?? albaseraphUrl.href;
