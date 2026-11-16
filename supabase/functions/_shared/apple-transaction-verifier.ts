@@ -43,6 +43,8 @@ export async function verifyAppleTransaction(
       signedTransaction.length > 16384) throw new Error("invalid_signed_transaction");
   if (!PRODUCTS.has(expectedProductId)) throw new Error("unknown_product");
   if (!/^\d{6,30}$/.test(expectedTransactionId)) throw new Error("invalid_transaction_id");
+  if (expectedOriginalTransactionId !== null && !/^\d{6,30}$/.test(expectedOriginalTransactionId))
+    throw new Error("invalid_original_transaction_id");
   if (config.environment !== "Sandbox") throw new Error("production_verification_disabled");
   if (!/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(config.expectedAppAccountToken))
     throw new Error("invalid_expected_account_token");
@@ -70,7 +72,19 @@ export async function verifyAppleTransaction(
       (expectedOriginalTransactionId !== null &&
         decoded.originalTransactionId !== expectedOriginalTransactionId))
     throw new Error("signed_transaction_mismatch");
-  if (decoded.revocationDate != null) throw new Error("transaction_revoked");
+  if (decoded.revocationDate != null || decoded.revocationReason != null) throw new Error("transaction_revoked");
+  const isPremium = expectedProductId.includes(".premium.");
+  if (decoded.type !== (isPremium ? "Auto-Renewable Subscription" : "Consumable"))
+    throw new Error("transaction_type_mismatch");
+  if (!isPremium && (decoded.quantity != null && decoded.quantity !== 1))
+    throw new Error("unsupported_coin_quantity");
+  if (decoded.inAppOwnershipType != null && decoded.inAppOwnershipType !== "PURCHASED")
+    throw new Error("unsupported_ownership_type");
+  if (!Number.isSafeInteger(decoded.purchaseDate) || decoded.purchaseDate <= 0 ||
+      decoded.purchaseDate > Date.now() + 300000 ||
+      !Number.isSafeInteger(decoded.signedDate) || decoded.signedDate < decoded.purchaseDate ||
+      decoded.signedDate > Date.now() + 300000)
+    throw new Error("invalid_apple_transaction_dates");
   if (expectedProductId.includes(".premium.") &&
       (!decoded.expiresDate || decoded.expiresDate <= Date.now()))
     throw new Error("subscription_expired");
