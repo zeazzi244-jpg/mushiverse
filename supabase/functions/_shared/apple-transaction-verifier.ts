@@ -36,12 +36,16 @@ export async function verifyAppleTransaction(
     bundleId: string;
     environment: "Sandbox" | "Production";
     appAppleId?: number;
+    expectedAppAccountToken: string;
   },
 ): Promise<VerifiedAppleTransaction> {
   if (!/^[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+$/.test(signedTransaction) ||
       signedTransaction.length > 16384) throw new Error("invalid_signed_transaction");
   if (!PRODUCTS.has(expectedProductId)) throw new Error("unknown_product");
   if (!/^\d{6,30}$/.test(expectedTransactionId)) throw new Error("invalid_transaction_id");
+  if (config.environment !== "Sandbox") throw new Error("production_verification_disabled");
+  if (!/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(config.expectedAppAccountToken))
+    throw new Error("invalid_expected_account_token");
   if (!config.rootCertificates.length || config.rootCertificates.some(c => c.length < 500))
     throw new Error("apple_roots_not_configured");
   if (config.bundleId !== "com.rikuto.mushiverse") throw new Error("bundle_mismatch");
@@ -59,6 +63,8 @@ export async function verifyAppleTransaction(
   if (decoded.bundleId !== config.bundleId ||
       decoded.environment !== config.environment ||
       decoded.productId !== expectedProductId ||
+      typeof decoded.appAccountToken !== "string" ||
+      decoded.appAccountToken.toLowerCase() !== config.expectedAppAccountToken.toLowerCase() ||
       decoded.transactionId !== expectedTransactionId ||
       !decoded.originalTransactionId ||
       (expectedOriginalTransactionId !== null &&
