@@ -111,7 +111,11 @@ for (const match of html.matchAll(/\b(?:src|href)\s*=\s*["']([^"']+\.(?:mjs|js|c
   if (!url || url.includes('\\')) {
     throw new Error('Release bundle has malformed startup asset URL: ' + match[1]);
   }
-  // Startup JavaScript and CSS must be bundled: remote CDN dependencies can\n  // silently fail when the iPhone is offline and leave the WebView blank.\n  if (/^(?:[a-z][a-z\d+.-]*:|\/\/)/i.test(url)) {\n    throw new Error('Release bundle has remote startup dependency: ' + url);\n  }
+  // Startup JavaScript and CSS must be bundled: remote CDN dependencies can
+  // silently fail when the iPhone is offline and leave the WebView blank.
+  if (/^(?:[a-z][a-z\d+.-]*:|\/\/)/i.test(url)) {
+    throw new Error('Release bundle has remote startup dependency: ' + url);
+  }
   let normalized;
   try { normalized = decodeURIComponent(url).replace(/^\/?/, ''); }
   catch { throw new Error('Release bundle has invalid startup asset URL: ' + url); }
