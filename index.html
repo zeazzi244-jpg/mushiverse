@@ -710,7 +710,22 @@ window.addEventListener('mushiverse:app-ready',function(){booted=true;if(recover
   <div id="mapPostList" style="margin-top:16px"></div>
 </section></main><footer class="appCopyright" aria-label="著作権情報"><div class="copyrightBrand">MUSHIVERSE / ムシバース <span class="versionPill">v90</span></div><div>© 2026 川村　陸都. All Rights Reserved.</div></footer></div>
 <nav class="nav" aria-label="メインメニュー"><button data-tab="home" class="navHomeBtn"><b>🏡</b>ホーム<span id="navNoticeBadge" class="navNoticeBadge" hidden>0</span></button><button data-tab="post"><b>➕</b>記録</button><button data-tab="gacha"><b><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 36 36" width="27" height="27" role="img" aria-label="ガシャポン" style="vertical-align:middle"><rect x="5" y="2" width="26" height="22" rx="5" fill="#e8f6e4" stroke="#2e6d4d" stroke-width="2"/><path d="M8 10a10 10 0 0 1 20 0v8H8z" fill="#8fd1bb"/><circle cx="13" cy="13" r="4" fill="#ffbe7d"/><circle cx="22" cy="12" r="4" fill="#c4a2f5"/><rect x="9" y="24" width="18" height="9" rx="2" fill="#236e53"/><circle cx="18" cy="22" r="5" fill="#fff" stroke="#236e53" stroke-width="2"/><path d="M18 19v6m-3-3h6" stroke="#236e53" stroke-width="2"/></svg></b>ガチャ</button><button data-tab="collection"><b>📗</b>図鑑</button><button data-tab="map"><b>🗺️</b>マップ</button><button data-tab="profile" class="active"><b>👤</b>マイページ</button></nav><div id="toast" class="toast" role="status" aria-live="polite" aria-atomic="true"></div>
-<div id="detailModal" class="detailModal" aria-hidden="true"><div class="detailSheet"><button id="detailClose" class="detailClose" type="button" aria-label="閉じる">×</button><div id="detailContent"></div></div></div><script src="assets/vendor/leaflet/leaflet.js"></script><script src="assets/vendor/supabase/supabase.js"></script>
+<div id="detailModal" class="detailModal" aria-hidden="true"><div class="detailSheet"><button id="detailClose" class="detailClose" type="button" aria-label="閉じる">×</button><div id="detailContent"></div></div></div>
+<dialog id="postEditDialog" aria-labelledby="postEditTitle">
+  <form id="postEditForm">
+    <h2 id="postEditTitle">投稿を編集</h2>
+    <label>昆虫の名前<input name="insect_name" required></label>
+    <label>分類<input name="category"></label>
+    <label>市区町村<input name="municipality"></label>
+    <label>メモ<textarea name="comment" rows="4"></textarea></label>
+    <p id="postEditStatus" role="status"></p>
+    <div class="postEditActions">
+      <button type="button" id="postEditCancel">キャンセル</button>
+      <button type="submit" id="postEditSave">保存</button>
+    </div>
+  </form>
+</dialog>
+<script src="assets/vendor/leaflet/leaflet.js"></script><script src="assets/vendor/supabase/supabase.js"></script>
 <script>
 (()=>{'use strict';
 const SUPABASE_URL='https://jhowxtdemlsmetcwhekr.supabase.co';
@@ -748,6 +763,7 @@ const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&
 // v70: make HTML escaping available to later script blocks.
 window.esc=esc;
 let user=null,records=[],likes=[],selectedPhoto=null,currentAiName=null,currentAiConfidence=null;
+let activeDetailRecord=null;
 // v68: expose the live record array to legacy scripts outside the core IIFE.
 // Getter follows reassignment after each Supabase refresh; no data is copied or reset.
 Object.defineProperty(window,'records',{configurable:true,enumerable:false,get:()=>records});
@@ -897,7 +913,7 @@ document.querySelectorAll('.nav button').forEach(b=>b.onclick=()=>tab(b.dataset.
 function safePhoto(r,cls='photo'){if(!r.image_url)return `<div class="${cls==='photo'?'placeholder':'miniPlaceholder'}">🪲</div>`;try{const u=new URL(r.image_url);if(u.protocol!=='https:')throw Error();return `<img src="${esc(u.href)}" class="${cls}" loading="lazy" alt="${esc(r.insect_name)}の写真">`}catch{return '<div class="placeholder">🪲</div>'}}
 
 function postLikeCounts(){const counts={};for(const l of likes)counts[l.post_id]=(counts[l.post_id]||0)+1;return counts}
-function closeDetail(){const m=$('detailModal');m.classList.remove('open');m.setAttribute('aria-hidden','true');try{history.replaceState(null,'',location.pathname+(location.hash||''))}catch{}}
+function closeDetail(){activeDetailRecord=null;const m=$('detailModal');m.classList.remove('open');m.setAttribute('aria-hidden','true');try{history.replaceState(null,'',location.pathname+(location.hash||''))}catch{}}
 const BOOKMARK_KEY='mushiverse-bookmarks-v1';
 let bookmarks=new Set();
 function loadBookmarks(){try{const a=JSON.parse(localStorage.getItem(BOOKMARK_KEY)||'[]');bookmarks=new Set(Array.isArray(a)?a:[])}catch{bookmarks=new Set()}}
@@ -1652,12 +1668,19 @@ async function reportPostLocal(id){
  toast('運営への通報を受け付けました。この端末では投稿を非表示にしました');
 }
 function clearSafetyFilters(){hiddenPosts=new Set();blockedUsers=new Set();saveIdSet(HIDDEN_POSTS_KEY,hiddenPosts);saveIdSet(BLOCKED_USERS_KEY,blockedUsers);render();renderCommunitySafety();toast('非表示設定をリセットしました')}
-function openDetail(id){
-  const r=records.find(x=>x.id===id);if(!r)return;rememberViewedSpecies(r);renderRecentlyViewed();
+window.openMushiverseOwnPost=post=>{if(canEditPost(post))openDetail(post.id,post)};
+function openDetail(id,profilePost){
+  const r=profilePost||records.find(x=>x.id===id)||(
+    activeDetailRecord?.id===id?activeDetailRecord:null
+  );
+  if(!r)return;
+  activeDetailRecord=r;
+  rememberViewedSpecies(r);renderRecentlyViewed();
   const counts={};for(const l of likes)counts[l.post_id]=(counts[l.post_id]||0)+1;
   const place=[r.prefecture,r.municipality].filter(Boolean).join(' ');
   const speciesKey=String(r.insect_name||'').trim().toLocaleLowerCase('ja-JP');
-  const same=records.filter(x=>String(x.insect_name||'').trim().toLocaleLowerCase('ja-JP')===speciesKey);
+  const detailRecords=records.some(x=>x.id===r.id)?records:[r,...records];
+  const same=detailRecords.filter(x=>String(x.insect_name||'').trim().toLocaleLowerCase('ja-JP')===speciesKey);
   const related=same.filter(x=>x.id!==r.id).slice(0,4);
   const dates=same.map(x=>(x.observed_at||x.created_at||'').slice(0,10)).filter(Boolean).sort();
   const speciesAreas=new Set(same.map(x=>[x.prefecture,x.municipality].filter(Boolean).join(' ')).filter(Boolean));
@@ -1665,9 +1688,19 @@ function openDetail(id){
   const peak=Object.entries(monthCounts).sort((a,b)=>b[1]-a[1])[0]?.[0];
   const lowConfidence=Number.isInteger(r.ai_confidence)&&r.ai_confidence<70;
   $('detailContent').innerHTML=`${r.image_url?`<img class="detailHero" src="${esc(r.image_url)}" alt="${esc(r.insect_name)}の写真">`:'<div class="placeholder" style="height:220px;border-radius:16px">🪲</div>'}<h2 style="margin:8px 0">${esc(r.insect_name)}</h2><div class="muted">📆 ${esc((r.observed_at||r.created_at||'').slice(0,10))}${place?' · 📍 '+esc(place):''}</div>${r.category?`<p><b>🏷️ 分類：</b>${esc(r.category)}</p>`:''}${r.comment?`<p style="white-space:pre-wrap"><b>💬 メモ：</b>${esc(r.comment)}</p>`:''}${r.ai_name?`<p><b>🤖 AI判定：</b>${esc(r.ai_name)}${Number.isInteger(r.ai_confidence)?`（${r.ai_confidence}%）`:''}</p>`:''}${lowConfidence?'<div class="aiCaution">⚠️ AIの確信度が低めです。名前は候補として確認してね。</div>':''}<div class="detailStats"><div class="detailStat"><small>この虫の記録</small><b>${same.length}件</b></div><div class="detailStat"><small>記録地域</small><b>${speciesAreas.size}地域</b></div><div class="detailStat"><small>最初の記録</small><b>${esc(dates[0]||'-')}</b></div><div class="detailStat"><small>記録が多い月</small><b>${peak?Number(peak)+'月':'-'}</b></div></div><div class="detailSpeciesNote">📗 ムシバース内の記録から集計した情報です。生物学的な生息域・発生時期そのものを示すものではありません。</div><p><b>♥ いいね：</b>${counts[r.id]||0}</p><div class="detailActions"><button class="btn outline bookmarkBtn ${bookmarks.has(r.id)?'active':''}" type="button" data-bookmark-post="${esc(r.id)}">${bookmarks.has(r.id)?'★ お気に入り済み':'☆ お気に入り'}</button><button class="btn outline" type="button" data-share-post="${esc(r.id)}">📤 共有</button></div><div class="detailSafety"><button class="btn outline" type="button" data-hide-post="${esc(r.id)}">🙈 非表示</button>${user?.id!==r.user_id?`<button class="btn outline" type="button" data-block-user="${esc(r.user_id||'')}">🚫 投稿者を非表示</button><button class="btn outline" type="button" data-report-post="${esc(r.id)}">⚑ 通報</button>`:''}</div>${renderMonthBars(monthCounts)}${renderSpeciesGallery(same,r.id)}${related.length?`<h3 style="margin:18px 0 8px">🔎 同じ虫の記録</h3><div class="relatedGrid">${related.map(x=>`<button class="relatedBtn" type="button" data-related="${esc(x.id)}"><b>${esc(x.insect_name)}</b><span class="muted">${esc((x.observed_at||x.created_at||'').slice(0,10))}${x.municipality?' · '+esc(x.municipality):''}</span></button>`).join('')}</div>`:''}`;
+  if(canEditPost(r)){
+    const menu=document.createElement('details');
+    menu.className='postDetailMenu';
+    menu.innerHTML='<summary aria-label="投稿の操作">⋯</summary><button type="button">編集</button>';
+    menu.querySelector('button').onclick=()=>{
+      menu.open=false;
+      openPostEditor(r,menu.querySelector('summary'));
+    };
+    $('detailContent').prepend(menu);
+  }
   const m=$('detailModal');m.classList.add('open');m.setAttribute('aria-hidden','false');try{history.replaceState(null,'',`${location.pathname}?post=${encodeURIComponent(r.id)}${location.hash||''}`)}catch{}
 }
-async function sharePost(id){const r=records.find(x=>x.id===id);if(!r)return;const place=[r.prefecture,r.municipality].filter(Boolean).join(' '),text=`ムシバースで${r.insect_name}を記録！${place?` 📍${place}`:''}`;try{if(navigator.share)await navigator.share({title:`ムシバース｜${r.insect_name}`,text,url:`${location.origin}${location.pathname}?post=${encodeURIComponent(r.id)}`});else if(navigator.clipboard){await navigator.clipboard.writeText(`${text}\n${location.origin}${location.pathname}?post=${encodeURIComponent(r.id)}`);toast('共有用テキストをコピーしました')}else toast('この端末では共有機能を利用できません')}catch(e){if(e?.name!=='AbortError')toast('共有できませんでした')}}
+async function sharePost(id){const r=activeDetailRecord?.id===id?activeDetailRecord:records.find(x=>x.id===id);if(!r)return;const place=[r.prefecture,r.municipality].filter(Boolean).join(' '),text=`ムシバースで${r.insect_name}を記録！${place?` 📍${place}`:''}`;try{if(navigator.share)await navigator.share({title:`ムシバース｜${r.insect_name}`,text,url:`${location.origin}${location.pathname}?post=${encodeURIComponent(r.id)}`});else if(navigator.clipboard){await navigator.clipboard.writeText(`${text}\n${location.origin}${location.pathname}?post=${encodeURIComponent(r.id)}`);toast('共有用テキストをコピーしました')}else toast('この端末では共有機能を利用できません')}catch(e){if(e?.name!=='AbortError')toast('共有できませんでした')}}
 $('detailClose').onclick=closeDetail;$('detailModal').onclick=e=>{if(e.target===$('detailModal'))closeDetail()};$('detailContent').onclick=e=>{const gallery=e.target.closest('[data-species-gallery]');if(gallery){openDetail(gallery.dataset.speciesGallery);return}const rel=e.target.closest('[data-related]');if(rel){openDetail(rel.dataset.related);return}const mark=e.target.closest('[data-bookmark-post]');if(mark){toggleBookmark(mark.dataset.bookmarkPost);return}const b=e.target.closest('[data-share-post]');if(b){sharePost(b.dataset.sharePost);return}const hide=e.target.closest('[data-hide-post]');if(hide){hidePostLocal(hide.dataset.hidePost);return}const block=e.target.closest('[data-block-user]');if(block){blockUserLocal(block.dataset.blockUser);return}const report=e.target.closest('[data-report-post]');if(report){reportPostLocal(report.dataset.reportPost);return}};
 function renderPlatformStatus(){
  const el=$('platformStatus');if(!el)return;
@@ -2116,7 +2149,74 @@ async function load(){if(!db){toast('通信ライブラリを読み込めませ�
 $('search').oninput=render;$('filter').disabled=false;$('filter').title='';$('filter').onchange=render;$('sort').onchange=render;$('areaFilter').onchange=render;$('mineOnly').onchange=render;$('bookmarkOnly').onchange=render;$('mapCategory').onchange=()=>{renderMap();renderMapSummary()};$('mapMineOnly').onchange=()=>{renderMap();renderMapSummary()};$('mapFit').onclick=()=>{if(!insectMap)return;if(lastMapPoints.length===1)insectMap.setView(lastMapPoints[0],8);else if(lastMapPoints.length>1)insectMap.fitBounds(lastMapPoints,{padding:[28,28],maxZoom:9});else toast('表示できる投稿地点がありません')};$('mapReset').onclick=()=>{if(insectMap)insectMap.setView([36.4,138.2],5)};$('areaRanking').onclick=e=>{const row=e.target.closest('[data-area-jump]');if(!row)return;const area=row.dataset.areaJump||'';const hit=records.find(r=>[r.prefecture,r.municipality].filter(Boolean).join(' ')===area);if(hit)jumpToArea(hit.prefecture,hit.municipality)};$('loadMore').onclick=async()=>{postLimit+=100;$('loadMore').disabled=true;await load();$('loadMore').disabled=false};$('ranking').onclick=e=>{const b=e.target.closest('[data-detail]');if(b)openDetail(b.dataset.detail)};$('collectionList').onclick=e=>{const b=e.target.closest('[data-detail]');if(b)openDetail(b.dataset.detail)};$('collectionCategory').onchange=renderCollectionGrid;$('collectionSort').onchange=renderCollectionGrid;
 function storagePathFromPublicUrl(url){try{if(!url)return null;const u=new URL(url);const m=u.pathname.match(/\/storage\/v1\/object\/public\/insect-photos\/(.+)$/);return m?decodeURIComponent(m[1]):null}catch{return null}}
 async function removeOwnedPostPhoto(url){const path=storagePathFromPublicUrl(url);if(!path||!user||!path.startsWith(user.id+'/'))return;try{await db.storage.from('insect-photos').remove([path])}catch{}}
-$('feed').onclick=async e=>{const share=e.target.closest('[data-share-feed]');if(share){await sharePost(share.dataset.shareFeed);return}const detail=e.target.closest('[data-detail]');if(detail){openDetail(detail.dataset.detail);return}const mark=e.target.closest('[data-bookmark]');if(mark){toggleBookmark(mark.dataset.bookmark);return}const like=e.target.closest('[data-like]');if(like){if(!user){toast('いいねするにはログインしてください');tab('profile');return}like.disabled=true;const postId=like.dataset.like;const already=likes.some(l=>l.post_id===postId&&l.user_id===user.id);const q=already?db.from('post_likes').delete().eq('post_id',postId).eq('user_id',user.id):db.from('post_likes').insert({post_id:postId,user_id:user.id});const {error}=await q;if(error)toast('いいねに失敗：'+error.message);else await load();return}const edit=e.target.closest('[data-edit]');if(edit){if(!user)return;const r=records.find(x=>x.id===edit.dataset.edit);if(!r||r.user_id!==user.id)return;const name=prompt('昆虫の名前を編集',r.insect_name||'');if(name===null)return;const category=prompt('分類を編集（例：甲虫）',r.category||'');if(category===null)return;const municipality=prompt('市区町村を編集（例：札幌市）',r.municipality||'');if(municipality===null)return;const comment=prompt('メモを編集',r.comment||'');if(comment===null)return;edit.disabled=true;const {error}=await db.from('insect_posts').update({insect_name:name.trim()||r.insect_name,category:category.trim()||null,municipality:municipality.trim()||null,locality:municipality.trim()||null,comment:comment.trim()||null}).eq('id',r.id).eq('user_id',user.id);if(error)toast('編集失敗：'+error.message);else{toast('投稿を更新しました');await load()}return}const b=e.target.closest('[data-delete]');if(!b||!user)return;const r=records.find(x=>x.id===b.dataset.delete);if(!r||r.user_id!==user.id||!confirm('この投稿を削除しますか？'))return;b.disabled=true;const {error}=await db.from('insect_posts').delete().eq('id',r.id).eq('user_id',user.id);if(error)toast('削除失敗：'+error.message);else{await removeOwnedPostPhoto(r.image_url);toast('投稿を削除しました');await load()}};
+$('feed').onclick=async e=>{const share=e.target.closest('[data-share-feed]');if(share){await sharePost(share.dataset.shareFeed);return}const detail=e.target.closest('[data-detail]');if(detail){openDetail(detail.dataset.detail);return}const mark=e.target.closest('[data-bookmark]');if(mark){toggleBookmark(mark.dataset.bookmark);return}const like=e.target.closest('[data-like]');if(like){if(!user){toast('いいねするにはログインしてください');tab('profile');return}like.disabled=true;const postId=like.dataset.like;const already=likes.some(l=>l.post_id===postId&&l.user_id===user.id);const q=already?db.from('post_likes').delete().eq('post_id',postId).eq('user_id',user.id):db.from('post_likes').insert({post_id:postId,user_id:user.id});const {error}=await q;if(error)toast('いいねに失敗：'+error.message);else await load();return}const edit=e.target.closest('[data-edit]');if(edit){openPostEditor(records.find(x=>x.id===edit.dataset.edit),edit);return}const b=e.target.closest('[data-delete]');if(!b||!user)return;const r=records.find(x=>x.id===b.dataset.delete);if(!r||r.user_id!==user.id||!confirm('この投稿を削除しますか？'))return;b.disabled=true;const {error}=await db.from('insect_posts').delete().eq('id',r.id).eq('user_id',user.id);if(error)toast('削除失敗：'+error.message);else{await removeOwnedPostPhoto(r.image_url);toast('投稿を削除しました');await load()}};
+const postEditDialog=$('postEditDialog'),postEditForm=$('postEditForm');
+const editablePostFields=['insect_name','category','municipality','comment'];
+let postEditSession=null;
+function canEditPost(post){
+  return Boolean(post&&user?.id&&post.user_id===user.id&&!document.body.classList.contains('mv128Kids'));
+}
+function openPostEditor(post,trigger){
+  if(!canEditPost(post)||postEditDialog.open)return;
+  postEditSession={post,trigger};
+  for(const field of editablePostFields)postEditForm.elements[field].value=post[field]||'';
+  $('postEditStatus').textContent='';
+  postEditDialog.showModal();
+  postEditForm.elements.insect_name.focus();
+}
+$('postEditCancel').onclick=()=>postEditDialog.close();
+postEditDialog.addEventListener('cancel',event=>{
+  if($('postEditSave').disabled)event.preventDefault();
+});
+postEditDialog.addEventListener('close',()=>{
+  const trigger=postEditSession?.trigger;
+  postEditSession=null;
+  if(trigger?.isConnected)trigger.focus({preventScroll:true});
+});
+document.addEventListener('mushiverse:profile-account',()=>{
+  if(postEditSession&&!canEditPost(postEditSession.post))postEditDialog.close();
+});
+postEditForm.onsubmit=async event=>{
+  event.preventDefault();
+  const session=postEditSession,button=$('postEditSave'),status=$('postEditStatus');
+  if(!session||button.disabled||!canEditPost(session.post))return;
+  const {post}=session;
+  const changes={};
+  for(const field of editablePostFields){
+    const value=postEditForm.elements[field].value.trim();
+    if(field==='insect_name'&&!value){
+      status.textContent='昆虫の名前を入力してください。';
+      postEditForm.elements[field].focus();
+      return;
+    }
+    if(value!==String(post[field]||'').trim())changes[field]=value||null;
+  }
+  if(!Object.keys(changes).length){postEditDialog.close();return}
+  if('municipality' in changes)changes.locality=changes.municipality;
+  button.disabled=$('postEditCancel').disabled=true;
+  status.textContent='保存中…';
+  try{
+    const {data,error}=await db.from('insect_posts').update(changes)
+      .eq('id',post.id).eq('user_id',post.user_id).select('id').maybeSingle();
+    if(postEditSession!==session||!canEditPost(post))return;
+    if(error||!data){status.textContent='保存できませんでした。通信状態を確認して、もう一度お試しください。';return}
+    const updatedPost={...post,...changes};
+    records=records.map(record=>record.id===data.id?{...record,...changes}:record);
+    postEditDialog.close();
+    if(activeDetailRecord?.id===data.id){
+      openDetail(data.id,updatedPost);
+      $('detailContent').querySelector('.postDetailMenu summary')?.focus({preventScroll:true});
+    }
+    document.dispatchEvent(new Event('mushiverse:post-updated'));
+    toast('投稿を更新しました');
+    void load().catch(()=>toast('投稿一覧を更新できませんでした'));
+  }catch{
+    if(postEditSession===session)status.textContent='保存できませんでした。通信状態を確認して、もう一度お試しください。';
+  }finally{
+    button.disabled=$('postEditCancel').disabled=false;
+  }
+};
+
 function resizeImage(file){return new Promise((resolve,reject)=>{if(!file){resolve(null);return}if(!file.type.startsWith('image/')){reject(Error('画像を選択してください'));return}const reader=new FileReader();reader.onerror=()=>reject(Error('写真を読み取れません'));reader.onload=()=>{const img=new Image();img.onerror=()=>reject(Error('この写真形式は読み取れません'));img.onload=()=>{const f=Math.min(1,1100/img.width,1100/img.height),c=document.createElement('canvas');c.width=Math.max(1,Math.round(img.width*f));c.height=Math.max(1,Math.round(img.height*f));c.getContext('2d').drawImage(img,0,0,c.width,c.height);c.toBlob(blob=>blob?resolve(blob):reject(Error('写真を変換できません')),'image/jpeg',.72)};img.src=reader.result};reader.readAsDataURL(file)})}
 function blobToDataURL(blob){return new Promise((resolve,reject)=>{const r=new FileReader();r.onerror=()=>reject(Error('写真をAI判定用に読み込めません'));r.onload=()=>resolve(r.result);r.readAsDataURL(blob)})}
 $('photo').onchange=async()=>{selectedPhoto=null;currentAiName=null;currentAiConfidence=null;$('preview').style.display='none';$('aiResult').style.display='none';$('aiIdentify').disabled=true;const f=$('photo').files[0];if(!f)return;try{selectedPhoto=await resizeImage(f);$('preview').src=URL.createObjectURL(selectedPhoto);$('preview').style.display='block';$('aiIdentify').disabled=!user}catch(e){toast(e.message);$('photo').value=''}};
@@ -4350,21 +4450,21 @@ function initProfile(){
   }catch(e){$('mv86ProfileStatus').textContent=e.message}
   finally{button.disabled=false}
  };
- let request=0,statsOwner;
+ let request=0,statsOwner,visiblePostCount=12;
  async function refreshPosts(){
   const id=window.user?.id;
   const client=window.db;
   const current=++request;
   const recent=$('mv86RecentPosts');
   if(statsOwner!==id){
-   statsOwner=id;
+   statsOwner=id;visiblePostCount=12;
    for(const key of ['mv86Posts','mv109Followers','mv86Following','mv86Species'])$(key).textContent='0';
    recent.replaceChildren();
   }
   if(!id||!client||document.body.classList.contains('mv128Kids'))return;
   try{
    const results=await Promise.all([
-    client.from('insect_posts').select('insect_name,image_url,observed_at',{count:'exact'}).eq('user_id',id).order('created_at',{ascending:false}).limit(1000),
+    client.from('insect_posts').select('id,user_id,insect_name,image_url,observed_at,created_at,prefecture,municipality,category,comment,ai_name,ai_confidence',{count:'exact'}).eq('user_id',id).order('created_at',{ascending:false}).limit(1000),
     client.from('user_follows').select('follower_id',{count:'exact',head:true}).eq('followed_id',id),
     client.from('user_follows').select('followed_id',{count:'exact',head:true}).eq('follower_id',id)
    ]);
@@ -4377,15 +4477,43 @@ function initProfile(){
    $('mv86Posts').textContent=posts.count??posts.data.length;
    const species=new Set(posts.data.map(post=>post.insect_name?.trim().toLocaleLowerCase('ja-JP')).filter(Boolean)).size;
    $('mv86Species').textContent=(posts.count>posts.data.length?'≥':'')+species;
-   const heading=document.createElement('h3');heading.textContent='最近の投稿';
+   const heading=document.createElement('h3');heading.textContent='自分の投稿';
    recent.replaceChildren(heading);
-   for(const post of posts.data.slice(0,6)){
-    const entry=document.createElement('article');
-    const name=document.createElement('b');name.textContent=post.insect_name||'名前未設定';
-    const date=document.createElement('small');date.textContent=post.observed_at||'';
-    let url;try{url=new URL(post.image_url)}catch{}
-    if(url?.protocol==='https:'){const img=document.createElement('img');img.src=url.href;img.alt='';img.loading='lazy';entry.append(img)}
-    entry.append(name,date);recent.append(entry);
+   if(posts.data.length){
+    const grid=document.createElement('div');grid.className='profilePostGrid';
+    const renderMore=()=>{
+     const next=posts.data.slice(grid.childElementCount,visiblePostCount);
+     for(const post of next){
+      const entry=document.createElement('button');entry.type='button';entry.className='profilePostCard';
+      const photo=document.createElement('span');photo.className='profilePostPhoto';
+      const placeholder=document.createElement('span');placeholder.textContent='写真なし';photo.append(placeholder);
+      let url;try{url=new URL(post.image_url)}catch{}
+      if(url?.protocol==='https:'){
+       const img=document.createElement('img');img.alt='';img.loading='lazy';
+       img.addEventListener('error',()=>img.remove(),{once:true});img.src=url.href;photo.append(img);
+      }
+      const name=document.createElement('strong');name.textContent=post.insect_name||'名前未設定';
+      entry.append(photo,name);
+      const region=[post.prefecture,post.municipality].filter(Boolean).join(' ');
+      const date=(post.observed_at||post.created_at||'').slice(0,10).replaceAll('-','.');
+      const meta=document.createElement('small');meta.textContent=[region,date].filter(Boolean).join(' · ');
+      if(meta.textContent)entry.append(meta);
+      if(post.comment){const comment=document.createElement('span');comment.className='profilePostComment';comment.textContent=post.comment;entry.append(comment)}
+      entry.onclick=()=>{
+       if(id===window.user?.id)window.openMushiverseOwnPost(post);
+      };
+      grid.append(entry);
+     }
+    };
+    renderMore();recent.append(grid);
+    if(posts.data.length>visiblePostCount){
+     const more=document.createElement('button');more.type='button';more.className='btn outline';more.textContent='もっと見る';
+     more.onclick=()=>{
+      visiblePostCount+=12;renderMore();
+      if(grid.childElementCount>=posts.data.length)more.remove();
+     };
+     recent.append(more);
+    }
    }
    if(!posts.data.length){
    const empty=document.createElement('p');empty.textContent='写真を撮って、最初の発見を残しましょう。';
@@ -4401,6 +4529,7 @@ function initProfile(){
   paint();setTimeout(()=>{void refreshPosts();void refreshUsername()},0);
  });
  document.querySelector('.nav [data-tab=profile]').addEventListener('click',refreshPosts);
+ document.addEventListener('mushiverse:post-updated',refreshPosts);
  window.addEventListener('online',refreshPosts);
  window.addEventListener('online',refreshUsername);
  void refreshPosts();void refreshUsername();
