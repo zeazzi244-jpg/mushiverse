@@ -25,7 +25,10 @@
     };
     let speciesUrl = '';
     try {
-      speciesUrl = window.mushiverseSpeciesIllustration?.(name, rarity) || '';
+      const resolved = window.mushiverseSpeciesIllustration?.(name, rarity);
+      // A malformed resolver result must never break the card error handler.
+      speciesUrl = typeof resolved === 'string' && /^(?:data:image\/svg\+xml;charset=UTF-8,|https?:\/\/|\/|\.\/|\.\.\/)/.test(resolved)
+        ? resolved : '';
     } catch (error) {
       console.warn('MUSHIVERSE species illustration lookup failed:', error);
     }
@@ -36,11 +39,14 @@
     const tierFallback = new URL(tierName, scriptCardBase).href;
     const rootFallback = new URL(tierName, rootCardBase).href;
     const source = speciesUrl || legacyUrl || tierFallback;
+    // Each distinct fallback is attempted at most once, including when the
+    // script and document resolve to the same bundled asset directory.
+    const fallbackUrls = [...new Set([tierFallback, rootFallback])].filter(url => url !== source);
     const image = document.createElement('img');
     image.alt = name ? name + 'のイラスト' : 'LRカードのイラスト';
     image.loading = eager ? 'eager' : 'lazy';
     image.decoding = 'async';
-    let fallbackStage = 0;
+    let fallbackIndex = 0;
     image.addEventListener('error', () => {
       // Older installed WebViews may retain a stale script URL after an update.
       // Try the app document's asset root once before displaying an error.
@@ -64,16 +70,8 @@
           console.warn('MUSHIVERSE inline illustration fallback failed:', error);
         }
       }
-      // Prefer the species illustration, then the bundled rarity artwork.
-      // Both asset roots are tried to recover from stale iOS WebView bases.
-      if (fallbackStage === 0 && source !== tierFallback) {
-        fallbackStage = 1;
-        image.src = tierFallback;
-        return;
-      }
-      if (fallbackStage <= 1 && image.src !== rootFallback && tierFallback !== rootFallback) {
-        fallbackStage = 2;
-        image.src = rootFallback;
+      if (fallbackIndex < fallbackUrls.length) {
+        image.src = fallbackUrls[fallbackIndex++];
         return;
       }
       image.remove();
