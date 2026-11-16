@@ -20,6 +20,10 @@ final class MushiverseCoinPlugin: CAPPlugin, CAPBridgedPlugin, UIAdaptivePresent
     private var store: MushiverseCoinStore?
 
     @objc func openShop(_ call: CAPPluginCall) {
+        guard call.getBool("kidMode") == false else {
+            call.reject("キッズモードではショップを利用できません")
+            return
+        }
         guard let token = call.getString("accessToken"), !token.isEmpty,
               let account = call.getString("userID"), let uuid = UUID(uuidString: account) else {
             call.reject("ログインが必要です")

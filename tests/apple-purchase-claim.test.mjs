@@ -1,6 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
+import {isAppleCoinProduct} from '../supabase/functions/_shared/apple-coin-transaction-policy.mjs';
 
 // Execute the deployed Deno handler in an isolated Node harness with a fake
 // Supabase client. This checks request behavior without a real Apple purchase,
@@ -55,7 +56,7 @@ function createHarness() {
     env:{get:()=> 'test-value'},
     serve:fn=>{handler=fn;}
   };
-  new Function('Deno','createClient','Response',source)(deno,()=>client,Response);
+  new Function('Deno','createClient','Response','isAppleCoinProduct',source)(deno,()=>client,Response,isAppleCoinProduct);
   assert.equal(typeof handler,'function','Deno.serve handler not registered');
   async function send(body,raw=false,bearer='Bearer test') {
     const req=new Request('https://example.invalid/claim',{

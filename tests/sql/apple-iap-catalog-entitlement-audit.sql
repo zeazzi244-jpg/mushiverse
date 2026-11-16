@@ -9,8 +9,12 @@ DECLARE
 BEGIN
   WITH expected(product_id,coins,price) AS (
     VALUES ('mushiverse.coins.100',100,160),
+           ('mushiverse.coins.300',300,320),
            ('mushiverse.coins.500',500,480),
-           ('mushiverse.coins.1200',1200,980)
+           ('mushiverse.coins.1200',1200,980),
+           ('mushiverse.coins.2500',2500,1800),
+           ('mushiverse.coins.5500',5500,3600),
+           ('mushiverse.coins.12000',12000,7800)
   )
   SELECT count(*) INTO mismatch_count
   FROM expected x LEFT JOIN public.apple_coin_pack_catalog c USING (product_id)
@@ -21,7 +25,8 @@ BEGIN
     RAISE EXCEPTION 'IAP catalog expected products/prices differ or sale enabled';
   END IF;
   SELECT count(*) INTO unexpected_count FROM public.apple_coin_pack_catalog
-   WHERE product_id NOT IN ('mushiverse.coins.100','mushiverse.coins.500','mushiverse.coins.1200');
+   WHERE product_id NOT IN ('mushiverse.coins.100','mushiverse.coins.300','mushiverse.coins.500',
+     'mushiverse.coins.1200','mushiverse.coins.2500','mushiverse.coins.5500','mushiverse.coins.12000');
   IF unexpected_count <> 0 THEN
     RAISE EXCEPTION 'IAP catalog contains unexpected products';
   END IF;

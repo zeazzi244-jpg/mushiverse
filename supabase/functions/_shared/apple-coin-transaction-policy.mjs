@@ -1,6 +1,20 @@
 // Validation of claims AFTER cryptographic verification of an Apple signed transaction.
 // This module never verifies signatures and MUST NOT be used as proof of purchase.
 // A trusted Apple certificate-chain/JWS verifier must run before this policy.
+export const appleCoinPacks = Object.freeze({
+  'mushiverse.coins.100': 100,
+  'mushiverse.coins.300': 300,
+  'mushiverse.coins.500': 500,
+  'mushiverse.coins.1200': 1200,
+  'mushiverse.coins.2500': 2500,
+  'mushiverse.coins.5500': 5500,
+  'mushiverse.coins.12000': 12000,
+});
+
+export function isAppleCoinProduct(productId) {
+  return typeof productId === 'string' && Object.hasOwn(appleCoinPacks, productId);
+}
+
 export function validateVerifiedAppleCoinTransaction(transaction, expected) {
   if (!transaction || typeof transaction !== 'object' || !expected) throw new Error('invalid_transaction');
   const { bundleId, productId, environment, transactionId, originalTransactionId,
@@ -8,12 +22,7 @@ export function validateVerifiedAppleCoinTransaction(transaction, expected) {
   if (bundleId !== 'com.rikuto.mushiverse') throw new Error('bundle_mismatch');
   if (!['Sandbox', 'Production'].includes(environment) || environment !== expected.environment)
     throw new Error('environment_mismatch');
-  const packs = Object.freeze({
-    'mushiverse.coins.100': 100,
-    'mushiverse.coins.500': 500,
-    'mushiverse.coins.1200': 1200,
-  });
-  if (!Object.hasOwn(packs, productId) || productId !== expected.productId)
+  if (!isAppleCoinProduct(productId) || productId !== expected.productId)
     throw new Error('product_mismatch');
   if (type !== 'Consumable') throw new Error('type_mismatch');
   // A multi-unit purchase must not be silently credited as a single pack.
@@ -49,5 +58,5 @@ export function validateVerifiedAppleCoinTransaction(transaction, expected) {
   }
   if (expected.transactionId !== transactionId) throw new Error('transaction_mismatch');
   if (expected.originalTransactionId !== originalTransactionId) throw new Error('original_transaction_mismatch');
-  return Object.freeze({ transactionId, originalTransactionId, productId, environment, coins: packs[productId] });
+  return Object.freeze({ transactionId, originalTransactionId, productId, environment, coins: appleCoinPacks[productId] });
 }
