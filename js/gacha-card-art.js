@@ -19,7 +19,7 @@
       .replace(/url\(#(forest|shell)\)/g, (_, id) => 'url(#' + idPrefix + id + ')');
     const svg = new DOMParser().parseFromString(markup, 'image/svg+xml').documentElement;
     if (svg.localName !== 'svg' || svg.namespaceURI !== svgNamespace ||
-        svg.querySelector('script,foreignObject,image,use,style,a,animate,set')) return null;
+        svg.querySelector('parsererror,script,foreignObject,image,use,style,a,animate,set')) return null;
     const unsafe = [svg, ...svg.querySelectorAll('*')].some(node =>
       [...node.attributes].some(attr => /^on/i.test(attr.name) || /(?:href|src|style)$/i.test(attr.name)));
     if (unsafe) return null;
@@ -53,8 +53,8 @@
       const id = node.getAttribute('id');
       if (id) node.setAttribute('id', prefix + id);
       for (const attr of [...node.attributes]) {
-        if (/url\\(#([^)]+)\\)/.test(attr.value)) {
-          node.setAttribute(attr.name, attr.value.replace(/url\\(#([^)]+)\\)/g, (_, id) => 'url(#' + prefix + id + ')'));
+        if (/url\(#([^)]+)\)/.test(attr.value)) {
+          node.setAttribute(attr.name, attr.value.replace(/url\(#([^)]+)\)/g, (_, id) => 'url(#' + prefix + id + ')'));
         }
       }
     }
