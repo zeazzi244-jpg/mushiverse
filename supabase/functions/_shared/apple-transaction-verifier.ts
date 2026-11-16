@@ -76,6 +76,13 @@ export async function verifyAppleTransaction(
   const isPremium = expectedProductId.includes(".premium.");
   if (decoded.type !== (isPremium ? "Auto-Renewable Subscription" : "Consumable"))
     throw new Error("transaction_type_mismatch");
+  // A consumable purchase must be a standalone transaction, not a renewal
+  // or a reused original transaction from a different purchase.
+  if (!isPremium && decoded.originalTransactionId !== decoded.transactionId)
+    throw new Error("consumable_transaction_chain_mismatch");
+  // An upgraded transaction cannot be used to grant fresh entitlements.
+  if (decoded.isUpgraded != null && decoded.isUpgraded !== false)
+    throw new Error("upgraded_transaction");
   if (!isPremium && (decoded.quantity != null && decoded.quantity !== 1))
     throw new Error("unsupported_coin_quantity");
   if (decoded.inAppOwnershipType != null && decoded.inAppOwnershipType !== "PURCHASED")
