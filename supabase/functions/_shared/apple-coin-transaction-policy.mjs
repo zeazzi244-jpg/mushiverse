@@ -56,7 +56,7 @@ export function validateVerifiedAppleCoinTransaction(transaction, expected) {
         typeof appAccountToken !== 'string' || appAccountToken.toLowerCase() !== expected.appAccountToken.toLowerCase())
       throw new Error('app_account_token_mismatch');
   }
-  if (expected.transactionId !== transactionId) throw new Error('transaction_mismatch');
+  // Consumables are standalone purchases, not renewable subscription chains.\n  // Their original transaction must identify the same purchase; rejecting an\n  // unexpected chain prevents a second transaction reusing a consumable origin.\n  if (originalTransactionId !== transactionId) throw new Error('consumable_transaction_chain_mismatch');\n  if (expected.transactionId !== transactionId) throw new Error('transaction_mismatch');
   if (expected.originalTransactionId !== originalTransactionId) throw new Error('original_transaction_mismatch');
   return Object.freeze({ transactionId, originalTransactionId, productId, environment, coins: appleCoinPacks[productId] });
 }
