@@ -225,7 +225,12 @@ function validateBundledCss(directory) {
     }
     for (const match of stylesheet.matchAll(/url\(\s*(?:"([^"]+)"|'([^']+)'|([^\s)]+))\s*\)/gi)) {
       const raw = (match[1] || match[2] || match[3]).trim();
-      if (!raw || raw.startsWith('#') || /^(?:data:|https?:|\/\/)/i.test(raw)) continue;
+      if (!raw || raw.startsWith('#') || /^data:/i.test(raw)) continue;
+      // A remote CSS image or font can disappear in offline WKWebView. Do not
+      // silently accept it while validating every other bundled asset.
+      if (/^(?:[a-z][a-z\d+.-]*:|\/\/)/i.test(raw)) {
+        throw new Error('Bundled CSS has remote asset dependency in ' + name + ': ' + raw);
+      }
       const url = raw.split(/[?#]/, 1)[0];
       let decoded;
       try { decoded = decodeURIComponent(url); }
