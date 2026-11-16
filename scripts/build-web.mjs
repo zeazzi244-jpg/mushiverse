@@ -187,7 +187,12 @@ function validateBundledCss(directory) {
     // stylesheet can silently leave the native WebView with unreadable text.
     for (const match of stylesheet.matchAll(/@import\s+(?:url\(\s*)?(?:["']([^"']+)["']|([^\s;)]+))\s*\)?/gi)) {
       const raw = (match[1] || match[2] || '').trim();
-      if (!raw || /^(?:data:|https?:|\/\/)/i.test(raw)) continue;
+      if (!raw) continue;
+      // Imported stylesheets are required to render the native UI. A remote
+      // import can disappear offline and leave labels unreadable.
+      if (/^(?:[a-z][a-z\\d+.-]*:|\\/\\/)/i.test(raw)) {
+        throw new Error('Bundled CSS has remote import in ' + name + ': ' + raw);
+      }
       const url = raw.split(/[?#]/, 1)[0];
       let decoded;
       try { decoded = decodeURIComponent(url); }
