@@ -73,6 +73,13 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Hiragino Kaku Gothic ProN","Y
 :is(#home,#post,#collection,#gacha,#map,#profile) :is(input,textarea)::placeholder{opacity:1;color:#596b60}
 :is(#home,#post,#collection,#gacha,#map,#profile) :is(input,textarea,select):disabled{opacity:.72}
 :is(#home,#post,#collection,#gacha,#map,#profile) :is(button,[role="button"]):disabled{opacity:.65;cursor:not-allowed}
+/* Locked cards still carry catalogue numbers and rarity information. */
+#collection .mv90Tile.mv90Unowned:disabled{
+  opacity:1;
+  color:#344e3e;
+  -webkit-text-fill-color:currentColor;
+}
+#collection .mv90Tile.mv90Unowned .mv90Num{color:#465c4d}
 :is(#home,#post,#collection,#gacha,#map,#profile) :is(.panel,.toolbar) :is(h1,h2,h3,h4){overflow-wrap:break-word}
 :is(#home,#post,#collection,#gacha,#map,#profile) :is(.panel,.toolbar) :is(input,textarea,select){box-sizing:border-box}
 @media(forced-colors:active){:is(#home,#post,#collection,#gacha,#map,#profile) :is(button,a,input,select,textarea):focus-visible{outline:3px solid Highlight}}
