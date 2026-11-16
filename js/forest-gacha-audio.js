@@ -141,7 +141,7 @@
     if (!notes) return;
     const finish = () => cue(time => {
       noise(time, 2270, 0.14, 0.17);
-      for (const [hz, offset] of notes) bell(time + offset, notes.length > 4 ? 0.65 : 0.38, 0.18);
+      for (const [hz, offset] of notes) bell(time + offset, hz, notes.length > 4 ? 0.65 : 0.38, 0.18);
     });
     if (audio?.state === 'running') finish();
     else if (audio && volume()) {
