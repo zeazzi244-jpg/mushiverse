@@ -76,6 +76,19 @@ Deno.serve(async(req)=>{
       if(productError) throw productError;
       if(foreignProduct?.length)
         return json({error:"original_transaction_chain_conflict"},409);
+      // A consumable original transaction identifies one purchase, unlike a
+      // subscription chain which legitimately has renewal transaction IDs.
+      // Reject another transaction ID for the same consumable original ID
+      // before creating a misleading pending claim. This is a preflight
+      // check; DB uniqueness and verified fulfillment remain authoritative.
+      if(isAppleCoinProduct(productId)){
+        const {data:otherConsumable,error:otherError}=await admin.from("apple_purchase_claims")
+          .select("transaction_id").eq("original_transaction_id",originalTransactionId)
+          .neq("transaction_id",transactionId).limit(1);
+        if(otherError) throw otherError;
+        if(otherConsumable?.length)
+          return json({error:"consumable_original_transaction_conflict"},409);
+      }
     }
 
     // Rate-limit new unverified claims. Replaying an existing transaction
