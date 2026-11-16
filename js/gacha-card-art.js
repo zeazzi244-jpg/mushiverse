@@ -43,7 +43,8 @@
       art.classList.add('mvCardArtUnavailable');
     };
 
-    try {
+    const isLegendary = rarity === 'LR' && name === '創世の白蝶・アルバセラフ';
+    if (!isLegendary) try {
       const svg = renderSpecies(name, rarity);
       if (svg) {
         art.append(svg);
@@ -53,12 +54,15 @@
       console.warn('MUSHIVERSE species illustration rendering failed:', error);
     }
 
-    if (rarity === 'LR' && name === '創世の白蝶・アルバセラフ') {
+    if (isLegendary) {
       const image = document.createElement('img');
       image.alt = name + 'のイラスト';
       image.loading = eager ? 'eager' : 'lazy';
       image.decoding = 'async';
-      image.addEventListener('error', showUnavailable, { once: true });
+      image.addEventListener('error', () => {
+        image.remove();
+        showUnavailable();
+      }, { once: true });
       art.append(image);
       image.src = albaseraphUrl.href;
     } else {
