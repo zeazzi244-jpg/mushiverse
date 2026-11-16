@@ -9,13 +9,14 @@ const cors={
 
 Deno.serve(async (req)=>{
   if(req.method==="OPTIONS") return new Response("ok",{headers:cors});
+  if(req.method!=="GET"&&req.method!=="POST") return new Response(JSON.stringify({error:"method_not_allowed"}),{status:405,headers:{...cors,"Content-Type":"application/json","Cache-Control":"no-store","Allow":"GET, POST, OPTIONS"}});
   try{
     const auth=req.headers.get("Authorization")||"";
     const url=Deno.env.get("SUPABASE_URL")!;
     const anon=Deno.env.get("SUPABASE_ANON_KEY")!;
     const sb=createClient(url,anon,{global:{headers:{Authorization:auth}}});
     const {data:{user},error:uerr}=await sb.auth.getUser();
-    if(uerr||!user) return new Response(JSON.stringify({error:"unauthorized"}),{status:401,headers:{...cors,"Content-Type":"application/json"}});
+    if(uerr||!user) return new Response(JSON.stringify({error:"unauthorized"}),{status:401,headers:{...cors,"Content-Type":"application/json","Cache-Control":"no-store"}});
     const {data,error}=await sb.from("premium_entitlements").select("plan,source,status,current_period_end,updated_at").eq("user_id",user.id).maybeSingle();
     if(error) throw error;
     const periodEnd=data?.current_period_end ? Date.parse(data.current_period_end) : NaN;
