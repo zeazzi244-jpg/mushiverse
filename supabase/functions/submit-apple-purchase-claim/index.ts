@@ -59,12 +59,19 @@ Deno.serve(async(req)=>{
     // original transaction ID. Do not let a second account claim that chain.
     if(originalTransactionId){
       if(!/^\d{6,}$/.test(originalTransactionId)) return json({error:"invalid_original_transaction_id"},400);
-      const {data:chain,error:chainError}=await admin.from("apple_purchase_claims")
-        .select("user_id,product_id").eq("original_transaction_id",originalTransactionId).limit(2);
-      if(chainError) throw chainError;
-      if(chain?.some((row:any)=>row.user_id!==user.id))
+      // Query conflicting rows directly. A limited sample of the chain can
+      // miss a foreign owner or product after two legitimate renewals.
+      const {data:foreignOwner,error:ownerError}=await admin.from("apple_purchase_claims")
+        .select("transaction_id").eq("original_transaction_id",originalTransactionId)
+        .neq("user_id",user.id).limit(1);
+      if(ownerError) throw ownerError;
+      if(foreignOwner?.length)
         return json({error:"subscription_already_claimed"},409);
-      if(chain?.some((row:any)=>row.product_id!==productId))
+      const {data:foreignProduct,error:productError}=await admin.from("apple_purchase_claims")
+        .select("transaction_id").eq("original_transaction_id",originalTransactionId)
+        .neq("product_id",productId).limit(1);
+      if(productError) throw productError;
+      if(foreignProduct?.length)
         return json({error:"original_transaction_chain_conflict"},409);
     }
 
