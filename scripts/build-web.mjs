@@ -148,7 +148,11 @@ for (const match of html.matchAll(/\b(?:src|href)\s*=\s*["']([^"']+\.(?:mjs|js|c
 // sound or animation can otherwise fail silently in WKWebView.
 for (const match of html.matchAll(/\b(?:src|poster)\s*=\s*["']([^"']+\.(?:mp3|wav|m4a|aac|ogg|mp4|webm)(?:[?#][^"']*)?)["']/gi)) {
   const raw = match[1];
-  if (/^(?:[a-z][a-z\d+.-]*:|\/\/)/i.test(raw)) continue;
+  // Native offline media must be packaged locally. A remote audio or video
+  // URL would otherwise pass this check and silently fail without a network.
+  if (/^(?:[a-z][a-z\d+.-]*:|\/\/)/i.test(raw)) {
+    throw new Error('Release bundle has remote media dependency: ' + raw);
+  }
   const url = raw.split(/[?#]/, 1)[0];
   let decoded;
   try { decoded = decodeURIComponent(url).replace(/^\/?/, ''); }
