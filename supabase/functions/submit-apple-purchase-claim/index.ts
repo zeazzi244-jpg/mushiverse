@@ -41,7 +41,11 @@ Deno.serve(async(req)=>{
     // This is still unverified metadata: only Apple-signed values can grant access.
     if(!originalTransactionId)
       return json({error:"original_transaction_id_required"},400);
-    // The downstream JWS verifier is Sandbox-only until real purchase proof.\n    // Reject Production and local StoreKit/Xcode claims before they create\n    // pending records that cannot be verified or safely fulfilled.\n    if(environment!==null&&environment!=="Sandbox")\n      return json({error:"unsupported_environment"},400);
+    // The downstream JWS verifier is Sandbox-only until real purchase proof.
+    // Reject Production and local StoreKit/Xcode claims before they create
+    // pending records that cannot be verified or safely fulfilled.
+    if(environment!==null&&environment!=="Sandbox")
+      return json({error:"unsupported_environment"},400);
 
     // Claims are only unverified reports. Replays must never reset a verified
     // or rejected transaction to pending, nor reassign it to another user.
