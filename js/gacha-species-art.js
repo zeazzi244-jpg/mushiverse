@@ -244,7 +244,10 @@
   window.mushiverseSpeciesIllustration = (name, rarity) => {
     const spec = species.get(name);
     if (!spec) return '';
-    if (cache.has(name)) return cache.get(name);
+    // Background gradients depend on rarity; a name-only cache leaks the first
+    // rendered rarity into later card previews for the same species.
+    const cacheKey = `${name}\u0000${rarity}`;
+    if (cache.has(cacheKey)) return cache.get(cacheKey);
     const [family, color, accent, marking, size] = spec;
     const [shade, light] = terrain[rarity] ?? terrain.N;
     let insect;
@@ -265,7 +268,7 @@
       <g transform="translate(120 118) scale(${size})">${insect}</g>
     </svg>`;
     const url = 'data:image/svg+xml;charset=UTF-8,'+encodeURIComponent(svg);
-    cache.set(name,url);
+    cache.set(cacheKey,url);
     return url;
   };
 })();
