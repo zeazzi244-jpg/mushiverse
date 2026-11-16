@@ -41,6 +41,10 @@ Deno.serve(async(req)=>{
     // This is still unverified metadata: only Apple-signed values can grant access.
     if(!originalTransactionId)
       return json({error:"original_transaction_id_required"},400);
+    // Consumable purchases cannot be renewal chains. Reject impossible claims
+    // before storing them; the signed JWS verifier independently enforces this.
+    if(isAppleCoinProduct(productId) && originalTransactionId!==transactionId)
+      return json({error:"consumable_transaction_chain_mismatch"},400);
     // The downstream JWS verifier is Sandbox-only until real purchase proof.
     // Reject Production and local StoreKit/Xcode claims before they create
     // pending records that cannot be verified or safely fulfilled.
