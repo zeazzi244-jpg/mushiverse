@@ -21,7 +21,13 @@
   }
 
   function stop() {
-    for (const source of active) source.stop();
+    // A source may already have a scheduled stop but still be awaiting onended.
+    // Repeated close/reveal events must never abort the rest of the audio handler.
+    for (const source of active) {
+      try { source.stop(); } catch (error) {
+        if (error?.name !== 'InvalidStateError') console.warn('MUSHIVERSE audio stop failed:', error);
+      }
+    }
     active.clear();
   }
 
