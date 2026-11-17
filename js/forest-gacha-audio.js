@@ -7,6 +7,7 @@
   let output;
   let grain;
   const active = new Set();
+  const cleanupBySource = new WeakMap();
 
   function volume() {
     try {
@@ -29,18 +30,27 @@
       }
       // stop() can leave scheduled notes connected until onended fires.
       // Disconnect immediately so closing the gacha reliably silences them.
-      try { source.disconnect(); } catch { /* Already disconnected. */ }
+      release(source);
     }
     active.clear();
   }
 
-  function start(source, node, time, length) {
+  function release(source) {
+    const nodes = cleanupBySource.get(source) || [];
+    cleanupBySource.delete(source);
+    try { source.disconnect(); } catch { /* Already disconnected. */ }
+    for (const node of nodes) {
+      try { node.disconnect(); } catch { /* Already disconnected. */ }
+    }
+  }
+
+  function start(source, node, time, length, extraNodes = []) {
+    cleanupBySource.set(source, [node, ...extraNodes]);
     source.onended = () => {
       active.delete(source);
       // Repeated draws create many short-lived nodes. Release their graph
       // connections as soon as playback finishes (including scheduled notes).
-      try { source.disconnect(); } catch { /* Already disconnected. */ }
-      try { node.disconnect(); } catch { /* Already disconnected. */ }
+      release(source);
     };
     try {
       source.connect(node);
@@ -49,7 +59,7 @@
       source.stop(time + length);
     } catch (error) {
       active.delete(source);
-      try { source.disconnect(); } catch { /* Node may not be connected. */ }
+      release(source);
       throw error;
     }
   }
@@ -78,8 +88,9 @@
     filter.type = 'bandpass';
     filter.frequency.value = hz;
     filter.Q.value = 0.85;
-    filter.connect(envelope(time, length, level));
-    start(source, filter, time, length);
+    const amp = envelope(time, length, level);
+    filter.connect(amp);
+    start(source, filter, time, length, [amp]);
   }
 
   function bell(time, hz, length, level) {
