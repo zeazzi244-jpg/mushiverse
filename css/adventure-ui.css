@@ -1039,13 +1039,20 @@ body[data-screen="profile"] .wrap > header { display: none; }
   width:min(100%,360px);
   margin:0 auto 6px;
 }
-#gacha #mv101Machine .mvWoodMachine > img{
+#gacha #mv101Machine .mvWoodMachine > :is(img,video,canvas){
   display:block;
+  box-sizing:border-box;
+  max-width:100%;
   width:100%;
   height:auto;
+  max-height:min(42vh,340px);
   max-height:min(42dvh,340px);
   object-fit:contain;
 }
+/* A broken or unusually wide machine asset must never push the draw buttons
+   beyond the horizontal viewport. This also covers nested machine media. */
+#gacha #mv101Machine .mvWoodMachine{min-width:0;max-width:100%;overflow:hidden;}
+#gacha #mv101Machine .mvWoodMachine :is(img,video,canvas){max-width:100%;object-fit:contain;}
 #gacha #mv101Machine .mvWoodActions{
   display:grid;
   grid-template-columns:repeat(2,minmax(0,1fr));
