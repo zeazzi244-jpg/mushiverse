@@ -111,6 +111,16 @@ Deno.serve(async (request: Request) => {
     if (newOwnerError) return json({ error: "unavailable", credited_or_previously_credited: false }, 503);
     if (newForeignOwners?.length)
       return json({ error: "original_transaction_owned_by_other_account", credited_or_previously_credited: false }, 409);
+    // A second claim for this same original transaction can appear while the
+    // remote Apple signature verifier runs. Recheck same-account conflicts too:
+    // a foreign-owner-only check cannot catch a duplicate transaction claim.
+    const { data: newConflicts, error: newConflictError } = await admin.from("apple_purchase_claims")
+      .select("transaction_id").eq("original_transaction_id", verified.originalTransactionId)
+      .eq("user_id", user.id)
+      .or(`transaction_id.neq.${verified.transactionId},product_id.neq.${verified.productId}`).limit(1);
+    if (newConflictError) return json({ error: "unavailable", credited_or_previously_credited: false }, 503);
+    if (newConflicts?.length)
+      return json({ error: "original_transaction_claim_conflict", credited_or_previously_credited: false }, 409);
     // This is a staging-only consistency check, not an atomic fulfillment gate.
     // No event insertion, RPC invocation, wallet mutation or premium entitlement.
     return json({ ok: true, verification: "sandbox_signature_verified", transaction_id: verified.transactionId,
