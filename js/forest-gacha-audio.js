@@ -32,11 +32,17 @@
   }
 
   function start(source, node, time, length) {
-    active.add(source);
     source.onended = () => active.delete(source);
-    source.connect(node);
-    source.start(time);
-    source.stop(time + length);
+    try {
+      source.connect(node);
+      source.start(time);
+      active.add(source);
+      source.stop(time + length);
+    } catch (error) {
+      active.delete(source);
+      try { source.disconnect(); } catch { /* Node may not be connected. */ }
+      throw error;
+    }
   }
 
   function envelope(time, length, level) {
@@ -96,8 +102,14 @@
   function cue(effect) {
     const gain = volume();
     if (!gain || document.hidden || audio?.state !== 'running') return;
-    output.gain.setValueAtTime(gain, audio.currentTime);
-    effect(audio.currentTime + 0.016);
+    try {
+      output.gain.setValueAtTime(gain, audio.currentTime);
+      effect(audio.currentTime + 0.016);
+    } catch (error) {
+      // Audio failures must not interrupt the gacha draw or card reveal.
+      stop();
+      console.warn('MUSHIVERSE gacha audio cue failed:', error);
+    }
   }
 
   document.addEventListener('mushiverse:gacha-audio-start', () => {
@@ -122,6 +134,8 @@
       if (audio.state !== 'running') void audio.resume().catch(() => {});
     } catch {
       audio = undefined;
+      output = undefined;
+      grain = undefined;
     }
   });
 
