@@ -236,4 +236,14 @@
   }
   document.addEventListener('mushiverse:gacha-audio-close', cancel);
   document.addEventListener('visibilitychange', () => { if (document.hidden) cancel(); });
+  // pagehide also fires on iOS navigation/BFCache transitions where
+  // visibilitychange is not guaranteed. Do not leave queued notes playing.
+  window.addEventListener('pagehide', cancel);
+  // The app can mute gacha sounds mid-animation; silence already queued notes
+  // immediately instead of waiting for the next cue to read the new volume.
+  window.addEventListener('storage', event => {
+    if (['mushiverse-gacha-mute', 'mushiverse-gacha-volume', 'mushiverse-tap-sounds-enabled'].includes(event.key)) {
+      if (!volume()) stop();
+    }
+  });
 })();
