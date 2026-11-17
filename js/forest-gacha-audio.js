@@ -151,11 +151,18 @@
           samples[i] = seed / 2147483648 - 1;
         }
       }
-      if (audio.state !== 'running') void audio.resume().catch(() => {});
-    } catch {
+      if (audio.state !== 'running') {
+        // Some WebViews throw synchronously rather than returning a rejected promise.
+        try { void Promise.resolve(audio.resume()).catch(() => {}); } catch { /* Retry on the next gesture. */ }
+      }
+    } catch (error) {
+      // A partially initialized AudioContext otherwise leaks across repeated draws.
+      const failedContext = audio;
       audio = undefined;
       output = undefined;
       grain = undefined;
+      try { if (failedContext) void Promise.resolve(failedContext.close()).catch(() => {}); } catch { /* Already closed. */ }
+      console.warn('MUSHIVERSE gacha audio initialization failed:', error);
     }
   });
 
@@ -163,9 +170,13 @@
   document.addEventListener('mushiverse:gacha-audio-prelude', () => {
     const current = ++turn;
     if (audio?.state === 'running') cue(crank);
-    else if (audio && volume()) void audio.resume().then(() => {
-      if (current === turn) cue(crank);
-    }).catch(() => {});
+    else if (audio && volume()) {
+      try {
+        void Promise.resolve(audio.resume()).then(() => {
+          if (current === turn) cue(crank);
+        }).catch(() => {});
+      } catch { /* Audio is optional; never interrupt the draw. */ }
+    }
   });
 
   document.addEventListener('mushiverse:gacha-audio-phase', ({detail}) => {
@@ -188,7 +199,9 @@
     if (audio?.state === 'running') finish();
     else if (audio && volume()) {
       const current = turn;
-      void audio.resume().then(() => { if (current === turn) finish(); }).catch(() => {});
+      try {
+        void Promise.resolve(audio.resume()).then(() => { if (current === turn) finish(); }).catch(() => {});
+      } catch { /* Keep the revealed card visible even if audio fails. */ }
     }
   });
 
