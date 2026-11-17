@@ -1092,6 +1092,7 @@ body[data-screen="profile"] .wrap > header { display: none; }
    controls share available space and wrap only on genuinely narrow screens. */
 #gacha :is(.gacha-controls,.gacha-actions){
   display:flex;
+  flex-wrap:wrap;
   align-items:stretch;
   gap:.65rem;
 }
