@@ -47,3 +47,9 @@
 - Build compelling but healthy engagement through curiosity, discoveries, progression, collections, community and learning. Avoid exploitative addictive mechanics, especially for children.
 - The durable strategy is documented in `MAJOR_UPDATE_ROADMAP.md` (commit `a84a282`).
 - Next implementation priorities: verify CI, check home navigation and empty states, remove confusing developer-facing panels without concealing security or account notices, and fix TestFlight white-screen startup before expanding monetization.
+
+## V19 card art recovery (2026-11-17)
+- The first-series catalogue contains 100 existing WebPs. The original expansion contains 200 WebPs (195 N, 5 SR), including 140 retained from local V18 commit `b96a646852ae852e47860296a722687b5f0dd4fa` and 52 converted from the previous session's generated PNG checkpoints. All 300 files decoded successfully and have distinct decoded pixels. No new image generation was required.
+- The shared card renderer selects the bundled WebP for gacha results, the owned list, catalogue entries and details. Existing SVGs remain available for the original expansion when a WebP fails. The original IDs, rates and local storage code were preserved.
+- After `npm run build:web`, run `node --test tests/gacha-species-art.test.mjs` to check the 300 references and SSR 0.1% threshold. The full suite on the integration base and V19 both reported 123 pass and 22 existing Apple purchase failures. The Apple purchase code is owned by the separate IAP workstream.
+- Verify the signed TestFlight build on iPhone across gacha results, owned cards, the gacha catalogue and card details. Give special attention to offline loading in WKWebView.

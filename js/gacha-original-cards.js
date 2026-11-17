@@ -202,18 +202,13 @@
     {"id":"mv-original-emerald-blade-mantis","slug":"emerald-blade-mantis","name":"エメラルドブレイドカマキリ","rarity":"SR","habitat":"翠玉の渓谷","description":"翡翠の結晶に似た前脚を構える。"},
     {"id":"mv-original-prism-star-jewel","slug":"prism-star-jewel","name":"プリズムスタータマムシ","rarity":"SR","habitat":"虹晶の洞窟","description":"虹色の甲殻に星形の光が反射する。"},
   ];
-  const photographed = new Set([
-    'tide-swallowtail', 'auspice-moth', 'amethyst-bee',
-    'moonblade-stag', 'celestial-moon-moth', 'sunlight-empress-bee',
-    'emerald-blade-mantis', 'prism-star-jewel',
-  ]);
   const byName = new Map();
   const byId = new Map();
   const scriptUrl = document.currentScript?.src || document.baseURI;
   const artBase = new URL('../assets/cards/original/', scriptUrl);
   for (const card of cards) {
     card.image = new URL(card.slug + '.svg', artBase).href;
-    if (photographed.has(card.slug)) card.photo = new URL(card.slug + '.webp', artBase).href;
+    card.photo = new URL(card.slug + '.webp', artBase).href;
     Object.freeze(card);
     byName.set(card.name, card);
     byId.set(card.id, card);

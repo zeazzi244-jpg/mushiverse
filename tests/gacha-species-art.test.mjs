@@ -99,6 +99,7 @@ test('archived and new WebP images are bundled under distinct card IDs, names an
   assert.equal(new Set([...originals, ...archived].map(c => c.id)).size, 300);
   assert.equal(window.mushiverseArchivedCard('星霜オサムシ').id, 'AI-080');
   const photos = originals.filter(card => card.photo);
+  assert.equal(photos.length, 200);
   assert.deepEqual(
     Array.from(photos, c => new URL(c.photo).pathname.split('/').at(-1)).sort(),
     readdirSync('www/assets/cards/original').filter(file => file.endsWith('.webp')).sort()
@@ -144,8 +145,11 @@ test('shared card rendering selects the correct WebP and retains the original SV
   context.document.createElement = () => new Element();
   runInNewContext(readFileSync('www/js/gacha-card-art.js', 'utf8'), context);
   const render = context.window.mushiverseCardArt;
-  const [firstSeries] = render('星霜オサムシ', 'SR').children;
-  assert.match(firstSeries.src, /\/assets\/ai-insects\/AI-080\.webp$/);
+  for (const card of [...context.window.mushiverseArchivedCards, ...context.window.mushiverseOriginalCards]) {
+    const [image] = render(card.name, card.rarity).children;
+    assert.equal(image.src, card.photo ?? card.image, card.name);
+    assert.equal(image.loading, 'lazy', card.name);
+  }
   const [photograph] = render('潮玉アゲハ', 'N', true).children;
   assert.match(photograph.src, /\/assets\/cards\/original\/tide-swallowtail\.webp$/);
   assert.equal(photograph.loading, 'eager');
