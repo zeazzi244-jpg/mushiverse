@@ -55,6 +55,11 @@ Deno.serve(async (request: Request) => {
       return json({ error: "not_coin_product" }, 400);
     if (!claim.original_transaction_id || !idPattern.test(claim.original_transaction_id))
       return json({ error: "original_transaction_required" }, 400);
+    // Consumable purchases must be standalone. Reject inconsistent claims before
+    // any ownership query or expensive certificate validation; the signed JWS
+    // is independently checked against both IDs by the Apple verifier below.
+    if (claim.original_transaction_id !== claim.transaction_id)
+      return json({ error: "consumable_transaction_chain_mismatch", credited_or_previously_credited: false }, 409);
     // Fail closed if the same Apple original transaction is claimed by another
     // account. This is a preflight ownership check, not a substitute for the
     // atomic uniqueness enforcement required when fulfillment is enabled.
