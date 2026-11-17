@@ -187,10 +187,23 @@
 
   document.addEventListener('mushiverse:gacha-audio-phase', ({detail}) => {
     if (![0, 1, 2].includes(detail)) return;
-    cue(time => {
-      noise(time, 1200 + detail * 750, 0.12, 0.06);
-      bell(time, [330, 493.88, 659.25][detail], 0.20, 0.10);
-    });
+    // iOS may suspend Web Audio between the prelude and the capsule animation.
+    // Resume on this gesture when possible, but never play a stale phase after
+    // a newer draw, reveal, close, or visibility change.
+    const current = turn;
+    const play = () => {
+      if (current !== turn) return;
+      cue(time => {
+        noise(time, 1200 + detail * 750, 0.12, 0.06);
+        bell(time, [330, 493.88, 659.25][detail], 0.20, 0.10);
+      });
+    };
+    if (audio?.state === 'running') play();
+    else if (audio && volume() && !document.hidden) {
+      try {
+        void Promise.resolve(audio.resume()).then(play).catch(() => {});
+      } catch { /* Sound must never interrupt the capsule animation. */ }
+    }
   });
 
   document.addEventListener('mushiverse:rarity-reveal', ({detail}) => {
