@@ -90,6 +90,28 @@ Deno.serve(async (request: Request) => {
     } catch {
       return json({ error: "apple_transaction_verification_failed", credited_or_previously_credited: false }, 422);
     }
+    // Re-check ownership after asynchronous Apple certificate verification. A
+    // pending claim can be modified while the remote verifier is running;
+    // never report a verified purchase against a changed or reassigned claim.
+    const { data: currentClaims, error: currentError } = await admin.from("apple_purchase_claims")
+      .select("user_id,transaction_id,original_transaction_id,product_id,status,environment")
+      .eq("transaction_id", verified.transactionId).limit(2);
+    if (currentError) return json({ error: "unavailable", credited_or_previously_credited: false }, 503);
+    if (!currentClaims || currentClaims.length !== 1 ||
+        currentClaims[0].user_id !== user.id ||
+        currentClaims[0].transaction_id !== verified.transactionId ||
+        currentClaims[0].original_transaction_id !== verified.originalTransactionId ||
+        currentClaims[0].product_id !== verified.productId ||
+        currentClaims[0].status !== "pending" ||
+        (currentClaims[0].environment !== null && currentClaims[0].environment !== "Sandbox"))
+      return json({ error: "claim_changed_during_verification", credited_or_previously_credited: false }, 409);
+    const { data: newForeignOwners, error: newOwnerError } = await admin.from("apple_purchase_claims")
+      .select("transaction_id").eq("original_transaction_id", verified.originalTransactionId)
+      .neq("user_id", user.id).limit(1);
+    if (newOwnerError) return json({ error: "unavailable", credited_or_previously_credited: false }, 503);
+    if (newForeignOwners?.length)
+      return json({ error: "original_transaction_owned_by_other_account", credited_or_previously_credited: false }, 409);
+    // This is a staging-only consistency check, not an atomic fulfillment gate.
     // No event insertion, RPC invocation, wallet mutation or premium entitlement.
     return json({ ok: true, verification: "sandbox_signature_verified", transaction_id: verified.transactionId,
       credited_or_previously_credited: false, fulfillment: "disabled_pending_sandbox_proof" });
