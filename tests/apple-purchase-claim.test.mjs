@@ -74,7 +74,7 @@ function createHarness() {
 }
 const coin=(id,product='mushiverse.coins.100',original=id)=>({
   transaction_id:id,original_transaction_id:original,product_id:product,
-  environment:'storekit'
+  environment:'Sandbox'
 });
 test('accepts an allowlisted coin claim as pending, not as a granted reward',async()=>{
   const h=createHarness();
@@ -108,6 +108,15 @@ test('a subscription original transaction cannot be reused by another account',a
   assert.equal((await h.send(premium('123456789'))).status,200);
   h.setUser('user-b');
   assert.equal((await h.send(premium('223456789'))).status,409);
+});
+test('rejects unsupported StoreKit and Production claims without creating pending purchases',async()=>{
+  const h=createHarness();
+  for (const environment of ['storekit', 'Production']) {
+    const r=await h.send({...coin('123456789'),environment});
+    assert.equal(r.status,400,environment);
+    assert.equal(r.data.error,'unsupported_environment');
+  }
+  assert.equal(h.rows.length,0);
 });
 test('disallows unknown products and malformed transaction IDs',async()=>{
   const h=createHarness();
