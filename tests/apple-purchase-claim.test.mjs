@@ -22,6 +22,9 @@ function createHarness() {
     const filters = [];
     const q = {
       eq(k,v) { filters.push(r => r[k]===v); return q; },
+      // Match Supabase's negative-equality filter when checking transaction ownership.
+      // The production claim handler uses .neq() for cross-account/product guards.
+      neq(k,v) { filters.push(r => r[k]!==v); return q; },
       limit(n) { return Promise.resolve({data: rows.filter(r=>filters.every(f=>f(r))).slice(0,n),error:null}); },
       gte(k,v) {
         const count=rows.filter(r=>filters.every(f=>f(r)) && r[k]>=v).length;
