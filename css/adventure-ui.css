@@ -975,7 +975,7 @@ body[data-screen="profile"] .wrap > header { display: none; }
 #gacha #mv101Machine .mvGachaOdds { margin: .5rem 0; }
 #gacha #mv101Machine .mvGachaOdds summary { min-height: 30px; cursor: pointer; font-weight: 700; }
 #gacha #mv101Machine .mvWoodBalance { color: #173d2f; font-weight: 800; }
-@media(max-width:340px) {
+@media(max-width:300px) {
   #mv88Reveal .mvGachaNext:not([hidden]), #gacha #mv101Machine .mvWoodActions { grid-template-columns: minmax(0,1fr); }
 }
 @media(prefers-reduced-motion:no-preference) {
@@ -1027,7 +1027,7 @@ body[data-screen="profile"] .wrap > header { display: none; }
     grid-template-columns: repeat(2,minmax(0,1fr));
   }
 }
-@media(max-width:320px) {
+@media(max-width:300px) {
   #gacha #mv101Machine .mvWoodActions {
     grid-template-columns: minmax(0,1fr);
   }
@@ -1085,7 +1085,9 @@ body[data-screen="profile"] .wrap > header { display: none; }
   outline:3px solid #f5d17b;
   outline-offset:2px;
 }
-@media(max-width:340px){
+/* Keep both draw choices adjacent on 320px iPhones; grid minmax(0,1fr)
+   and wrapping labels prevent overflow without stacking the controls. */
+@media(max-width:300px){
   #gacha #mv101Machine .mvWoodActions{grid-template-columns:1fr}
 }
 
