@@ -32,8 +32,8 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
     func sceneDidBecomeActive(_ scene: UIScene) {
         guard let overlay = launchOverlay, launchOverlayDismissal == nil else { return }
         let fadeDuration = UIAccessibility.isReduceMotionEnabled ? 0 : Self.launchFadeDuration
-        let dismissal = DispatchWorkItem { [weak self, weak overlay] in
-            guard let self, let overlay else { return }
+        let dismissal = DispatchWorkItem { [weak self, weak overlay, weak scene] in
+            guard let self, let overlay, scene?.activationState == .foregroundActive else { return }
             if fadeDuration == 0 {
                 self.removeLaunchOverlay(overlay)
                 return
@@ -59,9 +59,14 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         launchOverlayDismissal = nil
     }
 
-    func sceneDidDisconnect(_ scene: UIScene) {
+    func sceneWillResignActive(_ scene: UIScene) {
+        // The launch logo needs time on screen while the app is visible.
         launchOverlayDismissal?.cancel()
         launchOverlayDismissal = nil
+    }
+
+    func sceneDidDisconnect(_ scene: UIScene) {
+        sceneWillResignActive(scene)
         launchOverlay?.removeFromSuperview()
         launchOverlay = nil
     }

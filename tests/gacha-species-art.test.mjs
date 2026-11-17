@@ -1,5 +1,6 @@
 import assert from 'node:assert/strict';
-import { readFileSync } from 'node:fs';
+import { createHash } from 'node:crypto';
+import { readdirSync, readFileSync } from 'node:fs';
 import test from 'node:test';
 import { runInNewContext } from 'node:vm';
 
@@ -24,6 +25,8 @@ function readExpansion() {
   const window = {};
   const context = { window, URL, document: { currentScript: { src: 'capacitor://localhost/js/gacha-original-cards.js' } } };
   runInNewContext(readFileSync('www/js/gacha-original-cards.js', 'utf8'), context);
+  context.document.currentScript.src = 'capacitor://localhost/js/gacha-archived-cards.js';
+  runInNewContext(readFileSync('www/js/gacha-archived-cards.js', 'utf8'), context);
   return context;
 }
 
@@ -66,19 +69,86 @@ test('the live draw function can award every original and preserves all existing
     sizes[draw().rarity]++;
   }
   assert.deepEqual(sizes, { N: 800, R: 180, SR: 19, SSR: 1 });
-  assert.equal(context.window.mushiverseGachaCatalogue.length, 300);
+  assert.equal(context.window.mushiverseGachaCatalogue.length, 400);
   const seen = new Set();
-  for (const [rarity, size] of [['N', 235], ['SR', 25]]) {
+  const { window } = context;
+  for (const [rarity, roll] of [['N', 0.5], ['R', 0.1], ['SR', 0.01], ['SSR', 0.0005]]) {
+    const size = window.mushiverseGachaCatalogue.filter(([, tier]) => tier === rarity).length;
     for (let i = 0; i < size; i++) {
-      rolls = [rarity === 'N' ? 0.5 : 0.01, (i + 0.5) / size];
+      rolls = [roll, (i + 0.5) / size];
       const pulled = draw();
-      const original = context.window.mushiverseOriginalCard(pulled.name);
-      if (original) {
-        assert.equal(pulled.id, original.id);
-        assert.equal(pulled.rarity, original.rarity);
+      const card = window.mushiverseOriginalCard(pulled.name) ?? window.mushiverseArchivedCard(pulled.name);
+      if (card) {
+        assert.equal(pulled.id, card.id);
+        assert.equal(pulled.rarity, card.rarity);
         seen.add(pulled.id);
       }
     }
   }
-  assert.equal(seen.size, 200);
+  assert.equal(seen.size, 300);
+});
+
+test('archived and new WebP images are bundled under distinct card IDs, names and URLs', () => {
+  const { window } = readExpansion();
+  const archived = window.mushiverseArchivedCards;
+  const originals = window.mushiverseOriginalCards;
+  const html = readFileSync('www/index.html', 'utf8');
+  const species = JSON.parse(html.match(/const INSECTS=(\[\[.*?\]\]);/u)[1].replaceAll("'", '"'));
+  assert.equal(archived.length, 100);
+  assert.equal(new Set([...species.map(([name]) => name), ...[...originals, ...archived].map(c => c.name)]).size, 400);
+  assert.equal(new Set([...originals, ...archived].map(c => c.id)).size, 300);
+  assert.equal(window.mushiverseArchivedCard('星霜オサムシ').id, 'AI-080');
+  const photos = originals.filter(card => card.photo);
+  assert.deepEqual(
+    Array.from(photos, c => new URL(c.photo).pathname.split('/').at(-1)).sort(),
+    readdirSync('www/assets/cards/original').filter(file => file.endsWith('.webp')).sort()
+  );
+  const hashes = new Set();
+  for (const card of [...archived, ...photos]) {
+    const path = new URL(card.photo ?? card.image).pathname;
+    assert.equal(path, card.photo ? '/assets/cards/original/' + card.slug + '.webp' : '/assets/ai-insects/' + card.id + '.webp');
+    const data = readFileSync('www' + path);
+    assert.equal(data.toString('ascii', 0, 4), 'RIFF', card.name);
+    assert.equal(data.toString('ascii', 8, 12), 'WEBP', card.name);
+    const hash = createHash('sha256').update(data).digest('hex');
+    assert.ok(!hashes.has(hash), card.name);
+    hashes.add(hash);
+  }
+});
+
+test('legacy collections and conflicting old names are resolved on read without rewriting the wallet', () => {
+  const context = readExpansion();
+  const queried = [];
+  context.window.user = { id: 'existing-player' };
+  context.localStorage = {
+    getItem(key) { queried.push(key); return JSON.stringify({ cards: ['AI-080'] }); }
+  };
+  const entries = Object.freeze([Object.freeze({
+    id: 'mv-original-amethyst-rhinoceros', name: '紫晶カブト', rarity: 'N', at: 'saved'
+  })]);
+  const [original, archived] = context.window.mushiverseDisplayGachaCards(entries);
+  assert.deepEqual(queried, ['mushiverse-ai-collection-v1:user:existing-player']);
+  assert.equal(original.name, '紫晶の林カブト');
+  assert.equal(original.at, 'saved');
+  assert.equal(archived.name, '星霜オサムシ');
+  assert.equal(entries[0].name, '紫晶カブト');
+  assert.equal(entries.length, 1);
+});
+
+test('shared card rendering selects the correct WebP and retains the original SVG as a fallback', () => {
+  const context = readExpansion();
+  class Element extends EventTarget {
+    children = [];
+    append(child) { this.children.push(child); }
+  }
+  context.document.createElement = () => new Element();
+  runInNewContext(readFileSync('www/js/gacha-card-art.js', 'utf8'), context);
+  const render = context.window.mushiverseCardArt;
+  const [firstSeries] = render('星霜オサムシ', 'SR').children;
+  assert.match(firstSeries.src, /\/assets\/ai-insects\/AI-080\.webp$/);
+  const [photograph] = render('潮玉アゲハ', 'N', true).children;
+  assert.match(photograph.src, /\/assets\/cards\/original\/tide-swallowtail\.webp$/);
+  assert.equal(photograph.loading, 'eager');
+  photograph.dispatchEvent(new Event('error'));
+  assert.match(photograph.src, /\/assets\/cards\/original\/tide-swallowtail\.svg$/);
 });

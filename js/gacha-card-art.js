@@ -80,7 +80,8 @@
 
     const isLegendary = rarity === 'LR' && name === '創世の白蝶・アルバセラフ';
     const original = window.mushiverseOriginalCard?.(name);
-    if (!isLegendary && !original) try {
+    const archived = window.mushiverseArchivedCard?.(name);
+    if (!isLegendary && !original && !archived) try {
       const svg = renderSpecies(name, rarity);
       if (svg) {
         art.append(svg);
@@ -90,12 +91,17 @@
       console.warn('MUSHIVERSE species illustration rendering failed:', error);
     }
 
-    if (isLegendary || original) {
+    if (isLegendary || original || archived) {
       const image = document.createElement('img');
       image.alt = name + 'のイラスト';
       image.loading = eager ? 'eager' : 'lazy';
       image.decoding = 'async';
-      image.addEventListener('error', () => {
+      const onImageError = () => {
+        if (original?.photo && image.src === original.photo) {
+          image.addEventListener('error', onImageError, { once: true });
+          image.src = original.image;
+          return;
+        }
         image.remove();
         if (!original) return showUnavailable();
         inlineOriginalArt(original.image, name)
@@ -104,9 +110,10 @@
             console.warn('MUSHIVERSE original illustration fallback failed:', name, error);
             showUnavailable();
           });
-      }, { once: true });
+      };
+      image.addEventListener('error', onImageError, { once: true });
       art.append(image);
-      image.src = original?.image ?? albaseraphUrl.href;
+      image.src = archived?.image ?? original?.photo ?? original?.image ?? albaseraphUrl.href;
     } else {
       showUnavailable();
     }

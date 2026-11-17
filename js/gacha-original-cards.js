@@ -139,7 +139,7 @@
     {"id":"mv-original-amethyst-swallowtail","slug":"amethyst-swallowtail","name":"紫晶アゲハ","rarity":"N","habitat":"紫晶の林","description":"紫水晶の断面のような模様が浮かぶ。森の上を弧を描いて飛ぶ。"},
     {"id":"mv-original-amethyst-moth","slug":"amethyst-moth","name":"紫晶コガ","rarity":"N","habitat":"紫晶の林","description":"紫水晶の断面のような模様が浮かぶ。枝先で翅を重ねて休む。"},
     {"id":"mv-original-amethyst-stag","slug":"amethyst-stag","name":"紫晶クワガタ","rarity":"N","habitat":"紫晶の林","description":"紫水晶の断面のような模様が浮かぶ。二股の大あごで枯れ枝をつかむ。"},
-    {"id":"mv-original-amethyst-rhinoceros","slug":"amethyst-rhinoceros","name":"紫晶カブト","rarity":"N","habitat":"紫晶の林","description":"紫水晶の断面のような模様が浮かぶ。一本の角が葉の間からのぞく。"},
+    {"id":"mv-original-amethyst-rhinoceros","slug":"amethyst-rhinoceros","name":"紫晶の林カブト","rarity":"N","habitat":"紫晶の林","description":"紫水晶の断面のような模様が浮かぶ。一本の角が葉の間からのぞく。"},
     {"id":"mv-original-amethyst-jewel","slug":"amethyst-jewel","name":"紫晶タマムシ","rarity":"N","habitat":"紫晶の林","description":"紫水晶の断面のような模様が浮かぶ。細い甲殻の縁が動くたびに光る。"},
     {"id":"mv-original-amethyst-ladybird","slug":"amethyst-ladybird","name":"紫晶テントウ","rarity":"N","habitat":"紫晶の林","description":"紫水晶の断面のような模様が浮かぶ。丸い背が木の実に紛れる。"},
     {"id":"mv-original-amethyst-longhorn","slug":"amethyst-longhorn","name":"紫晶カミキリ","rarity":"N","habitat":"紫晶の林","description":"紫水晶の断面のような模様が浮かぶ。長い触角で樹皮のすき間を探る。"},
@@ -202,14 +202,23 @@
     {"id":"mv-original-emerald-blade-mantis","slug":"emerald-blade-mantis","name":"エメラルドブレイドカマキリ","rarity":"SR","habitat":"翠玉の渓谷","description":"翡翠の結晶に似た前脚を構える。"},
     {"id":"mv-original-prism-star-jewel","slug":"prism-star-jewel","name":"プリズムスタータマムシ","rarity":"SR","habitat":"虹晶の洞窟","description":"虹色の甲殻に星形の光が反射する。"},
   ];
+  const photographed = new Set([
+    'tide-swallowtail', 'auspice-moth', 'amethyst-bee',
+    'moonblade-stag', 'celestial-moon-moth', 'sunlight-empress-bee',
+    'emerald-blade-mantis', 'prism-star-jewel',
+  ]);
   const byName = new Map();
+  const byId = new Map();
   const scriptUrl = document.currentScript?.src || document.baseURI;
   const artBase = new URL('../assets/cards/original/', scriptUrl);
   for (const card of cards) {
     card.image = new URL(card.slug + '.svg', artBase).href;
+    if (photographed.has(card.slug)) card.photo = new URL(card.slug + '.webp', artBase).href;
     Object.freeze(card);
     byName.set(card.name, card);
+    byId.set(card.id, card);
   }
   window.mushiverseOriginalCards = Object.freeze(cards);
   window.mushiverseOriginalCard = name => byName.get(name);
+  window.mushiverseOriginalCardById = id => byId.get(id);
 })();
