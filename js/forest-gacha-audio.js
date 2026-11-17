@@ -27,12 +27,21 @@
       try { source.stop(); } catch (error) {
         if (error?.name !== 'InvalidStateError') console.warn('MUSHIVERSE audio stop failed:', error);
       }
+      // stop() can leave scheduled notes connected until onended fires.
+      // Disconnect immediately so closing the gacha reliably silences them.
+      try { source.disconnect(); } catch { /* Already disconnected. */ }
     }
     active.clear();
   }
 
   function start(source, node, time, length) {
-    source.onended = () => active.delete(source);
+    source.onended = () => {
+      active.delete(source);
+      // Repeated draws create many short-lived nodes. Release their graph
+      // connections as soon as playback finishes (including scheduled notes).
+      try { source.disconnect(); } catch { /* Already disconnected. */ }
+      try { node.disconnect(); } catch { /* Already disconnected. */ }
+    };
     try {
       source.connect(node);
       source.start(time);
