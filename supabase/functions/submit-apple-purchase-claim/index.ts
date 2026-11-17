@@ -58,6 +58,9 @@ Deno.serve(async(req)=>{
       .eq("transaction_id",transactionId).limit(2);
     if(lookupError) throw lookupError;
     if(existing?.length){
+      // Multiple rows for one Apple transaction indicate broken uniqueness.
+      // Never acknowledge an ambiguous claim as an idempotent success.
+      if(existing.length !== 1) return json({error:"transaction_integrity_conflict"},409);
       if(existing.some((row:any)=>row.user_id!==user.id || row.product_id!==productId || row.original_transaction_id!==originalTransactionId))
         return json({error:"transaction_already_claimed"},409);
       return json({ok:true,claim_id:existing[0].id,status:existing[0].status});
