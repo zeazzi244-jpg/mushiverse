@@ -6,6 +6,7 @@ const base = {
   bundleId: 'com.rikuto.mushiverse', productId: 'mushiverse.coins.100',
   environment: 'Sandbox', transactionId: '1234567890', originalTransactionId: '1234567890',
   purchaseDate: 1730000000000, signedDate: 1730000001000, type: 'Consumable',
+  quantity: 1, inAppOwnershipType: 'PURCHASED',
   appAccountToken: '123e4567-e89b-42d3-a456-426614174000',
 };
 const expected = {
@@ -29,8 +30,17 @@ for (const [name, change, match] of [
   ['future signed date', {signedDate:Date.now()+86400000}, /invalid_signed_date/],
   ['invalid signed date', {signedDate:'not-a-date'}, /invalid_signed_date/],
   ['missing transaction', {transactionId:''}, /invalid_transaction_id/],
-  ['wrong original transaction', {originalTransactionId:'999999'}, /original_transaction_mismatch/],
+  ['wrong original transaction', {originalTransactionId:'999999'}, /consumable_transaction_chain_mismatch/],
 ]) test('rejects '+name, () => assert.throws(() => validate({...base,...change},expected), match));
+test('rejects a different trusted original transaction even when the signed transaction is internally consistent', () => {
+  assert.throws(() => validate(base,{...expected,originalTransactionId:'999999999'}), /original_transaction_mismatch/);
+});
+test('rejects missing or unsupported quantity and ownership fields', () => {
+  assert.throws(() => validate({...base,quantity:undefined},expected), /unsupported_quantity/);
+  assert.throws(() => validate({...base,quantity:2},expected), /unsupported_quantity/);
+  assert.throws(() => validate({...base,inAppOwnershipType:undefined},expected), /unsupported_ownership_type/);
+  assert.throws(() => validate({...base,inAppOwnershipType:'FAMILY_SHARED'},expected), /unsupported_ownership_type/);
+});
 test('rejects mismatched transaction ownership', () =>
   assert.throws(() => validate(base,{...expected,transactionId:'987654321'}),/transaction_mismatch/));
 
