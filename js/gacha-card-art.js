@@ -96,24 +96,34 @@
       image.alt = name + 'のイラスト';
       image.loading = eager ? 'eager' : 'lazy';
       image.decoding = 'async';
+      // Archived artwork can disappear after a catalog migration. Try the
+      // original card's photo and SVG before declaring the card unavailable.
+      // Preserve each card's own URLs; never substitute a shared placeholder.
+      const candidates = [...new Set([
+        archived?.image,
+        original?.photo,
+        original?.image,
+        isLegendary ? albaseraphUrl.href : null
+      ].filter(Boolean))];
+      let candidateIndex = 0;
       const onImageError = () => {
-        if (original?.photo && image.src === original.photo) {
-          image.addEventListener('error', onImageError, { once: true });
-          image.src = original.image;
+        candidateIndex++;
+        if (candidateIndex < candidates.length) {
+          image.src = candidates[candidateIndex];
           return;
         }
         image.remove();
         if (!original) return showUnavailable();
         inlineOriginalArt(original.image, name)
-          .then(svg => art.append(svg))
+          .then(svg => { if (art.isConnected) art.append(svg); })
           .catch(error => {
             console.warn('MUSHIVERSE original illustration fallback failed:', name, error);
-            showUnavailable();
+            if (art.isConnected) showUnavailable();
           });
       };
-      image.addEventListener('error', onImageError, { once: true });
+      image.addEventListener('error', onImageError);
       art.append(image);
-      image.src = archived?.image ?? original?.photo ?? original?.image ?? albaseraphUrl.href;
+      image.src = candidates[0];
     } else {
       showUnavailable();
     }
