@@ -5,10 +5,12 @@ import { isAppleCoinProduct } from "../_shared/apple-coin-transaction-policy.mjs
 
 // Sandbox verification-only staging: do not persist trusted events or grant coins
 // before the release gate and atomic fulfillment integration are independently proven.
-const headers = { "content-type": "application/json; charset=utf-8", "cache-control": "no-store", "x-content-type-options": "nosniff" };
+const cors = { "access-control-allow-origin": "*", "access-control-allow-headers": "authorization, x-client-info, apikey, content-type", "access-control-allow-methods": "POST, OPTIONS" };
+const headers = { ...cors, "content-type": "application/json; charset=utf-8", "cache-control": "no-store", "x-content-type-options": "nosniff" };
 const json = (body: Record<string, unknown>, status = 200) => new Response(JSON.stringify(body), { status, headers });
 const idPattern = /^\d{6,30}$/;
 Deno.serve(async (request: Request) => {
+  if (request.method === "OPTIONS") return new Response(null, { status: 204, headers: cors });
   if (request.method !== "POST") return json({ error: "method_not_allowed" }, 405);
   const authorization = request.headers.get("authorization") ?? "";
   if (!/^Bearer\s+\S+$/i.test(authorization)) return json({ error: "unauthorized" }, 401);
