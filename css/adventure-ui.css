@@ -969,7 +969,9 @@ body[data-screen="profile"] .wrap > header { display: none; }
 #mv88Reveal .mvGachaNext button:disabled, #gacha #mv101Machine .mvWoodActions button:disabled {
   background: #d5e3da; color: #40594b;
 }
-#mv88Reveal .mvGachaNext button:last-child, #mvWoodStatus, #mv77DrawHint { grid-column: 1 / -1; }
+/* Only status and hints span the row: the final draw button must not be
+   forced onto a separate row when two actions fit side by side. */
+#mvWoodStatus, #mv77DrawHint { grid-column: 1 / -1; }
 #gacha #mv101Machine .mvGachaOdds { margin: .5rem 0; }
 #gacha #mv101Machine .mvGachaOdds summary { min-height: 30px; cursor: pointer; font-weight: 700; }
 #gacha #mv101Machine .mvWoodBalance { color: #173d2f; font-weight: 800; }
