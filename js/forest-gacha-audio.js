@@ -24,6 +24,12 @@
   }
 
   function stop() {
+    // Mute the shared output first: stopping individual scheduled sources can
+    // throw in some WebViews, but a failed stop must never leave a fanfare audible.
+    if (output && audio?.state === 'running') {
+      try { output.gain.setValueAtTime(0, audio.currentTime); }
+      catch (error) { console.warn('MUSHIVERSE audio mute failed:', error); }
+    }
     // A source may already have a scheduled stop but still be awaiting onended.
     // Repeated close/reveal events must never abort the rest of the audio handler.
     for (const source of active) {
@@ -242,7 +248,8 @@
   // The app can mute gacha sounds mid-animation; silence already queued notes
   // immediately instead of waiting for the next cue to read the new volume.
   window.addEventListener('storage', event => {
-    if (!['mushiverse-gacha-mute', 'mushiverse-gacha-volume', 'mushiverse-tap-sounds-enabled'].includes(event.key)) return;
+    // Storage.clear() emits a null key and can reset all audio preferences.
+    if (event.key !== null && !['mushiverse-gacha-mute', 'mushiverse-gacha-volume', 'mushiverse-tap-sounds-enabled'].includes(event.key)) return;
     // A volume change in another tab must affect sounds already playing, not
     // only the next cue. In particular, lowering the volume must not leave a
     // previously queued SSR fanfare playing at its old level.
