@@ -884,7 +884,7 @@ async function renderMap(){
   }
   setTimeout(()=>{insectMap.invalidateSize();if(placedPoints.length===1)insectMap.setView(placedPoints[0],8);else if(placedPoints.length>1)insectMap.fitBounds(placedPoints,{padding:[28,28],maxZoom:9})},80)
 }
-function tab(name){document.body.dataset.screen=name;document.querySelector('.skipLink').href='#'+name;document.querySelectorAll('main > section').forEach(el=>el.classList.toggle('hide',el.id!==name));document.querySelectorAll('.nav button').forEach(el=>el.classList.toggle('active',el.dataset.tab===name));if(name==='map')renderMap();window.scrollTo({top:0,behavior:'smooth'})}
+function tab(name){if(document.body.classList.contains('mv128Kids')&&(name==='post'||name==='map'))return;document.body.dataset.screen=name;document.querySelector('.skipLink').href='#'+name;document.querySelectorAll('main > section').forEach(el=>el.classList.toggle('hide',el.id!==name));document.querySelectorAll('.nav button').forEach(el=>el.classList.toggle('active',el.dataset.tab===name));if(name==='map')renderMap();window.scrollTo({top:0,behavior:'smooth'})}
 document.querySelectorAll('.nav button').forEach(b=>b.onclick=()=>tab(b.dataset.tab));
 function safePhoto(r,cls='photo'){if(!r.image_url)return `<div class="${cls==='photo'?'placeholder':'miniPlaceholder'}">🪲</div>`;try{const u=new URL(r.image_url);if(u.protocol!=='https:')throw Error();return `<img src="${esc(u.href)}" class="${cls}" loading="lazy" alt="${esc(r.insect_name)}の写真">`}catch{return '<div class="placeholder">🪲</div>'}}
 
@@ -1645,6 +1645,7 @@ async function reportPostLocal(id){
 }
 function clearSafetyFilters(){hiddenPosts=new Set();blockedUsers=new Set();saveIdSet(HIDDEN_POSTS_KEY,hiddenPosts);saveIdSet(BLOCKED_USERS_KEY,blockedUsers);render();renderCommunitySafety();toast('非表示設定をリセットしました')}
 function openDetail(id){
+ if(document.body.classList.contains('mv128Kids'))return;
   const r=records.find(x=>x.id===id);if(!r)return;rememberViewedSpecies(r);renderRecentlyViewed();
   const counts={};for(const l of likes)counts[l.post_id]=(counts[l.post_id]||0)+1;
   const place=[r.prefecture,r.municipality].filter(Boolean).join(' ');
@@ -4413,7 +4414,7 @@ function initGacha(){const nav=document.querySelector('.nav button[data-tab="gac
  moveGacha();new MutationObserver(moveGacha).observe(document.body,{childList:true,subtree:true});
 }
 function initLocation(){const b=$('mv86Locate');if(!b)return;let marker=null,circle=null;
- b.onclick=()=>{const status=$('mv86LocationStatus');if(!navigator.geolocation){status.textContent='この端末では位置情報を利用できません';return}
+ b.onclick=()=>{if(document.body.classList.contains('mv128Kids'))return;const status=$('mv86LocationStatus');if(!navigator.geolocation){status.textContent='この端末では位置情報を利用できません';return}
  b.disabled=true;status.textContent='位置情報を確認しています…';
  navigator.geolocation.getCurrentPosition(pos=>{b.disabled=false;const map=window.mv86InsectMap;if(!map||!window.L){status.textContent='地図を表示してからもう一度押してください';return}const lat=pos.coords.latitude,lng=pos.coords.longitude;if(marker)map.removeLayer(marker);if(circle)map.removeLayer(circle);marker=L.circleMarker([lat,lng],{radius:8,color:'#0967bb',weight:3,fillColor:'#53aaf0',fillOpacity:1}).addTo(map).bindPopup('📍 現在地（この端末のみ）');circle=L.circle([lat,lng],{radius:Math.min(pos.coords.accuracy||0,5000),color:'#4393d3',fillOpacity:.08,weight:1}).addTo(map);map.setView([lat,lng],14);status.textContent='青い点が現在地です。観察記録には追加されません。地図サービスには周辺の地図画像をリクエストします。';},err=>{b.disabled=false;status.textContent=err.code===1?'位置情報の利用が許可されていません':'現在地を取得できませんでした。もう一度お試しください。';},{enableHighAccuracy:false,timeout:15000,maximumAge:0});};
 }
@@ -5069,7 +5070,7 @@ body.mv128Kids #profile button,body.mv128Kids nav.nav button{min-height:50px!imp
 #profile .mv128DevHidden{display:none!important}
 </style>
 <script id="mv128-public-settings-script">
-(()=>{'use strict';const K='mushiverse-display-mode-v1';function mode(){try{return localStorage.getItem(K)==='kids'?'kids':'normal'}catch{return 'normal'}}function apply(){document.body.classList.toggle('mv128Kids',mode()==='kids')}function mount(){const root=document.getElementById('profile');if(!root||document.getElementById('mv128Settings'))return;const section=document.createElement('section');section.id='mv128Settings';const heading=document.createElement('h3');heading.textContent='⚙️ アプリの設定';const label=document.createElement('label');label.textContent='表示モード';const select=document.createElement('select');select.setAttribute('aria-label','表示モード');[['normal','通常モード（大人・上級者）'],['kids','キッズモード（12歳以下向け）']].forEach(([value,name])=>{const option=document.createElement('option');option.value=value;option.textContent=name;select.append(option)});select.value=mode();select.addEventListener('change',()=>{try{localStorage.setItem(K,select.value)}catch{}apply()});label.append(select);const help=document.createElement('p');help.textContent='キッズモードでは文字と操作ボタンを大きく表示します。位置情報や交流の安全制限は今後の対応が必要です。';section.append(heading,label,help);const card=document.getElementById('mv86ProfileCard');if(card)card.insertAdjacentElement('afterend',section);else root.prepend(section);const advanced=document.getElementById('mv86AdvancedToggle');if(advanced)advanced.textContent='⚙️ 詳細設定を表示';}
+(()=>{'use strict';const K='mushiverse-display-mode-v1';function mode(){try{return localStorage.getItem(K)==='kids'?'kids':'normal'}catch{return 'normal'}}function apply(){document.body.classList.toggle('mv128Kids',mode()==='kids')}function mount(){const root=document.getElementById('profile');if(!root||document.getElementById('mv128Settings'))return;const section=document.createElement('section');section.id='mv128Settings';const heading=document.createElement('h3');heading.textContent='⚙️ アプリの設定';const label=document.createElement('label');label.textContent='表示モード';const select=document.createElement('select');select.setAttribute('aria-label','表示モード');[['normal','通常モード（大人・上級者）'],['kids','キッズモード（12歳以下向け）']].forEach(([value,name])=>{const option=document.createElement('option');option.value=value;option.textContent=name;select.append(option)});select.value=mode();select.addEventListener('change',()=>{try{localStorage.setItem(K,select.value)}catch{}apply()});label.append(select);const help=document.createElement('p');help.textContent='キッズモードでは文字と操作ボタンを大きく表示します。投稿・地図・公開フィード・ショップを非表示にします。';section.append(heading,label,help);const card=document.getElementById('mv86ProfileCard');if(card)card.insertAdjacentElement('afterend',section);else root.prepend(section);const advanced=document.getElementById('mv86AdvancedToggle');if(advanced)advanced.textContent='⚙️ 詳細設定を表示';}
 function init(){apply();mount()}if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init,{once:true});else init();})();
 </script>
 <style id="mv129-fixes">/* mv129-settings-visibility-fix */
@@ -5104,6 +5105,7 @@ document.addEventListener('click',e=>{if(e.target.closest?.('[data-tab="profile"
 
 <style id="mv131-kids-safety-ui">
 body.mv128Kids nav.nav [data-tab="post"],body.mv128Kids nav.nav [data-tab="map"],body.mv128Kids #mv110FollowFeed,body.mv128Kids #mv108Follows,body.mv128Kids #mv104Ranking{display:none!important}
+body.mv128Kids main > #post,body.mv128Kids main > #map,body.mv128Kids #home > :not(.mvAdventureHero),body.mv128Kids #home .mvAdventurePrimary{display:none!important}
 #mv131KidsNotice{display:none;padding:14px;margin:12px;border:1px solid #c4d8bf;border-radius:14px;background:#f1f8e9;color:#254a32;font-weight:700}
 body.mv128Kids #mv131KidsNotice{display:block}
 </style>
