@@ -4530,7 +4530,11 @@ function init(){
  const muteKey='mushiverse-gacha-mute';
  try{
   const saved=localStorage.getItem(volumeKey);
-  if(saved!==null&&Number.isFinite(Number(saved)))volume.value=String(Number(saved)*100);
+  if(saved!==null&&Number.isFinite(Number(saved))){
+   const max=Number(volume.max)||100;
+   const min=Number(volume.min)||0;
+   volume.value=String(Math.max(min,Math.min(max,Number(saved)*100)));
+  }
   mute.checked=localStorage.getItem(muteKey)==='true';
   volume.addEventListener('input',()=>localStorage.setItem(volumeKey,String(Number(volume.value)/100)));
   mute.addEventListener('change',()=>localStorage.setItem(muteKey,String(mute.checked)));
