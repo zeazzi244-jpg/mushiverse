@@ -67,6 +67,10 @@
       source.stop(time + length);
     } catch (error) {
       active.delete(source);
+      // source.start() may have succeeded before scheduling source.stop()
+      // failed. Explicitly stop it before disconnecting the graph, otherwise
+      // a live oscillator can survive the failed cue in iOS WebViews.
+      try { source.stop(); } catch { /* Never started or already stopped. */ }
       release(source);
       throw error;
     }
