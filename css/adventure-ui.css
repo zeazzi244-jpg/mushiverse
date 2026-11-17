@@ -1109,3 +1109,19 @@ body[data-screen="profile"] .wrap > header { display: none; }
 @media(max-width:360px){
   #gacha :is(.gacha-controls,.gacha-actions) > :is(button,[role="button"]){flex-basis:100%;}
 }
+
+/* Public-release accessibility: disclosure summaries are interactive targets.
+   Their previous 30px/36px heights were too small for touch and switch users. */
+#gacha #mv101Machine :is(.mvGachaOdds,.mvWoodAudio) > summary {
+  display:flex;
+  align-items:center;
+  min-height:44px;
+  padding-block:8px;
+  color:#173d2f;
+  touch-action:manipulation;
+}
+#gacha #mv101Machine :is(.mvGachaOdds,.mvWoodAudio) > summary:focus-visible {
+  outline:3px solid #b87915;
+  outline-offset:2px;
+  border-radius:4px;
+}
