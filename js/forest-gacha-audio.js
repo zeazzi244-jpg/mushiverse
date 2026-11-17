@@ -6,6 +6,8 @@
   let audio;
   let output;
   let grain;
+  // Prevent delayed phase events from restarting audio after reveal or close.
+  let drawOpen = false;
   const active = new Set();
   const cleanupBySource = new WeakMap();
 
@@ -135,6 +137,7 @@
   document.addEventListener('mushiverse:gacha-audio-start', () => {
     // Invalidate any pending resume callback from the previous draw, even if muted.
     turn++;
+    drawOpen = true;
     stop();
     if (!volume() || document.hidden) return;
     try {
@@ -174,25 +177,26 @@
 
   let turn = 0;
   document.addEventListener('mushiverse:gacha-audio-prelude', () => {
+    if (!drawOpen) return;
     const current = ++turn;
     if (audio?.state === 'running') cue(crank);
     else if (audio && volume()) {
       try {
         void Promise.resolve(audio.resume()).then(() => {
-          if (current === turn) cue(crank);
+          if (drawOpen && current === turn) cue(crank);
         }).catch(() => {});
       } catch { /* Audio is optional; never interrupt the draw. */ }
     }
   });
 
   document.addEventListener('mushiverse:gacha-audio-phase', ({detail}) => {
-    if (![0, 1, 2].includes(detail)) return;
+    if (!drawOpen || ![0, 1, 2].includes(detail)) return;
     // iOS may suspend Web Audio between the prelude and the capsule animation.
     // Resume on this gesture when possible, but never play a stale phase after
     // a newer draw, reveal, close, or visibility change.
     const current = turn;
     const play = () => {
-      if (current !== turn) return;
+      if (!drawOpen || current !== turn) return;
       cue(time => {
         noise(time, 1200 + detail * 750, 0.12, 0.06);
         bell(time, [330, 493.88, 659.25][detail], 0.20, 0.10);
@@ -207,6 +211,7 @@
   });
 
   document.addEventListener('mushiverse:rarity-reveal', ({detail}) => {
+    drawOpen = false;
     turn++;
     stop();
     const notes = fanfares[detail?.rarity];
@@ -225,6 +230,7 @@
   });
 
   function cancel() {
+    drawOpen = false;
     turn++;
     stop();
   }
