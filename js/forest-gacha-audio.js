@@ -101,6 +101,9 @@
   }
 
   document.addEventListener('mushiverse:gacha-audio-start', () => {
+    // Invalidate any pending resume callback from the previous draw, even if muted.
+    turn++;
+    stop();
     if (!volume() || document.hidden) return;
     try {
       if (!audio) {
@@ -116,7 +119,6 @@
           samples[i] = seed / 2147483648 - 1;
         }
       }
-      stop();
       if (audio.state !== 'running') void audio.resume().catch(() => {});
     } catch {
       audio = undefined;
