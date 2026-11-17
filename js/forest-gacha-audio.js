@@ -121,7 +121,7 @@
 
   function cue(effect) {
     const gain = volume();
-    if (!gain || document.hidden || audio?.state !== 'running') return;
+    if (!gain || document.hidden || audio?.state !== 'running' || !output) return;
     try {
       output.gain.setValueAtTime(gain, audio.currentTime);
       effect(audio.currentTime + 0.016);
@@ -138,6 +138,12 @@
     stop();
     if (!volume() || document.hidden) return;
     try {
+      if (audio && audio.state === 'closed') {
+        stop();
+        audio = undefined;
+        output = undefined;
+        grain = undefined;
+      }
       if (!audio) {
         audio = new Context();
         output = audio.createGain();
