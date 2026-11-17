@@ -98,12 +98,21 @@ test('credit endpoint rejects unauthenticated sessions and missing backend confi
   assert.equal(noConfig.calls.rpc,0);
 });
 
-test('a verified Sandbox transaction for a new pack still cannot write a wallet', async () => {
-  const h = harness({productId:'mushiverse.coins.2500', validSignature:true});
+test('a verified Sandbox transaction for an approved pack still cannot write a wallet', async () => {
+  const h = harness({productId:'mushiverse.coins.1200', validSignature:true});
   const result = await h.send();
   assert.equal(result.status,200);
   assert.equal(result.body.verification,'sandbox_signature_verified');
   assert.equal(result.body.credited_or_previously_credited,false);
   assert.equal(h.calls.verifier,1);
+  assert.equal(h.calls.rpc,0);
+});
+
+test('a staged coin pack cannot enter Sandbox verification before approval', async () => {
+  const h = harness({productId:'mushiverse.coins.2500', validSignature:true});
+  const result = await h.send();
+  assert.equal(result.status,400);
+  assert.equal(result.body.error,'not_coin_product');
+  assert.equal(h.calls.verifier,0);
   assert.equal(h.calls.rpc,0);
 });
