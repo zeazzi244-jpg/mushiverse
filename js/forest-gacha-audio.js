@@ -242,8 +242,17 @@
   // The app can mute gacha sounds mid-animation; silence already queued notes
   // immediately instead of waiting for the next cue to read the new volume.
   window.addEventListener('storage', event => {
-    if (['mushiverse-gacha-mute', 'mushiverse-gacha-volume', 'mushiverse-tap-sounds-enabled'].includes(event.key)) {
-      if (!volume()) stop();
+    if (!['mushiverse-gacha-mute', 'mushiverse-gacha-volume', 'mushiverse-tap-sounds-enabled'].includes(event.key)) return;
+    // A volume change in another tab must affect sounds already playing, not
+    // only the next cue. In particular, lowering the volume must not leave a
+    // previously queued SSR fanfare playing at its old level.
+    const level = volume();
+    if (!level) {
+      stop();
+    }
+    if (audio?.state === 'running' && output) {
+      try { output.gain.setValueAtTime(level, audio.currentTime); }
+      catch (error) { console.warn('MUSHIVERSE audio volume update failed:', error); }
     }
   });
 })();
