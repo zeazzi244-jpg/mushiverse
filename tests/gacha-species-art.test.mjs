@@ -148,7 +148,7 @@ test('shared card rendering selects the correct WebP and retains the original SV
   for (const card of [...context.window.mushiverseArchivedCards, ...context.window.mushiverseOriginalCards]) {
     const [image] = render(card.name, card.rarity).children;
     assert.equal(image.src, card.photo ?? card.image, card.name);
-    assert.equal(image.loading, 'lazy', card.name);
+    assert.equal(image.loading, 'eager', card.name); // Detached card nodes must load before insertion.
   }
   const [photograph] = render('潮玉アゲハ', 'N', true).children;
   assert.match(photograph.src, /\/assets\/cards\/original\/tide-swallowtail\.webp$/);
