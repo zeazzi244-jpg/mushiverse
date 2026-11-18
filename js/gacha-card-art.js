@@ -143,7 +143,12 @@
           return;
         }
         image.remove();
-        if (!original?.image) return showSpeciesFallback();
+        // Only SVG files can be parsed as inline artwork. WebP/PNG/JPEG
+        // candidates must fall back to the species illustration instead of
+        // being fetched and parsed as XML after an image-load failure.
+        if (!original?.image || !/\\.svg(?:[?#]|$)/i.test(original.image)) {
+          return showSpeciesFallback();
+        }
         // Card nodes are often created while detached (e.g. in a carousel or
         // document fragment). isConnected is false then, but the image still
         // needs to finish loading before the node is inserted.
