@@ -69,6 +69,19 @@
   window.mushiverseCardArt = (name, rarity, eager = false) => {
     const art = document.createElement('div');
     art.className = 'mvSharedCardArt';
+    const showSpeciesFallback = () => {
+      try {
+        const svg = renderSpecies(name, rarity);
+        if (svg) {
+          art.classList.remove('mvCardArtUnavailable');
+          art.replaceChildren(svg);
+          return;
+        }
+      } catch (error) {
+        console.warn('MUSHIVERSE species fallback failed:', name, error);
+      }
+      showUnavailable();
+    };
     const showUnavailable = () => {
       if (!reported.has(name)) {
         reported.add(name);
@@ -106,7 +119,7 @@
         isLegendary ? albaseraphUrl.href : null
       ].filter(Boolean))];
       if (!candidates.length) {
-        showUnavailable();
+        showSpeciesFallback();
         return art;
       }
       let candidateIndex = 0;
@@ -117,19 +130,19 @@
           return;
         }
         image.remove();
-        if (!original?.image) return showUnavailable();
+        if (!original?.image) return showSpeciesFallback();
         inlineOriginalArt(original.image, name)
           .then(svg => { if (art.isConnected) art.append(svg); })
           .catch(error => {
             console.warn('MUSHIVERSE original illustration fallback failed:', name, error);
-            if (art.isConnected) showUnavailable();
+            if (art.isConnected) showSpeciesFallback();
           });
       };
       image.addEventListener('error', onImageError);
       art.append(image);
       image.src = candidates[0];
     } else {
-      showUnavailable();
+      showSpeciesFallback();
     }
     return art;
   };
