@@ -28,7 +28,7 @@
       if (id) node.setAttribute('id', prefix + id);
       for (const attr of [...node.attributes]) {
         if (attr.value.includes('url(#')) {
-          node.setAttribute(attr.name, attr.value.replace(/url\\(#([^)]+)\\)/g,
+          node.setAttribute(attr.name, attr.value.replace(/url\(#([^)]+)\)/g,
             (_, id) => 'url(#' + prefix + id + ')'));
         }
       }
