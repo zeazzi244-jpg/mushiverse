@@ -13,16 +13,26 @@
 
     // Inline the bundled drawing so WKWebView never has to load a data URL.
     // Each card needs its own gradient IDs, including repeat pulls of the same species.
-    const idPrefix = 'mvSpeciesArt-' + ++nextArtId + '-';
-    const markup = decodeURIComponent(source.slice(svgPrefix.length))
-      .replace(/id="(forest|shell)"/g, (_, id) => 'id="' + idPrefix + id + '"')
-      .replace(/url\(#(forest|shell)\)/g, (_, id) => 'url(#' + idPrefix + id + ')');
+    const markup = decodeURIComponent(source.slice(svgPrefix.length));
     const svg = new DOMParser().parseFromString(markup, 'image/svg+xml').documentElement;
     if (svg.localName !== 'svg' || svg.namespaceURI !== svgNamespace ||
         svg.querySelector('parsererror,script,foreignObject,image,use,style,a,animate,set')) return null;
     const unsafe = [svg, ...svg.querySelectorAll('*')].some(node =>
       [...node.attributes].some(attr => /^on/i.test(attr.name) || /(?:href|src|style)$/i.test(attr.name)));
     if (unsafe) return null;
+    // Rewrite every local SVG ID, not only known gradient names. Different
+    // species can use different filter, mask or clip-path IDs in the future.
+    const prefix = 'mvSpeciesArt-' + ++nextArtId + '-';
+    for (const node of [svg, ...svg.querySelectorAll('*')]) {
+      const id = node.getAttribute('id');
+      if (id) node.setAttribute('id', prefix + id);
+      for (const attr of [...node.attributes]) {
+        if (attr.value.includes('url(#')) {
+          node.setAttribute(attr.name, attr.value.replace(/url\\(#([^)]+)\\)/g,
+            (_, id) => 'url(#' + prefix + id + ')'));
+        }
+      }
+    }
     svg.setAttribute('role', 'img');
     svg.setAttribute('aria-label', name + 'のイラスト');
     svg.setAttribute('width', '100%');
