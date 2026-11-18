@@ -139,13 +139,28 @@
       }
       let candidateIndex = 0;
       let fallbackStarted = false;
+      let loadTimeout;
+      const clearLoadTimeout = () => {
+        if (loadTimeout !== undefined) clearTimeout(loadTimeout);
+        loadTimeout = undefined;
+      };
+      const armLoadTimeout = () => {
+        clearLoadTimeout();
+        // A stalled request may never fire load/error in an embedded WebView.
+        // Move to the next species-specific source rather than leaving a blank card.
+        loadTimeout = setTimeout(() => {
+          if (!fallbackStarted && !image.complete) onImageError();
+        }, 12000);
+      };
       const onImageError = () => {
+        clearLoadTimeout();
         // An already-failed image may emit another error after a source swap.
         // Start the asynchronous SVG fallback only once per card.
         if (fallbackStarted) return;
         candidateIndex++;
         if (candidateIndex < candidates.length) {
           image.src = candidates[candidateIndex];
+          armLoadTimeout();
           return;
         }
         fallbackStarted = true;
@@ -174,8 +189,10 @@
         void tryInlineSvg();
       };
       image.addEventListener('error', onImageError);
+      image.addEventListener('load', clearLoadTimeout, { once: true });
       art.append(image);
       image.src = candidates[0];
+      armLoadTimeout();
     } else {
       showSpeciesFallback();
     }
