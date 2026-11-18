@@ -138,12 +138,18 @@
         return art;
       }
       let candidateIndex = 0;
+      let fallbackStarted = false;
       const onImageError = () => {
+        // An already-failed image may emit another error after a source swap.
+        // Start the asynchronous SVG fallback only once per card.
+        if (fallbackStarted) return;
         candidateIndex++;
         if (candidateIndex < candidates.length) {
           image.src = candidates[candidateIndex];
           return;
         }
+        fallbackStarted = true;
+        image.removeEventListener('error', onImageError);
         image.remove();
         // Only SVG files can be parsed as inline artwork. WebP/PNG/JPEG
         // candidates must fall back to the species illustration instead of
