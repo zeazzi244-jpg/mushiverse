@@ -117,7 +117,8 @@
     if (isLegendary || original || archived) {
       const image = document.createElement('img');
       image.alt = name + 'のイラスト';
-      image.loading = eager ? 'eager' : 'lazy';
+      // Card artwork is frequently built off-DOM; lazy loading can leave it blank.
+      image.loading = 'eager';
       image.decoding = 'async';
       // Archived artwork can disappear after a catalog migration. Try the
       // original card's photo and SVG before declaring the card unavailable.
@@ -127,7 +128,7 @@
         original?.photo,
         original?.image,
         isLegendary ? albaseraphUrl.href : null
-      ].filter(url => typeof url === 'string' && url.trim() && !/^\\s*(?:javascript|data):/i.test(url)))];
+      ].filter(url => typeof url === 'string' && url.trim() && !/^\s*(?:javascript|data):/i.test(url)))];
       if (!candidates.length) {
         showSpeciesFallback();
         return art;
@@ -154,10 +155,6 @@
       image.addEventListener('error', onImageError);
       art.append(image);
       image.src = candidates[0];
-      // A detached lazy image may never start loading until it enters the
-      // document. Eagerly load the initial image so carousel/prebuilt cards
-      // can resolve missing artwork before their first appearance.
-      if (!eager && !art.isConnected) image.loading = 'eager';
     } else {
       showSpeciesFallback();
     }
