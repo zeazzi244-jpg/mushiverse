@@ -105,6 +105,10 @@
         original?.image,
         isLegendary ? albaseraphUrl.href : null
       ].filter(Boolean))];
+      if (!candidates.length) {
+        showUnavailable();
+        return art;
+      }
       let candidateIndex = 0;
       const onImageError = () => {
         candidateIndex++;
@@ -113,7 +117,7 @@
           return;
         }
         image.remove();
-        if (!original) return showUnavailable();
+        if (!original?.image) return showUnavailable();
         inlineOriginalArt(original.image, name)
           .then(svg => { if (art.isConnected) art.append(svg); })
           .catch(error => {
