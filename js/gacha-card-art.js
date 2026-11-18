@@ -130,7 +130,9 @@
         original?.photo,
         original?.image,
         isLegendary ? albaseraphUrl.href : null
-      ].filter(url => typeof url === 'string' && url.trim() && !/^\s*(?:javascript|data):/i.test(url)))];
+      ].filter(url => typeof url === 'string')
+        .map(url => url.trim())
+        .filter(url => url && !/^(?:javascript|data|vbscript):/i.test(url)))];
       if (!candidates.length) {
         showSpeciesFallback();
         return art;
