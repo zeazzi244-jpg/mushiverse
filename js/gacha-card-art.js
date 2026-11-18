@@ -189,7 +189,15 @@
         void tryInlineSvg();
       };
       image.addEventListener('error', onImageError);
-      image.addEventListener('load', clearLoadTimeout);
+      image.addEventListener('load', () => {
+        // A WebView may emit load for a decoded-but-empty image. Do not
+        // clear the recovery timer until the artwork has real dimensions.
+        if (image.naturalWidth > 0 && image.naturalHeight > 0) {
+          clearLoadTimeout();
+        } else {
+          onImageError();
+        }
+      });
       art.append(image);
       armLoadTimeout();
       image.src = candidates[0];
