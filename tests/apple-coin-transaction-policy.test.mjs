@@ -24,6 +24,7 @@ for (const [name, change, match] of [
   ['wrong environment', {environment:'Production'}, /environment_mismatch/],
   ['unknown product', {productId:'mushiverse.coins.999'}, /product_mismatch/],
   ['subscription', {type:'Auto-Renewable Subscription'}, /type_mismatch/],
+  ['renewal-marked consumable', {transactionReason:'RENEWAL'}, /invalid_consumable_transaction_reason/],
   ['revoked', {revocationDate:1730000000001}, /revoked/],
   ['future purchase', {purchaseDate:Date.now()+86400000}, /invalid_purchase_date/],
   ['signed before purchase', {signedDate:base.purchaseDate-1}, /invalid_signed_date/],
