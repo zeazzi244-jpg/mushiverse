@@ -22,7 +22,11 @@ Deno.serve(async (request: Request) => {
     const userClient = createClient(url, anon, { global: { headers: { Authorization: authorization } } });
     const { data: { user }, error: authError } = await userClient.auth.getUser();
     if (authError || !user) return json({ error: "unauthorized" }, 401);
-    if (Number(request.headers.get("content-length") || 0) > 40000) return json({ error: "request_too_large" }, 413);
+    const declaredLength = request.headers.get("content-length");
+    if (declaredLength !== null) {
+      if (!/^(0|[1-9][0-9]*)$/.test(declaredLength)) return json({ error: "invalid_content_length" }, 400);
+      if (Number(declaredLength) > 40000) return json({ error: "request_too_large" }, 413);
+    }
     // Enforce the limit while reading: request.text() buffers an entire chunked
     // body before checking its size and permits unbounded unauthenticated memory use.
     const reader = request.body?.getReader();
@@ -44,7 +48,9 @@ Deno.serve(async (request: Request) => {
     const bytes = new Uint8Array(received);
     let offset = 0;
     for (const chunk of chunks) { bytes.set(chunk, offset); offset += chunk.byteLength; }
-    const raw = new TextDecoder("utf-8", { fatal: true }).decode(bytes);
+    let raw: string;
+    try { raw = new TextDecoder("utf-8", { fatal: true }).decode(bytes); }
+    catch { return json({ error: "invalid_utf8" }, 400); }
     let body: Record<string, unknown>;
     try { body = JSON.parse(raw); } catch { return json({ error: "invalid_json" }, 400); }
     if (!body || typeof body !== "object" || Array.isArray(body)) return json({ error: "invalid_body" }, 400);
