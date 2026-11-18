@@ -118,6 +118,10 @@
     'mv-classic-022', 'mv-classic-023', 'mv-classic-024',
     'mv-classic-025', 'mv-classic-026', 'mv-classic-027',
     'mv-classic-028', 'mv-classic-029', 'mv-classic-030',
+    'mv-classic-031', 'mv-classic-032', 'mv-classic-033',
+    'mv-classic-034', 'mv-classic-035', 'mv-classic-036',
+    'mv-classic-037', 'mv-classic-038', 'mv-classic-039',
+    'mv-classic-040', 'mv-classic-041', 'mv-classic-042',
   ]);
   const cards = roster.map(([id, legacyName, name, rarity, weight]) => {
     const photo = photographs.has(id) ? new URL(id + '.webp', base).href : null;
