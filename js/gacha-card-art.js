@@ -146,7 +146,7 @@
         // Only SVG files can be parsed as inline artwork. WebP/PNG/JPEG
         // candidates must fall back to the species illustration instead of
         // being fetched and parsed as XML after an image-load failure.
-        if (!original?.image || !/\\.svg(?:[?#]|$)/i.test(original.image)) {
+        if (!original?.image || !/\.svg(?:[?#]|$)/i.test(original.image)) {
           return showSpeciesFallback();
         }
         // Card nodes are often created while detached (e.g. in a carousel or
