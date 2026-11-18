@@ -9,17 +9,18 @@ final class MushiverseCoinStore: ObservableObject {
     // Compile-time release gate. Never enable from JavaScript, remote config or localStorage.
     static let purchasesEnabled = false
 
-    static let coinPacks: [(id: String, coins: Int)] = [100, 300, 500, 1200, 2500, 5500, 12000].map {
+    // Match the three server-allowlisted products. Unsupported legacy packs must not be offered.
+    static let coinPacks: [(id: String, coins: Int)] = [100, 500, 1200].map {
         ("mushiverse.coins.\($0)", $0)
     }
     static let premiumID = "jp.mushiverse.premium.monthly"
-    static let adventurePassID = "jp.mushiverse.adventure.pass.30d"
-    static let productIDs = Set(coinPacks.map { $0.id } + [premiumID, adventurePassID])
+    static let premiumAnnualID = "jp.mushiverse.premium.annual"
+    static let productIDs = Set(coinPacks.map { $0.id } + [premiumID, premiumAnnualID])
 
     private static func expectedType(_ id: String) -> Product.ProductType? {
         switch id {
         case premiumID: return .autoRenewable
-        case adventurePassID: return .nonRenewable
+        case premiumAnnualID: return .autoRenewable
         default: return coinPacks.contains(where: { $0.id == id }) ? .consumable : nil
         }
     }
