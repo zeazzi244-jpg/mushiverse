@@ -38,7 +38,7 @@ function harness({user = {id:'user-a'}, configured = true, productId = 'mushiver
       assert.equal(expected.environment,'Sandbox');
       assert.equal(expected.productId,productId);
       if(!validSignature)throw Error('invalid signature');
-      return {transactionId:expected.transactionId};
+      return {transactionId:expected.transactionId, originalTransactionId:expected.originalTransactionId, productId:expected.productId};
     }, isAppleCoinProduct
   );
   assert.equal(typeof handler,'function');
