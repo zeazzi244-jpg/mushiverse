@@ -23,8 +23,28 @@ Deno.serve(async (request: Request) => {
     const { data: { user }, error: authError } = await userClient.auth.getUser();
     if (authError || !user) return json({ error: "unauthorized" }, 401);
     if (Number(request.headers.get("content-length") || 0) > 40000) return json({ error: "request_too_large" }, 413);
-    const raw = await request.text();
-    if (new TextEncoder().encode(raw).length > 40000) return json({ error: "request_too_large" }, 413);
+    // Enforce the limit while reading: request.text() buffers an entire chunked
+    // body before checking its size and permits unbounded unauthenticated memory use.
+    const reader = request.body?.getReader();
+    if (!reader) return json({ error: "invalid_body" }, 400);
+    const chunks: Uint8Array[] = [];
+    let received = 0;
+    try {
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+        received += value.byteLength;
+        if (received > 40000) {
+          await reader.cancel();
+          return json({ error: "request_too_large" }, 413);
+        }
+        chunks.push(value);
+      }
+    } finally { reader.releaseLock(); }
+    const bytes = new Uint8Array(received);
+    let offset = 0;
+    for (const chunk of chunks) { bytes.set(chunk, offset); offset += chunk.byteLength; }
+    const raw = new TextDecoder("utf-8", { fatal: true }).decode(bytes);
     let body: Record<string, unknown>;
     try { body = JSON.parse(raw); } catch { return json({ error: "invalid_json" }, 400); }
     if (!body || typeof body !== "object" || Array.isArray(body)) return json({ error: "invalid_body" }, 400);
