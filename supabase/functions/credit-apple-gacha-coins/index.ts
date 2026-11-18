@@ -25,7 +25,7 @@ Deno.serve(async (request: Request) => {
     const declaredLength = request.headers.get("content-length");
     if (declaredLength !== null) {
       if (!/^(0|[1-9][0-9]*)$/.test(declaredLength)) return json({ error: "invalid_content_length" }, 400);
-      if (Number(declaredLength) > 40000) return json({ error: "request_too_large" }, 413);
+      if (!Number.isSafeInteger(Number(declaredLength)) || Number(declaredLength) > 40000) return json({ error: "request_too_large" }, 413);
     }
     // Enforce the limit while reading: request.text() buffers an entire chunked
     // body before checking its size and permits unbounded unauthenticated memory use.
@@ -45,7 +45,7 @@ Deno.serve(async (request: Request) => {
         chunks.push(value);
       }
     } finally { reader.releaseLock(); }
-    const bytes = new Uint8Array(received);
+    // A mismatched declared length is not reliable purchase evidence. Reject\n    // incomplete or inconsistent bodies rather than parsing partial JSON.\n    if (declaredLength !== null && received !== Number(declaredLength))\n      return json({ error: "content_length_mismatch" }, 400);\n    const bytes = new Uint8Array(received);
     let offset = 0;
     for (const chunk of chunks) { bytes.set(chunk, offset); offset += chunk.byteLength; }
     let raw: string;
