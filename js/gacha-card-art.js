@@ -149,7 +149,7 @@
         // A stalled request may never fire load/error in an embedded WebView.
         // Move to the next species-specific source rather than leaving a blank card.
         loadTimeout = setTimeout(() => {
-          if (!fallbackStarted && !image.complete) onImageError();
+          if (!fallbackStarted && image.naturalWidth === 0) onImageError();
         }, 12000);
       };
       const onImageError = () => {
@@ -159,8 +159,8 @@
         if (fallbackStarted) return;
         candidateIndex++;
         if (candidateIndex < candidates.length) {
-          image.src = candidates[candidateIndex];
           armLoadTimeout();
+          image.src = candidates[candidateIndex];
           return;
         }
         fallbackStarted = true;
@@ -189,10 +189,10 @@
         void tryInlineSvg();
       };
       image.addEventListener('error', onImageError);
-      image.addEventListener('load', clearLoadTimeout, { once: true });
+      image.addEventListener('load', clearLoadTimeout);
       art.append(image);
-      image.src = candidates[0];
       armLoadTimeout();
+      image.src = candidates[0];
     } else {
       showSpeciesFallback();
     }
