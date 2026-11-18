@@ -107,7 +107,18 @@
   const byKey = new Map();
   const base = new URL('../assets/cards/classic/', document.currentScript?.src || document.baseURI);
   // Only add verified WebP files here. Other cards retain their own offline art.
-  const photographs = new Set(['mv-classic-001', 'mv-classic-002', 'mv-classic-003', 'mv-classic-004', 'mv-classic-005', 'mv-classic-006']);
+  const photographs = new Set([
+    'mv-classic-001', 'mv-classic-002', 'mv-classic-003',
+    'mv-classic-004', 'mv-classic-005', 'mv-classic-006',
+    'mv-classic-007', 'mv-classic-008', 'mv-classic-009',
+    'mv-classic-010', 'mv-classic-011', 'mv-classic-012',
+    'mv-classic-013', 'mv-classic-014', 'mv-classic-015',
+    'mv-classic-016', 'mv-classic-017', 'mv-classic-018',
+    'mv-classic-019', 'mv-classic-020', 'mv-classic-021',
+    'mv-classic-022', 'mv-classic-023', 'mv-classic-024',
+    'mv-classic-025', 'mv-classic-026', 'mv-classic-027',
+    'mv-classic-028', 'mv-classic-029', 'mv-classic-030',
+  ]);
   const cards = roster.map(([id, legacyName, name, rarity, weight]) => {
     const photo = photographs.has(id) ? new URL(id + '.webp', base).href : null;
     const card = Object.freeze({ id, legacyName, name, rarity, weight, photo });
