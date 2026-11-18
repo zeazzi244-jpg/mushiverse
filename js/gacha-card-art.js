@@ -44,9 +44,17 @@
   // Some WKWebView versions reject SVG in <img> while accepting inline SVG.
   // Keep this fallback local to bundled original-card artwork.
   async function inlineOriginalArt(url, name) {
-    const response = await fetch(url, { cache: 'force-cache' });
-    if (!response.ok) throw new Error('Original artwork unavailable');
-    const markup = await response.text();
+    // A hanging SVG request must not block the remaining artwork candidates.
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 8000);
+    let markup;
+    try {
+      const response = await fetch(url, { cache: 'force-cache', signal: controller.signal });
+      if (!response.ok) throw new Error('Original artwork unavailable');
+      markup = await response.text();
+    } finally {
+      clearTimeout(timeout);
+    }
     if (markup.length > 100000) throw new Error('Original artwork too large');
     const svg = new DOMParser().parseFromString(markup, 'image/svg+xml').documentElement;
     if (svg.localName !== 'svg' || svg.namespaceURI !== svgNamespace ||
