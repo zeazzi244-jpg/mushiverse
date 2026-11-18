@@ -5,13 +5,11 @@ import test from 'node:test';
 import { runInNewContext } from 'node:vm';
 
 test('every shipped gacha species has a distinct offline illustration', () => {
-  const html = readFileSync(new URL('../www/index.html', import.meta.url), 'utf8');
   const source = readFileSync(new URL('../www/js/gacha-species-art.js', import.meta.url), 'utf8');
-  const catalogue = html.match(/const INSECTS=(\[\[.*?\]\]);/u)[1];
-  const cards = JSON.parse(catalogue.replaceAll("'", '"'));
-  const window = {};
+  const { window } = readExpansion();
+  const cards = window.mushiverseClassicCards;
   runInNewContext(source, { window });
-  const urls = cards.map(([name, rarity]) => {
+  const urls = cards.map(({ legacyName: name, rarity }) => {
     const url = window.mushiverseSpeciesIllustration(name, rarity);
     assert.match(url, /^data:image\/svg\+xml;/, name);
     return url;
@@ -24,6 +22,9 @@ test('every shipped gacha species has a distinct offline illustration', () => {
 function readExpansion() {
   const window = {};
   const context = { window, URL, document: { currentScript: { src: 'capacitor://localhost/js/gacha-original-cards.js' } } };
+  context.document.currentScript.src = 'capacitor://localhost/js/gacha-classic-cards.js';
+  runInNewContext(readFileSync('www/js/gacha-classic-cards.js', 'utf8'), context);
+  context.document.currentScript.src = 'capacitor://localhost/js/gacha-original-cards.js';
   runInNewContext(readFileSync('www/js/gacha-original-cards.js', 'utf8'), context);
   context.document.currentScript.src = 'capacitor://localhost/js/gacha-archived-cards.js';
   runInNewContext(readFileSync('www/js/gacha-archived-cards.js', 'utf8'), context);
@@ -32,13 +33,12 @@ function readExpansion() {
 
 test('the offline bundle includes 200 distinct, named originals and keeps the legacy catalogue intact', () => {
   const { window } = readExpansion();
-  const html = readFileSync('www/index.html', 'utf8');
-  const legacy = JSON.parse(html.match(/const INSECTS=(\[\[.*?\]\]);/u)[1].replaceAll("'", '"'));
+  const legacy = window.mushiverseClassicCards;
   const cards = window.mushiverseOriginalCards;
   assert.equal(legacy.length, 100);
   assert.equal(cards.length, 200);
   assert.deepEqual(Object.fromEntries(['N', 'SR'].map(tier => [tier, cards.filter(card => card.rarity === tier).length])), { N: 195, SR: 5 });
-  assert.equal(new Set([...legacy.map(row => row[0]), ...cards.map(card => card.name)]).size, 300);
+  assert.equal(new Set([...legacy.map(card => card.name), ...cards.map(card => card.name)]).size, 300);
   const drawings = new Set();
   for (const card of cards) {
     assert.match(card.slug, /^[a-z]+(?:-[a-z]+)+$/);
@@ -58,7 +58,7 @@ test('the offline bundle includes 200 distinct, named originals and keeps the le
 test('the live draw function can award every original and preserves all existing tier thresholds', () => {
   const context = readExpansion();
   const html = readFileSync('www/index.html', 'utf8');
-  const catalogue = html.match(/const INSECTS=\[\[.*?\]\];[\s\S]*?(?=\nconst MV80_INFO)/u)[0];
+  const catalogue = html.match(/const INSECTS=[\s\S]*?(?=\nfunction openCardDetail)/u)[0];
   const pick = html.match(/function pick\(\)\{[^\n]+/u)[0];
   let rolls = [];
   context.Math = { floor: Math.floor, random: () => rolls.shift() };
@@ -77,7 +77,7 @@ test('the live draw function can award every original and preserves all existing
     for (let i = 0; i < size; i++) {
       rolls = [roll, (i + 0.5) / size];
       const pulled = draw();
-      const card = window.mushiverseOriginalCard(pulled.name) ?? window.mushiverseArchivedCard(pulled.name);
+      const card = window.mushiverseOriginalCard(pulled.name) ?? window.mushiverseArchivedCard(pulled.name) ?? window.mushiverseClassicCard(pulled.id);
       if (card) {
         assert.equal(pulled.id, card.id);
         assert.equal(pulled.rarity, card.rarity);
@@ -85,29 +85,46 @@ test('the live draw function can award every original and preserves all existing
       }
     }
   }
-  assert.equal(seen.size, 300);
+  assert.equal(seen.size, 400);
 });
 
 test('archived and new WebP images are bundled under distinct card IDs, names and URLs', () => {
   const { window } = readExpansion();
   const archived = window.mushiverseArchivedCards;
   const originals = window.mushiverseOriginalCards;
-  const html = readFileSync('www/index.html', 'utf8');
-  const species = JSON.parse(html.match(/const INSECTS=(\[\[.*?\]\]);/u)[1].replaceAll("'", '"'));
+  const classic = window.mushiverseClassicCards;
+  const catalogue = [...classic, ...originals, ...archived];
   assert.equal(archived.length, 100);
-  assert.equal(new Set([...species.map(([name]) => name), ...[...originals, ...archived].map(c => c.name)]).size, 400);
-  assert.equal(new Set([...originals, ...archived].map(c => c.id)).size, 300);
+  const normalized = name => name.normalize('NFKC').replace(/\s/gu, '');
+  const oldNames = new Set(classic.map(card => normalized(card.legacyName)));
+  assert.equal(new Set(catalogue.map(card => normalized(card.name))).size, 400);
+  assert.equal(new Set(catalogue.map(card => card.id)).size, 400);
+  assert.deepEqual(catalogue.filter(card => oldNames.has(normalized(card.name))), []);
   assert.equal(window.mushiverseArchivedCard('星霜オサムシ').id, 'AI-080');
+  const renamed = window.mushiverseArchivedCard('キンイロハナムグリ');
+  assert.equal(renamed, window.mushiverseArchivedCard('AI-040'));
+  assert.equal(renamed, window.mushiverseArchivedCard('蜜金リンデル'));
+  assert.equal(window.mushiverseGachaDisplayName('キンイロハナムグリ'), '蜜金リンデル');
   const photos = originals.filter(card => card.photo);
   assert.equal(photos.length, 200);
   assert.deepEqual(
     Array.from(photos, c => new URL(c.photo).pathname.split('/').at(-1)).sort(),
     readdirSync('www/assets/cards/original').filter(file => file.endsWith('.webp')).sort()
   );
+  const newPhotos = classic.filter(card => card.photo);
+  assert.deepEqual(
+    Array.from(newPhotos, card => card.id + '.webp').sort(),
+    readdirSync('www/assets/cards/classic').filter(file => file.endsWith('.webp')).sort()
+  );
   const hashes = new Set();
-  for (const card of [...archived, ...photos]) {
+  for (const card of [...archived, ...photos, ...newPhotos]) {
     const path = new URL(card.photo ?? card.image).pathname;
-    assert.equal(path, card.photo ? '/assets/cards/original/' + card.slug + '.webp' : '/assets/ai-insects/' + card.id + '.webp');
+    const expected = card.legacyName
+      ? '/assets/cards/classic/' + card.id + '.webp'
+      : card.photo
+        ? '/assets/cards/original/' + card.slug + '.webp'
+        : '/assets/ai-insects/' + card.id + '.webp';
+    assert.equal(path, expected);
     const data = readFileSync('www' + path);
     assert.equal(data.toString('ascii', 0, 4), 'RIFF', card.name);
     assert.equal(data.toString('ascii', 8, 12), 'WEBP', card.name);
@@ -136,6 +153,21 @@ test('legacy collections and conflicting old names are resolved on read without 
   assert.equal(entries.length, 1);
 });
 
+test('all 100 first-release ownership entries keep their tier, order and timestamp', () => {
+  const { window } = readExpansion();
+  const saved = Object.freeze(Array.from(window.mushiverseClassicCards, card => Object.freeze({
+    name: card.legacyName, rarity: card.rarity, at: 'legacy'
+  })));
+  const displayed = window.mushiverseDisplayGachaCards(saved);
+  for (const [index, card] of window.mushiverseClassicCards.entries()) {
+    assert.equal(displayed[index].id, card.id);
+    assert.equal(displayed[index].name, card.name);
+    assert.equal(displayed[index].rarity, saved[index].rarity);
+    assert.equal(displayed[index].at, saved[index].at);
+    assert.equal(saved[index].name, card.legacyName);
+  }
+});
+
 test('shared card rendering selects the correct WebP and retains the original SVG as a fallback', () => {
   const context = readExpansion();
   class Element extends EventTarget {
@@ -145,7 +177,8 @@ test('shared card rendering selects the correct WebP and retains the original SV
   context.document.createElement = () => new Element();
   runInNewContext(readFileSync('www/js/gacha-card-art.js', 'utf8'), context);
   const render = context.window.mushiverseCardArt;
-  for (const card of [...context.window.mushiverseArchivedCards, ...context.window.mushiverseOriginalCards]) {
+  for (const card of [...context.window.mushiverseArchivedCards, ...context.window.mushiverseOriginalCards,
+    ...context.window.mushiverseClassicCards.filter(card => card.photo)]) {
     const [image] = render(card.name, card.rarity).children;
     assert.equal(image.src, card.photo ?? card.image, card.name);
     assert.equal(image.loading, 'eager', card.name); // Detached card nodes must load before insertion.

@@ -8,7 +8,7 @@
   let nextArtId = 0;
 
   function renderSpecies(name, rarity) {
-    const source = window.mushiverseSpeciesIllustration?.(name, rarity);
+    const source = window.mushiverseSpeciesIllustration?.(window.mushiverseClassicCard?.(name)?.legacyName ?? name, rarity);
     if (typeof source !== 'string' || !source.startsWith(svgPrefix) || source.length >= 100000) return null;
 
     // Inline the bundled drawing so WKWebView never has to load a data URL.
@@ -104,7 +104,8 @@
     const isLegendary = rarity === 'LR' && name === '創世の白蝶・アルバセラフ';
     const original = window.mushiverseOriginalCard?.(name);
     const archived = window.mushiverseArchivedCard?.(name);
-    if (!isLegendary && !original && !archived) try {
+    const classicPhoto = window.mushiverseClassicCard?.(name)?.photo;
+    if (!isLegendary && !original && !archived && !classicPhoto) try {
       const svg = renderSpecies(name, rarity);
       if (svg) {
         art.append(svg);
@@ -114,7 +115,7 @@
       console.warn('MUSHIVERSE species illustration rendering failed:', error);
     }
 
-    if (isLegendary || original || archived) {
+    if (isLegendary || original || archived || classicPhoto) {
       const image = document.createElement('img');
       image.alt = name + 'のイラスト';
       // Card artwork is frequently built off-DOM; lazy loading can leave it blank.
@@ -124,6 +125,7 @@
       // original card's photo and SVG before declaring the card unavailable.
       // Preserve each card's own URLs; never substitute a shared placeholder.
       const candidates = [...new Set([
+        classicPhoto,
         archived?.image,
         original?.photo,
         original?.image,

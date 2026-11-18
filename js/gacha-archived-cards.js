@@ -19,11 +19,11 @@
     ["AI-015","チャカゲホシコガネ","N"],
     ["AI-016","シモフリホタル","N"],
     ["AI-017","ハルカゼチョウ","N"],
-    ["AI-018","ヒメツノムシ","N"],
+    ["AI-018","ヒメツノムシ","N","角雫ピュリア"],
     ["AI-019","クロモリクワガタ","N"],
     ["AI-020","アサツユコモレビムシ","N"],
     ["AI-021","キイロハネガ","N"],
-    ["AI-022","ホソツノカミキリ","N"],
+    ["AI-022","ホソツノカミキリ","N","糸角セレーヌ"],
     ["AI-023","シラユキコガネ","N"],
     ["AI-024","アオモリバッタ","N"],
     ["AI-025","カゲボシホタル","N"],
@@ -32,8 +32,8 @@
     ["AI-028","コガネハネムシ","N"],
     ["AI-029","ミズカゲトンボ","N"],
     ["AI-030","ヒスイコオロギ","N"],
-    ["AI-031","クサイロカマキリ","N"],
-    ["AI-032","ホシスジカミキリ","N"],
+    ["AI-031","クサイロカマキリ","N","草燐の鎌ラフィル"],
+    ["AI-032","ホシスジカミキリ","N","星譜ルシオン"],
     ["AI-033","ツチイロコガネ","N"],
     ["AI-034","アオハネセミ","N"],
     ["AI-035","コモレビチョウ","N"],
@@ -41,13 +41,13 @@
     ["AI-037","シロツノコガネ","N"],
     ["AI-038","ヤマカゼガ","N"],
     ["AI-039","クロシズクホタル","N"],
-    ["AI-040","キンイロハナムグリ","N"],
+    ["AI-040","キンイロハナムグリ","N","蜜金リンデル"],
     ["AI-041","ルリカゲクワガタ","R"],
     ["AI-042","アカツキコガネ","R"],
     ["AI-043","ギンセツホタル","R"],
     ["AI-044","ムラサキツノムシ","R"],
     ["AI-045","コハクハネチョウ","R"],
-    ["AI-046","アオホシカミキリ","R"],
+    ["AI-046","アオホシカミキリ","R","蒼刻の角アンセラ"],
     ["AI-047","ヒカリツノカブト","R"],
     ["AI-048","シロガネトンボ","R"],
     ["AI-049","ベニシズクガ","R"],
@@ -55,7 +55,7 @@
     ["AI-051","ハクギンカマキリ","R"],
     ["AI-052","ヒスイハネムシ","R"],
     ["AI-053","クロホシクワガタ","R"],
-    ["AI-054","キンモンチョウ","R"],
+    ["AI-054","キンモンチョウ","R","金紋シェルヴァ"],
     ["AI-055","アオツキホタル","R"],
     ["AI-056","シンジュコガネ","R"],
     ["AI-057","ベニツノカブト","R"],
@@ -65,11 +65,11 @@
     ["AI-061","スミレクワガタ","R"],
     ["AI-062","ハクヨウホタル","R"],
     ["AI-063","ルリツノコガネ","R"],
-    ["AI-064","アカホシカマキリ","R"],
+    ["AI-064","アカホシカマキリ","R","朱星の鎌ネフェラ"],
     ["AI-065","ギンハネチョウ","R"],
     ["AI-066","クロガネカブト","R"],
     ["AI-067","シロツキコガネ","R"],
-    ["AI-068","ミカヅキトンボ","R"],
+    ["AI-068","ミカヅキトンボ","R","弧月リュネット"],
     ["AI-069","アオギンハナムグリ","R"],
     ["AI-070","コハクツノクワガタ","R"],
     ["AI-071","蒼晶クワガタ","SR"],
@@ -106,21 +106,24 @@
   const artBase = new URL('../assets/ai-insects/', document.currentScript?.src || document.baseURI);
   const byName = new Map();
   const byId = new Map();
-  const cards = roster.map(([id, name, rarity]) => {
+  const cards = roster.map(([id, legacyName, rarity, name = legacyName]) => {
     const card = Object.freeze({ id, name, rarity, image: new URL(id + '.webp', artBase).href });
+    byName.set(legacyName, card);
     byName.set(name, card);
     byId.set(id, card);
     return card;
   });
 
   window.mushiverseArchivedCards = Object.freeze(cards);
-  window.mushiverseArchivedCard = name => byName.get(name);
+  window.mushiverseArchivedCard = key => byId.get(key) ?? byName.get(key);
 
   window.mushiverseDisplayGachaCards = entries => {
     const displayed = entries.map(entry => {
-      const card = byId.get(entry?.id) ?? window.mushiverseOriginalCardById?.(entry?.id);
-      return card && (card.name !== entry.name || card.rarity !== entry.rarity)
-        ? { ...entry, name: card.name, rarity: card.rarity }
+      const card = byId.get(entry?.id) ?? window.mushiverseOriginalCardById?.(entry?.id)
+        ?? window.mushiverseClassicCard?.(entry?.id ?? entry?.name)
+        ?? (!entry?.id ? byName.get(entry?.name) : undefined);
+      return card && (card.name !== entry.name || card.rarity !== entry.rarity || card.id !== entry.id)
+        ? { ...entry, id: card.id, name: card.name, rarity: card.rarity }
         : entry;
     });
     // Early builds also supported a separate AI-only collection for this account.
