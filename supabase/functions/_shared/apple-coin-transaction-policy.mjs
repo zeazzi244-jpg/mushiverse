@@ -25,6 +25,11 @@ export function validateVerifiedAppleCoinTransaction(transaction, expected) {
   if (!isAppleCoinProduct(productId) || productId !== expected.productId)
     throw new Error('product_mismatch');
   if (type !== 'Consumable') throw new Error('type_mismatch');
+  // A coin pack is a one-time consumable purchase, never a subscription renewal.
+  // Apple's transactionReason can be omitted for consumables; if supplied it
+  // must not identify a renewal, even if other transaction fields look valid.
+  if (transaction.transactionReason != null && transaction.transactionReason !== 'PURCHASE')
+    throw new Error('invalid_consumable_transaction_reason');
   // A multi-unit purchase must not be silently credited as a single pack.
   // Fail closed when quantity is absent or not exactly one. No ambiguous pack credits.
   if (quantity !== 1) throw new Error('unsupported_quantity');
