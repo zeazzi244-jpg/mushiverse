@@ -45,7 +45,11 @@ Deno.serve(async (request: Request) => {
         chunks.push(value);
       }
     } finally { reader.releaseLock(); }
-    // A mismatched declared length is not reliable purchase evidence. Reject\n    // incomplete or inconsistent bodies rather than parsing partial JSON.\n    if (declaredLength !== null && received !== Number(declaredLength))\n      return json({ error: "content_length_mismatch" }, 400);\n    const bytes = new Uint8Array(received);
+    // A mismatched declared length is not reliable purchase evidence. Reject
+    // incomplete or inconsistent bodies rather than parsing partial JSON.
+    if (declaredLength !== null && received !== Number(declaredLength))
+      return json({ error: "content_length_mismatch" }, 400);
+    const bytes = new Uint8Array(received);
     let offset = 0;
     for (const chunk of chunks) { bytes.set(chunk, offset); offset += chunk.byteLength; }
     let raw: string;
