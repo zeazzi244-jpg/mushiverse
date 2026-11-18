@@ -25,6 +25,10 @@ export function validateVerifiedAppleCoinTransaction(transaction, expected) {
   if (!isAppleCoinProduct(productId) || productId !== expected.productId)
     throw new Error('product_mismatch');
   if (type !== 'Consumable') throw new Error('type_mismatch');
+  // Consumables cannot carry subscription expiration or group metadata. Reject
+  // contradictory signed fields instead of interpreting them as coin purchases.
+  if (transaction.expiresDate != null || transaction.subscriptionGroupIdentifier != null)
+    throw new Error('subscription_metadata_on_consumable');
   // A coin pack is a one-time consumable purchase, never a subscription renewal.
   // Apple's transactionReason can be omitted for consumables; if supplied it
   // must not identify a renewal, even if other transaction fields look valid.
