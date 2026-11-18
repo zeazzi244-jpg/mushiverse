@@ -148,16 +148,17 @@
       let candidateIndex = 0;
       let fallbackStarted = false;
       let loadTimeout;
+      let loadSettled = false;
       const clearLoadTimeout = () => {
         if (loadTimeout !== undefined) clearTimeout(loadTimeout);
         loadTimeout = undefined;
       };
       const armLoadTimeout = () => {
         clearLoadTimeout();
-        // A stalled request may never fire load/error in an embedded WebView.
+        // A stalled request may expose dimensions before its load event.\n        // Require a completed load event, not merely nonzero naturalWidth.
         // Move to the next species-specific source rather than leaving a blank card.
         loadTimeout = setTimeout(() => {
-          if (!fallbackStarted && (image.naturalWidth === 0 || image.naturalHeight === 0)) onImageError();
+          if (!fallbackStarted && !loadSettled) onImageError();
         }, 12000);
       };
       const onImageError = () => {
@@ -166,6 +167,7 @@
         // Start the asynchronous SVG fallback only once per card.
         if (fallbackStarted) return;
         candidateIndex++;
+        loadSettled = false;
         if (candidateIndex < candidates.length) {
           armLoadTimeout();
           image.src = candidates[candidateIndex];
@@ -202,6 +204,7 @@
         // A WebView may emit load for a decoded-but-empty image. Do not
         // clear the recovery timer until the artwork has real dimensions.
         if (image.naturalWidth > 0 && image.naturalHeight > 0) {
+          loadSettled = true;
           clearLoadTimeout();
         } else {
           onImageError();
