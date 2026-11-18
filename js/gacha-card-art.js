@@ -127,7 +127,7 @@
         original?.photo,
         original?.image,
         isLegendary ? albaseraphUrl.href : null
-      ].filter(Boolean))];
+      ].filter(url => typeof url === 'string' && url.trim() && !/^\\s*(?:javascript|data):/i.test(url)))];
       if (!candidates.length) {
         showSpeciesFallback();
         return art;
@@ -154,6 +154,10 @@
       image.addEventListener('error', onImageError);
       art.append(image);
       image.src = candidates[0];
+      // A detached lazy image may never start loading until it enters the
+      // document. Eagerly load the initial image so carousel/prebuilt cards
+      // can resolve missing artwork before their first appearance.
+      if (!eager && !art.isConnected) image.loading = 'eager';
     } else {
       showSpeciesFallback();
     }
