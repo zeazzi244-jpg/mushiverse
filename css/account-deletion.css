@@ -1,0 +1,10 @@
+#mv21DeleteAccount { border-top: 1px solid #a9c5b0; margin-top: 18px; padding-top: 14px; }
+#mv21DeletionDialog { color: #e9f4ec; background: #10291e; border: 1px solid #7caf91; border-radius: 18px; width: min(94vw, 520px); max-height: 88dvh; padding: 22px; overflow: auto; }
+#mv21DeletionDialog::backdrop { background: #000b; }
+#mv21DeletionDialog h2 { margin-top: 0; }
+#mv21DeletionDialog label { display: block; margin: 14px 0; }
+#mv21DeletionDialog input:not([type=checkbox]) { display: block; width: 100%; min-height: 46px; padding: 10px; margin-top: 8px; background: #f4faf5; color: #142e20; border: 1px solid #a9c5b0; border-radius: 8px; }
+#mv21DeletionDialog input[type=checkbox] { width: 22px; height: 22px; vertical-align: middle; }
+#mv21DeletionDialog button { min-height: 46px; margin: 6px 0; width: 100%; }
+#mv21DeletionDialog #mv21DeletionStatus { color: #fff1b8; }
+#mv21DeletionDialog a { color: #b8e7cd; }
