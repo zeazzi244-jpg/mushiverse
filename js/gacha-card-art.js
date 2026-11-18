@@ -148,18 +148,24 @@
         // Only SVG files can be parsed as inline artwork. WebP/PNG/JPEG
         // candidates must fall back to the species illustration instead of
         // being fetched and parsed as XML after an image-load failure.
-        if (!original?.image || !/\.svg(?:[?#]|$)/i.test(original.image)) {
-          return showSpeciesFallback();
-        }
-        // Card nodes are often created while detached (e.g. in a carousel or
-        // document fragment). isConnected is false then, but the image still
-        // needs to finish loading before the node is inserted.
-        inlineOriginalArt(original.image, name)
-          .then(svg => { art.replaceChildren(svg); })
-          .catch(error => {
-            console.warn('MUSHIVERSE original illustration fallback failed:', name, error);
-            showSpeciesFallback();
-          });
+        const svgCandidates = candidates.filter(url => /\.svg(?:[?#]|$)/i.test(url));
+        if (!svgCandidates.length) return showSpeciesFallback();
+        // Card nodes may be detached; still finish loading before insertion.
+        // Try all SVG candidates, not only original.image.
+        const tryInlineSvg = async () => {
+          for (const url of svgCandidates) {
+            try {
+              const svg = await inlineOriginalArt(url, name);
+              art.classList.remove('mvCardArtUnavailable');
+              art.replaceChildren(svg);
+              return;
+            } catch (error) {
+              console.warn('MUSHIVERSE SVG fallback failed:', name, url, error);
+            }
+          }
+          showSpeciesFallback();
+        };
+        void tryInlineSvg();
       };
       image.addEventListener('error', onImageError);
       art.append(image);
