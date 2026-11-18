@@ -131,11 +131,14 @@
         }
         image.remove();
         if (!original?.image) return showSpeciesFallback();
+        // Card nodes are often created while detached (e.g. in a carousel or
+        // document fragment). isConnected is false then, but the image still
+        // needs to finish loading before the node is inserted.
         inlineOriginalArt(original.image, name)
-          .then(svg => { if (art.isConnected) art.append(svg); })
+          .then(svg => { art.replaceChildren(svg); })
           .catch(error => {
             console.warn('MUSHIVERSE original illustration fallback failed:', name, error);
-            if (art.isConnected) showSpeciesFallback();
+            showSpeciesFallback();
           });
       };
       image.addEventListener('error', onImageError);
