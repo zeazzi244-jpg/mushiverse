@@ -183,6 +183,7 @@
             clearLoadTimeout();
             if (preview) { preview.remove(); preview = null; image.style.display = ''; }
             image.removeEventListener('error', handleImageError);
+            image.removeEventListener('load', handleImageLoad);
             return;
           }
           onImageError(true);
@@ -204,6 +205,7 @@
           clearLoadTimeout();
           if (preview) { preview.remove(); preview = null; image.style.display = ''; }
           image.removeEventListener('error', handleImageError);
+          image.removeEventListener('load', handleImageLoad);
           return;
         }
         clearLoadTimeout();
@@ -219,15 +221,14 @@
         }
         fallbackStarted = true;
         image.removeEventListener('error', handleImageError);
+        image.removeEventListener('load', handleImageLoad);
         image.remove();
         // Only SVG files can be parsed as inline artwork. WebP/PNG/JPEG
         // candidates must fall back to the species illustration instead of
         // being fetched and parsed as XML after an image-load failure.
         const svgCandidates = candidates.filter(url => /\.svg(?:[?#]|$)/i.test(url));
         if (!svgCandidates.length) {
-          // No SVG recovery is possible: keep the species-specific preview
-          // without leaving the detached image's load listener registered.
-          image.removeEventListener('load', handleImageLoad);
+          // No SVG recovery is possible: keep species-specific artwork visible.
           return showSpeciesFallback();
         }
         // Show species-specific artwork immediately while inline SVG recovery runs.
