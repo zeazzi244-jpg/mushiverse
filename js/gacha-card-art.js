@@ -209,7 +209,7 @@
         };
         void tryInlineSvg();
       };
-      image.addEventListener('error', onImageError);
+      // DOM error listeners receive an Event, not the timeout boolean.\n      // Keep ordinary errors distinct from explicit watchdog expiry.\n      image.addEventListener('error', () => onImageError(false));
       image.addEventListener('load', () => {
         if (fallbackStarted || loadSettled || !image.complete) return;
         // A late load event from an earlier source must not mark the next
