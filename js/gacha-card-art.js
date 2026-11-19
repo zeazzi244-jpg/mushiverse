@@ -155,11 +155,14 @@
       };
       const armLoadTimeout = () => {
         clearLoadTimeout();
+        // A timeout queued for an earlier candidate must never skip the
+        // currently loading image after the source has changed.
+        const timedCandidate = candidateIndex;
         // A stalled request may expose dimensions before its load event.
         // Require a completed load event, not merely nonzero naturalWidth.
         // Move to the next species-specific source rather than leaving a blank card.
         loadTimeout = setTimeout(() => {
-          if (!fallbackStarted && !loadSettled) onImageError();
+          if (!fallbackStarted && !loadSettled && candidateIndex === timedCandidate) onImageError();
         }, 12000);
       };
       const onImageError = () => {
