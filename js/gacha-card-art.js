@@ -278,10 +278,17 @@
       } catch (error) {
         console.warn('MUSHIVERSE card preview failed:', name, error);
       }
-      if (preview) {
-        art.append(preview);
-        image.style.display = 'none';
+      if (!preview) {
+        // The illustration catalogue can load before its species renderer.
+        // Keep a readable card label rather than a blank rectangle while
+        // WKWebView waits for the real image or its recovery timeout.
+        preview = document.createElement('span');
+        preview.className = 'mvCardArtLoadingLabel';
+        preview.textContent = name + ' のイラストを読み込み中';
+        preview.setAttribute('role', 'status');
       }
+      art.append(preview);
+      image.style.display = 'none';
       art.append(image);
       image.src = candidates[0];
       armLoadTimeout();
