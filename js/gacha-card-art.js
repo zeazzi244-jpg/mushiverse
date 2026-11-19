@@ -166,6 +166,13 @@
         }, 12000);
       };
       const onImageError = () => {
+        // WKWebView can deliver an error from a previous source after the
+        // replacement has already decoded. Never discard valid current art.
+        if (image.complete && image.naturalWidth > 0 && image.naturalHeight > 0) {
+          loadSettled = true;
+          clearLoadTimeout();
+          return;
+        }
         clearLoadTimeout();
         // An already-failed image may emit another error after a source swap.
         // Start the asynchronous SVG fallback only once per card.
