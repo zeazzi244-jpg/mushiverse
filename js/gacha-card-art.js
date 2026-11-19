@@ -220,6 +220,10 @@
         // being fetched and parsed as XML after an image-load failure.
         const svgCandidates = candidates.filter(url => /\.svg(?:[?#]|$)/i.test(url));
         if (!svgCandidates.length) return showSpeciesFallback();
+        // Show species-specific artwork immediately while inline SVG recovery runs.
+        // Otherwise a stalled fetch leaves the card empty for up to eight seconds
+        // per SVG candidate, especially noticeable on iPhone WKWebView.
+        showSpeciesFallback();
         // Card nodes may be detached; still finish loading before insertion.
         // Try all SVG candidates, not only original.image.
         const tryInlineSvg = async () => {
