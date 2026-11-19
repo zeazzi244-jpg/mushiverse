@@ -174,6 +174,10 @@ test('shared card rendering selects the correct WebP and retains the original SV
     children = [];
     append(child) { this.children.push(child); }
   }
+  // VM contexts do not inherit browser timer globals; keep image timeout
+  // callbacks inert in this synchronous rendering test.
+  context.setTimeout = () => 1;
+  context.clearTimeout = () => {};
   context.document.createElement = () => new Element();
   runInNewContext(readFileSync('www/js/gacha-card-art.js', 'utf8'), context);
   const render = context.window.mushiverseCardArt;
