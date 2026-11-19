@@ -25,8 +25,10 @@ final class MushiverseCoinStore: ObservableObject {
         }
     }
 
+    @Published private(set) var sandboxPurchasesEnabled = false
+
     var canPurchase: Bool {
-        Self.purchasesEnabled && AppStore.canMakePayments && !isPurchasing && !isRetrying
+        (Self.purchasesEnabled || sandboxPurchasesEnabled) && AppStore.canMakePayments && !isPurchasing && !isRetrying
     }
 
     @Published private(set) var products: [Product] = []
@@ -54,6 +56,14 @@ final class MushiverseCoinStore: ObservableObject {
         isStarted = true
         lifecycleGeneration += 1
         let generation = lifecycleGeneration
+        if #available(iOS 16.0, *),
+           let appResult = try? await AppTransaction.shared,
+           case .verified(let app) = appResult,
+           app.bundleID == "com.rikuto.mushiverse", app.environment == .sandbox,
+           isStarted, lifecycleGeneration == generation, !Task.isCancelled {
+            sandboxPurchasesEnabled = true
+        }
+        guard isStarted, lifecycleGeneration == generation, !Task.isCancelled else { return }
         // Restarting the shop must not leave a second StoreKit updates listener active.
         updatesTask?.cancel()
         updatesTask = nil
@@ -83,6 +93,7 @@ final class MushiverseCoinStore: ObservableObject {
 
     func stop() {
         isStarted = false
+        sandboxPurchasesEnabled = false
         lifecycleGeneration += 1
         productLoadGeneration += 1
         updatesTask?.cancel()
@@ -107,7 +118,7 @@ final class MushiverseCoinStore: ObservableObject {
     }
 
     func purchase(_ product: Product) async {
-        guard Self.purchasesEnabled else {
+        guard Self.purchasesEnabled || sandboxPurchasesEnabled else {
             lastError = "現在は販売準備中です。購入はできません。"
             return
         }
@@ -136,11 +147,14 @@ final class MushiverseCoinStore: ObservableObject {
     }
 
     private func process(_ result: VerificationResult<Transaction>) async {
-        guard Self.purchasesEnabled, isStarted, !Task.isCancelled else { return }
+        guard Self.purchasesEnabled || sandboxPurchasesEnabled, isStarted, !Task.isCancelled else { return }
         let generation = lifecycleGeneration
         guard case .verified(let transaction) = result else {
             lastError = "Appleによる購入確認に失敗しました"
             return
+        }
+        if !Self.purchasesEnabled {
+            guard #available(iOS 16.0, *), transaction.environment == .sandbox else { return }
         }
         guard Self.expectedType(transaction.productID) == .consumable,
               transaction.productType == .consumable,
@@ -171,8 +185,15 @@ final class MushiverseCoinStore: ObservableObject {
                 to: creditEndpoint, token: token
             )
             guard response.statusCode == 200 else { throw PurchaseError.serverRejected }
-            let receipt = try JSONDecoder().decode(CreditResponse.self, from: data)
             guard isStarted, lifecycleGeneration == generation, !Task.isCancelled else { return }
+            if sandboxPurchasesEnabled,
+               let proof = try? JSONDecoder().decode(SandboxProof.self, from: data),
+               proof.verification == "sandbox_signature_verified",
+               proof.transactionID == String(transaction.id) {
+                lastError = "Sandbox取引のサーバー検証に成功しました。コイン付与はまだ検証段階です。"
+                return
+            }
+            let receipt = try JSONDecoder().decode(CreditResponse.self, from: data)
             guard receipt.creditedOrPreviouslyCredited,
                   receipt.transactionID == String(transaction.id),
                   receipt.productID == transaction.productID else {
@@ -216,6 +237,15 @@ final class MushiverseCoinStore: ObservableObject {
         enum CodingKeys: String, CodingKey {
             case transactionID = "transaction_id"
             case signedTransaction = "signed_transaction"
+        }
+    }
+
+    private struct SandboxProof: Decodable {
+        let verification: String
+        let transactionID: String
+        enum CodingKeys: String, CodingKey {
+            case verification
+            case transactionID = "transaction_id"
         }
     }
 

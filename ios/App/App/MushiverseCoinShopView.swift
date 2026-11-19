@@ -4,13 +4,17 @@ import StoreKit
 struct MushiverseCoinShopView: View {
     @ObservedObject var store: MushiverseCoinStore
     let purchasesEnabled: Bool
+    private var canTestPurchase: Bool { purchasesEnabled || store.sandboxPurchasesEnabled }
     private let forest = Color(red: 0.07, green: 0.17, blue: 0.13)
     private let gold = Color(red: 0.98, green: 0.84, blue: 0.49)
 
     var body: some View {
         VStack(alignment: .leading, spacing: 18) {
             Text("ムシバース ショップ").font(.title2.bold())
-            if !purchasesEnabled {
+            if store.sandboxPurchasesEnabled {
+                Text("Sandbox購入テスト · コインは付与されません。")
+                    .foregroundStyle(gold)
+            } else if !purchasesEnabled {
                 Text("現在は販売準備中です。")
                     .foregroundStyle(gold)
             }
@@ -39,7 +43,7 @@ struct MushiverseCoinShopView: View {
             if let message = store.lastError {
                 Text(message).font(.footnote).foregroundStyle(gold)
             }
-            if purchasesEnabled {
+            if canTestPurchase {
                 Button("未完了の購入を再確認") {
                     Task { await store.retryUnfinishedPurchases() }
                 }
@@ -66,13 +70,13 @@ struct MushiverseCoinShopView: View {
             } else {
                 Text("Apple価格未取得").font(.footnote)
             }
-            Button(purchasesEnabled && canFulfill && product != nil ? "購入" : "販売準備中") {
+            Button(canTestPurchase && canFulfill && product != nil ? (store.sandboxPurchasesEnabled ? "テスト購入" : "購入") : "販売準備中") {
                 guard let product else { return }
                 Task { await store.purchase(product) }
             }
             .frame(maxWidth: .infinity, minHeight: 44)
             .foregroundStyle(gold)
-            .disabled(!purchasesEnabled || store.isPurchasing || store.isRetrying || !store.canPurchase || !canFulfill || product == nil)
+            .disabled(!canTestPurchase || store.isPurchasing || store.isRetrying || !store.canPurchase || !canFulfill || product == nil)
         }
         .padding(12)
         .frame(maxWidth: .infinity, alignment: .leading)
