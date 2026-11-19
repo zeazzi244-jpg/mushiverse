@@ -165,7 +165,8 @@
           if (fallbackStarted || loadSettled || candidateIndex !== timedCandidate) return;
           // Cached WKWebView images can decode successfully without dispatching
           // a load event to a detached card. Keep a fully decoded image.
-          if (image.complete && image.naturalWidth > 0 && image.naturalHeight > 0) {
+          if (image.complete && image.naturalWidth > 0 && image.naturalHeight > 0 &&
+              (!image.currentSrc || image.currentSrc === new URL(candidates[timedCandidate], document.baseURI).href)) {
             loadSettled = true;
             clearLoadTimeout();
             image.removeEventListener('error', handleImageError);
@@ -177,7 +178,12 @@
       const onImageError = (timedOut = false) => {
         // WKWebView can deliver an error from a previous source after the
         // replacement has already decoded. Never discard valid current art.
-        if (!timedOut && image.complete && image.naturalWidth > 0 && image.naturalHeight > 0) {
+        // Only accept dimensions for the active candidate: a delayed event
+        // from the previous source must not settle the replacement request.
+        const activeUrl = new URL(candidates[candidateIndex], document.baseURI).href;
+        const decodedCurrent = image.complete && image.naturalWidth > 0 &&
+          image.naturalHeight > 0 && (!image.currentSrc || image.currentSrc === activeUrl);
+        if (!timedOut && decodedCurrent) {
           loadSettled = true;
           clearLoadTimeout();
           image.removeEventListener('error', handleImageError);
@@ -228,7 +234,7 @@
         // A late load event from an earlier source must not mark the next
         // candidate as successful. Compare the resolved active URL before
         // accepting dimensions, especially on WKWebView cache transitions.
-        const expectedUrl = image.src;
+        const expectedUrl = new URL(candidates[candidateIndex], document.baseURI).href;
         if (image.currentSrc && image.currentSrc !== expectedUrl) return;
         // A WebView may emit load for a decoded-but-empty image. Do not
         // clear the recovery timer until the artwork has real dimensions.
