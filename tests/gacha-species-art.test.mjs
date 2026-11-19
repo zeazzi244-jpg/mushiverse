@@ -172,22 +172,28 @@ test('shared card rendering selects the correct WebP and retains the original SV
   const context = readExpansion();
   class Element extends EventTarget {
     children = [];
+    style = {};
+    classList = { add() {}, remove() {} };
+    attributes = {};
     append(child) { this.children.push(child); }
+    setAttribute(name, value) { this.attributes[name] = value; }
+    remove() {}
   }
   // VM contexts do not inherit browser timer globals; keep image timeout
   // callbacks inert in this synchronous rendering test.
   context.setTimeout = () => 1;
   context.clearTimeout = () => {};
-  context.document.createElement = () => new Element();
+  context.document.createElement = tag => Object.assign(new Element(), { tagName: tag });
   runInNewContext(readFileSync('www/js/gacha-card-art.js', 'utf8'), context);
   const render = context.window.mushiverseCardArt;
   for (const card of [...context.window.mushiverseArchivedCards, ...context.window.mushiverseOriginalCards,
     ...context.window.mushiverseClassicCards.filter(card => card.photo)]) {
-    const [image] = render(card.name, card.rarity).children;
+    const image = render(card.name, card.rarity).children.find(node => node.tagName === 'img');
+    assert.ok(image, card.name);
     assert.equal(image.src, card.photo ?? card.image, card.name);
     assert.equal(image.loading, 'eager', card.name); // Detached card nodes must load before insertion.
   }
-  const [photograph] = render('潮玉アゲハ', 'N', true).children;
+  const photograph = render('潮玉アゲハ', 'N', true).children.find(node => node.tagName === 'img');
   assert.match(photograph.src, /\/assets\/cards\/original\/tide-swallowtail\.webp$/);
   assert.equal(photograph.loading, 'eager');
   photograph.dispatchEvent(new Event('error'));
