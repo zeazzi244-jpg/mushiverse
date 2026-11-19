@@ -195,6 +195,9 @@ final class MushiverseCoinStore: ObservableObject {
                       proof.ok,
                       proof.verification == "sandbox_signature_verified",
                       proof.transactionID == String(transaction.id),
+                      proof.originalTransactionID == String(transaction.originalID),
+                      proof.productID == transaction.productID,
+                      proof.environment == "Sandbox",
                       proof.creditedOrPreviouslyCredited == false,
                       proof.fulfillment == "disabled_pending_sandbox_proof" else {
                     throw PurchaseError.serverRejected
@@ -253,11 +256,17 @@ final class MushiverseCoinStore: ObservableObject {
         let ok: Bool
         let verification: String
         let transactionID: String
+        let originalTransactionID: String
+        let productID: String
+        let environment: String
         let creditedOrPreviouslyCredited: Bool
         let fulfillment: String
         enum CodingKeys: String, CodingKey {
             case ok, verification, fulfillment
             case transactionID = "transaction_id"
+            case originalTransactionID = "original_transaction_id"
+            case productID = "product_id"
+            case environment
             case creditedOrPreviouslyCredited = "credited_or_previously_credited"
         }
     }
