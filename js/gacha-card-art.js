@@ -162,7 +162,16 @@
         // Timeout recovery must advance even if the incomplete image has dimensions.
         // Move to the next species-specific source rather than leaving a blank card.
         loadTimeout = setTimeout(() => {
-          if (!fallbackStarted && !loadSettled && candidateIndex === timedCandidate) onImageError(true);
+          if (fallbackStarted || loadSettled || candidateIndex !== timedCandidate) return;
+          // Cached WKWebView images can decode successfully without dispatching
+          // a load event to a detached card. Keep a fully decoded image.
+          if (image.complete && image.naturalWidth > 0 && image.naturalHeight > 0) {
+            loadSettled = true;
+            clearLoadTimeout();
+            image.removeEventListener('error', handleImageError);
+            return;
+          }
+          onImageError(true);
         }, 12000);
       };
       const onImageError = (timedOut = false) => {
@@ -171,6 +180,7 @@
         if (!timedOut && image.complete && image.naturalWidth > 0 && image.naturalHeight > 0) {
           loadSettled = true;
           clearLoadTimeout();
+          image.removeEventListener('error', handleImageError);
           return;
         }
         clearLoadTimeout();
@@ -225,6 +235,7 @@
         if (image.naturalWidth > 0 && image.naturalHeight > 0) {
           loadSettled = true;
           clearLoadTimeout();
+          image.removeEventListener('error', handleImageError);
         } else {
           onImageError();
         }
