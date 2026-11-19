@@ -28,9 +28,7 @@ struct MushiverseCoinShopView: View {
             productRow(id: MushiverseCoinStore.premiumID, title: "月額プレミアム",
                        detail: "自動更新", canFulfill: false)
 
-            Text("冒険パス").font(.headline)
-            productRow(id: MushiverseCoinStore.adventurePassID, title: "30日冒険パス",
-                       detail: "自動更新なし", canFulfill: false)
+            // Do not advertise an unconfigured adventure pass in the free release.
 
             Button("Appleの商品情報を再読み込み") {
                 Task { await store.loadProducts() }
