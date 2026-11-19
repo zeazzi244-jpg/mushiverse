@@ -186,13 +186,19 @@ final class MushiverseCoinStore: ObservableObject {
             )
             guard response.statusCode == 200 else { throw PurchaseError.serverRejected }
             guard isStarted, lifecycleGeneration == generation, !Task.isCancelled else { return }
-            if sandboxPurchasesEnabled,
-               let proof = try? JSONDecoder().decode(SandboxProof.self, from: data),
-               proof.ok,
-               proof.verification == "sandbox_signature_verified",
-               proof.transactionID == String(transaction.id),
-               proof.creditedOrPreviouslyCredited == false,
-               proof.fulfillment == "disabled_pending_sandbox_proof" {
+            // Sandbox-only builds must never accept a credit receipt or finish a
+            // consumable transaction, even if the server accidentally returns one.
+            // Only a complete, explicitly non-crediting proof is acceptable.
+            if !Self.purchasesEnabled {
+                guard sandboxPurchasesEnabled,
+                      let proof = try? JSONDecoder().decode(SandboxProof.self, from: data),
+                      proof.ok,
+                      proof.verification == "sandbox_signature_verified",
+                      proof.transactionID == String(transaction.id),
+                      proof.creditedOrPreviouslyCredited == false,
+                      proof.fulfillment == "disabled_pending_sandbox_proof" else {
+                    throw PurchaseError.serverRejected
+                }
                 lastError = "Sandbox取引のサーバー検証に成功しました。コイン付与はまだ検証段階です。"
                 return
             }
