@@ -12,6 +12,8 @@ function createHarness() {
     .replace(/^import .*;\s*$/gm, '')
     .replace('const json=(b:any,s=200)', 'const json=(b,s=200)')
     .replace('let body:Record<string,unknown>;', 'let body;')
+    .replace('const chunks:Uint8Array[]=[];', 'const chunks=[];')
+    .replace('let rawBody:string;', 'let rawBody;')
     .replaceAll('(row:any)', '(row)')
     .replace(/Deno\.env\.get\(("SUPABASE_(?:URL|ANON_KEY|SERVICE_ROLE_KEY)")\)!/g, 'Deno.env.get($1)');
   let handler;
