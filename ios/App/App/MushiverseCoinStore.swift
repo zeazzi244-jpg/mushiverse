@@ -188,8 +188,11 @@ final class MushiverseCoinStore: ObservableObject {
             guard isStarted, lifecycleGeneration == generation, !Task.isCancelled else { return }
             if sandboxPurchasesEnabled,
                let proof = try? JSONDecoder().decode(SandboxProof.self, from: data),
+               proof.ok,
                proof.verification == "sandbox_signature_verified",
-               proof.transactionID == String(transaction.id) {
+               proof.transactionID == String(transaction.id),
+               proof.creditedOrPreviouslyCredited == false,
+               proof.fulfillment == "disabled_pending_sandbox_proof" {
                 lastError = "Sandbox取引のサーバー検証に成功しました。コイン付与はまだ検証段階です。"
                 return
             }
@@ -241,11 +244,15 @@ final class MushiverseCoinStore: ObservableObject {
     }
 
     private struct SandboxProof: Decodable {
+        let ok: Bool
         let verification: String
         let transactionID: String
+        let creditedOrPreviouslyCredited: Bool
+        let fulfillment: String
         enum CodingKeys: String, CodingKey {
-            case verification
+            case ok, verification, fulfillment
             case transactionID = "transaction_id"
+            case creditedOrPreviouslyCredited = "credited_or_previously_credited"
         }
     }
 
