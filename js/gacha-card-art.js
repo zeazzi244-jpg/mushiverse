@@ -105,7 +105,7 @@
         reported.add(name);
         console.warn('MUSHIVERSE card illustration unavailable:', name);
       }
-      art.textContent = 'イラストを表示できません';
+      art.textContent = name + ' のイラストを表示できません';
       art.classList.add('mvCardArtUnavailable');
     };
 
@@ -143,7 +143,9 @@
           // Invalid catalogue URLs must not throw from load/error callbacks,
           // leaving an empty card and a permanently armed watchdog.
           try {
-            const parsed = new URL(url.trim(), document.baseURI);
+            const trimmed = url.trim();
+            if (!trimmed) return null;
+            const parsed = new URL(trimmed, document.baseURI);
             // Keep Capacitor's bundled file/app origins, but reject active
             // schemes and unexpected protocols from catalogue data.
             if (!['http:', 'https:', 'file:', 'capacitor:', 'ionic:'].includes(parsed.protocol)) return null;
