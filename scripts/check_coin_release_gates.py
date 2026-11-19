@@ -11,7 +11,7 @@ backend = (root / "supabase/functions/credit-apple-gacha-coins/index.ts").read_t
 checks = {
     "purchase UI has release gate": "!purchasesEnabled || store.isPurchasing || store.isRetrying" in shop,
     "shop shows preparation notice": "現在は販売準備中です" in shop,
-    "seven planned coin products": "[100, 300, 500, 1200, 2500, 5500, 12000]" in store,
+    "only three approved coin products": '[100, 500, 1200].map' in store and '[100, 300, 500, 1200, 2500, 5500, 12000]' not in store,
     "payments stay disabled": "static let purchasesEnabled = false" in store,
     "honor Apple payment restrictions": "AppStore.canMakePayments" in store,
     "purchase requires active shop": "guard isStarted, !Task.isCancelled" in store,
