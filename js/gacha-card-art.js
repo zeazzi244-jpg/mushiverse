@@ -155,7 +155,8 @@
       };
       const armLoadTimeout = () => {
         clearLoadTimeout();
-        // A stalled request may expose dimensions before its load event.\n        // Require a completed load event, not merely nonzero naturalWidth.
+        // A stalled request may expose dimensions before its load event.
+        // Require a completed load event, not merely nonzero naturalWidth.
         // Move to the next species-specific source rather than leaving a blank card.
         loadTimeout = setTimeout(() => {
           if (!fallbackStarted && !loadSettled) onImageError();
