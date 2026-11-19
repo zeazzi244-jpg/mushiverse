@@ -19,9 +19,16 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: actions/configure-pages@v5
+      - uses: actions/setup-node@v5
+        with:
+          node-version: '22'
+      - name: Build public release assets
+        run: npm run build:web
+      - name: Verify public entry point
+        run: test -s www/index.html
       - uses: actions/upload-pages-artifact@v3
         with:
-          path: .
+          path: www
           name: github-pages-${{ github.run_attempt }}
       - id: deployment
         uses: actions/deploy-pages@v4
