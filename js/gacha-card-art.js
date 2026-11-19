@@ -159,16 +159,16 @@
         // currently loading image after the source has changed.
         const timedCandidate = candidateIndex;
         // A stalled request may expose dimensions before its load event.
-        // Require a completed load event, not merely nonzero naturalWidth.
+        // Timeout recovery must advance even if the incomplete image has dimensions.
         // Move to the next species-specific source rather than leaving a blank card.
         loadTimeout = setTimeout(() => {
-          if (!fallbackStarted && !loadSettled && candidateIndex === timedCandidate) onImageError();
+          if (!fallbackStarted && !loadSettled && candidateIndex === timedCandidate) onImageError(true);
         }, 12000);
       };
-      const onImageError = () => {
+      const onImageError = (timedOut = false) => {
         // WKWebView can deliver an error from a previous source after the
         // replacement has already decoded. Never discard valid current art.
-        if (image.complete && image.naturalWidth > 0 && image.naturalHeight > 0) {
+        if (!timedOut && image.complete && image.naturalWidth > 0 && image.naturalHeight > 0) {
           loadSettled = true;
           clearLoadTimeout();
           return;
