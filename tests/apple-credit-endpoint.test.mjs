@@ -10,7 +10,9 @@ function harness({user = {id:'user-a'}, configured = true, productId = 'mushiver
     .replace(/^import .*;\s*$/gm,'')
     .replace('(body: Record<string, unknown>, status', '(body, status')
     .replace('let body: Record<string, unknown>;','let body;')
-    .replace('request: Request','request');
+    .replace('request: Request','request')
+    .replace('const chunks: Uint8Array[] = [];','const chunks = [];')
+    .replace('let raw: string;','let raw;');
   let handler;
   const calls = {client:0, rpc:0, getUser:0, verifier:0};
   const deno = {
