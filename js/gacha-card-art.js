@@ -139,8 +139,20 @@
         original?.image,
         isLegendary ? albaseraphUrl.href : null
       ].filter(url => typeof url === 'string')
-        .map(url => url.trim())
-        .filter(url => url && !/^(?:javascript|data|vbscript):/i.test(url)))];
+        .map(url => {
+          // Invalid catalogue URLs must not throw from load/error callbacks,
+          // leaving an empty card and a permanently armed watchdog.
+          try {
+            const parsed = new URL(url.trim(), document.baseURI);
+            // Keep Capacitor's bundled file/app origins, but reject active
+            // schemes and unexpected protocols from catalogue data.
+            if (!['http:', 'https:', 'file:', 'capacitor:', 'ionic:'].includes(parsed.protocol)) return null;
+            return parsed.href;
+          } catch {
+            return null;
+          }
+        })
+        .filter(Boolean))];
       if (!candidates.length) {
         showSpeciesFallback();
         return art;
