@@ -193,6 +193,9 @@
         // Only accept dimensions for the active candidate: a delayed event
         // from the previous source must not settle the replacement request.
         const activeUrl = new URL(candidates[candidateIndex], document.baseURI).href;
+        // A delayed error from the previous source must not consume the
+        // replacement candidate. Watchdog expiry is tied to its own index.
+        if (!timedOut && image.currentSrc && image.currentSrc !== activeUrl) return;
         const decodedCurrent = image.complete && image.naturalWidth > 0 &&
           image.naturalHeight > 0 && (!image.currentSrc || image.currentSrc === activeUrl);
         if (!timedOut && decodedCurrent) {
@@ -237,7 +240,8 @@
               console.warn('MUSHIVERSE SVG fallback failed:', name, url, error);
             }
           }
-          showSpeciesFallback();
+          // Species-specific artwork is already visible while SVG recovery
+          // runs; do not replace it again after all fetches fail.
         };
         void tryInlineSvg();
       };
