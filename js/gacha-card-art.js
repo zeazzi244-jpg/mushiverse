@@ -185,7 +185,7 @@
           return;
         }
         fallbackStarted = true;
-        image.removeEventListener('error', onImageError);
+        image.removeEventListener('error', handleImageError);
         image.remove();
         // Only SVG files can be parsed as inline artwork. WebP/PNG/JPEG
         // candidates must fall back to the species illustration instead of
@@ -211,7 +211,8 @@
       };
       // DOM error listeners receive an Event, not the timeout boolean.
       // Keep ordinary errors distinct from explicit watchdog expiry.
-      image.addEventListener('error', () => onImageError(false));
+      const handleImageError = () => onImageError(false);
+      image.addEventListener('error', handleImageError);
       image.addEventListener('load', () => {
         if (fallbackStarted || loadSettled || !image.complete) return;
         // A late load event from an earlier source must not mark the next
