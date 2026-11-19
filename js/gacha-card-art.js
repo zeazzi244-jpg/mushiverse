@@ -181,6 +181,7 @@
               (!image.currentSrc || image.currentSrc === new URL(candidates[timedCandidate], document.baseURI).href)) {
             loadSettled = true;
             clearLoadTimeout();
+            if (preview) { preview.remove(); preview = null; image.style.display = ''; }
             image.removeEventListener('error', handleImageError);
             return;
           }
@@ -201,6 +202,7 @@
         if (!timedOut && decodedCurrent) {
           loadSettled = true;
           clearLoadTimeout();
+          if (preview) { preview.remove(); preview = null; image.style.display = ''; }
           image.removeEventListener('error', handleImageError);
           return;
         }
@@ -261,11 +263,25 @@
         if (image.naturalWidth > 0 && image.naturalHeight > 0) {
           loadSettled = true;
           clearLoadTimeout();
+          if (preview) { preview.remove(); preview = null; image.style.display = ''; }
           image.removeEventListener('error', handleImageError);
         } else {
           onImageError();
         }
       });
+      // Render a species-specific preview immediately instead of leaving a
+      // blank card during a slow or stalled WKWebView image request.
+      // Keep the real image hidden until decoded; then replace the preview.
+      let preview = null;
+      try {
+        preview = renderSpecies(name, rarity);
+      } catch (error) {
+        console.warn('MUSHIVERSE card preview failed:', name, error);
+      }
+      if (preview) {
+        art.append(preview);
+        image.style.display = 'none';
+      }
       art.append(image);
       image.src = candidates[0];
       armLoadTimeout();
