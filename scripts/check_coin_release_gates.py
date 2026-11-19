@@ -9,7 +9,14 @@ shop = (root / "ios/App/App/MushiverseCoinShopView.swift").read_text(encoding="u
 backend = (root / "supabase/functions/credit-apple-gacha-coins/index.ts").read_text(encoding="utf-8")
 
 checks = {
-    "purchase UI has release gate": "!purchasesEnabled || store.isPurchasing || store.isRetrying" in shop,
+    "purchase UI has release gate": "!canTestPurchase || store.isPurchasing || store.isRetrying" in shop
+        and "purchasesEnabled || store.sandboxPurchasesEnabled" in shop,
+    "sandbox gate requires verified Apple app transaction": all(fragment in store for fragment in (
+        "let appResult = try? await AppTransaction.shared",
+        "case .verified(let app) = appResult",
+        'app.bundleID == "com.rikuto.mushiverse", app.environment == .sandbox',
+        "transaction.environment == .sandbox",
+    )) and store.count("sandboxPurchasesEnabled = true") == 1,
     "shop shows preparation notice": "現在は販売準備中です" in shop,
     "only three approved coin products": '[100, 500, 1200].map' in store and '[100, 300, 500, 1200, 2500, 5500, 12000]' not in store,
     "payments stay disabled": "static let purchasesEnabled = false" in store,
