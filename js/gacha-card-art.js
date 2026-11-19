@@ -169,7 +169,7 @@
         clearLoadTimeout();
         // An already-failed image may emit another error after a source swap.
         // Start the asynchronous SVG fallback only once per card.
-        if (fallbackStarted) return;
+        if (fallbackStarted || loadSettled) return;
         candidateIndex++;
         loadSettled = false;
         if (candidateIndex < candidates.length) {
@@ -204,7 +204,7 @@
       };
       image.addEventListener('error', onImageError);
       image.addEventListener('load', () => {
-        if (fallbackStarted) return;
+        if (fallbackStarted || loadSettled || !image.complete) return;
         // A WebView may emit load for a decoded-but-empty image. Do not
         // clear the recovery timer until the artwork has real dimensions.
         if (image.naturalWidth > 0 && image.naturalHeight > 0) {
