@@ -196,8 +196,8 @@
         candidateIndex++;
         loadSettled = false;
         if (candidateIndex < candidates.length) {
-          armLoadTimeout();
           image.src = candidates[candidateIndex];
+          armLoadTimeout();
           return;
         }
         fallbackStarted = true;
@@ -247,8 +247,8 @@
         }
       });
       art.append(image);
-      armLoadTimeout();
       image.src = candidates[0];
+      armLoadTimeout();
     } else {
       showSpeciesFallback();
     }
