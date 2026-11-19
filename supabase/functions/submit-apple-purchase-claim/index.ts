@@ -20,10 +20,38 @@ Deno.serve(async(req)=>{
 
     // Claims are untrusted input: bound request size and validate full values
     // rather than truncating strings into a potentially different transaction.
-    const length=Number(req.headers.get("content-length")||0);
-    if(length>4096) return json({error:"request_too_large"},413);
-    const rawBody=await req.text();
-    if(new TextEncoder().encode(rawBody).byteLength>4096) return json({error:"request_too_large"},413);
+    const declaredLength=req.headers.get("content-length");
+    if(declaredLength!==null){
+      if(!/^(0|[1-9][0-9]*)$/.test(declaredLength)) return json({error:"invalid_content_length"},400);
+      if(!Number.isSafeInteger(Number(declaredLength))||Number(declaredLength)>4096)
+        return json({error:"request_too_large"},413);
+    }
+    // Limit actual streamed bytes, including chunked requests with no Content-Length.
+    // req.text() would buffer the entire attacker-controlled body first.
+    const reader=req.body?.getReader();
+    if(!reader) return json({error:"invalid_body"},400);
+    const chunks:Uint8Array[]=[];
+    let received=0;
+    try{
+      while(true){
+        const {done,value}=await reader.read();
+        if(done) break;
+        received+=value.byteLength;
+        if(received>4096){
+          await reader.cancel();
+          return json({error:"request_too_large"},413);
+        }
+        chunks.push(value);
+      }
+    }finally{reader.releaseLock()}
+    if(declaredLength!==null&&received!==Number(declaredLength))
+      return json({error:"content_length_mismatch"},400);
+    const bytes=new Uint8Array(received);
+    let offset=0;
+    for(const chunk of chunks){bytes.set(chunk,offset);offset+=chunk.byteLength}
+    let rawBody:string;
+    try{rawBody=new TextDecoder("utf-8",{fatal:true}).decode(bytes)}
+    catch{return json({error:"invalid_utf8"},400)}
     let body:Record<string,unknown>;
     try{body=JSON.parse(rawBody)}catch{return json({error:"invalid_json"},400)}
     if(!body||typeof body!=="object"||Array.isArray(body))return json({error:"invalid_body"},400);
