@@ -224,7 +224,12 @@
         // candidates must fall back to the species illustration instead of
         // being fetched and parsed as XML after an image-load failure.
         const svgCandidates = candidates.filter(url => /\.svg(?:[?#]|$)/i.test(url));
-        if (!svgCandidates.length) return showSpeciesFallback();
+        if (!svgCandidates.length) {
+          // No SVG recovery is possible: keep the species-specific preview
+          // without leaving the detached image's load listener registered.
+          image.removeEventListener('load', handleImageLoad);
+          return showSpeciesFallback();
+        }
         // Show species-specific artwork immediately while inline SVG recovery runs.
         // Otherwise a stalled fetch leaves the card empty for up to eight seconds
         // per SVG candidate, especially noticeable on iPhone WKWebView.
@@ -251,7 +256,7 @@
       // Keep ordinary errors distinct from explicit watchdog expiry.
       const handleImageError = () => onImageError(false);
       image.addEventListener('error', handleImageError);
-      image.addEventListener('load', () => {
+      const handleImageLoad = () => {
         if (fallbackStarted || loadSettled || !image.complete) return;
         // A late load event from an earlier source must not mark the next
         // candidate as successful. Compare the resolved active URL before
@@ -265,10 +270,12 @@
           clearLoadTimeout();
           if (preview) { preview.remove(); preview = null; image.style.display = ''; }
           image.removeEventListener('error', handleImageError);
+          image.removeEventListener('load', handleImageLoad);
         } else {
           onImageError();
         }
-      });
+      };
+      image.addEventListener('load', handleImageLoad);
       // Render a species-specific preview immediately instead of leaving a
       // blank card during a slow or stalled WKWebView image request.
       // Keep the real image hidden until decoded; then replace the preview.
