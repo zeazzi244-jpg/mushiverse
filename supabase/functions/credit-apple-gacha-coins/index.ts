@@ -153,7 +153,8 @@ Deno.serve(async (request: Request) => {
       return json({ error: "original_transaction_claim_conflict", credited_or_previously_credited: false }, 409);
     // This is a staging-only consistency check, not an atomic fulfillment gate.
     // No event insertion, RPC invocation, wallet mutation or premium entitlement.
-    return json({ ok: true, verification: "sandbox_signature_verified", transaction_id: verified.transactionId,
+    return json({ ok: true, verification: "sandbox_signature_verified", transaction_id: verified.transactionId, original_transaction_id: verified.originalTransactionId,
+      product_id: verified.productId, environment: verified.environment,
       credited_or_previously_credited: false, fulfillment: "disabled_pending_sandbox_proof" });
   } catch {
     return json({ error: "unavailable", credited_or_previously_credited: false }, 503);
