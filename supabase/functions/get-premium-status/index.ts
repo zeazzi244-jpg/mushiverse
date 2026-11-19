@@ -23,7 +23,9 @@ Deno.serve(async (req)=>{
     // Fail closed on missing, malformed, or expired entitlement periods.
     const active=!!data && data.plan==="premium" && ["trialing","active"].includes(data.status)
       && Number.isFinite(periodEnd) && periodEnd>Date.now();
-    // Entitlements can expire or be revoked between requests. Never let a CDN,\n    // intermediary, or WKWebView reuse a previously active premium response.\n    return new Response(JSON.stringify({plan:active?"premium":"free",source:data?.source||null,status:data?.status||"inactive",current_period_end:data?.current_period_end||null,updated_at:data?.updated_at||null}),{headers:{...cors,"Content-Type":"application/json","Cache-Control":"no-store, private","Pragma":"no-cache","Vary":"Authorization","X-Content-Type-Options":"nosniff"}});
+    // Entitlements can expire or be revoked between requests. Never let a CDN,
+    // intermediary, or WKWebView reuse a previously active premium response.
+    return new Response(JSON.stringify({plan:active?"premium":"free",source:data?.source||null,status:data?.status||"inactive",current_period_end:data?.current_period_end||null,updated_at:data?.updated_at||null}),{headers:{...cors,"Content-Type":"application/json","Cache-Control":"no-store, private","Pragma":"no-cache","Vary":"Authorization","X-Content-Type-Options":"nosniff"}});
   }catch(e){
     return new Response(JSON.stringify({error:"server_error"}),{status:500,headers:{...cors,"Content-Type":"application/json"}});
   }
