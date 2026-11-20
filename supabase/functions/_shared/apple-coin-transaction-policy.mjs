@@ -29,6 +29,7 @@ export function validateVerifiedAppleCoinTransaction(transaction, expected) {
   // contradictory signed fields instead of interpreting them as coin purchases.
   if (transaction.expiresDate != null || transaction.subscriptionGroupIdentifier != null ||
       transaction.offerType != null || transaction.offerIdentifier != null ||
+      transaction.offerDiscountType != null || transaction.offerPeriod != null ||
       transaction.webOrderLineItemId != null)
     throw new Error('subscription_metadata_on_consumable');
   // A coin pack is a one-time consumable purchase, never a subscription renewal.
