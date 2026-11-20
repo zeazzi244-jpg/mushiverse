@@ -51,13 +51,19 @@ Deno.serve(async (req)=>{
             .order("purchase_date",{ascending:false}).order("verified_at",{ascending:false}).limit(1);
           const latest=events?.[0];
           const expiresAt=latest?.expires_date ? Date.parse(latest.expires_date) : NaN;
+          const purchasedAt=latest?.purchase_date ? Date.parse(latest.purchase_date) : NaN;
+          // Only a well-formed, already-purchased signed event may establish access.
+          // Reject impossible future purchases and reversed purchase/expiry periods.
+          const validSignedPeriod=typeof latest?.transaction_id==="string" && /^\\d{6,30}$/.test(latest.transaction_id) &&
+            Number.isFinite(purchasedAt) && purchasedAt<=Date.now()+5*60*1000 &&
+            Number.isFinite(expiresAt) && expiresAt>purchasedAt;
           // A verified transaction must be a supported subscription, never a coin pack or an unknown environment.
           const supportedPremiumProduct=latest?.product_id==="jp.mushiverse.premium.monthly" || latest?.product_id==="jp.mushiverse.premium.annual";
           // Until production Apple transactions are independently proven, only Sandbox-signed events may establish an Apple entitlement.
           // The global gates alone must not turn an unexpected Production event into premium.
           const supportedEnvironment=latest?.environment==="Sandbox";
           applePurchaseProven=!eventError && !!latest && supportedPremiumProduct && supportedEnvironment && latest.revocation_date==null &&
-            Number.isFinite(expiresAt) && expiresAt>Date.now();
+            validSignedPeriod && expiresAt>Date.now();
         }
       }
     }
