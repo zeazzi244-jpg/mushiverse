@@ -54,7 +54,7 @@ Deno.serve(async (req)=>{
           const purchasedAt=latest?.purchase_date ? Date.parse(latest.purchase_date) : NaN;
           // Only a well-formed, already-purchased signed event may establish access.
           // Reject impossible future purchases and reversed purchase/expiry periods.
-          const validSignedPeriod=typeof latest?.transaction_id==="string" && /^\\d{6,30}$/.test(latest.transaction_id) &&
+          const validSignedPeriod=typeof latest?.transaction_id==="string" && /^\d{6,30}$/.test(latest.transaction_id) &&
             Number.isFinite(purchasedAt) && purchasedAt<=Date.now()+5*60*1000 &&
             Number.isFinite(expiresAt) && expiresAt>purchasedAt;
           // A verified transaction must be a supported subscription, never a coin pack or an unknown environment.
