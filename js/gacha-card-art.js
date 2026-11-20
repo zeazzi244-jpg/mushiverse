@@ -276,7 +276,11 @@
           image.removeEventListener('error', handleImageError);
           image.removeEventListener('load', handleImageLoad);
         } else {
-          onImageError();
+          // A load event with zero dimensions is a failed decode even when
+          // WKWebView still reports a stale currentSrc from the previous URL.
+          // Advance the candidate now instead of leaving the card blank until
+          // the 12-second watchdog expires.
+          onImageError(true);
         }
       };
       image.addEventListener('load', handleImageLoad);
