@@ -1,0 +1,13 @@
+services:
+  - type: web
+    name: mushiverse-apple-sandbox-verifier
+    runtime: node
+    plan: free
+    buildCommand: npm ci --prefix services/apple-sandbox-verifier
+    startCommand: npm start --prefix services/apple-sandbox-verifier
+    healthCheckPath: /healthz
+    envVars:
+      - key: NODE_VERSION
+        value: 24.22.3
+      - key: APPLE_SANDBOX_VERIFIER_SECRET
+        sync: false
