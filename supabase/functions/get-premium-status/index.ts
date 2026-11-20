@@ -51,7 +51,10 @@ Deno.serve(async (req)=>{
             .order("purchase_date",{ascending:false}).order("verified_at",{ascending:false}).limit(1);
           const latest=events?.[0];
           const expiresAt=latest?.expires_date ? Date.parse(latest.expires_date) : NaN;
-          // A verified transaction must be a supported subscription, never a coin pack or an unknown environment.\n          const supportedPremiumProduct=latest?.product_id==="jp.mushiverse.premium.monthly" || latest?.product_id==="jp.mushiverse.premium.annual";\n          const supportedEnvironment=latest?.environment==="Sandbox" || latest?.environment==="Production";\n          applePurchaseProven=!eventError && !!latest && supportedPremiumProduct && supportedEnvironment && latest.revocation_date==null &&
+          // A verified transaction must be a supported subscription, never a coin pack or an unknown environment.
+          const supportedPremiumProduct=latest?.product_id==="jp.mushiverse.premium.monthly" || latest?.product_id==="jp.mushiverse.premium.annual";
+          const supportedEnvironment=latest?.environment==="Sandbox" || latest?.environment==="Production";
+          applePurchaseProven=!eventError && !!latest && supportedPremiumProduct && supportedEnvironment && latest.revocation_date==null &&
             Number.isFinite(expiresAt) && expiresAt>Date.now();
         }
       }
