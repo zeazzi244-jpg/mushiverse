@@ -11,7 +11,7 @@ test('the purchase endpoint has no path to the spendable wallet', () => {
     ['record_apple_sandbox_coin_credit']);
   assert.doesNotMatch(source, /gacha_coin_wallets|\.insert\s*\(|\.upsert\s*\(|\.update\s*\(/);
 
-  const migration = readFileSync('supabase/migrations/20261120122000_apple_sandbox_coin_credits.sql', 'utf8');
+  const migration = readFileSync('supabase/migrations/20261120031622_apple_sandbox_coin_credits_v24.sql', 'utf8');
   assert.doesNotMatch(migration, /gacha_coin_wallets|gacha_coin_purchase_credits/);
   assert.match(migration, /transaction_id text PRIMARY KEY/);
   assert.match(migration, /ON CONFLICT \(transaction_id\) DO NOTHING/);
