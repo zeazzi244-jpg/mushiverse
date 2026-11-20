@@ -290,7 +290,18 @@
         if (typeof image.decode !== 'function') return;
         const decodingCandidate = candidateIndex;
         const decodingUrl = candidates[decodingCandidate];
-        void image.decode().then(() => {
+        // Some WKWebView implementations throw synchronously from decode()
+        // (rather than returning a rejected promise). Preserve the watchdog
+        // and the visible preview instead of aborting card construction.
+        let decodePromise;
+        try {
+          decodePromise = image.decode();
+        } catch (error) {
+          console.warn('MUSHIVERSE image decode could not start:', name, error);
+          return;
+        }
+        if (!decodePromise || typeof decodePromise.then !== 'function') return;
+        void decodePromise.then(() => {
           if (fallbackStarted || loadSettled || candidateIndex !== decodingCandidate ||
               image.src !== decodingUrl || !image.complete ||
               image.naturalWidth <= 0 || image.naturalHeight <= 0) return;
