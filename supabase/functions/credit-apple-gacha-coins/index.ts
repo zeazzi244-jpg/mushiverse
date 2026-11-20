@@ -200,9 +200,18 @@ Deno.serve(async (request: Request) => {
     }
     if (newConflicts?.length)
       return json({ error: "original_transaction_claim_conflict", credited_or_previously_credited: false }, 409);
-    if (verified.productId === "mushiverse.coins.100" &&
-        verified.environment === "Sandbox" &&
-        Deno.env.get("APPLE_IAP_SANDBOX_TESTER_USER_ID") === user.id) {
+    let sandboxTester = false;
+    if (verified.productId === "mushiverse.coins.100" && verified.environment === "Sandbox") {
+      const configuredTester = Deno.env.get("APPLE_IAP_SANDBOX_TESTER_USER_ID");
+      if (configuredTester) {
+        sandboxTester = configuredTester === user.id;
+      } else {
+        const { data, error } = await admin.rpc("is_apple_sandbox_tester", { p_user_id: user.id });
+        if (error) return json({ error: "sandbox_credit_unavailable", credited_or_previously_credited: false }, 503);
+        sandboxTester = data === true;
+      }
+    }
+    if (sandboxTester) {
       const { data: credit, error } = await admin.rpc("record_apple_sandbox_coin_credit", {
         p_transaction_id: verified.transactionId,
         p_user_id: user.id,
