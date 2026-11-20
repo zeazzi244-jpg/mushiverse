@@ -123,11 +123,19 @@ Deno.serve(async (request: Request) => {
     // This staging endpoint deliberately accepts Sandbox only.
     let verified;
     try {
+      const configuredSecret = Deno.env.get("APPLE_SANDBOX_VERIFIER_SECRET");
+      const configuredUrl = Deno.env.get("APPLE_SANDBOX_VERIFIER_URL");
+      let vaultSecret;
+      if (!configuredSecret && !configuredUrl && claim.product_id === "mushiverse.coins.100") {
+        const { data, error } = await admin.rpc("get_apple_sandbox_verifier_secret");
+        if (error) throw new Error("apple_verification_not_configured");
+        if (typeof data === "string") vaultSecret = data;
+      }
       verified = await verifyAppleCoinJws(signed_transaction, {
         productId: claim.product_id, transactionId: claim.transaction_id,
         originalTransactionId: claim.original_transaction_id,
         appAccountToken: user.id, environment: "Sandbox",
-      });
+      }, vaultSecret);
     } catch (error) {
       // Deployment configuration failures are retryable and say nothing about the purchase.
       if (error instanceof Error && [
