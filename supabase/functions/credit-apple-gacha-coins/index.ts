@@ -16,7 +16,10 @@ Deno.serve(async (request: Request) => {
   const url = Deno.env.get("SUPABASE_URL");
   const anon = Deno.env.get("SUPABASE_ANON_KEY");
   const service = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
-  if (!url || !anon || !service) return json({ error: "unavailable" }, 503);
+  if (!url || !anon || !service) {
+    console.warn("apple sandbox credit: Supabase configuration missing");
+    return json({ error: "unavailable" }, 503);
+  }
   try {
     const userClient = createClient(url, anon, { global: { headers: { Authorization: authorization } } });
     const { data: { user }, error: authError } = await userClient.auth.getUser();
@@ -66,7 +69,10 @@ Deno.serve(async (request: Request) => {
     const { data: claims, error: claimError } = await admin.from("apple_purchase_claims")
       .select("user_id,transaction_id,original_transaction_id,product_id,status,environment")
       .eq("transaction_id", transaction_id).limit(2);
-    if (claimError) return json({ error: "unavailable" }, 503);
+    if (claimError) {
+      console.warn("apple sandbox credit: claim_lookup failed");
+      return json({ error: "unavailable" }, 503);
+    }
     if (!claims || claims.length !== 1 || claims[0].user_id !== user.id)
       return json({ error: "claim_not_owned" }, 403);
     const claim = claims[0];
@@ -97,14 +103,20 @@ Deno.serve(async (request: Request) => {
     const { data: foreignOwners, error: ownershipError } = await admin.from("apple_purchase_claims")
       .select("transaction_id").eq("original_transaction_id", claim.original_transaction_id)
       .neq("user_id", user.id).limit(1);
-    if (ownershipError) return json({ error: "unavailable", credited_or_previously_credited: false }, 503);
+    if (ownershipError) {
+      console.warn("apple sandbox credit: ownership_lookup failed");
+      return json({ error: "unavailable", credited_or_previously_credited: false }, 503);
+    }
     if (foreignOwners?.length)
       return json({ error: "original_transaction_owned_by_other_account", credited_or_previously_credited: false }, 409);
     const { data: conflictingClaims, error: conflictError } = await admin.from("apple_purchase_claims")
       .select("transaction_id").eq("original_transaction_id", claim.original_transaction_id)
       .eq("user_id", user.id)
       .or(`transaction_id.neq.${claim.transaction_id},product_id.neq.${claim.product_id}`).limit(1);
-    if (conflictError) return json({ error: "unavailable", credited_or_previously_credited: false }, 503);
+    if (conflictError) {
+      console.warn("apple sandbox credit: conflict_lookup failed");
+      return json({ error: "unavailable", credited_or_previously_credited: false }, 503);
+    }
     if (conflictingClaims?.length)
       return json({ error: "original_transaction_claim_conflict", credited_or_previously_credited: false }, 409);
     // Never accept environment or app-account ownership from request metadata.
@@ -124,6 +136,7 @@ Deno.serve(async (request: Request) => {
         "invalid_apple_root_certificates",
         "invalid_apple_app_id",
       ].includes(error.message)) {
+        console.warn("apple sandbox credit: verifier configuration unavailable", error.message);
         return json({ error: "apple_verification_unavailable", credited_or_previously_credited: false }, 503);
       }
       return json({ error: "apple_transaction_verification_failed", credited_or_previously_credited: false }, 422);
@@ -134,7 +147,10 @@ Deno.serve(async (request: Request) => {
     const { data: currentClaims, error: currentError } = await admin.from("apple_purchase_claims")
       .select("user_id,transaction_id,original_transaction_id,product_id,status,environment")
       .eq("transaction_id", verified.transactionId).limit(2);
-    if (currentError) return json({ error: "unavailable", credited_or_previously_credited: false }, 503);
+    if (currentError) {
+      console.warn("apple sandbox credit: claim_recheck failed");
+      return json({ error: "unavailable", credited_or_previously_credited: false }, 503);
+    }
     if (!currentClaims || currentClaims.length !== 1 ||
         currentClaims[0].user_id !== user.id ||
         currentClaims[0].transaction_id !== verified.transactionId ||
@@ -146,7 +162,10 @@ Deno.serve(async (request: Request) => {
     const { data: newForeignOwners, error: newOwnerError } = await admin.from("apple_purchase_claims")
       .select("transaction_id").eq("original_transaction_id", verified.originalTransactionId)
       .neq("user_id", user.id).limit(1);
-    if (newOwnerError) return json({ error: "unavailable", credited_or_previously_credited: false }, 503);
+    if (newOwnerError) {
+      console.warn("apple sandbox credit: ownership_recheck failed");
+      return json({ error: "unavailable", credited_or_previously_credited: false }, 503);
+    }
     if (newForeignOwners?.length)
       return json({ error: "original_transaction_owned_by_other_account", credited_or_previously_credited: false }, 409);
     // A second claim for this same original transaction can appear while the
@@ -156,7 +175,10 @@ Deno.serve(async (request: Request) => {
       .select("transaction_id").eq("original_transaction_id", verified.originalTransactionId)
       .eq("user_id", user.id)
       .or(`transaction_id.neq.${verified.transactionId},product_id.neq.${verified.productId}`).limit(1);
-    if (newConflictError) return json({ error: "unavailable", credited_or_previously_credited: false }, 503);
+    if (newConflictError) {
+      console.warn("apple sandbox credit: conflict_recheck failed");
+      return json({ error: "unavailable", credited_or_previously_credited: false }, 503);
+    }
     if (newConflicts?.length)
       return json({ error: "original_transaction_claim_conflict", credited_or_previously_credited: false }, 409);
     if (verified.productId === "mushiverse.coins.100" &&
@@ -167,6 +189,7 @@ Deno.serve(async (request: Request) => {
         p_user_id: user.id,
       });
       if (error || credit !== true) {
+        console.warn("apple sandbox credit: isolated ledger did not acknowledge credit");
         return json({ error: "sandbox_credit_unavailable", credited_or_previously_credited: false }, 503);
       }
       return json({ ok: true, verification: "sandbox_signature_verified", transaction_id: verified.transactionId,
@@ -178,6 +201,7 @@ Deno.serve(async (request: Request) => {
       product_id: verified.productId, environment: verified.environment,
       credited_or_previously_credited: false, fulfillment: "disabled_pending_sandbox_proof" });
   } catch {
+    console.warn("apple sandbox credit: unexpected request failure");
     return json({ error: "unavailable", credited_or_previously_credited: false }, 503);
   }
 });
