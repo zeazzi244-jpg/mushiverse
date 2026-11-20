@@ -53,7 +53,9 @@ Deno.serve(async (req)=>{
           const expiresAt=latest?.expires_date ? Date.parse(latest.expires_date) : NaN;
           // A verified transaction must be a supported subscription, never a coin pack or an unknown environment.
           const supportedPremiumProduct=latest?.product_id==="jp.mushiverse.premium.monthly" || latest?.product_id==="jp.mushiverse.premium.annual";
-          // Until production Apple transactions are independently proven, only Sandbox-signed events may establish an Apple entitlement.\n          // The global gates alone must not turn an unexpected Production event into premium.\n          const supportedEnvironment=latest?.environment==="Sandbox";
+          // Until production Apple transactions are independently proven, only Sandbox-signed events may establish an Apple entitlement.
+          // The global gates alone must not turn an unexpected Production event into premium.
+          const supportedEnvironment=latest?.environment==="Sandbox";
           applePurchaseProven=!eventError && !!latest && supportedPremiumProduct && supportedEnvironment && latest.revocation_date==null &&
             Number.isFinite(expiresAt) && expiresAt>Date.now();
         }
