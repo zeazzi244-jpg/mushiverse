@@ -32,6 +32,7 @@ function harness({user = {id:'user-a'}, configured = true, productId = 'mushiver
         }]})}
     })}),
     rpc:async(name, args)=>{
+      if (name === "is_apple_sandbox_tester") return {data:false,error:null};
       if (name === "get_apple_sandbox_verifier_secret") return {data:null,error:null};
       calls.rpc++;
       assert.equal(name,'record_apple_sandbox_coin_credit');
