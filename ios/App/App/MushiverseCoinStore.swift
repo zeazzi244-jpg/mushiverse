@@ -165,14 +165,16 @@ final class MushiverseCoinStore: ObservableObject {
     }
 
     private func process(_ result: VerificationResult<Transaction>) async {
-        guard Self.purchasesEnabled || sandboxPurchasesEnabled, isStarted, !Task.isCancelled else { return }
+        guard isStarted, !Task.isCancelled else { return }
         let generation = lifecycleGeneration
         guard case .verified(let transaction) = result else {
             lastError = "Appleによる購入確認に失敗しました"
             return
         }
         if !Self.purchasesEnabled {
-            guard #available(iOS 16.0, *), transaction.environment == .sandbox else { return }
+            // Recovery relies on the verified transaction even when product loading fails.
+            guard #available(iOS 16.0, *), transaction.environment == .sandbox,
+                  transaction.productID == Self.sandboxProductID else { return }
         }
         guard Self.expectedType(transaction.productID) == .consumable,
               transaction.productType == .consumable,
@@ -206,8 +208,7 @@ final class MushiverseCoinStore: ObservableObject {
             guard isStarted, lifecycleGeneration == generation, !Task.isCancelled else { return }
             // Finish only after the isolated Sandbox ledger acknowledges this purchase.
             if !Self.purchasesEnabled {
-                guard sandboxPurchasesEnabled,
-                      let proof = try? JSONDecoder().decode(SandboxProof.self, from: data),
+                guard let proof = try? JSONDecoder().decode(SandboxProof.self, from: data),
                       proof.ok,
                       proof.verification == "sandbox_signature_verified",
                       proof.transactionID == String(transaction.id),
@@ -238,7 +239,7 @@ final class MushiverseCoinStore: ObservableObject {
             lastError = nil
         } catch {
             // Deliberately leave the StoreKit transaction unfinished for retry.
-            lastError = "購入情報を確認中です。コインはまだ付与されていません"
+            lastError = "購入の反映を確認できませんでした。未完了の購入を再確認してください。"
         }
     }
 

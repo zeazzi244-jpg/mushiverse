@@ -5,7 +5,6 @@ import UIKit
 struct MushiverseCoinShopView: View {
     @ObservedObject var store: MushiverseCoinStore
     let purchasesEnabled: Bool
-    private var canTestPurchase: Bool { purchasesEnabled || store.sandboxPurchasesEnabled }
     private let forest = Color(red: 0.07, green: 0.17, blue: 0.13)
     private let gold = Color(red: 0.98, green: 0.84, blue: 0.49)
 
@@ -44,14 +43,12 @@ struct MushiverseCoinShopView: View {
             if let message = store.lastError {
                 Text(message).font(.footnote).foregroundStyle(gold)
             }
-            if canTestPurchase {
-                Button("未完了の購入を再確認") {
-                    Task { await store.retryUnfinishedPurchases() }
-                }
-                .foregroundStyle(gold)
-                .frame(minHeight: 44)
-                .disabled(store.isPurchasing || store.isRetrying)
+            Button("未完了の購入を再確認") {
+                Task { await store.retryUnfinishedPurchases() }
             }
+            .foregroundStyle(gold)
+            .frame(minHeight: 44)
+            .disabled(store.isPurchasing || store.isRetrying)
         }
         .padding()
         .frame(maxWidth: .infinity, alignment: .leading)
@@ -79,6 +76,8 @@ struct MushiverseCoinShopView: View {
                 guard let product else { return }
                 Task { await store.purchase(product) }
             }
+            .multilineTextAlignment(.center)
+            .fixedSize(horizontal: false, vertical: true)
             .frame(maxWidth: .infinity, minHeight: 44)
             .foregroundStyle(gold)
             .disabled(!available || !store.canPurchase)
