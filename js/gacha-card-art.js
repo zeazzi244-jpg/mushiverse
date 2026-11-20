@@ -296,7 +296,13 @@
               image.naturalWidth <= 0 || image.naturalHeight <= 0) return;
           handleImageLoad();
         }).catch(() => {
-          // The existing error event and watchdog own candidate recovery.
+          // WKWebView can reject decode() for a fully failed cached image
+          // without dispatching an error event. Advance immediately only
+          // when this exact candidate has finished with no decoded pixels.
+          if (fallbackStarted || loadSettled || candidateIndex !== decodingCandidate ||
+              image.src !== decodingUrl || !image.complete ||
+              image.naturalWidth > 0 || image.naturalHeight > 0) return;
+          onImageError(true);
         });
       }
 
