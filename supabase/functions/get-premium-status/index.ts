@@ -44,10 +44,11 @@ Deno.serve(async (req)=>{
           // Evaluate the latest verified event, including revocations. Looking for
           // *any* older unrevoked event can incorrectly restore a revoked subscription.
           const {data:events,error:eventError}=await admin.from("apple_iap_events")
-            .select("transaction_id,revocation_date,expires_date").eq("user_id",user.id)
+            .select("transaction_id,revocation_date,expires_date,purchase_date").eq("user_id",user.id)
             .eq("original_transaction_id",data.provider_subscription_id)
             .not("verified_at","is",null)
-            .order("verified_at",{ascending:false}).limit(1);
+            // A delayed verification of an older transaction must not supersede a newer renewal or revocation.
+            .order("purchase_date",{ascending:false}).order("verified_at",{ascending:false}).limit(1);
           const latest=events?.[0];
           const expiresAt=latest?.expires_date ? Date.parse(latest.expires_date) : NaN;
           applePurchaseProven=!eventError && !!latest && latest.revocation_date==null &&
