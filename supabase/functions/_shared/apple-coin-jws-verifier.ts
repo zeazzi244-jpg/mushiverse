@@ -40,6 +40,39 @@ export async function verifyAppleCoinJws(signedTransaction: string, expected: {
   if (expected.environment === "Production")
     throw new Error("production_verification_disabled");
 
+  const remoteUrl = Deno.env.get("APPLE_SANDBOX_VERIFIER_URL");
+  const remoteSecret = Deno.env.get("APPLE_SANDBOX_VERIFIER_SECRET");
+  if (remoteUrl || remoteSecret) {
+    if (!remoteUrl || !remoteSecret || !/^[a-f0-9]{64}$/.test(remoteSecret))
+      throw new Error("apple_verification_not_configured");
+    const url = URL.parse(remoteUrl);
+    if (!url || url.protocol !== "https:" || url.username || url.password ||
+        url.pathname !== "/verify" || url.search || url.hash)
+      throw new Error("apple_verification_not_configured");
+    let response;
+    try {
+      response = await fetch(url, {
+        method: "POST",
+        redirect: "error",
+        signal: AbortSignal.timeout(15000),
+        headers: { "content-type": "application/json", authorization: "Bearer " + remoteSecret },
+        body: JSON.stringify({ signedTransaction, expected }),
+      });
+    } catch {
+      throw new Error("apple_verification_not_configured");
+    }
+    if (response.status === 422 || response.status === 400)
+      throw new Error("invalid_signed_transaction");
+    if (!response.ok) throw new Error("apple_verification_not_configured");
+    const { verified } = await response.json();
+    if (!verified || verified.environment !== "Sandbox" ||
+        verified.productId !== "mushiverse.coins.100" || verified.productId !== expected.productId ||
+        verified.transactionId !== expected.transactionId ||
+        verified.originalTransactionId !== expected.originalTransactionId || verified.coins !== 100)
+      throw new Error("invalid_signed_transaction");
+    return verified;
+  }
+
   const bundleId = "com.rikuto.mushiverse";
   // Apple Root CA - G3, from https://www.apple.com/certificateauthority/.
   // SHA-256: 63343ABFB89A6A03EBB57E9B3F5FA7BE7C4F5C756F3017B3A8C488C3653E9179.
