@@ -41,13 +41,17 @@ Deno.serve(async (req)=>{
         // Bind the active subscription to a server-verified, non-revoked Apple event.
         if(!gateError && gate?.server_jws_verified===true && gate?.sandbox_purchase_proven===true &&
            typeof data?.provider_subscription_id==="string" && /^\d{6,30}$/.test(data.provider_subscription_id)){
+          // Evaluate the latest verified event, including revocations. Looking for
+          // *any* older unrevoked event can incorrectly restore a revoked subscription.
           const {data:events,error:eventError}=await admin.from("apple_iap_events")
-            .select("transaction_id").eq("user_id",user.id)
+            .select("transaction_id,revocation_date,expires_date").eq("user_id",user.id)
             .eq("original_transaction_id",data.provider_subscription_id)
-            .not("verified_at","is",null).is("revocation_date",null)
-            .not("expires_date","is",null).gt("expires_date",new Date().toISOString())
-            .limit(1);
-          applePurchaseProven=!eventError && !!events?.length;
+            .not("verified_at","is",null)
+            .order("verified_at",{ascending:false}).limit(1);
+          const latest=events?.[0];
+          const expiresAt=latest?.expires_date ? Date.parse(latest.expires_date) : NaN;
+          applePurchaseProven=!eventError && !!latest && latest.revocation_date==null &&
+            Number.isFinite(expiresAt) && expiresAt>Date.now();
         }
       }
     }
