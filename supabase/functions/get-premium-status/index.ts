@@ -18,7 +18,7 @@ Deno.serve(async (req)=>{
     const sb=createClient(url,anon,{global:{headers:{Authorization:auth}}});
     const {data:{user},error:uerr}=await sb.auth.getUser();
     if(uerr||!user) return new Response(JSON.stringify({error:"unauthorized"}),{status:401,headers:{...cors,"Content-Type":"application/json","Cache-Control":"no-store"}});
-    const {data,error}=await sb.from("premium_entitlements").select("plan,source,status,current_period_end,updated_at").eq("user_id",user.id).maybeSingle();
+    const {data,error}=await sb.from("premium_entitlements").select("plan,source,status,current_period_end,updated_at,provider_subscription_id").eq("user_id",user.id).maybeSingle();
     if(error) throw error;
     // Apple premium is not released until both independent IAP proof gates pass.
     // Existing non-Apple subscriptions retain their established entitlement logic.
@@ -37,7 +37,18 @@ Deno.serve(async (req)=>{
         const admin=createClient(url,service);
         const {data:gate,error:gateError}=await admin.from("apple_iap_verification_gate")
           .select("server_jws_verified,sandbox_purchase_proven").eq("singleton",true).maybeSingle();
-        applePurchaseProven=!gateError && gate?.server_jws_verified===true && gate?.sandbox_purchase_proven===true;
+        // Global release gates are necessary but never sufficient for a user's entitlement.
+        // Bind the active subscription to a server-verified, non-revoked Apple event.
+        if(!gateError && gate?.server_jws_verified===true && gate?.sandbox_purchase_proven===true &&
+           typeof data?.provider_subscription_id==="string" && /^\\d{6,30}$/.test(data.provider_subscription_id)){
+          const {data:events,error:eventError}=await admin.from("apple_iap_events")
+            .select("transaction_id").eq("user_id",user.id)
+            .eq("original_transaction_id",data.provider_subscription_id)
+            .not("verified_at","is",null).is("revocation_date",null)
+            .not("expires_date","is",null).gt("expires_date",new Date().toISOString())
+            .limit(1);
+          applePurchaseProven=!eventError && !!events?.length;
+        }
       }
     }
     const periodEnd=data?.current_period_end ? Date.parse(data.current_period_end) : NaN;
