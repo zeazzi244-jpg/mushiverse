@@ -199,7 +199,13 @@
         const activeUrl = new URL(candidates[candidateIndex], document.baseURI).href;
         // A delayed error from the previous source must not consume the
         // replacement candidate. Watchdog expiry is tied to its own index.
-        if (!timedOut && image.currentSrc && image.currentSrc !== activeUrl) return;
+        if (!timedOut && image.currentSrc && image.currentSrc !== activeUrl) {
+          // WKWebView may retain the previous currentSrc after the active
+          // replacement has already failed. A completed zero-size active
+          // request must still advance, rather than waiting 12 seconds.
+          if (!image.complete || image.naturalWidth > 0 || image.naturalHeight > 0 ||
+              image.src !== activeUrl) return;
+        }
         const decodedCurrent = image.complete && image.naturalWidth > 0 &&
           image.naturalHeight > 0 && (!image.currentSrc || image.currentSrc === activeUrl);
         if (!timedOut && decodedCurrent) {
