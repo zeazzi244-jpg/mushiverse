@@ -16,7 +16,7 @@ function harness({user = {id:'user-a'}, configured = true, productId = 'mushiver
   let handler;
   const calls = {client:0, rpc:0, getUser:0, verifier:0};
   const deno = {
-    env:{get:key=>key==='APPLE_IAP_SANDBOX_TESTER_USER_ID'?tester:configured?'configured-value':undefined},
+    env:{get:key=>key==='APPLE_IAP_SANDBOX_TESTER_USER_ID'?tester:key.startsWith('APPLE_SANDBOX_VERIFIER_')?undefined:configured?'configured-value':undefined},
     serve:fn=>{handler=fn}
   };
   const client = {
@@ -32,6 +32,7 @@ function harness({user = {id:'user-a'}, configured = true, productId = 'mushiver
         }]})}
     })}),
     rpc:async(name, args)=>{
+      if (name === "get_apple_sandbox_verifier_secret") return {data:null,error:null};
       calls.rpc++;
       assert.equal(name,'record_apple_sandbox_coin_credit');
       assert.deepEqual(args,{p_transaction_id:'123456',p_user_id:user.id});
