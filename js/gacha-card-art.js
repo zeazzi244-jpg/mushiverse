@@ -302,6 +302,21 @@
       art.append(image);
       image.src = candidates[0];
       armLoadTimeout();
+      // Detached WKWebView images sometimes decode without firing a load event.
+      // Explicit decode resolves the initial candidate without waiting for the
+      // watchdog, but must never settle artwork after a source change.
+      if (typeof image.decode === 'function') {
+        const decodingCandidate = candidateIndex;
+        const decodingUrl = candidates[decodingCandidate];
+        void image.decode().then(() => {
+          if (fallbackStarted || loadSettled || candidateIndex !== decodingCandidate ||
+              image.src !== decodingUrl || !image.complete ||
+              image.naturalWidth <= 0 || image.naturalHeight <= 0) return;
+          handleImageLoad();
+        }).catch(() => {
+          // The existing error event and watchdog own candidate recovery.
+        });
+      }
     } else {
       showSpeciesFallback();
     }
