@@ -109,11 +109,13 @@ Deno.serve(async(req)=>{
       // transaction ID while switching between monthly and annual products.
       // Only block cross-category reuse (coins vs subscriptions) or unknown
       // products; a same-owner premium plan change is a legitimate renewal.
-      const {data:chainProducts,error:productError}=await admin.from("apple_purchase_claims")
-        .select("product_id").eq("original_transaction_id",originalTransactionId)
-        .neq("product_id",productId).limit(100);
+      const productQuery=admin.from("apple_purchase_claims")
+        .select("transaction_id").eq("original_transaction_id",originalTransactionId);
+      const {data:conflictingProduct,error:productError}=premiumProducts.has(productId)
+        ? await productQuery.not("product_id","in",'("jp.mushiverse.premium.monthly","jp.mushiverse.premium.annual")').limit(1)
+        : await productQuery.neq("product_id",productId).limit(1);
       if(productError) throw productError;
-      if(chainProducts?.some((row:any)=>!premiumProducts.has(productId) || !premiumProducts.has(row.product_id)))
+      if(conflictingProduct?.length)
         return json({error:"original_transaction_chain_conflict"},409);
       // A consumable original transaction identifies one purchase, unlike a
       // subscription chain which legitimately has renewal transaction IDs.
