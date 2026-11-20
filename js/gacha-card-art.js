@@ -319,7 +319,15 @@
           if (fallbackStarted || loadSettled || candidateIndex !== decodingCandidate ||
               image.src !== decodingUrl || !image.complete ||
               image.naturalWidth <= 0 || image.naturalHeight <= 0) return;
-          handleImageLoad();
+          // decode() belongs to the source captured above. WKWebView may
+          // retain a stale currentSrc after a successful replacement decode;
+          // the ordinary load handler would reject it and leave the preview
+          // visible until the watchdog expires.
+          loadSettled = true;
+          clearLoadTimeout();
+          if (preview) { preview.remove(); preview = null; image.style.display = ''; }
+          image.removeEventListener('error', handleImageError);
+          image.removeEventListener('load', handleImageLoad);
         }).catch(() => {
           // WKWebView can reject decode() for a fully failed cached image
           // without dispatching an error event. Advance immediately only
