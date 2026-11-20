@@ -12,7 +12,7 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         guard let windowScene = scene as? UIWindowScene else { return }
 
         let appWindow = UIWindow(windowScene: windowScene)
-        appWindow.rootViewController = CAPBridgeViewController()
+        appWindow.rootViewController = MushiverseBridgeViewController()
         window = appWindow
 
         // Continue the system launch screen while Capacitor loads behind it.

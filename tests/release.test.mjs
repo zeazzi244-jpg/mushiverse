@@ -831,3 +831,10 @@ test('forest CSS preflight ignores commented-out asset references', () => {
   assert.equal(active.includes('missing-font.woff2'), false);
   assert.equal(active.includes('real-image.png'), true);
 });
+
+test('the iOS scene launches the bridge that registers the native coin shop', () => {
+  const scene = readFileSync('ios/App/App/SceneDelegate.swift', 'utf8');
+  const bridge = readFileSync('ios/App/App/MushiverseBridgeViewController.swift', 'utf8');
+  assert.match(scene, /rootViewController = MushiverseBridgeViewController\(\)/);
+  assert.match(bridge, /registerPluginInstance\(MushiverseCoinPlugin\(\)\)/);
+});
