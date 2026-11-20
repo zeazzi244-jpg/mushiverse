@@ -298,6 +298,14 @@
           decodePromise = image.decode();
         } catch (error) {
           console.warn('MUSHIVERSE image decode could not start:', name, error);
+          // A synchronous decode failure on a completed, empty cached image
+          // is terminal even when WKWebView omits its error event. Do not
+          // make the user wait for the 12-second watchdog in this case.
+          if (!fallbackStarted && !loadSettled && candidateIndex === decodingCandidate &&
+              image.src === decodingUrl && image.complete &&
+              (image.naturalWidth <= 0 || image.naturalHeight <= 0)) {
+            onImageError(true);
+          }
           return;
         }
         if (!decodePromise || typeof decodePromise.then !== 'function') return;
@@ -312,7 +320,7 @@
           // when this exact candidate has finished with no decoded pixels.
           if (fallbackStarted || loadSettled || candidateIndex !== decodingCandidate ||
               image.src !== decodingUrl || !image.complete ||
-              image.naturalWidth > 0 || image.naturalHeight > 0) return;
+              (image.naturalWidth > 0 && image.naturalHeight > 0)) return;
           onImageError(true);
         });
       }
