@@ -24,8 +24,13 @@ Deno.serve(async (req)=>{
     // Existing non-Apple subscriptions retain their established entitlement logic.
     // Recognize all supported App Store/StoreKit source labels, not just apple_*.
     // Otherwise a differently named Apple entitlement could bypass the proof gate.
-    const appleSource=typeof data?.source==="string" && /^(?:apple(?:[_-]|$)|app[_-]?store(?:[_-]|$)|storekit(?:[_-]|$)|ios[_-]?iap(?:[_-]|$))/i.test(data.source);
-    let applePurchaseProven=!appleSource;
+    // Only explicitly recognized non-Apple billing sources may use the legacy entitlement path.
+    // An unfamiliar or missing source must never become premium merely by avoiding
+    // the known Apple source-name prefixes.
+    const source=typeof data?.source==="string" ? data.source.trim().toLowerCase() : "";
+    const nonAppleSource=/^(?:stripe|stripe_subscription|stripe_checkout|manual|admin)$/.test(source);
+    const appleSource=!!source && !nonAppleSource;
+    let applePurchaseProven=nonAppleSource;
     if(appleSource){
       const service=Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
       if(service){
@@ -42,7 +47,7 @@ Deno.serve(async (req)=>{
     // An Apple entitlement blocked by the proof gate is pending verification, not expired.
     // Do not return an expired or malformed entitlement as status=active:
     // clients must not accidentally grant premium by reading status alone.
-    const effectiveStatus=active?data.status:(!applePurchaseProven && appleSource ? "verification_pending" : (data?.status==="active"||data?.status==="trialing"?"expired":data?.status||"inactive"));
+    const effectiveStatus=active?data.status:(!applePurchaseProven && !!data && (appleSource || !source) ? "verification_pending" : (data?.status==="active"||data?.status==="trialing"?"expired":data?.status||"inactive"));
     // Entitlements can expire or be revoked between requests. Never let a CDN,
     // intermediary, or WKWebView reuse a previously active premium response.
     return new Response(JSON.stringify({plan:active?"premium":"free",source:data?.source||null,status:effectiveStatus,current_period_end:data?.current_period_end||null,updated_at:data?.updated_at||null}),{headers:{...cors,"Content-Type":"application/json","Cache-Control":"no-store, private","Pragma":"no-cache","Vary":"Authorization","X-Content-Type-Options":"nosniff"}});
