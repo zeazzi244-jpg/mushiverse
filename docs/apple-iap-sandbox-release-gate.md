@@ -37,3 +37,11 @@ Before using this draft, confirm the review account can complete Sandbox fulfill
 
 - [Configure In-App Purchases for review in the sandbox](https://developer.apple.com/help/app-review/before-submitting-for-review/configure-in-app-purchases/)
 - [Submit an In-App Purchase](https://developer.apple.com/help/app-store-connect/manage-submissions-to-app-review/submit-an-in-app-purchase/)
+
+## Real-device Sandbox evidence — 2026-11-21 JST
+
+- TestFlight build 5441, bundle `com.rikuto.mushiverse`, displayed `mushiverse.coins.100` at ¥160 using StoreKit.
+- An unfinished Sandbox purchase was replayed from the shop. Apple signature verification succeeded and the isolated Supabase ledger recorded one transaction totaling 100 Sandbox coins.
+- This run did not verify a second replay, a balance debit from a paid draw, or a Production transaction. Production billing and all coin catalog sales were disabled when checked.
+- Review submission remains blocked on designated review-account access and a successful purchase and balance check using that account on the exact submission build. Use test-account credentials in App Store Connect only. The product screen must show the real StoreKit price. Attach the product screenshot under the IAP Review Information.
+- Production release remains blocked on the Production-only Apple verifier and authenticated atomic credit-and-spend integration. Sandbox credit must stay isolated from the spendable wallet.
