@@ -1,5 +1,5 @@
 // Server-only Apple JWS verification. NEVER trust decoded JWS payloads directly.
-// Requires Apple's pinned root certificates, provisioned securely as base64 DER.
+// Uses Apple's public, pinned root certificate as base64 DER.
 import { Environment, SignedDataVerifier } from "npm:@apple/app-store-server-library@1.5.0";
 import { isAppleCoinProduct, validateVerifiedAppleCoinTransaction } from "./apple-coin-transaction-policy.mjs";
 
@@ -40,16 +40,10 @@ export async function verifyAppleCoinJws(signedTransaction: string, expected: {
   if (expected.environment === "Production")
     throw new Error("production_verification_disabled");
 
-  const bundleId = Deno.env.get("APPLE_IAP_BUNDLE_ID");
-  const roots = Deno.env.get("APPLE_IAP_ROOT_CERTS_DER_BASE64");
-  // Never let a misconfigured deployment trust a different App Store app.
-  // SignedDataVerifier checks the JWS against this ID, but the ID itself must
-  // also be pinned server-side to MUSHIVERSE's immutable iOS bundle identity.
-  if (bundleId !== "com.rikuto.mushiverse" || !roots)
-    throw new Error("apple_verification_not_configured");
-  const certificates = roots.split(",").map(v => decodeDer(v.trim()));
-  if (certificates.length < 1 || certificates.length > 5)
-    throw new Error("invalid_apple_root_certificates");
+  const bundleId = "com.rikuto.mushiverse";
+  // Apple Root CA - G3, from https://www.apple.com/certificateauthority/.
+  // SHA-256: 63343ABFB89A6A03EBB57E9B3F5FA7BE7C4F5C756F3017B3A8C488C3653E9179.
+  const certificates = [decodeDer("MIICQzCCAcmgAwIBAgIILcX8iNLFS5UwCgYIKoZIzj0EAwMwZzEbMBkGA1UEAwwSQXBwbGUgUm9vdCBDQSAtIEczMSYwJAYDVQQLDB1BcHBsZSBDZXJ0aWZpY2F0aW9uIEF1dGhvcml0eTETMBEGA1UECgwKQXBwbGUgSW5jLjELMAkGA1UEBhMCVVMwHhcNMTQwNDMwMTgxOTA2WhcNMzkwNDMwMTgxOTA2WjBnMRswGQYDVQQDDBJBcHBsZSBSb290IENBIC0gRzMxJjAkBgNVBAsMHUFwcGxlIENlcnRpZmljYXRpb24gQXV0aG9yaXR5MRMwEQYDVQQKDApBcHBsZSBJbmMuMQswCQYDVQQGEwJVUzB2MBAGByqGSM49AgEGBSuBBAAiA2IABJjpLz1AcqTtkyJygRMc3RCV8cWjTnHcFBbZDuWmBSp3ZHtfTjjTuxxEtX/1H7YyYl3J6YRbTzBPEVoA/VhYDKX1DyxNB0cTddqXl5dvMVztK517IDvYuVTZXpmkOlEKMaNCMEAwHQYDVR0OBBYEFLuw3qFYM4iapIqZ3r6966/ayySrMA8GA1UdEwEB/wQFMAMBAf8wDgYDVR0PAQH/BAQDAgEGMAoGCCqGSM49BAMDA2gAMGUCMQCD6cHEFl4aXTQY2e3v9GwOAEZLuN+yRhHFD/3meoyhpmvOwgPUnPWTxnS4at+qIxUCMG1mihDK1A3UT82NQz60imOlM27jbdoXt2QfyFMm+YhidDkLF1vLUagM6BgD56KyKA==")];
   const environment = expected.environment === "Sandbox" ? Environment.SANDBOX : Environment.PRODUCTION;
   const appAppleIdRaw = Deno.env.get("APPLE_IAP_APP_APPLE_ID");
   // Never silently ignore a malformed configured Apple app ID, even in Sandbox.
