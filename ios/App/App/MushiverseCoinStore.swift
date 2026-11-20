@@ -113,12 +113,13 @@ final class MushiverseCoinStore: ObservableObject {
                 return
             }
             if #available(iOS 16.0, *), !Self.purchasesEnabled, !sandboxPurchasesEnabled {
-                let appResult = try? await AppTransaction.shared
-                guard isStarted, productLoadGeneration == generation, !Task.isCancelled else { return }
-                if case .verified(let app)? = appResult,
-                   app.bundleID == "com.rikuto.mushiverse", app.environment == .sandbox {
+                if let appResult = try? await AppTransaction.shared,
+                   case .verified(let app) = appResult,
+                   app.bundleID == "com.rikuto.mushiverse", app.environment == .sandbox,
+                   isStarted, productLoadGeneration == generation, !Task.isCancelled {
                     sandboxPurchasesEnabled = true
                 }
+                guard isStarted, productLoadGeneration == generation, !Task.isCancelled else { return }
             }
             if !Self.purchasesEnabled && !sandboxPurchasesEnabled {
                 lastError = "価格は取得できました。Appleのテスト環境を確認できないため、購入は無効です。"
