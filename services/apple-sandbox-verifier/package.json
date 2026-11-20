@@ -1,0 +1,8 @@
+{
+  "name": "mushiverse-apple-sandbox-verifier",
+  "private": true,
+  "type": "module",
+  "engines": { "node": "24.x" },
+  "scripts": { "start": "node server.mjs" },
+  "dependencies": { "@apple/app-store-server-library": "3.1.0" }
+}
