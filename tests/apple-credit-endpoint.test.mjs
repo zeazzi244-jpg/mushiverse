@@ -5,7 +5,7 @@ import {isAppleCoinProduct} from '../supabase/functions/_shared/apple-coin-trans
 
 // Exercise the checked-in fail-closed endpoint, not a mocked replacement response.
 // Before a trusted Apple JWS verifier is deployed, requests MUST NOT credit coins.
-function harness({user = {id:'user-a'}, configured = true, productId = 'mushiverse.coins.100', environment = null, validSignature = false} = {}) {
+function harness({user = {id:'user-a'}, configured = true, productId = 'mushiverse.coins.100', environment = null, validSignature = false, verifierError = null} = {}) {
   const source = readFileSync('supabase/functions/credit-apple-gacha-coins/index.ts','utf8')
     .replace(/^import .*;\s*$/gm,'')
     .replace('(body: Record<string, unknown>, status', '(body, status')
@@ -39,6 +39,7 @@ function harness({user = {id:'user-a'}, configured = true, productId = 'mushiver
       calls.verifier++;
       assert.equal(expected.environment,'Sandbox');
       assert.equal(expected.productId,productId);
+      if (verifierError) throw verifierError;
       if(!validSignature)throw Error('invalid signature');
       return {transactionId:expected.transactionId, originalTransactionId:expected.originalTransactionId, productId:expected.productId};
     }, isAppleCoinProduct
@@ -98,6 +99,16 @@ test('credit endpoint rejects unauthenticated sessions and missing backend confi
   const noConfig=harness({configured:false});
   assert.equal((await noConfig.send()).status,503);
   assert.equal(noConfig.calls.rpc,0);
+});
+
+test('missing Apple verification configuration returns a retryable error without crediting coins', async () => {
+  const h = harness({verifierError:new Error('apple_verification_not_configured')});
+  const result = await h.send();
+  assert.equal(result.status,503);
+  assert.equal(result.body.error,'apple_verification_unavailable');
+  assert.equal(result.body.credited_or_previously_credited,false);
+  assert.equal(h.calls.verifier,1);
+  assert.equal(h.calls.rpc,0);
 });
 
 test('a verified Sandbox transaction for an approved pack still cannot write a wallet', async () => {
