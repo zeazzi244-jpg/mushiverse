@@ -47,7 +47,7 @@ Deno.serve(async (req)=>{
     // An Apple entitlement blocked by the proof gate is pending verification, not expired.
     // Do not return an expired or malformed entitlement as status=active:
     // clients must not accidentally grant premium by reading status alone.
-    const effectiveStatus=active?data.status:(!applePurchaseProven && !!data && (appleSource || !source) ? "verification_pending" : (data?.status==="active"||data?.status==="trialing"?"expired":data?.status||"inactive"));
+    const pendingVerification=!applePurchaseProven && !!data && (appleSource || !source) &&\n      data.plan==="premium" && ["active","trialing"].includes(data.status) &&\n      Number.isFinite(periodEnd) && periodEnd>Date.now();\n    const effectiveStatus=active?data.status:(pendingVerification ? "verification_pending" :\n      (data?.status==="active"||data?.status==="trialing"?"expired":data?.status||"inactive"));
     // Entitlements can expire or be revoked between requests. Never let a CDN,
     // intermediary, or WKWebView reuse a previously active premium response.
     return new Response(JSON.stringify({plan:active?"premium":"free",source:data?.source||null,status:effectiveStatus,current_period_end:data?.current_period_end||null,updated_at:data?.updated_at||null}),{headers:{...cors,"Content-Type":"application/json","Cache-Control":"no-store, private","Pragma":"no-cache","Vary":"Authorization","X-Content-Type-Options":"nosniff"}});
