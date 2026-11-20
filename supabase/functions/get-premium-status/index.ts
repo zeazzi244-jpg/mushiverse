@@ -31,6 +31,7 @@ Deno.serve(async (req)=>{
     const nonAppleSource=/^(?:stripe|stripe_subscription|stripe_checkout|manual|admin)$/.test(source);
     const appleSource=!!source && !nonAppleSource;
     let applePurchaseProven=nonAppleSource;
+    let latestSignedExpiry:number|undefined;
     if(appleSource){
       const service=Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
       if(service){
@@ -64,12 +65,16 @@ Deno.serve(async (req)=>{
           const supportedEnvironment=latest?.environment==="Sandbox";
           applePurchaseProven=!eventError && !!latest && supportedPremiumProduct && supportedEnvironment && latest.revocation_date==null &&
             validSignedPeriod && expiresAt>Date.now();
+          if(applePurchaseProven) latestSignedExpiry=expiresAt;
         }
       }
     }
     const periodEnd=data?.current_period_end ? Date.parse(data.current_period_end) : NaN;
     // Fail closed on missing, malformed, or expired entitlement periods.
-    const active=applePurchaseProven && !!data && data.plan==="premium" && ["trialing","active"].includes(data.status)
+    // The entitlement row must never extend Apple access beyond the signed transaction expiry.
+    // A stale or manually extended DB period is not independent proof of a renewal.
+    const applePeriodBounded=!appleSource || (typeof latestSignedExpiry==="number" && Number.isFinite(latestSignedExpiry) && Number.isFinite(periodEnd) && periodEnd<=latestSignedExpiry);
+    const active=applePurchaseProven && applePeriodBounded && !!data && data.plan==="premium" && ["trialing","active"].includes(data.status)
       && Number.isFinite(periodEnd) && periodEnd>Date.now();
     // An Apple entitlement blocked by the proof gate is pending verification, not expired.
     // Do not return an expired or malformed entitlement as status=active:
