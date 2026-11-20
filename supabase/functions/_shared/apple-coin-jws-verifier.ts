@@ -17,7 +17,7 @@ export async function verifyAppleCoinJws(signedTransaction: string, expected: {
   originalTransactionId: string;
   appAccountToken: string;
   environment: "Sandbox" | "Production";
-}) {
+}, vaultSecret?: string) {
   // Reject malformed compact JWS before invoking the Apple verifier. Each segment
   // must be nonempty base64url; never accept padded or extra-segment tokens.
   if (typeof signedTransaction !== "string" || signedTransaction.length > 16384 ||
@@ -40,8 +40,9 @@ export async function verifyAppleCoinJws(signedTransaction: string, expected: {
   if (expected.environment === "Production")
     throw new Error("production_verification_disabled");
 
-  const remoteUrl = Deno.env.get("APPLE_SANDBOX_VERIFIER_URL");
-  const remoteSecret = Deno.env.get("APPLE_SANDBOX_VERIFIER_SECRET");
+  const remoteUrl = Deno.env.get("APPLE_SANDBOX_VERIFIER_URL") ??
+    (vaultSecret ? "https://mushiverse-apple-sandbox-verifier.onrender.com/verify" : undefined);
+  const remoteSecret = Deno.env.get("APPLE_SANDBOX_VERIFIER_SECRET") ?? vaultSecret;
   if (remoteUrl || remoteSecret) {
     if (!remoteUrl || !remoteSecret || !/^[a-f0-9]{64}$/.test(remoteSecret))
       throw new Error("apple_verification_not_configured");
