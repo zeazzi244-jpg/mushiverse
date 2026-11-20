@@ -3,8 +3,7 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import { verifyAppleCoinJws } from "../_shared/apple-coin-jws-verifier.ts";
 import { isAppleCoinProduct } from "../_shared/apple-coin-transaction-policy.mjs";
 
-// Sandbox verification-only staging: do not persist trusted events or grant coins
-// before the release gate and atomic fulfillment integration are independently proven.
+// Sandbox fulfillment is restricted to one configured tester and an isolated ledger.
 const cors = { "access-control-allow-origin": "*", "access-control-allow-headers": "authorization, x-client-info, apikey, content-type", "access-control-allow-methods": "POST, OPTIONS" };
 const headers = { ...cors, "content-type": "application/json; charset=utf-8", "cache-control": "no-store", "x-content-type-options": "nosniff" };
 const json = (body: Record<string, unknown>, status = 200) => new Response(JSON.stringify(body), { status, headers });
@@ -160,8 +159,21 @@ Deno.serve(async (request: Request) => {
     if (newConflictError) return json({ error: "unavailable", credited_or_previously_credited: false }, 503);
     if (newConflicts?.length)
       return json({ error: "original_transaction_claim_conflict", credited_or_previously_credited: false }, 409);
-    // This is a staging-only consistency check, not an atomic fulfillment gate.
-    // No event insertion, RPC invocation, wallet mutation or premium entitlement.
+    if (verified.productId === "mushiverse.coins.100" &&
+        verified.environment === "Sandbox" &&
+        Deno.env.get("APPLE_IAP_SANDBOX_TESTER_USER_ID") === user.id) {
+      const { data: credit, error } = await admin.rpc("record_apple_sandbox_coin_credit", {
+        p_transaction_id: verified.transactionId,
+        p_user_id: user.id,
+      });
+      if (error || credit !== true) {
+        return json({ error: "sandbox_credit_unavailable", credited_or_previously_credited: false }, 503);
+      }
+      return json({ ok: true, verification: "sandbox_signature_verified", transaction_id: verified.transactionId,
+        original_transaction_id: verified.originalTransactionId, product_id: verified.productId,
+        environment: verified.environment, credited_or_previously_credited: true,
+        fulfillment: "sandbox_test_wallet", coins: 100 });
+    }
     return json({ ok: true, verification: "sandbox_signature_verified", transaction_id: verified.transactionId, original_transaction_id: verified.originalTransactionId,
       product_id: verified.productId, environment: verified.environment,
       credited_or_previously_credited: false, fulfillment: "disabled_pending_sandbox_proof" });

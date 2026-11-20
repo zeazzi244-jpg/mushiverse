@@ -1,11 +1,13 @@
 # Apple IAP verification and Sandbox release gate
 
-Status: BLOCKED. This checklist does not authorize payments or coin grants.
+Production status: disabled. The 100-coin SKU is the only native Sandbox purchase offered.
 
-## Current server behavior (verified against deployed Edge Function source)
-- `submit-apple-purchase-claim` v14 stores *untrusted* transaction metadata as pending, with environment set to null; no entitlement is granted.
-- `credit-apple-gacha-coins` v1 explicitly returns HTTP 503 `apple_verification_not_configured` after user authentication.
-- Do not replace this fail-closed endpoint with client-trusted credits.
+## Sandbox fulfillment
+- Set `APPLE_IAP_SANDBOX_TESTER_USER_ID` to the Supabase account UUID designated for Sandbox. Without that setting, the endpoint verifies eligible Sandbox signatures without acknowledging fulfillment.
+- Apply the isolated Sandbox ledger migration before deploying the credit function. Continue provisioning Apple's trusted root certificates with `APPLE_IAP_ROOT_CERTS_DER_BASE64` and pin `APPLE_IAP_BUNDLE_ID=com.rikuto.mushiverse`.
+- The server derives the buyer from Supabase authentication and matches Apple's signed account token. The Sandbox ledger records exactly 100 test coins per verified transaction ID. Balance for testing is the sum of that account's ledger entries.
+- The native app finishes the purchase only after a matching receipt for the Sandbox ledger. To test interruption, take the app offline before fulfillment, reconnect, then reopen the shop or tap “未完了の購入を再確認”. Confirm one ledger entry and a 100-coin delta, then replay and confirm zero additional credits. Check a second account is rejected and the normal wallet balance stays the same.
+- The iPhone run requires a signed Sandbox-capable build, an Apple Sandbox environment, and Apple’s registered product metadata. Capture redacted transaction evidence and record the actual result before release.
 
 ## Server-side transaction verification acceptance criteria
 1. Authenticate the Supabase user server-side. Bind each verified Apple transaction to the correct user, with an authenticated, tamper-resistant account token/ownership policy.

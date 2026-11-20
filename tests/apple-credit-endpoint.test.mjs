@@ -4,8 +4,8 @@ import {readFileSync} from 'node:fs';
 import {isAppleCoinProduct} from '../supabase/functions/_shared/apple-coin-transaction-policy.mjs';
 
 // Exercise the checked-in fail-closed endpoint, not a mocked replacement response.
-// Before a trusted Apple JWS verifier is deployed, requests MUST NOT credit coins.
-function harness({user = {id:'user-a'}, configured = true, productId = 'mushiverse.coins.100', environment = null, validSignature = false, verifierError = null} = {}) {
+// Only a verified 100-coin purchase by the configured Sandbox tester can reach fulfillment.
+function harness({user = {id:'user-a'}, configured = true, productId = 'mushiverse.coins.100', environment = null, validSignature = false, verifierError = null, tester = undefined, creditAccepted = true} = {}) {
   const source = readFileSync('supabase/functions/credit-apple-gacha-coins/index.ts','utf8')
     .replace(/^import .*;\s*$/gm,'')
     .replace('(body: Record<string, unknown>, status', '(body, status')
@@ -16,7 +16,7 @@ function harness({user = {id:'user-a'}, configured = true, productId = 'mushiver
   let handler;
   const calls = {client:0, rpc:0, getUser:0, verifier:0};
   const deno = {
-    env:{get:()=>configured?'configured-value':undefined},
+    env:{get:key=>key==='APPLE_IAP_SANDBOX_TESTER_USER_ID'?tester:configured?'configured-value':undefined},
     serve:fn=>{handler=fn}
   };
   const client = {
@@ -31,7 +31,12 @@ function harness({user = {id:'user-a'}, configured = true, productId = 'mushiver
           product_id:productId,status:"pending",environment
         }]})}
     })}),
-    rpc:()=>{calls.rpc++; throw new Error('Coin credit RPC must never run before verification')}
+    rpc:async(name, args)=>{
+      calls.rpc++;
+      assert.equal(name,'record_apple_sandbox_coin_credit');
+      assert.deepEqual(args,{p_transaction_id:'123456',p_user_id:user.id});
+      return {data:creditAccepted,error:null};
+    }
   };
   const createClient = ()=>{calls.client++; return client};
   new Function('Deno','createClient','Response','verifyAppleCoinJws','isAppleCoinProduct',source)(
@@ -41,7 +46,7 @@ function harness({user = {id:'user-a'}, configured = true, productId = 'mushiver
       assert.equal(expected.productId,productId);
       if (verifierError) throw verifierError;
       if(!validSignature)throw Error('invalid signature');
-      return {transactionId:expected.transactionId, originalTransactionId:expected.originalTransactionId, productId:expected.productId};
+      return {transactionId:expected.transactionId, originalTransactionId:expected.originalTransactionId, productId:expected.productId, environment:expected.environment};
     }, isAppleCoinProduct
   );
   assert.equal(typeof handler,'function');
@@ -128,4 +133,30 @@ test('a staged coin pack cannot enter Sandbox verification before approval', asy
   assert.equal(result.body.error,'not_coin_product');
   assert.equal(h.calls.verifier,0);
   assert.equal(h.calls.rpc,0);
+});
+
+test('only the configured tester can receive a Sandbox credit acknowledgment', async () => {
+  const tester = 'user-a';
+  const credits = harness({tester, validSignature:true});
+  const result = await credits.send();
+  assert.equal(result.status,200);
+  assert.equal(result.body.credited_or_previously_credited,true);
+  assert.equal(result.body.fulfillment,'sandbox_test_wallet');
+  assert.equal(result.body.coins,100);
+  assert.equal(credits.calls.rpc,1);
+
+  for (const options of [{tester:'other'}, {productId:'mushiverse.coins.1200'}]) {
+    const uncredited = harness({tester, validSignature:true, ...options});
+    assert.equal((await uncredited.send()).body.credited_or_previously_credited,false);
+    assert.equal(uncredited.calls.rpc,0);
+  }
+
+  const unsigned = harness({tester});
+  assert.equal((await unsigned.send()).status,422);
+  assert.equal(unsigned.calls.rpc,0);
+
+  const unavailable = harness({tester, validSignature:true, creditAccepted:false});
+  const failure = await unavailable.send();
+  assert.equal(failure.status,503);
+  assert.equal(failure.body.credited_or_previously_credited,false);
 });

@@ -1,5 +1,6 @@
 import SwiftUI
 import StoreKit
+import UIKit
 
 struct MushiverseCoinShopView: View {
     @ObservedObject var store: MushiverseCoinStore
@@ -12,7 +13,7 @@ struct MushiverseCoinShopView: View {
         VStack(alignment: .leading, spacing: 18) {
             Text("ムシバース ショップ").font(.title2.bold())
             if store.sandboxPurchasesEnabled {
-                Text("Sandbox購入テスト · コインは付与されません。")
+                Text("Sandbox購入テスト · 通常のコイン残高には反映されません。")
                     .foregroundStyle(gold)
             } else if !purchasesEnabled {
                 Text("現在は販売準備中です。")
@@ -57,11 +58,15 @@ struct MushiverseCoinShopView: View {
         .foregroundStyle(.white)
         .background(forest)
         .task { await store.start() }
+        .onReceive(NotificationCenter.default.publisher(for: UIApplication.didBecomeActiveNotification)) { _ in
+            Task { await store.retryUnfinishedPurchases() }
+        }
         .onDisappear { store.stop() }
     }
 
     private func productRow(id: String, title: String, detail: String?, canFulfill: Bool) -> some View {
         let product = store.products.first { $0.id == id }
+        let available = store.canOffer(id) && canFulfill && product != nil
         return VStack(alignment: .leading, spacing: 8) {
             Text(title).font(.headline)
             if let detail { Text(detail).font(.caption.weight(.semibold)).foregroundStyle(gold) }
@@ -70,13 +75,13 @@ struct MushiverseCoinShopView: View {
             } else {
                 Text("Apple価格未取得").font(.footnote)
             }
-            Button(canTestPurchase && canFulfill && product != nil ? (store.sandboxPurchasesEnabled ? "テスト購入" : "購入") : "販売準備中") {
+            Button(available ? (store.sandboxPurchasesEnabled ? "テスト購入" : "購入") : "販売準備中") {
                 guard let product else { return }
                 Task { await store.purchase(product) }
             }
             .frame(maxWidth: .infinity, minHeight: 44)
             .foregroundStyle(gold)
-            .disabled(!canTestPurchase || store.isPurchasing || store.isRetrying || !store.canPurchase || !canFulfill || product == nil)
+            .disabled(!available || !store.canPurchase)
         }
         .padding(12)
         .frame(maxWidth: .infinity, alignment: .leading)

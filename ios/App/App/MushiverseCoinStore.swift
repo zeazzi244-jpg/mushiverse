@@ -25,6 +25,12 @@ final class MushiverseCoinStore: ObservableObject {
         }
     }
 
+    static let sandboxProductID = "mushiverse.coins.100"
+
+    func canOffer(_ productID: String) -> Bool {
+        Self.purchasesEnabled || (sandboxPurchasesEnabled && productID == Self.sandboxProductID)
+    }
+
     @Published private(set) var sandboxPurchasesEnabled = false
 
     var canPurchase: Bool {
@@ -118,7 +124,7 @@ final class MushiverseCoinStore: ObservableObject {
     }
 
     func purchase(_ product: Product) async {
-        guard Self.purchasesEnabled || sandboxPurchasesEnabled else {
+        guard canOffer(product.id) else {
             lastError = "現在は販売準備中です。購入はできません。"
             return
         }
@@ -186,9 +192,7 @@ final class MushiverseCoinStore: ObservableObject {
             )
             guard response.statusCode == 200 else { throw PurchaseError.serverRejected }
             guard isStarted, lifecycleGeneration == generation, !Task.isCancelled else { return }
-            // Sandbox-only builds must never accept a credit receipt or finish a
-            // consumable transaction, even if the server accidentally returns one.
-            // Only a complete, explicitly non-crediting proof is acceptable.
+            // Finish only after the isolated Sandbox ledger acknowledges this purchase.
             if !Self.purchasesEnabled {
                 guard sandboxPurchasesEnabled,
                       let proof = try? JSONDecoder().decode(SandboxProof.self, from: data),
@@ -197,12 +201,19 @@ final class MushiverseCoinStore: ObservableObject {
                       proof.transactionID == String(transaction.id),
                       proof.originalTransactionID == String(transaction.originalID),
                       proof.productID == transaction.productID,
-                      proof.environment == "Sandbox",
-                      proof.creditedOrPreviouslyCredited == false,
-                      proof.fulfillment == "disabled_pending_sandbox_proof" else {
+                      proof.environment == "Sandbox" else {
                     throw PurchaseError.serverRejected
                 }
-                lastError = "Sandbox取引のサーバー検証に成功しました。コイン付与はまだ検証段階です。"
+                if !proof.creditedOrPreviouslyCredited && proof.fulfillment == "disabled_pending_sandbox_proof" {
+                    lastError = "Sandbox取引の署名を確認しました。テスト残高への付与は準備中です。"
+                    return
+                }
+                guard proof.creditedOrPreviouslyCredited,
+                      proof.fulfillment == "sandbox_test_wallet",
+                      proof.productID == Self.sandboxProductID,
+                      proof.coins == 100 else { throw PurchaseError.serverRejected }
+                await transaction.finish()
+                lastError = "Sandbox取引を確認しました。テスト残高に100コイン反映済みです。"
                 return
             }
             let receipt = try JSONDecoder().decode(CreditResponse.self, from: data)
@@ -261,8 +272,9 @@ final class MushiverseCoinStore: ObservableObject {
         let environment: String
         let creditedOrPreviouslyCredited: Bool
         let fulfillment: String
+        let coins: Int?
         enum CodingKeys: String, CodingKey {
-            case ok, verification, fulfillment
+            case ok, verification, fulfillment, coins
             case transactionID = "transaction_id"
             case originalTransactionID = "original_transaction_id"
             case productID = "product_id"

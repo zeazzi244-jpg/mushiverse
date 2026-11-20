@@ -9,8 +9,10 @@ shop = (root / "ios/App/App/MushiverseCoinShopView.swift").read_text(encoding="u
 backend = (root / "supabase/functions/credit-apple-gacha-coins/index.ts").read_text(encoding="utf-8")
 
 checks = {
-    "purchase UI has release gate": "!canTestPurchase || store.isPurchasing || store.isRetrying" in shop
-        and "purchasesEnabled || store.sandboxPurchasesEnabled" in shop,
+    "purchase UI has release gate": "store.canOffer(id)" in shop
+        and ".disabled(!available || !store.canPurchase)" in shop
+        and "guard canOffer(product.id)" in store
+        and 'sandboxPurchasesEnabled && productID == Self.sandboxProductID' in store,
     "sandbox gate requires verified Apple app transaction": all(fragment in store for fragment in (
         "let appResult = try? await AppTransaction.shared",
         "case .verified(let app) = appResult",
@@ -24,10 +26,13 @@ checks = {
     "purchase requires active shop": "guard isStarted, !Task.isCancelled" in store,
     "credit requests use signed transaction": "result.jwsRepresentation" in store,
     "credit endpoint restricted to HTTPS": 'creditEndpoint.scheme == "https"' in store,
-    "transaction finished after server acknowledgment": store.index("receipt.creditedOrPreviouslyCredited") < store.index("await transaction.finish()"),
+    "transaction finished after server acknowledgment": store.index('proof.fulfillment == "sandbox_test_wallet"') < store.index("await transaction.finish()")
+        and store.index("receipt.creditedOrPreviouslyCredited") < store.rindex("await transaction.finish()"),
     "unfinished purchase retries supported": "Transaction.unfinished" in store,
     "backend rejects unverified purchases": '"apple_transaction_verification_failed"' in backend,
-    "backend does not currently credit wallets": not re.search(r"\.(rpc|insert|upsert|update|delete)\s*\(", backend),
+    "backend writes only to the isolated Sandbox ledger": re.findall(r'\.rpc\("([^"]+)"', backend)
+        == ["record_apple_sandbox_coin_credit"]
+        and not re.search(r"gacha_coin_wallets|\.(insert|upsert|update|delete)\s*\(", backend),
     "backend requires authenticated user": ".auth.getUser()" in backend,
     "backend returns no-store": '"cache-control": "no-store"' in backend,
 }
