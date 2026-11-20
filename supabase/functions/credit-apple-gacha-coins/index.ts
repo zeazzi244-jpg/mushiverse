@@ -139,6 +139,12 @@ Deno.serve(async (request: Request) => {
         console.warn("apple sandbox credit: verifier configuration unavailable", error.message);
         return json({ error: "apple_verification_unavailable", credited_or_previously_credited: false }, 503);
       }
+      const policyReasons = new Set(["invalid_transaction","production_fulfillment_disabled","bundle_mismatch","environment_mismatch","product_mismatch","type_mismatch","subscription_metadata_on_consumable","invalid_consumable_transaction_reason","unsupported_quantity","unsupported_ownership_type","invalid_transaction_id","invalid_original_transaction_id","revoked","upgraded_transaction","invalid_purchase_date","invalid_signed_date","app_account_token_mismatch","consumable_transaction_chain_mismatch","transaction_mismatch","original_transaction_mismatch"]);
+      const reason = error instanceof Error && policyReasons.has(error.message)
+        ? error.message : "apple_verifier_rejected";
+      const status = error && typeof error === "object" && "status" in error && typeof error.status === "number"
+        ? error.status : null;
+      console.warn("apple sandbox credit: verification rejected", reason, status);
       return json({ error: "apple_transaction_verification_failed", credited_or_previously_credited: false }, 422);
     }
     // Re-check ownership after asynchronous Apple certificate verification. A
