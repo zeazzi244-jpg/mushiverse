@@ -105,11 +105,15 @@ Deno.serve(async(req)=>{
       if(ownerError) throw ownerError;
       if(foreignOwner?.length)
         return json({error:"subscription_already_claimed"},409);
-      const {data:foreignProduct,error:productError}=await admin.from("apple_purchase_claims")
-        .select("transaction_id").eq("original_transaction_id",originalTransactionId)
-        .neq("product_id",productId).limit(1);
+      // Apple subscription upgrades/downgrades can keep the same original
+      // transaction ID while switching between monthly and annual products.
+      // Only block cross-category reuse (coins vs subscriptions) or unknown
+      // products; a same-owner premium plan change is a legitimate renewal.
+      const {data:chainProducts,error:productError}=await admin.from("apple_purchase_claims")
+        .select("product_id").eq("original_transaction_id",originalTransactionId)
+        .neq("product_id",productId).limit(100);
       if(productError) throw productError;
-      if(foreignProduct?.length)
+      if(chainProducts?.some((row:any)=>!premiumProducts.has(productId) || !premiumProducts.has(row.product_id)))
         return json({error:"original_transaction_chain_conflict"},409);
       // A consumable original transaction identifies one purchase, unlike a
       // subscription chain which legitimately has renewal transaction IDs.
