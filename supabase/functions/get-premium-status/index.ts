@@ -22,7 +22,9 @@ Deno.serve(async (req)=>{
     if(error) throw error;
     // Apple premium is not released until both independent IAP proof gates pass.
     // Existing non-Apple subscriptions retain their established entitlement logic.
-    const appleSource=typeof data?.source==="string" && /^apple(?:[_-]|$)/i.test(data.source);
+    // Recognize all supported App Store/StoreKit source labels, not just apple_*.
+    // Otherwise a differently named Apple entitlement could bypass the proof gate.
+    const appleSource=typeof data?.source==="string" && /^(?:apple(?:[_-]|$)|app[_-]?store(?:[_-]|$)|storekit(?:[_-]|$)|ios[_-]?iap(?:[_-]|$))/i.test(data.source);
     let applePurchaseProven=!appleSource;
     if(appleSource){
       const service=Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
