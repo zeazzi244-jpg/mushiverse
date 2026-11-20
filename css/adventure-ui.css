@@ -1134,3 +1134,23 @@ body[data-screen="profile"] .wrap > header { display: none; }
   outline-offset:2px;
   border-radius:4px;
 }
+
+/* Keep the coin shop action compact beside long pack labels. */
+body #mv134CoinStore .mv134Pack {
+  flex-wrap: nowrap;
+}
+body #mv134CoinStore .mv134Pack strong {
+  flex: 1 1 0;
+}
+body #mv134CoinStore .mv134Pack button {
+  flex: 0 0 auto;
+  width: auto;
+}
+@media (max-width: 320px) {
+  body #mv134CoinStore .mv134Pack {
+    flex-wrap: wrap;
+  }
+  body #mv134CoinStore .mv134Pack strong {
+    flex-basis: 100%;
+  }
+}
