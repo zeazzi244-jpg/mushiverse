@@ -169,7 +169,7 @@
       };
       const armLoadTimeout = () => {
         clearLoadTimeout();
-        // A timeout queued for an earlier candidate must never skip the
+        // Bound each stalled candidate to eight seconds so a broken asset cannot\n        // hold the gallery on its preview for twelve seconds per source.\n        // A timeout queued for an earlier candidate must never skip the
         // currently loading image after the source has changed.
         const timedCandidate = candidateIndex;
         // A stalled request may expose dimensions before its load event.
@@ -189,7 +189,7 @@
             return;
           }
           onImageError(true);
-        }, 12000);
+        }, 8000);
       };
       const onImageError = (timedOut = false) => {
         // WKWebView can deliver an error from a previous source after the
