@@ -8,7 +8,7 @@ test('the purchase endpoint has no path to the spendable wallet', () => {
   assert.match(source, /fulfillment: "disabled_pending_sandbox_proof"/);
   assert.match(source, /\}\s*,\s*422\)/);
   assert.deepEqual([...source.matchAll(/\.rpc\("([^"]+)"/g)].map(match => match[1]),
-    ['record_apple_sandbox_coin_credit']);
+    ['get_apple_sandbox_verifier_secret', 'is_apple_sandbox_tester', 'record_apple_sandbox_coin_credit']);
   assert.doesNotMatch(source, /gacha_coin_wallets|\.insert\s*\(|\.upsert\s*\(|\.update\s*\(/);
 
   const migration = readFileSync('supabase/migrations/20261120031622_apple_sandbox_coin_credits_v24.sql', 'utf8');
