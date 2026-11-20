@@ -28,6 +28,8 @@ for (const [name, change, match] of [
   ['subscription group on consumable', {subscriptionGroupIdentifier:'123456'}, /subscription_metadata_on_consumable/],
   ['subscription offer type on consumable', {offerType:1}, /subscription_metadata_on_consumable/],
   ['subscription offer identifier on consumable', {offerIdentifier:'intro'}, /subscription_metadata_on_consumable/],
+  ['subscription discount type on consumable', {offerDiscountType:'PAY_AS_YOU_GO'}, /subscription_metadata_on_consumable/],
+  ['subscription offer period on consumable', {offerPeriod:'P1M'}, /subscription_metadata_on_consumable/],
   ['subscription web order line item on consumable', {webOrderLineItemId:'123456789'}, /subscription_metadata_on_consumable/],
   ['renewal-marked consumable', {transactionReason:'RENEWAL'}, /invalid_consumable_transaction_reason/],
   ['revoked', {revocationDate:1730000000001}, /revoked/],
