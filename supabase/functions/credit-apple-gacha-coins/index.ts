@@ -117,7 +117,16 @@ Deno.serve(async (request: Request) => {
         originalTransactionId: claim.original_transaction_id,
         appAccountToken: user.id, environment: "Sandbox",
       });
-    } catch {
+    } catch (error) {
+      // Deployment configuration failures are retryable and say nothing about the purchase.
+      if (error instanceof Error && [
+        "apple_verification_not_configured",
+        "invalid_apple_root_certificate",
+        "invalid_apple_root_certificates",
+        "invalid_apple_app_id",
+      ].includes(error.message)) {
+        return json({ error: "apple_verification_unavailable", credited_or_previously_credited: false }, 503);
+      }
       return json({ error: "apple_transaction_verification_failed", credited_or_previously_credited: false }, 422);
     }
     // Re-check ownership after asynchronous Apple certificate verification. A
