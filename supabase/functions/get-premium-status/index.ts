@@ -40,7 +40,7 @@ Deno.serve(async (req)=>{
         // Global release gates are necessary but never sufficient for a user's entitlement.
         // Bind the active subscription to a server-verified, non-revoked Apple event.
         if(!gateError && gate?.server_jws_verified===true && gate?.sandbox_purchase_proven===true &&
-           typeof data?.provider_subscription_id==="string" && /^\\d{6,30}$/.test(data.provider_subscription_id)){
+           typeof data?.provider_subscription_id==="string" && /^\d{6,30}$/.test(data.provider_subscription_id)){
           const {data:events,error:eventError}=await admin.from("apple_iap_events")
             .select("transaction_id").eq("user_id",user.id)
             .eq("original_transaction_id",data.provider_subscription_id)
