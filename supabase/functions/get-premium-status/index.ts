@@ -20,9 +20,22 @@ Deno.serve(async (req)=>{
     if(uerr||!user) return new Response(JSON.stringify({error:"unauthorized"}),{status:401,headers:{...cors,"Content-Type":"application/json","Cache-Control":"no-store"}});
     const {data,error}=await sb.from("premium_entitlements").select("plan,source,status,current_period_end,updated_at").eq("user_id",user.id).maybeSingle();
     if(error) throw error;
+    // Apple premium is not released until both independent IAP proof gates pass.
+    // Existing non-Apple subscriptions retain their established entitlement logic.
+    const appleSource=typeof data?.source==="string" && /^apple(?:[_-]|$)/i.test(data.source);
+    let applePurchaseProven=!appleSource;
+    if(appleSource){
+      const service=Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
+      if(service){
+        const admin=createClient(url,service);
+        const {data:gate,error:gateError}=await admin.from("apple_iap_verification_gate")
+          .select("server_jws_verified,sandbox_purchase_proven").eq("singleton",true).maybeSingle();
+        applePurchaseProven=!gateError && gate?.server_jws_verified===true && gate?.sandbox_purchase_proven===true;
+      }
+    }
     const periodEnd=data?.current_period_end ? Date.parse(data.current_period_end) : NaN;
     // Fail closed on missing, malformed, or expired entitlement periods.
-    const active=!!data && data.plan==="premium" && ["trialing","active"].includes(data.status)
+    const active=applePurchaseProven && !!data && data.plan==="premium" && ["trialing","active"].includes(data.status)
       && Number.isFinite(periodEnd) && periodEnd>Date.now();
     // Do not return an expired or malformed entitlement as status=active:
     // clients must not accidentally grant premium by reading status alone.
