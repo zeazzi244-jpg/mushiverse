@@ -62,13 +62,6 @@ final class MushiverseCoinStore: ObservableObject {
         isStarted = true
         lifecycleGeneration += 1
         let generation = lifecycleGeneration
-        if #available(iOS 16.0, *),
-           let appResult = try? await AppTransaction.shared,
-           case .verified(let app) = appResult,
-           app.bundleID == "com.rikuto.mushiverse", app.environment == .sandbox,
-           isStarted, lifecycleGeneration == generation, !Task.isCancelled {
-            sandboxPurchasesEnabled = true
-        }
         guard isStarted, lifecycleGeneration == generation, !Task.isCancelled else { return }
         // Restarting the shop must not leave a second StoreKit updates listener active.
         updatesTask?.cancel()
@@ -115,7 +108,25 @@ final class MushiverseCoinStore: ObservableObject {
                 .filter { Self.expectedType($0.id) == $0.type }
             guard !Task.isCancelled, productLoadGeneration == generation else { return }
             products = fetched
-            lastError = nil
+            guard fetched.contains(where: { $0.id == Self.sandboxProductID }) else {
+                lastError = "Appleから100コインの商品情報が返りませんでした。"
+                return
+            }
+            if #available(iOS 16.0, *), !Self.purchasesEnabled, !sandboxPurchasesEnabled {
+                let appResult = try? await AppTransaction.shared
+                guard isStarted, productLoadGeneration == generation, !Task.isCancelled else { return }
+                if case .verified(let app)? = appResult,
+                   app.bundleID == "com.rikuto.mushiverse", app.environment == .sandbox {
+                    sandboxPurchasesEnabled = true
+                }
+            }
+            if !Self.purchasesEnabled && !sandboxPurchasesEnabled {
+                lastError = "価格は取得できました。Appleのテスト環境を確認できないため、購入は無効です。"
+            } else if !AppStore.canMakePayments {
+                lastError = "この端末の設定ではアプリ内購入が許可されていません。"
+            } else {
+                lastError = nil
+            }
         } catch {
             guard !Task.isCancelled, productLoadGeneration == generation else { return }
             products = []
