@@ -26,3 +26,14 @@ Production status: disabled. The 100-coin SKU is the only native Sandbox purchas
 
 ## Evidence required to unblock
 Record Apple Sandbox transaction ID (redacted), verified JWS result, matching server event, exactly one ledger credit and wallet delta, successful duplicate replay with zero additional credits, verified premium renewal/expiration, and passing CI tests. Never store private keys or unredacted tokens in GitHub.
+
+## App Review preparation for the 100-coin consumable
+
+Review Notes draft for the build that passes real-device Sandbox verification:
+
+> Sign in using the review account listed in App Review Sign-In Information. Open Gacha (ガチャ), scroll to the MUSHIVERSE shop, and tap Appleの商品情報を見る. Select the 100-coin pack (mushiverse.coins.100). StoreKit shows the local storefront price. A successful Sandbox purchase adds 100 test coins once. If interrupted, reopen the shop and tap 未完了の購入を再確認 to retry.
+
+Before using this draft, confirm the review account can complete Sandbox fulfillment and that the submitted build matches these steps. Capture the actual in-app Apple product screen on iPhone showing the 100-coin pack and StoreKit price, with account information out of frame. Attach it under the product's Review Information. Include the first consumable and the verified iOS app version in the same submission.
+
+- [Configure In-App Purchases for review in the sandbox](https://developer.apple.com/help/app-review/before-submitting-for-review/configure-in-app-purchases/)
+- [Submit an In-App Purchase](https://developer.apple.com/help/app-store-connect/manage-submissions-to-app-review/submit-an-in-app-purchase/)
