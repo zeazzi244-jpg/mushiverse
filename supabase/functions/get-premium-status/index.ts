@@ -44,14 +44,14 @@ Deno.serve(async (req)=>{
           // Evaluate the latest verified event, including revocations. Looking for
           // *any* older unrevoked event can incorrectly restore a revoked subscription.
           const {data:events,error:eventError}=await admin.from("apple_iap_events")
-            .select("transaction_id,revocation_date,expires_date,purchase_date").eq("user_id",user.id)
+            .select("transaction_id,product_id,environment,revocation_date,expires_date,purchase_date").eq("user_id",user.id)
             .eq("original_transaction_id",data.provider_subscription_id)
             .not("verified_at","is",null)
             // A delayed verification of an older transaction must not supersede a newer renewal or revocation.
             .order("purchase_date",{ascending:false}).order("verified_at",{ascending:false}).limit(1);
           const latest=events?.[0];
           const expiresAt=latest?.expires_date ? Date.parse(latest.expires_date) : NaN;
-          applePurchaseProven=!eventError && !!latest && latest.revocation_date==null &&
+          // A verified transaction must be a supported subscription, never a coin pack or an unknown environment.\n          const supportedPremiumProduct=latest?.product_id==="jp.mushiverse.premium.monthly" || latest?.product_id==="jp.mushiverse.premium.annual";\n          const supportedEnvironment=latest?.environment==="Sandbox" || latest?.environment==="Production";\n          applePurchaseProven=!eventError && !!latest && supportedPremiumProduct && supportedEnvironment && latest.revocation_date==null &&
             Number.isFinite(expiresAt) && expiresAt>Date.now();
         }
       }
