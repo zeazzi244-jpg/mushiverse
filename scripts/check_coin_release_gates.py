@@ -31,7 +31,7 @@ checks = {
     "unfinished purchase retries supported": "Transaction.unfinished" in store,
     "backend rejects unverified purchases": '"apple_transaction_verification_failed"' in backend,
     "backend writes only to the isolated Sandbox ledger": re.findall(r'\.rpc\("([^"]+)"', backend)
-        == ["record_apple_sandbox_coin_credit"]
+        == ["get_apple_sandbox_verifier_secret", "is_apple_sandbox_tester", "record_apple_sandbox_coin_credit"]
         and not re.search(r"gacha_coin_wallets|\.(insert|upsert|update|delete)\s*\(", backend),
     "backend requires authenticated user": ".auth.getUser()" in backend,
     "backend returns no-store": '"cache-control": "no-store"' in backend,
