@@ -115,6 +115,18 @@ export async function verifyAppleCoinJws(signedTransaction: string, expected: {
         verified.bundleId !== "com.rikuto.mushiverse" ||
         // Missing revocation metadata is not proof of a non-revoked purchase.
         verified.revocationDate !== null ||
+        // The remote verifier must return signed purchase evidence, not only
+        // echoed identifiers. Reject malformed timestamps and non-consumables.
+        verified.type !== "Consumable" ||
+        verified.quantity !== 1 ||
+        verified.inAppOwnershipType !== "PURCHASED" ||
+        typeof verified.purchaseDate !== "number" ||
+        !Number.isSafeInteger(verified.purchaseDate) || verified.purchaseDate <= 0 ||
+        verified.purchaseDate > Date.now() + 300000 ||
+        typeof verified.signedDate !== "number" ||
+        !Number.isSafeInteger(verified.signedDate) ||
+        verified.signedDate < verified.purchaseDate ||
+        verified.signedDate > Date.now() + 300000 ||
         !Number.isSafeInteger(verified.coins) || verified.coins !== expectedCoins)
       throw new Error("invalid_signed_transaction");
     return verified;
