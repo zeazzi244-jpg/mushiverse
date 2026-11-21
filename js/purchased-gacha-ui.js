@@ -4,6 +4,14 @@
   const endpoint = 'https://jhowxtdemlsmetcwhekr.supabase.co/functions/v1/purchased-gacha-draw';
   const storagePrefix = 'mushiverse-purchased-draw-pending:';
   let busy = false;
+  let accountGeneration = 0;
+  function clearAccountView() {
+    accountGeneration++;
+    if ($('mvPaidBalance')) $('mvPaidBalance').textContent = 'ログイン状態を確認してください。';
+    if ($('mvPaidHistory')) $('mvPaidHistory').replaceChildren();
+    for (const id of ['mvPaidOne','mvPaidTen']) if ($(id)) $(id).disabled = true;
+    if ($('mvPaidStatus')) $('mvPaidStatus').textContent = '';
+  }
   const $ = id => document.getElementById(id);
   const kids = () => document.body.classList.contains('mv128Kids') ||
     localStorage.getItem('mushiverse-display-mode-v1') === 'kids';
@@ -68,11 +76,13 @@
   async function refresh() {
     if(busy || !$('mvPaidBalance')) return;
     busy=true; buttonsDisabled(true);
+    const generation = accountGeneration;
     try {
       if(kids()) { $('mvPaidBalance').textContent='キッズモードでは利用できません。';return; }
       const active=await session();
       if(!active){$('mvPaidBalance').textContent='ログイン後に利用できます。';return;}
       const result=await request('GET',active.access_token);
+      if (generation !== accountGeneration) return;
       if(result.status!==200 || result.data?.ok!==true){
         $('mvPaidBalance').textContent='本番課金は準備中です。購入コインの利用はまだできません。';
         return;
@@ -93,7 +103,11 @@
       }
     } catch {
       $('mvPaidBalance').textContent='購入コイン残高を読み込めませんでした。';
-    } finally {busy=false;$('mvPaidRefresh').disabled=false;}
+    } finally {
+      busy=false;
+      $('mvPaidRefresh').disabled=false;
+      if(generation !== accountGeneration) queueMicrotask(refresh);
+    }
   }
 
   async function draw(count){
@@ -114,7 +128,9 @@
         pending={draw_id:crypto.randomUUID(),count};
         localStorage.setItem(key,JSON.stringify(pending));
       }
+      const generation = accountGeneration;
       const response=await request('POST',active.access_token,pending);
+      if(generation !== accountGeneration) return;
       if(response.status===409 && response.data.error==='insufficient_balance'){
         localStorage.removeItem(key);
         status.textContent='購入コインが足りません。';
@@ -140,6 +156,6 @@
 
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',mount,{once:true});
   else mount();
-  document.addEventListener('mushiverse:profile-account',()=>{if($('mvPaidGacha'))refresh();});
+  document.addEventListener('mushiverse:profile-account',()=>{clearAccountView();if($('mvPaidGacha'))queueMicrotask(refresh);});
   document.addEventListener('click',e=>{if(e.target?.closest?.('[data-tab="gacha"]'))queueMicrotask(refresh);},true);
 })();
