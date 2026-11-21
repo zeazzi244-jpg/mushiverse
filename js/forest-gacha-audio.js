@@ -221,6 +221,9 @@
   });
 
   document.addEventListener('mushiverse:rarity-reveal', ({detail}) => {
+    // Ignore delayed or duplicate reveal events after the draw was closed.
+    // Otherwise an old animation can restart its fanfare after cancellation.
+    if (!drawOpen) return;
     drawOpen = false;
     turn++;
     stop();
