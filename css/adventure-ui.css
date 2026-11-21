@@ -1177,3 +1177,47 @@ body #mv134CoinStore .mv134Pack button {
     overflow-wrap:anywhere;
   }
 }
+
+
+/* V41: actual wooden gacha controls stay close to the machine on short
+   portrait iPhones. The fixed-width artwork previously occupied up to 42dvh,
+   leaving little room for the two draw actions above the bottom navigation. */
+@media (max-height:740px) and (orientation:portrait) {
+  #gacha #mv101Machine .mvWoodMachine {
+    max-height:34dvh;
+    margin-bottom:4px;
+  }
+  #gacha #mv101Machine .mvWoodMachine :is(img,video,canvas) {
+    max-height:34dvh;
+    width:auto;
+    max-width:100%;
+    margin-inline:auto;
+  }
+  #gacha #mv101Machine .mvWoodActions {
+    margin-block:4px 6px;
+  }
+}
+/* Audio volume slider and its value remain visible on the pale machine
+   surface even when the surrounding gacha tab uses a dark color scheme. */
+#gacha #mv101Machine .mvWoodAudio {
+  color-scheme:light;
+}
+#gacha #mv101Machine .mvWoodAudio :is(label,output,small) {
+  color:#173d2f;
+}
+#gacha #mv101Machine .mvWoodAudio input[type=range] {
+  accent-color:#17613f;
+  min-height:44px;
+}
+#gacha #mv101Machine .mvWoodAudio input[type=range]:focus-visible {
+  outline:3px solid #946516;
+  outline-offset:2px;
+}
+/* The decorative wood shake must respect the user's reduced-motion choice,
+   independently of the general card reveal rules. */
+@media (prefers-reduced-motion:reduce) {
+  #mv88Reveal .mvWoodPrelude {
+    animation:none!important;
+    transform:none!important;
+  }
+}
