@@ -96,9 +96,10 @@ Deno.serve(async (request: Request) => {
         (claim.environment !== null && claim.environment !== "Production"))
       return reply({error:"claim_mismatch"},403);
 
-    const appIDRaw = Deno.env.get("APPLE_IAP_APP_APPLE_ID");
-    if (!appIDRaw || !/^[1-9]\d*$/.test(appIDRaw) ||
-        !Number.isSafeInteger(Number(appIDRaw)))
+    // Public App Store listing ID is fixed to this registered app identity.
+    // A misconfigured deployment must fail closed rather than verify another app.
+    const appIDRaw = Deno.env.get("APPLE_IAP_APP_APPLE_ID") ?? "6826061606";
+    if (appIDRaw !== "6826061606")
       return reply({error:"apple_verification_unavailable"},503);
 
     let verified;
