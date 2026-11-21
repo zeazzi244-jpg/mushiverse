@@ -26,6 +26,18 @@ BEGIN
       (user_id,transaction_id,original_transaction_id,product_id,environment,status)
       VALUES(v_user,v_transaction,v_transaction,'mushiverse.coins.100',NULL,'pending');
 
+    -- Wrong-account replay must never touch the original owner's wallet.
+    BEGIN
+      PERFORM public.settle_verified_apple_coin_production(
+        v_transaction,v_transaction,
+        '123e4567-e89b-42d3-a456-426614174000'::uuid,
+        'mushiverse.coins.100','2026-11-21T09:00:00+00'::timestamptz);
+      RAISE EXCEPTION 'foreign_owner_accepted';
+    EXCEPTION WHEN raise_exception THEN
+      GET STACKED DIAGNOSTICS v_reason = MESSAGE_TEXT;
+      IF v_reason <> 'apple_verified_claim_mismatch' THEN RAISE EXCEPTION '%', v_reason; END IF;
+    END;
+
     v_ok := public.settle_verified_apple_coin_production(
       v_transaction,v_transaction,v_user,'mushiverse.coins.100',
       '2026-11-21T09:00:00+00'::timestamptz);
