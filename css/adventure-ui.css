@@ -1275,3 +1275,35 @@ body #mv134CoinStore .mv134Pack button {
     grid-template-columns:minmax(0,1fr);
   }
 }
+
+/* V44: Landscape and split-screen iPhones must keep the wooden draw controls
+   reachable without clipping the reveal behind the fixed bottom navigation.
+   Restrict this to the actual mounted gacha and preserve hidden state. */
+@media (max-height:500px) and (orientation:landscape) {
+  #gacha #mv101Machine .mvWoodMachine {
+    max-height:28dvh;
+    margin-bottom:2px;
+  }
+  #gacha #mv101Machine .mvWoodMachine :is(img,video,canvas) {
+    max-height:28dvh;
+    width:auto;
+    max-width:100%;
+    margin-inline:auto;
+  }
+  #gacha #mv101Machine .mvWoodActions {
+    margin-block:3px 5px;
+  }
+  #gacha {
+    padding-bottom:calc(96px + env(safe-area-inset-bottom, 0px));
+  }
+}
+/* Large text and VoiceOver focus should not be obscured by the result artwork.
+   Unlike a blanket overflow:hidden, these rules allow readable wrapping. */
+#mv88Reveal .mvGachaNext:not([hidden]) {
+  min-width:0;
+  max-width:100%;
+}
+#mv88Reveal .mvGachaNext:not([hidden]) > button:focus-visible {
+  outline:3px solid #f5d17b;
+  outline-offset:2px;
+}
