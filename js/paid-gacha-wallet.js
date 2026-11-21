@@ -8,10 +8,24 @@
   let busy = false, account = '', balance = 0, page = 0, hasMore = false, draws = [], drawsEnabled = false;
 
   function pendingKey() { return STORAGE + account; }
-  function pendingRead() { try { return JSON.parse(sessionStorage.getItem(pendingKey()) || 'null'); } catch { return null; } }
+  function pendingRead() {
+    const key = pendingKey();
+    const saved = localStorage.getItem(key);
+    if (saved !== null) return JSON.parse(saved);
+    const legacy = sessionStorage.getItem(key);
+    if (legacy === null) return null;
+    const pending = JSON.parse(legacy);
+    localStorage.setItem(key, legacy);
+    sessionStorage.removeItem(key);
+    return pending;
+  }
   function pendingSave(value) {
-    if(value) sessionStorage.setItem(pendingKey(),JSON.stringify(value));
-    else sessionStorage.removeItem(pendingKey());
+    const key = pendingKey();
+    if (value) localStorage.setItem(key, JSON.stringify({id:value.id, count:value.count}));
+    else {
+      sessionStorage.removeItem(key);
+      localStorage.removeItem(key);
+    }
   }
   const message = text => { const node = byID('mvPaidCoinMessage'); if (node) node.textContent = text; };
 
@@ -55,9 +69,12 @@
     if (panel.hidden) return;
     byID('mvPaidCoinBalance').textContent = balance.toLocaleString('ja-JP') + ' 購入コイン' +
       (drawsEnabled ? '' : '（有料ガチャは現在停止中）');
-    byID('mvPaidCoinSingle').disabled = !drawsEnabled || busy || balance < 50 || !!pendingRead();
-    byID('mvPaidCoinTen').disabled = !drawsEnabled || busy || balance < 450 || !!pendingRead();
-    byID('mvPaidCoinRetry').hidden = !pendingRead();
+    let pending, storageFailed = false;
+    try { pending = pendingRead(); }
+    catch { storageFailed = true; message('未完了の抽選を読み込めません。アプリを開き直してください。'); }
+    byID('mvPaidCoinSingle').disabled = !drawsEnabled || busy || balance < 50 || storageFailed || !!pending;
+    byID('mvPaidCoinTen').disabled = !drawsEnabled || busy || balance < 450 || storageFailed || !!pending;
+    byID('mvPaidCoinRetry').hidden = !pending;
     byID('mvPaidCoinRetry').disabled = !drawsEnabled || busy;
     byID('mvPaidCoinMore').hidden = !hasMore;
     const list = byID('mvPaidCoinHistory');
@@ -109,7 +126,8 @@
     const user=await sessionUser();
     if(busy) return;
     if(!user || user.id!==account) { account='';render();return; }
-    let pending=pendingRead();
+    let pending;
+    try { pending=pendingRead(); } catch { message('未完了の抽選を確認できません。アプリを開き直してください。'); return; }
     if(pending && !retry) { message('未確認の購入コインガチャがあります。再確認を押してください。');render();return; }
     if(!pending && retry) { await refresh(); return; }
     if(!pending) {

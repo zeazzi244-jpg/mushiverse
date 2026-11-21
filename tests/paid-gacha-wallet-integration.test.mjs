@@ -1,3 +1,4 @@
+import vm from 'node:vm';
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
@@ -15,7 +16,7 @@ test('existing gacha screen loads syntactically valid paid wallet interface',()=
   assert.match(ui,/getSession\(\)/);
   assert.match(ui,/window\.user\?\.id !== data\.session\.user\.id/);
   assert.match(ui,/window\.crypto\.randomUUID\(\)/);
-  assert.match(ui,/sessionStorage\.setItem/);
+  assert.match(ui,/localStorage\.setItem/);
   assert.match(ui,/mushiverse:profile-account/);
 });
 
@@ -26,7 +27,7 @@ test('paid draws use server-owned wallet and never mutate free coins in client s
   assert.match(ui,/insufficient_balance/);
   assert.match(ui,/pendingSave\(null\)/);
   assert.match(ui,/mushiverseClassicCards/);
-  assert.doesNotMatch(ui,/state\.coins\s*[+\-]=|localStorage\.setItem/);
+  assert.doesNotMatch(ui,/state\.coins\s*[+\-]=/);
 });
 
 test('paid draw endpoint binds buyer to JWT identity and server-authoritative RPC',()=>{
@@ -43,4 +44,30 @@ test('paid draw endpoint binds buyer to JWT identity and server-authoritative RP
 test('paid draw RPC cannot be called directly by anonymous or logged-in app roles',()=>{
   assert.match(migration,/FROM PUBLIC, anon, authenticated/);
   assert.match(migration,/TO service_role/);
+});
+
+test('an unfinished draw survives relaunch, preserves legacy requests and stays account-scoped',()=>{
+  const persistent = new Map(), session = new Map();
+  const storage = map => ({
+    getItem:key=>map.get(key) ?? null,
+    setItem:(key,value)=>map.set(key,value),
+    removeItem:key=>map.delete(key)
+  });
+  function launch(account, tab) {
+    const context={localStorage:storage(persistent),sessionStorage:storage(tab)};
+    const functions=ui.slice(ui.indexOf('  function pendingKey'),ui.indexOf('  const message'));
+    return vm.runInNewContext("const STORAGE='mushiverse-paid-draw-pending:', account="+JSON.stringify(account)+";"+functions+";({pendingRead,pendingSave})",context);
+  }
+  const key='mushiverse-paid-draw-pending:alice';
+  const pending={id:'12345678-1234-4123-a456-426614174000',count:10};
+  session.set(key,JSON.stringify(pending));
+  assert.equal(launch('alice',session).pendingRead().id,pending.id);
+  assert.equal(session.has(key),false);
+  assert.equal(launch('bob',new Map()).pendingRead(),null);
+  const reopened=launch('alice',new Map());
+  assert.equal(reopened.pendingRead().count,10);
+  reopened.pendingSave(null);
+  assert.equal(reopened.pendingRead(),null);
+  reopened.pendingSave({...pending,balance:999});
+  assert.equal(persistent.get(key),JSON.stringify(pending));
 });
