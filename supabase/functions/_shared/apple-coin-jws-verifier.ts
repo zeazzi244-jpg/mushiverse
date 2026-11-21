@@ -109,6 +109,12 @@ export async function verifyAppleCoinJws(signedTransaction: string, expected: {
         verified.productId !== expected.productId ||
         verified.transactionId !== expected.transactionId ||
         verified.originalTransactionId !== expected.originalTransactionId ||
+        // The remote verifier must attest the Apple-signed account binding and
+        // app identity, not merely echo a matching transaction/pack identifier.
+        verified.appAccountToken !== expected.appAccountToken ||
+        verified.bundleId !== "com.rikuto.mushiverse" ||
+        // Missing revocation metadata is not proof of a non-revoked purchase.
+        verified.revocationDate !== null ||
         !Number.isSafeInteger(verified.coins) || verified.coins !== expectedCoins)
       throw new Error("invalid_signed_transaction");
     return verified;
