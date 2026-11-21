@@ -1,0 +1,3210 @@
+[
+  {
+    "id": "mv-classic-001",
+    "name": "紅玻璃ルーメル",
+    "rarity": "N",
+    "habitat": "",
+    "description": "",
+    "image": "https://zeazzi244-jpg.github.io/mushiverse/assets/cards/classic/mv-classic-001.webp"
+  },
+  {
+    "id": "mv-classic-002",
+    "name": "白透紋ヴェーラ",
+    "rarity": "N",
+    "habitat": "",
+    "description": "",
+    "image": "https://zeazzi244-jpg.github.io/mushiverse/assets/cards/classic/mv-classic-002.webp"
+  },
+  {
+    "id": "mv-classic-003",
+    "name": "琥珀響コルナ",
+    "rarity": "N",
+    "habitat": "",
+    "description": "",
+    "image": "https://zeazzi244-jpg.github.io/mushiverse/assets/cards/classic/mv-classic-003.webp"
+  },
+  {
+    "id": "mv-classic-004",
+    "name": "翡翠脈フィーン",
+    "rarity": "N",
+    "habitat": "",
+    "description": "",
+    "image": "https://zeazzi244-jpg.github.io/mushiverse/assets/cards/classic/mv-classic-004.webp"
+  },
+  {
+    "id": "mv-classic-005",
+    "name": "霞珠ミュゼル",
+    "rarity": "N",
+    "habitat": "",
+    "description": "",
+    "image": "https://zeazzi244-jpg.github.io/mushiverse/assets/cards/classic/mv-classic-005.webp"
+  },
+  {
+    "id": "mv-classic-006",
+    "name": "黒晶響ノクタ",
+    "rarity": "N",
+    "habitat": "",
+    "description": "",
+    "image": "https://zeazzi244-jpg.github.io/mushiverse/assets/cards/classic/mv-classic-006.webp"
+  },
+  {
+    "id": "mv-classic-007",
+    "name": "霧苔パルム",
+    "rarity": "N",
+    "habitat": "",
+    "description": "",
+    "image": "https://zeazzi244-jpg.github.io/mushiverse/assets/cards/classic/mv-classic-007.webp"
+  },
+  {
+    "id": "mv-classic-008",
+    "name": "斜光跳セレト",
+    "rarity": "N",
+    "habitat": "",
+    "description": "",
+    "image": "https://zeazzi244-jpg.github.io/mushiverse/assets/cards/classic/mv-classic-008.webp"
+  },
+  {
+    "id": "mv-classic-009",
+    "name": "葉弓跳モルカ",
+    "rarity": "N",
+    "habitat": "",
+    "description": "",
+    "image": "https://zeazzi244-jpg.github.io/mushiverse/assets/cards/classic/mv-classic-009.webp"
+  },
+  {
+    "id": "mv-classic-010",
+    "name": "砂縞蹴ダリオ",
+    "rarity": "N",
+    "habitat": "",
+    "description": "",
+    "image": "https://zeazzi244-jpg.github.io/mushiverse/assets/cards/classic/mv-classic-010.webp"
+  },
+  {
+    "id": "mv-classic-011",
+    "name": "鈍灯音クリエ",
+    "rarity": "N",
+    "habitat": "",
+    "description": "",
+    "image": "https://zeazzi244-jpg.github.io/mushiverse/assets/cards/classic/mv-classic-011.webp"
+  },
+  {
+    "id": "mv-classic-012",
+    "name": "銀玲音リュシカ",
+    "rarity": "N",
+    "habitat": "",
+    "description": "",
+    "image": "https://zeazzi244-jpg.github.io/mushiverse/assets/cards/classic/mv-classic-012.webp"
+  },
+  {
+    "id": "mv-classic-013",
+    "name": "松蜜音パルシェ",
+    "rarity": "N",
+    "habitat": "",
+    "description": "",
+    "image": "https://zeazzi244-jpg.github.io/mushiverse/assets/cards/classic/mv-classic-013.webp"
+  },
+  {
+    "id": "mv-classic-014",
+    "name": "小鐘響テルム",
+    "rarity": "N",
+    "habitat": "",
+    "description": "",
+    "image": "https://zeazzi244-jpg.github.io/mushiverse/assets/cards/classic/mv-classic-014.webp"
+  },
+  {
+    "id": "mv-classic-015",
+    "name": "翠刃ヴェルデ",
+    "rarity": "N",
+    "habitat": "",
+    "description": "",
+    "image": "https://zeazzi244-jpg.github.io/mushiverse/assets/cards/classic/mv-classic-015.webp"
+  },
+  {
+    "id": "mv-classic-016",
+    "name": "厚鎌ホルテ",
+    "rarity": "N",
+    "habitat": "",
+    "description": "",
+    "image": "https://zeazzi244-jpg.github.io/mushiverse/assets/cards/classic/mv-classic-016.webp"
+  },
+  {
+    "id": "mv-classic-017",
+    "name": "葉刻カディル",
+    "rarity": "N",
+    "habitat": "",
+    "description": "",
+    "image": "https://zeazzi244-jpg.github.io/mushiverse/assets/cards/classic/mv-classic-017.webp"
+  },
+  {
+    "id": "mv-classic-018",
+    "name": "星錆ポルカ",
+    "rarity": "N",
+    "habitat": "",
+    "description": "",
+    "image": "https://zeazzi244-jpg.github.io/mushiverse/assets/cards/classic/mv-classic-018.webp"
+  },
+  {
+    "id": "mv-classic-019",
+    "name": "蒼条翅アゼル",
+    "rarity": "N",
+    "habitat": "",
+    "description": "",
+    "image": "https://zeazzi244-jpg.github.io/mushiverse/assets/cards/classic/mv-classic-019.webp"
+  },
+  {
+    "id": "mv-classic-020",
+    "name": "黄環翅エリュカ",
+    "rarity": "N",
+    "habitat": "",
+    "description": "",
+    "image": "https://zeazzi244-jpg.github.io/mushiverse/assets/cards/classic/mv-classic-020.webp"
+  },
+  {
+    "id": "mv-classic-021",
+    "name": "陽斑翅ラテカ",
+    "rarity": "N",
+    "habitat": "",
+    "description": "",
+    "image": "https://zeazzi244-jpg.github.io/mushiverse/assets/cards/classic/mv-classic-021.webp"
+  },
+  {
+    "id": "mv-classic-022",
+    "name": "藍粒翅ミラト",
+    "rarity": "N",
+    "habitat": "",
+    "description": "",
+    "image": "https://zeazzi244-jpg.github.io/mushiverse/assets/cards/classic/mv-classic-022.webp"
+  },
+  {
+    "id": "mv-classic-023",
+    "name": "朱箔翅ルセナ",
+    "rarity": "N",
+    "habitat": "",
+    "description": "",
+    "image": "https://zeazzi244-jpg.github.io/mushiverse/assets/cards/classic/mv-classic-023.webp"
+  },
+  {
+    "id": "mv-classic-024",
+    "name": "冬透針セティ",
+    "rarity": "N",
+    "habitat": "",
+    "description": "",
+    "image": "https://zeazzi244-jpg.github.io/mushiverse/assets/cards/classic/mv-classic-024.webp"
+  },
+  {
+    "id": "mv-classic-025",
+    "name": "淡波針シエロ",
+    "rarity": "N",
+    "habitat": "",
+    "description": "",
+    "image": "https://zeazzi244-jpg.github.io/mushiverse/assets/cards/classic/mv-classic-025.webp"
+  },
+  {
+    "id": "mv-classic-026",
+    "name": "白潮針アレフ",
+    "rarity": "N",
+    "habitat": "",
+    "description": "",
+    "image": "https://zeazzi244-jpg.github.io/mushiverse/assets/cards/classic/mv-classic-026.webp"
+  },
+  {
+    "id": "mv-classic-027",
+    "name": "紅稜双翅ロクサ",
+    "rarity": "N",
+    "habitat": "",
+    "description": "",
+    "image": "https://zeazzi244-jpg.github.io/mushiverse/assets/cards/classic/mv-classic-027.webp"
+  },
+  {
+    "id": "mv-classic-028",
+    "name": "夏焔双翅ミオラ",
+    "rarity": "N",
+    "habitat": "",
+    "description": "",
+    "image": "https://zeazzi244-jpg.github.io/mushiverse/assets/cards/classic/mv-classic-028.webp"
+  },
+  {
+    "id": "mv-classic-029",
+    "name": "環腰双翅エフカ",
+    "rarity": "N",
+    "habitat": "",
+    "description": "",
+    "image": "https://zeazzi244-jpg.github.io/mushiverse/assets/cards/classic/mv-classic-029.webp"
+  },
+  {
+    "id": "mv-classic-030",
+    "name": "墨透双翅ネヴァ",
+    "rarity": "N",
+    "habitat": "",
+    "description": "",
+    "image": "https://zeazzi244-jpg.github.io/mushiverse/assets/cards/classic/mv-classic-030.webp"
+  },
+  {
+    "id": "mv-classic-031",
+    "name": "夜絹オルナ",
+    "rarity": "N",
+    "habitat": "",
+    "description": "",
+    "image": "https://zeazzi244-jpg.github.io/mushiverse/assets/cards/classic/mv-classic-031.webp"
+  },
+  {
+    "id": "mv-classic-032",
+    "name": "金緑甲ブレノ",
+    "rarity": "N",
+    "habitat": "",
+    "description": "",
+    "image": "https://zeazzi244-jpg.github.io/mushiverse/assets/cards/classic/mv-classic-032.webp"
+  },
+  {
+    "id": "mv-classic-033",
+    "name": "蜜銅甲コバル",
+    "rarity": "N",
+    "habitat": "",
+    "description": "",
+    "image": "https://zeazzi244-jpg.github.io/mushiverse/assets/cards/classic/mv-classic-033.webp"
+  },
+  {
+    "id": "mv-classic-034",
+    "name": "白砂紋ソルナ",
+    "rarity": "N",
+    "habitat": "",
+    "description": "",
+    "image": "https://zeazzi244-jpg.github.io/mushiverse/assets/cards/classic/mv-classic-034.webp"
+  },
+  {
+    "id": "mv-classic-035",
+    "name": "若豆甲エノル",
+    "rarity": "N",
+    "habitat": "",
+    "description": "",
+    "image": "https://zeazzi244-jpg.github.io/mushiverse/assets/cards/classic/mv-classic-035.webp"
+  },
+  {
+    "id": "mv-classic-036",
+    "name": "銀粒角ザルカ",
+    "rarity": "N",
+    "habitat": "",
+    "description": "",
+    "image": "https://zeazzi244-jpg.github.io/mushiverse/assets/cards/classic/mv-classic-036.webp"
+  },
+  {
+    "id": "mv-classic-037",
+    "name": "波紋脚イオル",
+    "rarity": "N",
+    "habitat": "",
+    "description": "",
+    "image": "https://zeazzi244-jpg.github.io/mushiverse/assets/cards/classic/mv-classic-037.webp"
+  },
+  {
+    "id": "mv-classic-038",
+    "name": "濡鏡甲ネレル",
+    "rarity": "N",
+    "habitat": "",
+    "description": "",
+    "image": "https://zeazzi244-jpg.github.io/mushiverse/assets/cards/classic/mv-classic-038.webp"
+  },
+  {
+    "id": "mv-classic-039",
+    "name": "地掘爪ムルド",
+    "rarity": "N",
+    "habitat": "",
+    "description": "",
+    "image": "https://zeazzi244-jpg.github.io/mushiverse/assets/cards/classic/mv-classic-039.webp"
+  },
+  {
+    "id": "mv-classic-040",
+    "name": "稜首跳ゼッカ",
+    "rarity": "N",
+    "habitat": "",
+    "description": "",
+    "image": "https://zeazzi244-jpg.github.io/mushiverse/assets/cards/classic/mv-classic-040.webp"
+  },
+  {
+    "id": "mv-classic-041",
+    "name": "黄帯翅ネビア",
+    "rarity": "R",
+    "habitat": "",
+    "description": "",
+    "image": "https://zeazzi244-jpg.github.io/mushiverse/assets/cards/classic/mv-classic-041.webp"
+  },
+  {
+    "id": "mv-classic-042",
+    "name": "双隆角ヴァルト",
+    "rarity": "R",
+    "habitat": "",
+    "description": "",
+    "image": "https://zeazzi244-jpg.github.io/mushiverse/assets/cards/classic/mv-classic-042.webp"
+  },
+  {
+    "id": "mv-classic-043",
+    "name": "深山虹翅カレド",
+    "rarity": "R",
+    "habitat": "",
+    "description": "",
+    "image": "https://zeazzi244-jpg.github.io/mushiverse/assets/cards/classic/mv-classic-043.webp"
+  },
+  {
+    "id": "mv-classic-044",
+    "name": "夕茜翅オリエ",
+    "rarity": "R",
+    "habitat": "",
+    "description": "",
+    "image": "https://zeazzi244-jpg.github.io/mushiverse/assets/cards/classic/mv-classic-044.webp"
+  },
+  {
+    "id": "mv-classic-045",
+    "name": "香尾翅エスラ",
+    "rarity": "R",
+    "habitat": "",
+    "description": "",
+    "image": "https://zeazzi244-jpg.github.io/mushiverse/assets/cards/classic/mv-classic-045.webp"
+  },
+  {
+    "id": "mv-classic-046",
+    "name": "紫冠翅ミュリス",
+    "rarity": "R",
+    "habitat": "",
+    "description": "",
+    "image": "https://zeazzi244-jpg.github.io/mushiverse/assets/cards/classic/mv-classic-046.webp"
+  },
+  {
+    "id": "mv-classic-047",
+    "name": "瑠光翅タルナ",
+    "rarity": "R",
+    "habitat": "",
+    "description": "",
+    "image": "https://zeazzi244-jpg.github.io/mushiverse/assets/cards/classic/mv-classic-047.webp"
+  },
+  {
+    "id": "mv-classic-048",
+    "name": "透群翅シオル",
+    "rarity": "R",
+    "habitat": "",
+    "description": "",
+    "image": "https://zeazzi244-jpg.github.io/mushiverse/assets/cards/classic/mv-classic-048.webp"
+  },
+  {
+    "id": "mv-classic-049",
+    "name": "薄橙翅ラセル",
+    "rarity": "R",
+    "habitat": "",
+    "description": "",
+    "image": "https://zeazzi244-jpg.github.io/mushiverse/assets/cards/classic/mv-classic-049.webp"
+  },
+  {
+    "id": "mv-classic-050",
+    "name": "黒縁斑翅ノルカ",
+    "rarity": "R",
+    "habitat": "",
+    "description": "",
+    "image": "https://zeazzi244-jpg.github.io/mushiverse/assets/cards/classic/mv-classic-050.webp"
+  },
+  {
+    "id": "mv-classic-051",
+    "name": "緋鎧翅フェリト",
+    "rarity": "R",
+    "habitat": "",
+    "description": "",
+    "image": "https://zeazzi244-jpg.github.io/mushiverse/assets/cards/classic/mv-classic-051.webp"
+  },
+  {
+    "id": "mv-classic-052",
+    "name": "翠錆斑翅メルシャ",
+    "rarity": "R",
+    "habitat": "",
+    "description": "",
+    "image": "https://zeazzi244-jpg.github.io/mushiverse/assets/cards/classic/mv-classic-052.webp"
+  },
+  {
+    "id": "mv-classic-053",
+    "name": "巨縞針ヴァロン",
+    "rarity": "R",
+    "habitat": "",
+    "description": "",
+    "image": "https://zeazzi244-jpg.github.io/mushiverse/assets/cards/classic/mv-classic-053.webp"
+  },
+  {
+    "id": "mv-classic-054",
+    "name": "銀月針エスティ",
+    "rarity": "R",
+    "habitat": "",
+    "description": "",
+    "image": "https://zeazzi244-jpg.github.io/mushiverse/assets/cards/classic/mv-classic-054.webp"
+  },
+  {
+    "id": "mv-classic-055",
+    "name": "広尾針シルカ",
+    "rarity": "R",
+    "habitat": "",
+    "description": "",
+    "image": "https://zeazzi244-jpg.github.io/mushiverse/assets/cards/classic/mv-classic-055.webp"
+  },
+  {
+    "id": "mv-classic-056",
+    "name": "彩帆針パリア",
+    "rarity": "R",
+    "habitat": "",
+    "description": "",
+    "image": "https://zeazzi244-jpg.github.io/mushiverse/assets/cards/classic/mv-classic-056.webp"
+  },
+  {
+    "id": "mv-classic-057",
+    "name": "瑠星針ドーヴァ",
+    "rarity": "R",
+    "habitat": "",
+    "description": "",
+    "image": "https://zeazzi244-jpg.github.io/mushiverse/assets/cards/classic/mv-classic-057.webp"
+  },
+  {
+    "id": "mv-classic-058",
+    "name": "水盾顎ネクト",
+    "rarity": "R",
+    "habitat": "",
+    "description": "",
+    "image": "https://zeazzi244-jpg.github.io/mushiverse/assets/cards/classic/mv-classic-058.webp"
+  },
+  {
+    "id": "mv-classic-059",
+    "name": "柳鋏ネリウ",
+    "rarity": "R",
+    "habitat": "",
+    "description": "",
+    "image": "https://zeazzi244-jpg.github.io/mushiverse/assets/cards/classic/mv-classic-059.webp"
+  },
+  {
+    "id": "mv-classic-060",
+    "name": "細水鎌ヴィオス",
+    "rarity": "R",
+    "habitat": "",
+    "description": "",
+    "image": "https://zeazzi244-jpg.github.io/mushiverse/assets/cards/classic/mv-classic-060.webp"
+  },
+  {
+    "id": "mv-classic-061",
+    "name": "虹甲綾タルメ",
+    "rarity": "R",
+    "habitat": "",
+    "description": "",
+    "image": "https://zeazzi244-jpg.github.io/mushiverse/assets/cards/classic/mv-classic-061.webp"
+  },
+  {
+    "id": "mv-classic-062",
+    "name": "古銅甲オルバ",
+    "rarity": "R",
+    "habitat": "",
+    "description": "",
+    "image": "https://zeazzi244-jpg.github.io/mushiverse/assets/cards/classic/mv-classic-062.webp"
+  },
+  {
+    "id": "mv-classic-063",
+    "name": "刻歯角ガルン",
+    "rarity": "R",
+    "habitat": "",
+    "description": "",
+    "image": "https://zeazzi244-jpg.github.io/mushiverse/assets/cards/classic/mv-classic-063.webp"
+  },
+  {
+    "id": "mv-classic-064",
+    "name": "黄星角マーデ",
+    "rarity": "R",
+    "habitat": "",
+    "description": "",
+    "image": "https://zeazzi244-jpg.github.io/mushiverse/assets/cards/classic/mv-classic-064.webp"
+  },
+  {
+    "id": "mv-classic-065",
+    "name": "深泥球ドゥル",
+    "rarity": "R",
+    "habitat": "",
+    "description": "",
+    "image": "https://zeazzi244-jpg.github.io/mushiverse/assets/cards/classic/mv-classic-065.webp"
+  },
+  {
+    "id": "mv-classic-066",
+    "name": "藍泥球ヴィラ",
+    "rarity": "R",
+    "habitat": "",
+    "description": "",
+    "image": "https://zeazzi244-jpg.github.io/mushiverse/assets/cards/classic/mv-classic-066.webp"
+  },
+  {
+    "id": "mv-classic-067",
+    "name": "山錫顎ゼルガ",
+    "rarity": "R",
+    "habitat": "",
+    "description": "",
+    "image": "https://zeazzi244-jpg.github.io/mushiverse/assets/cards/classic/mv-classic-067.webp"
+  },
+  {
+    "id": "mv-classic-068",
+    "name": "小漆顎オルタ",
+    "rarity": "R",
+    "habitat": "",
+    "description": "",
+    "image": "https://zeazzi244-jpg.github.io/mushiverse/assets/cards/classic/mv-classic-068.webp"
+  },
+  {
+    "id": "mv-classic-069",
+    "name": "平岩顎クァルド",
+    "rarity": "R",
+    "habitat": "",
+    "description": "",
+    "image": "https://zeazzi244-jpg.github.io/mushiverse/assets/cards/classic/mv-classic-069.webp"
+  },
+  {
+    "id": "mv-classic-070",
+    "name": "蒼光甲ラピル",
+    "rarity": "R",
+    "habitat": "",
+    "description": "",
+    "image": "https://zeazzi244-jpg.github.io/mushiverse/assets/cards/classic/mv-classic-070.webp"
+  },
+  {
+    "id": "mv-classic-071",
+    "name": "鋸弧顎ザグリオ",
+    "rarity": "SR",
+    "habitat": "",
+    "description": "",
+    "image": "https://zeazzi244-jpg.github.io/mushiverse/assets/cards/classic/mv-classic-071.webp"
+  },
+  {
+    "id": "mv-classic-072",
+    "name": "黒鎧顎ヴォルガ",
+    "rarity": "SR",
+    "habitat": "",
+    "description": "",
+    "image": "https://zeazzi244-jpg.github.io/mushiverse/assets/cards/classic/mv-classic-072.webp"
+  },
+  {
+    "id": "mv-classic-073",
+    "name": "根潜顎トグラ",
+    "rarity": "SR",
+    "habitat": "",
+    "description": "",
+    "image": "https://zeazzi244-jpg.github.io/mushiverse/assets/cards/classic/mv-classic-073.webp"
+  },
+  {
+    "id": "mv-classic-074",
+    "name": "筋刻顎リガード",
+    "rarity": "SR",
+    "habitat": "",
+    "description": "",
+    "image": "https://zeazzi244-jpg.github.io/mushiverse/assets/cards/classic/mv-classic-074.webp"
+  },
+  {
+    "id": "mv-classic-075",
+    "name": "朱脚顎ケダル",
+    "rarity": "SR",
+    "habitat": "",
+    "description": "",
+    "image": "https://zeazzi244-jpg.github.io/mushiverse/assets/cards/classic/mv-classic-075.webp"
+  },
+  {
+    "id": "mv-classic-076",
+    "name": "小王顎ヴェスカ",
+    "rarity": "SR",
+    "habitat": "",
+    "description": "",
+    "image": "https://zeazzi244-jpg.github.io/mushiverse/assets/cards/classic/mv-classic-076.webp"
+  },
+  {
+    "id": "mv-classic-077",
+    "name": "墨雪翅オベラ",
+    "rarity": "SR",
+    "habitat": "",
+    "description": "",
+    "image": "https://zeazzi244-jpg.github.io/mushiverse/assets/cards/classic/mv-classic-077.webp"
+  },
+  {
+    "id": "mv-classic-078",
+    "name": "帝陽翅カリオン",
+    "rarity": "SR",
+    "habitat": "",
+    "description": "",
+    "image": "https://zeazzi244-jpg.github.io/mushiverse/assets/cards/classic/mv-classic-078.webp"
+  },
+  {
+    "id": "mv-classic-079",
+    "name": "春雷翅メティア",
+    "rarity": "SR",
+    "habitat": "",
+    "description": "",
+    "image": "https://zeazzi244-jpg.github.io/mushiverse/assets/cards/classic/mv-classic-079.webp"
+  },
+  {
+    "id": "mv-classic-080",
+    "name": "薄春翅フェロン",
+    "rarity": "SR",
+    "habitat": "",
+    "description": "",
+    "image": "https://zeazzi244-jpg.github.io/mushiverse/assets/cards/classic/mv-classic-080.webp"
+  },
+  {
+    "id": "mv-classic-081",
+    "name": "霜繭翅シリヴァ",
+    "rarity": "SR",
+    "habitat": "",
+    "description": "",
+    "image": "https://zeazzi244-jpg.github.io/mushiverse/assets/cards/classic/mv-classic-081.webp"
+  },
+  {
+    "id": "mv-classic-082",
+    "name": "孔彩翅タリアン",
+    "rarity": "SR",
+    "habitat": "",
+    "description": "",
+    "image": "https://zeazzi244-jpg.github.io/mushiverse/assets/cards/classic/mv-classic-082.webp"
+  },
+  {
+    "id": "mv-classic-083",
+    "name": "月紫翅イオーネ",
+    "rarity": "SR",
+    "habitat": "",
+    "description": "",
+    "image": "https://zeazzi244-jpg.github.io/mushiverse/assets/cards/classic/mv-classic-083.webp"
+  },
+  {
+    "id": "mv-classic-084",
+    "name": "深紫翅レイヴァ",
+    "rarity": "SR",
+    "habitat": "",
+    "description": "",
+    "image": "https://zeazzi244-jpg.github.io/mushiverse/assets/cards/classic/mv-classic-084.webp"
+  },
+  {
+    "id": "mv-classic-085",
+    "name": "翠円翅ヴェリス",
+    "rarity": "SR",
+    "habitat": "",
+    "description": "",
+    "image": "https://zeazzi244-jpg.github.io/mushiverse/assets/cards/classic/mv-classic-085.webp"
+  },
+  {
+    "id": "mv-classic-086",
+    "name": "砂鏡走アラク",
+    "rarity": "SR",
+    "habitat": "",
+    "description": "",
+    "image": "https://zeazzi244-jpg.github.io/mushiverse/assets/cards/classic/mv-classic-086.webp"
+  },
+  {
+    "id": "mv-classic-087",
+    "name": "庭星走ジグラ",
+    "rarity": "SR",
+    "habitat": "",
+    "description": "",
+    "image": "https://zeazzi244-jpg.github.io/mushiverse/assets/cards/classic/mv-classic-087.webp"
+  },
+  {
+    "id": "mv-classic-088",
+    "name": "瑠点角トレヴィ",
+    "rarity": "SR",
+    "habitat": "",
+    "description": "",
+    "image": "https://zeazzi244-jpg.github.io/mushiverse/assets/cards/classic/mv-classic-088.webp"
+  },
+  {
+    "id": "mv-classic-089",
+    "name": "白墨翅オリヴァ",
+    "rarity": "SR",
+    "habitat": "",
+    "description": "",
+    "image": "https://zeazzi244-jpg.github.io/mushiverse/assets/cards/classic/mv-classic-089.webp"
+  },
+  {
+    "id": "mv-classic-090",
+    "name": "深翠針サーヴァ",
+    "rarity": "SR",
+    "habitat": "",
+    "description": "",
+    "image": "https://zeazzi244-jpg.github.io/mushiverse/assets/cards/classic/mv-classic-090.webp"
+  },
+  {
+    "id": "mv-classic-091",
+    "name": "七彩双顎レグナ",
+    "rarity": "SSR",
+    "habitat": "",
+    "description": "",
+    "image": "https://zeazzi244-jpg.github.io/mushiverse/assets/cards/classic/mv-classic-091.webp"
+  },
+  {
+    "id": "mv-classic-092",
+    "name": "天杭角ヘルヴァ",
+    "rarity": "SSR",
+    "habitat": "",
+    "description": "",
+    "image": "https://zeazzi244-jpg.github.io/mushiverse/assets/cards/classic/mv-classic-092.webp"
+  },
+  {
+    "id": "mv-classic-093",
+    "name": "三頂角クラヴェ",
+    "rarity": "SSR",
+    "habitat": "",
+    "description": "",
+    "image": "https://zeazzi244-jpg.github.io/mushiverse/assets/cards/classic/mv-classic-093.webp"
+  },
+  {
+    "id": "mv-classic-094",
+    "name": "嵐峰角ヴォルネ",
+    "rarity": "SSR",
+    "habitat": "",
+    "description": "",
+    "image": "https://zeazzi244-jpg.github.io/mushiverse/assets/cards/classic/mv-classic-094.webp"
+  },
+  {
+    "id": "mv-classic-095",
+    "name": "巨鉞角エルダン",
+    "rarity": "SSR",
+    "habitat": "",
+    "description": "",
+    "image": "https://zeazzi244-jpg.github.io/mushiverse/assets/cards/classic/mv-classic-095.webp"
+  },
+  {
+    "id": "mv-classic-096",
+    "name": "深海槍ネレヴァ",
+    "rarity": "SSR",
+    "habitat": "",
+    "description": "",
+    "image": "https://zeazzi244-jpg.github.io/mushiverse/assets/cards/classic/mv-classic-096.webp"
+  },
+  {
+    "id": "mv-classic-097",
+    "name": "冥錨角ヴァクス",
+    "rarity": "SSR",
+    "habitat": "",
+    "description": "",
+    "image": "https://zeazzi244-jpg.github.io/mushiverse/assets/cards/classic/mv-classic-097.webp"
+  },
+  {
+    "id": "mv-classic-098",
+    "name": "長弧双顎ラグナス",
+    "rarity": "SSR",
+    "habitat": "",
+    "description": "",
+    "image": "https://zeazzi244-jpg.github.io/mushiverse/assets/cards/classic/mv-classic-098.webp"
+  },
+  {
+    "id": "mv-classic-099",
+    "name": "黒州鎧顎グラディ",
+    "rarity": "SSR",
+    "habitat": "",
+    "description": "",
+    "image": "https://zeazzi244-jpg.github.io/mushiverse/assets/cards/classic/mv-classic-099.webp"
+  },
+  {
+    "id": "mv-classic-100",
+    "name": "断月分顎マンドラ",
+    "rarity": "SSR",
+    "habitat": "",
+    "description": "",
+    "image": "https://zeazzi244-jpg.github.io/mushiverse/assets/cards/classic/mv-classic-100.webp"
+  },
+  {
+    "id": "AI-001",
+    "name": "アオシズクムシ",
+    "rarity": "N",
+    "habitat": "",
+    "description": "",
+    "image": "https://zeazzi244-jpg.github.io/mushiverse/assets/ai-insects/AI-001.webp"
+  },
+  {
+    "id": "AI-002",
+    "name": "コハクコガネ",
+    "rarity": "N",
+    "habitat": "",
+    "description": "",
+    "image": "https://zeazzi244-jpg.github.io/mushiverse/assets/ai-insects/AI-002.webp"
+  },
+  {
+    "id": "AI-003",
+    "name": "モリカゲムシ",
+    "rarity": "N",
+    "habitat": "",
+    "description": "",
+    "image": "https://zeazzi244-jpg.github.io/mushiverse/assets/ai-insects/AI-003.webp"
+  },
+  {
+    "id": "AI-004",
+    "name": "シロハネホタル",
+    "rarity": "N",
+    "habitat": "",
+    "description": "",
+    "image": "https://zeazzi244-jpg.github.io/mushiverse/assets/ai-insects/AI-004.webp"
+  },
+  {
+    "id": "AI-005",
+    "name": "クロガネシズクカミキリ",
+    "rarity": "N",
+    "habitat": "",
+    "description": "",
+    "image": "https://zeazzi244-jpg.github.io/mushiverse/assets/ai-insects/AI-005.webp"
+  },
+  {
+    "id": "AI-006",
+    "name": "ミドリツノムシ",
+    "rarity": "N",
+    "habitat": "",
+    "description": "",
+    "image": "https://zeazzi244-jpg.github.io/mushiverse/assets/ai-insects/AI-006.webp"
+  },
+  {
+    "id": "AI-007",
+    "name": "ハナシズクチョウ",
+    "rarity": "N",
+    "habitat": "",
+    "description": "",
+    "image": "https://zeazzi244-jpg.github.io/mushiverse/assets/ai-insects/AI-007.webp"
+  },
+  {
+    "id": "AI-008",
+    "name": "ベニスジシズクコガネ",
+    "rarity": "N",
+    "habitat": "",
+    "description": "",
+    "image": "https://zeazzi244-jpg.github.io/mushiverse/assets/ai-insects/AI-008.webp"
+  },
+  {
+    "id": "AI-009",
+    "name": "キリハネムシ",
+    "rarity": "N",
+    "habitat": "",
+    "description": "",
+    "image": "https://zeazzi244-jpg.github.io/mushiverse/assets/ai-insects/AI-009.webp"
+  },
+  {
+    "id": "AI-010",
+    "name": "ツキイロガ",
+    "rarity": "N",
+    "habitat": "",
+    "description": "",
+    "image": "https://zeazzi244-jpg.github.io/mushiverse/assets/ai-insects/AI-010.webp"
+  },
+  {
+    "id": "AI-011",
+    "name": "ヤマホシムシ",
+    "rarity": "N",
+    "habitat": "",
+    "description": "",
+    "image": "https://zeazzi244-jpg.github.io/mushiverse/assets/ai-insects/AI-011.webp"
+  },
+  {
+    "id": "AI-012",
+    "name": "スナツノコガネ",
+    "rarity": "N",
+    "habitat": "",
+    "description": "",
+    "image": "https://zeazzi244-jpg.github.io/mushiverse/assets/ai-insects/AI-012.webp"
+  },
+  {
+    "id": "AI-013",
+    "name": "ミズアオトンボ",
+    "rarity": "N",
+    "habitat": "",
+    "description": "",
+    "image": "https://zeazzi244-jpg.github.io/mushiverse/assets/ai-insects/AI-013.webp"
+  },
+  {
+    "id": "AI-014",
+    "name": "コケイロカマキリ",
+    "rarity": "N",
+    "habitat": "",
+    "description": "",
+    "image": "https://zeazzi244-jpg.github.io/mushiverse/assets/ai-insects/AI-014.webp"
+  },
+  {
+    "id": "AI-015",
+    "name": "チャカゲホシコガネ",
+    "rarity": "N",
+    "habitat": "",
+    "description": "",
+    "image": "https://zeazzi244-jpg.github.io/mushiverse/assets/ai-insects/AI-015.webp"
+  },
+  {
+    "id": "AI-016",
+    "name": "シモフリホタル",
+    "rarity": "N",
+    "habitat": "",
+    "description": "",
+    "image": "https://zeazzi244-jpg.github.io/mushiverse/assets/ai-insects/AI-016.webp"
+  },
+  {
+    "id": "AI-017",
+    "name": "ハルカゼチョウ",
+    "rarity": "N",
+    "habitat": "",
+    "description": "",
+    "image": "https://zeazzi244-jpg.github.io/mushiverse/assets/ai-insects/AI-017.webp"
+  },
+  {
+    "id": "AI-018",
+    "name": "角雫ピュリア",
+    "rarity": "N",
+    "habitat": "",
+    "description": "",
+    "image": "https://zeazzi244-jpg.github.io/mushiverse/assets/ai-insects/AI-018.webp"
+  },
+  {
+    "id": "AI-019",
+    "name": "クロモリクワガタ",
+    "rarity": "N",
+    "habitat": "",
+    "description": "",
+    "image": "https://zeazzi244-jpg.github.io/mushiverse/assets/ai-insects/AI-019.webp"
+  },
+  {
+    "id": "AI-020",
+    "name": "アサツユコモレビムシ",
+    "rarity": "N",
+    "habitat": "",
+    "description": "",
+    "image": "https://zeazzi244-jpg.github.io/mushiverse/assets/ai-insects/AI-020.webp"
+  },
+  {
+    "id": "AI-021",
+    "name": "キイロハネガ",
+    "rarity": "N",
+    "habitat": "",
+    "description": "",
+    "image": "https://zeazzi244-jpg.github.io/mushiverse/assets/ai-insects/AI-021.webp"
+  },
+  {
+    "id": "AI-022",
+    "name": "糸角セレーヌ",
+    "rarity": "N",
+    "habitat": "",
+    "description": "",
+    "image": "https://zeazzi244-jpg.github.io/mushiverse/assets/ai-insects/AI-022.webp"
+  },
+  {
+    "id": "AI-023",
+    "name": "シラユキコガネ",
+    "rarity": "N",
+    "habitat": "",
+    "description": "",
+    "image": "https://zeazzi244-jpg.github.io/mushiverse/assets/ai-insects/AI-023.webp"
+  },
+  {
+    "id": "AI-024",
+    "name": "アオモリバッタ",
+    "rarity": "N",
+    "habitat": "",
+    "description": "",
+    "image": "https://zeazzi244-jpg.github.io/mushiverse/assets/ai-insects/AI-024.webp"
+  },
+  {
+    "id": "AI-025",
+    "name": "カゲボシホタル",
+    "rarity": "N",
+    "habitat": "",
+    "description": "",
+    "image": "https://zeazzi244-jpg.github.io/mushiverse/assets/ai-insects/AI-025.webp"
+  },
+  {
+    "id": "AI-026",
+    "name": "ヤマシロチョウ",
+    "rarity": "N",
+    "habitat": "",
+    "description": "",
+    "image": "https://zeazzi244-jpg.github.io/mushiverse/assets/ai-insects/AI-026.webp"
+  },
+  {
+    "id": "AI-027",
+    "name": "アカネツノムシ",
+    "rarity": "N",
+    "habitat": "",
+    "description": "",
+    "image": "https://zeazzi244-jpg.github.io/mushiverse/assets/ai-insects/AI-027.webp"
+  },
+  {
+    "id": "AI-028",
+    "name": "コガネハネムシ",
+    "rarity": "N",
+    "habitat": "",
+    "description": "",
+    "image": "https://zeazzi244-jpg.github.io/mushiverse/assets/ai-insects/AI-028.webp"
+  },
+  {
+    "id": "AI-029",
+    "name": "ミズカゲトンボ",
+    "rarity": "N",
+    "habitat": "",
+    "description": "",
+    "image": "https://zeazzi244-jpg.github.io/mushiverse/assets/ai-insects/AI-029.webp"
+  },
+  {
+    "id": "AI-030",
+    "name": "ヒスイコオロギ",
+    "rarity": "N",
+    "habitat": "",
+    "description": "",
+    "image": "https://zeazzi244-jpg.github.io/mushiverse/assets/ai-insects/AI-030.webp"
+  },
+  {
+    "id": "AI-031",
+    "name": "草燐の鎌ラフィル",
+    "rarity": "N",
+    "habitat": "",
+    "description": "",
+    "image": "https://zeazzi244-jpg.github.io/mushiverse/assets/ai-insects/AI-031.webp"
+  },
+  {
+    "id": "AI-032",
+    "name": "星譜ルシオン",
+    "rarity": "N",
+    "habitat": "",
+    "description": "",
+    "image": "https://zeazzi244-jpg.github.io/mushiverse/assets/ai-insects/AI-032.webp"
+  },
+  {
+    "id": "AI-033",
+    "name": "ツチイロコガネ",
+    "rarity": "N",
+    "habitat": "",
+    "description": "",
+    "image": "https://zeazzi244-jpg.github.io/mushiverse/assets/ai-insects/AI-033.webp"
+  },
+  {
+    "id": "AI-034",
+    "name": "アオハネセミ",
+    "rarity": "N",
+    "habitat": "",
+    "description": "",
+    "image": "https://zeazzi244-jpg.github.io/mushiverse/assets/ai-insects/AI-034.webp"
+  },
+  {
+    "id": "AI-035",
+    "name": "コモレビチョウ",
+    "rarity": "N",
+    "habitat": "",
+    "description": "",
+    "image": "https://zeazzi244-jpg.github.io/mushiverse/assets/ai-insects/AI-035.webp"
+  },
+  {
+    "id": "AI-036",
+    "name": "ヨルシズクムシ",
+    "rarity": "N",
+    "habitat": "",
+    "description": "",
+    "image": "https://zeazzi244-jpg.github.io/mushiverse/assets/ai-insects/AI-036.webp"
+  },
+  {
+    "id": "AI-037",
+    "name": "シロツノコガネ",
+    "rarity": "N",
+    "habitat": "",
+    "description": "",
+    "image": "https://zeazzi244-jpg.github.io/mushiverse/assets/ai-insects/AI-037.webp"
+  },
+  {
+    "id": "AI-038",
+    "name": "ヤマカゼガ",
+    "rarity": "N",
+    "habitat": "",
+    "description": "",
+    "image": "https://zeazzi244-jpg.github.io/mushiverse/assets/ai-insects/AI-038.webp"
+  },
+  {
+    "id": "AI-039",
+    "name": "クロシズクホタル",
+    "rarity": "N",
+    "habitat": "",
+    "description": "",
+    "image": "https://zeazzi244-jpg.github.io/mushiverse/assets/ai-insects/AI-039.webp"
+  },
+  {
+    "id": "AI-040",
+    "name": "蜜金リンデル",
+    "rarity": "N",
+    "habitat": "",
+    "description": "",
+    "image": "https://zeazzi244-jpg.github.io/mushiverse/assets/ai-insects/AI-040.webp"
+  },
+  {
+    "id": "AI-041",
+    "name": "ルリカゲクワガタ",
+    "rarity": "R",
+    "habitat": "",
+    "description": "",
+    "image": "https://zeazzi244-jpg.github.io/mushiverse/assets/ai-insects/AI-041.webp"
+  },
+  {
+    "id": "AI-042",
+    "name": "アカツキコガネ",
+    "rarity": "R",
+    "habitat": "",
+    "description": "",
+    "image": "https://zeazzi244-jpg.github.io/mushiverse/assets/ai-insects/AI-042.webp"
+  },
+  {
+    "id": "AI-043",
+    "name": "ギンセツホタル",
+    "rarity": "R",
+    "habitat": "",
+    "description": "",
+    "image": "https://zeazzi244-jpg.github.io/mushiverse/assets/ai-insects/AI-043.webp"
+  },
+  {
+    "id": "AI-044",
+    "name": "ムラサキツノムシ",
+    "rarity": "R",
+    "habitat": "",
+    "description": "",
+    "image": "https://zeazzi244-jpg.github.io/mushiverse/assets/ai-insects/AI-044.webp"
+  },
+  {
+    "id": "AI-045",
+    "name": "コハクハネチョウ",
+    "rarity": "R",
+    "habitat": "",
+    "description": "",
+    "image": "https://zeazzi244-jpg.github.io/mushiverse/assets/ai-insects/AI-045.webp"
+  },
+  {
+    "id": "AI-046",
+    "name": "蒼刻の角アンセラ",
+    "rarity": "R",
+    "habitat": "",
+    "description": "",
+    "image": "https://zeazzi244-jpg.github.io/mushiverse/assets/ai-insects/AI-046.webp"
+  },
+  {
+    "id": "AI-047",
+    "name": "ヒカリツノカブト",
+    "rarity": "R",
+    "habitat": "",
+    "description": "",
+    "image": "https://zeazzi244-jpg.github.io/mushiverse/assets/ai-insects/AI-047.webp"
+  },
+  {
+    "id": "AI-048",
+    "name": "シロガネトンボ",
+    "rarity": "R",
+    "habitat": "",
+    "description": "",
+    "image": "https://zeazzi244-jpg.github.io/mushiverse/assets/ai-insects/AI-048.webp"
+  },
+  {
+    "id": "AI-049",
+    "name": "ベニシズクガ",
+    "rarity": "R",
+    "habitat": "",
+    "description": "",
+    "image": "https://zeazzi244-jpg.github.io/mushiverse/assets/ai-insects/AI-049.webp"
+  },
+  {
+    "id": "AI-050",
+    "name": "ツキカゲコガネ",
+    "rarity": "R",
+    "habitat": "",
+    "description": "",
+    "image": "https://zeazzi244-jpg.github.io/mushiverse/assets/ai-insects/AI-050.webp"
+  },
+  {
+    "id": "AI-051",
+    "name": "ハクギンカマキリ",
+    "rarity": "R",
+    "habitat": "",
+    "description": "",
+    "image": "https://zeazzi244-jpg.github.io/mushiverse/assets/ai-insects/AI-051.webp"
+  },
+  {
+    "id": "AI-052",
+    "name": "ヒスイハネムシ",
+    "rarity": "R",
+    "habitat": "",
+    "description": "",
+    "image": "https://zeazzi244-jpg.github.io/mushiverse/assets/ai-insects/AI-052.webp"
+  },
+  {
+    "id": "AI-053",
+    "name": "クロホシクワガタ",
+    "rarity": "R",
+    "habitat": "",
+    "description": "",
+    "image": "https://zeazzi244-jpg.github.io/mushiverse/assets/ai-insects/AI-053.webp"
+  },
+  {
+    "id": "AI-054",
+    "name": "金紋シェルヴァ",
+    "rarity": "R",
+    "habitat": "",
+    "description": "",
+    "image": "https://zeazzi244-jpg.github.io/mushiverse/assets/ai-insects/AI-054.webp"
+  },
+  {
+    "id": "AI-055",
+    "name": "アオツキホタル",
+    "rarity": "R",
+    "habitat": "",
+    "description": "",
+    "image": "https://zeazzi244-jpg.github.io/mushiverse/assets/ai-insects/AI-055.webp"
+  },
+  {
+    "id": "AI-056",
+    "name": "シンジュコガネ",
+    "rarity": "R",
+    "habitat": "",
+    "description": "",
+    "image": "https://zeazzi244-jpg.github.io/mushiverse/assets/ai-insects/AI-056.webp"
+  },
+  {
+    "id": "AI-057",
+    "name": "ベニツノカブト",
+    "rarity": "R",
+    "habitat": "",
+    "description": "",
+    "image": "https://zeazzi244-jpg.github.io/mushiverse/assets/ai-insects/AI-057.webp"
+  },
+  {
+    "id": "AI-058",
+    "name": "セイランカミキリ",
+    "rarity": "R",
+    "habitat": "",
+    "description": "",
+    "image": "https://zeazzi244-jpg.github.io/mushiverse/assets/ai-insects/AI-058.webp"
+  },
+  {
+    "id": "AI-059",
+    "name": "ヨゾラハネガ",
+    "rarity": "R",
+    "habitat": "",
+    "description": "",
+    "image": "https://zeazzi244-jpg.github.io/mushiverse/assets/ai-insects/AI-059.webp"
+  },
+  {
+    "id": "AI-060",
+    "name": "コガネシズクトンボ",
+    "rarity": "R",
+    "habitat": "",
+    "description": "",
+    "image": "https://zeazzi244-jpg.github.io/mushiverse/assets/ai-insects/AI-060.webp"
+  },
+  {
+    "id": "AI-061",
+    "name": "スミレクワガタ",
+    "rarity": "R",
+    "habitat": "",
+    "description": "",
+    "image": "https://zeazzi244-jpg.github.io/mushiverse/assets/ai-insects/AI-061.webp"
+  },
+  {
+    "id": "AI-062",
+    "name": "ハクヨウホタル",
+    "rarity": "R",
+    "habitat": "",
+    "description": "",
+    "image": "https://zeazzi244-jpg.github.io/mushiverse/assets/ai-insects/AI-062.webp"
+  },
+  {
+    "id": "AI-063",
+    "name": "ルリツノコガネ",
+    "rarity": "R",
+    "habitat": "",
+    "description": "",
+    "image": "https://zeazzi244-jpg.github.io/mushiverse/assets/ai-insects/AI-063.webp"
+  },
+  {
+    "id": "AI-064",
+    "name": "朱星の鎌ネフェラ",
+    "rarity": "R",
+    "habitat": "",
+    "description": "",
+    "image": "https://zeazzi244-jpg.github.io/mushiverse/assets/ai-insects/AI-064.webp"
+  },
+  {
+    "id": "AI-065",
+    "name": "ギンハネチョウ",
+    "rarity": "R",
+    "habitat": "",
+    "description": "",
+    "image": "https://zeazzi244-jpg.github.io/mushiverse/assets/ai-insects/AI-065.webp"
+  },
+  {
+    "id": "AI-066",
+    "name": "クロガネカブト",
+    "rarity": "R",
+    "habitat": "",
+    "description": "",
+    "image": "https://zeazzi244-jpg.github.io/mushiverse/assets/ai-insects/AI-066.webp"
+  },
+  {
+    "id": "AI-067",
+    "name": "シロツキコガネ",
+    "rarity": "R",
+    "habitat": "",
+    "description": "",
+    "image": "https://zeazzi244-jpg.github.io/mushiverse/assets/ai-insects/AI-067.webp"
+  },
+  {
+    "id": "AI-068",
+    "name": "弧月リュネット",
+    "rarity": "R",
+    "habitat": "",
+    "description": "",
+    "image": "https://zeazzi244-jpg.github.io/mushiverse/assets/ai-insects/AI-068.webp"
+  },
+  {
+    "id": "AI-069",
+    "name": "アオギンハナムグリ",
+    "rarity": "R",
+    "habitat": "",
+    "description": "",
+    "image": "https://zeazzi244-jpg.github.io/mushiverse/assets/ai-insects/AI-069.webp"
+  },
+  {
+    "id": "AI-070",
+    "name": "コハクツノクワガタ",
+    "rarity": "R",
+    "habitat": "",
+    "description": "",
+    "image": "https://zeazzi244-jpg.github.io/mushiverse/assets/ai-insects/AI-070.webp"
+  },
+  {
+    "id": "AI-071",
+    "name": "蒼晶クワガタ",
+    "rarity": "SR",
+    "habitat": "",
+    "description": "",
+    "image": "https://zeazzi244-jpg.github.io/mushiverse/assets/ai-insects/AI-071.webp"
+  },
+  {
+    "id": "AI-072",
+    "name": "紅蓮カブト",
+    "rarity": "SR",
+    "habitat": "",
+    "description": "",
+    "image": "https://zeazzi244-jpg.github.io/mushiverse/assets/ai-insects/AI-072.webp"
+  },
+  {
+    "id": "AI-073",
+    "name": "月光モルフォ",
+    "rarity": "SR",
+    "habitat": "",
+    "description": "",
+    "image": "https://zeazzi244-jpg.github.io/mushiverse/assets/ai-insects/AI-073.webp"
+  },
+  {
+    "id": "AI-074",
+    "name": "紫電オオツノ",
+    "rarity": "SR",
+    "habitat": "",
+    "description": "",
+    "image": "https://zeazzi244-jpg.github.io/mushiverse/assets/ai-insects/AI-074.webp"
+  },
+  {
+    "id": "AI-075",
+    "name": "翠玉ハナムグリ",
+    "rarity": "SR",
+    "habitat": "",
+    "description": "",
+    "image": "https://zeazzi244-jpg.github.io/mushiverse/assets/ai-insects/AI-075.webp"
+  },
+  {
+    "id": "AI-076",
+    "name": "白銀ホタル",
+    "rarity": "SR",
+    "habitat": "",
+    "description": "",
+    "image": "https://zeazzi244-jpg.github.io/mushiverse/assets/ai-insects/AI-076.webp"
+  },
+  {
+    "id": "AI-077",
+    "name": "琥珀オオカマキリ",
+    "rarity": "SR",
+    "habitat": "",
+    "description": "",
+    "image": "https://zeazzi244-jpg.github.io/mushiverse/assets/ai-insects/AI-077.webp"
+  },
+  {
+    "id": "AI-078",
+    "name": "蒼月トンボ",
+    "rarity": "SR",
+    "habitat": "",
+    "description": "",
+    "image": "https://zeazzi244-jpg.github.io/mushiverse/assets/ai-insects/AI-078.webp"
+  },
+  {
+    "id": "AI-079",
+    "name": "黒曜カブト",
+    "rarity": "SR",
+    "habitat": "",
+    "description": "",
+    "image": "https://zeazzi244-jpg.github.io/mushiverse/assets/ai-insects/AI-079.webp"
+  },
+  {
+    "id": "AI-080",
+    "name": "星霜オサムシ",
+    "rarity": "SR",
+    "habitat": "",
+    "description": "",
+    "image": "https://zeazzi244-jpg.github.io/mushiverse/assets/ai-insects/AI-080.webp"
+  },
+  {
+    "id": "AI-081",
+    "name": "氷晶クワガタ",
+    "rarity": "SR",
+    "habitat": "",
+    "description": "",
+    "image": "https://zeazzi244-jpg.github.io/mushiverse/assets/ai-insects/AI-081.webp"
+  },
+  {
+    "id": "AI-082",
+    "name": "金剛カミキリ",
+    "rarity": "SR",
+    "habitat": "",
+    "description": "",
+    "image": "https://zeazzi244-jpg.github.io/mushiverse/assets/ai-insects/AI-082.webp"
+  },
+  {
+    "id": "AI-083",
+    "name": "緋晶ハネムシ",
+    "rarity": "SR",
+    "habitat": "",
+    "description": "",
+    "image": "https://zeazzi244-jpg.github.io/mushiverse/assets/ai-insects/AI-083.webp"
+  },
+  {
+    "id": "AI-084",
+    "name": "天青モルフォ",
+    "rarity": "SR",
+    "habitat": "",
+    "description": "",
+    "image": "https://zeazzi244-jpg.github.io/mushiverse/assets/ai-insects/AI-084.webp"
+  },
+  {
+    "id": "AI-085",
+    "name": "幻月ホタル",
+    "rarity": "SR",
+    "habitat": "",
+    "description": "",
+    "image": "https://zeazzi244-jpg.github.io/mushiverse/assets/ai-insects/AI-085.webp"
+  },
+  {
+    "id": "AI-086",
+    "name": "紫晶カブト",
+    "rarity": "SR",
+    "habitat": "",
+    "description": "",
+    "image": "https://zeazzi244-jpg.github.io/mushiverse/assets/ai-insects/AI-086.webp"
+  },
+  {
+    "id": "AI-087",
+    "name": "翠嵐オオカマキリ",
+    "rarity": "SR",
+    "habitat": "",
+    "description": "",
+    "image": "https://zeazzi244-jpg.github.io/mushiverse/assets/ai-insects/AI-087.webp"
+  },
+  {
+    "id": "AI-088",
+    "name": "銀河トンボ",
+    "rarity": "SR",
+    "habitat": "",
+    "description": "",
+    "image": "https://zeazzi244-jpg.github.io/mushiverse/assets/ai-insects/AI-088.webp"
+  },
+  {
+    "id": "AI-089",
+    "name": "白虹クワガタ",
+    "rarity": "SR",
+    "habitat": "",
+    "description": "",
+    "image": "https://zeazzi244-jpg.github.io/mushiverse/assets/ai-insects/AI-089.webp"
+  },
+  {
+    "id": "AI-090",
+    "name": "蒼炎コガネ",
+    "rarity": "SR",
+    "habitat": "",
+    "description": "",
+    "image": "https://zeazzi244-jpg.github.io/mushiverse/assets/ai-insects/AI-090.webp"
+  },
+  {
+    "id": "AI-091",
+    "name": "天晶カブト",
+    "rarity": "SSR",
+    "habitat": "",
+    "description": "",
+    "image": "https://zeazzi244-jpg.github.io/mushiverse/assets/ai-insects/AI-091.webp"
+  },
+  {
+    "id": "AI-092",
+    "name": "虹皇モルフォ",
+    "rarity": "SSR",
+    "habitat": "",
+    "description": "",
+    "image": "https://zeazzi244-jpg.github.io/mushiverse/assets/ai-insects/AI-092.webp"
+  },
+  {
+    "id": "AI-093",
+    "name": "神威クワガタ",
+    "rarity": "SSR",
+    "habitat": "",
+    "description": "",
+    "image": "https://zeazzi244-jpg.github.io/mushiverse/assets/ai-insects/AI-093.webp"
+  },
+  {
+    "id": "AI-094",
+    "name": "星帝オオカブト",
+    "rarity": "SSR",
+    "habitat": "",
+    "description": "",
+    "image": "https://zeazzi244-jpg.github.io/mushiverse/assets/ai-insects/AI-094.webp"
+  },
+  {
+    "id": "AI-095",
+    "name": "幻煌ホタル",
+    "rarity": "SSR",
+    "habitat": "",
+    "description": "",
+    "image": "https://zeazzi244-jpg.github.io/mushiverse/assets/ai-insects/AI-095.webp"
+  },
+  {
+    "id": "AI-096",
+    "name": "天雷オオツノ",
+    "rarity": "SSR",
+    "habitat": "",
+    "description": "",
+    "image": "https://zeazzi244-jpg.github.io/mushiverse/assets/ai-insects/AI-096.webp"
+  },
+  {
+    "id": "AI-097",
+    "name": "黒皇クワガタ",
+    "rarity": "SSR",
+    "habitat": "",
+    "description": "",
+    "image": "https://zeazzi244-jpg.github.io/mushiverse/assets/ai-insects/AI-097.webp"
+  },
+  {
+    "id": "AI-098",
+    "name": "聖晶モルフォ",
+    "rarity": "SSR",
+    "habitat": "",
+    "description": "",
+    "image": "https://zeazzi244-jpg.github.io/mushiverse/assets/ai-insects/AI-098.webp"
+  },
+  {
+    "id": "AI-099",
+    "name": "銀天オオカマキリ",
+    "rarity": "SSR",
+    "habitat": "",
+    "description": "",
+    "image": "https://zeazzi244-jpg.github.io/mushiverse/assets/ai-insects/AI-099.webp"
+  },
+  {
+    "id": "AI-100",
+    "name": "創世カブト",
+    "rarity": "SSR",
+    "habitat": "",
+    "description": "",
+    "image": "https://zeazzi244-jpg.github.io/mushiverse/assets/ai-insects/AI-100.webp"
+  },
+  {
+    "id": "mv-original-moss-swallowtail",
+    "name": "苔灯アゲハ",
+    "rarity": "N",
+    "habitat": "苔の谷",
+    "description": "苔の光を翅や甲殻に宿す。森の上を弧を描いて飛ぶ。",
+    "image": "https://zeazzi244-jpg.github.io/mushiverse/assets/cards/original/moss-swallowtail.webp"
+  },
+  {
+    "id": "mv-original-moss-moth",
+    "name": "苔灯コガ",
+    "rarity": "N",
+    "habitat": "苔の谷",
+    "description": "苔の光を翅や甲殻に宿す。枝先で翅を重ねて休む。",
+    "image": "https://zeazzi244-jpg.github.io/mushiverse/assets/cards/original/moss-moth.webp"
+  },
+  {
+    "id": "mv-original-moss-stag",
+    "name": "苔灯クワガタ",
+    "rarity": "N",
+    "habitat": "苔の谷",
+    "description": "苔の光を翅や甲殻に宿す。二股の大あごで枯れ枝をつかむ。",
+    "image": "https://zeazzi244-jpg.github.io/mushiverse/assets/cards/original/moss-stag.webp"
+  },
+  {
+    "id": "mv-original-moss-rhinoceros",
+    "name": "苔灯カブト",
+    "rarity": "N",
+    "habitat": "苔の谷",
+    "description": "苔の光を翅や甲殻に宿す。一本の角が葉の間からのぞく。",
+    "image": "https://zeazzi244-jpg.github.io/mushiverse/assets/cards/original/moss-rhinoceros.webp"
+  },
+  {
+    "id": "mv-original-moss-jewel",
+    "name": "苔灯タマムシ",
+    "rarity": "N",
+    "habitat": "苔の谷",
+    "description": "苔の光を翅や甲殻に宿す。細い甲殻の縁が動くたびに光る。",
+    "image": "https://zeazzi244-jpg.github.io/mushiverse/assets/cards/original/moss-jewel.webp"
+  },
+  {
+    "id": "mv-original-moss-ladybird",
+    "name": "苔灯テントウ",
+    "rarity": "N",
+    "habitat": "苔の谷",
+    "description": "苔の光を翅や甲殻に宿す。丸い背が木の実に紛れる。",
+    "image": "https://zeazzi244-jpg.github.io/mushiverse/assets/cards/original/moss-ladybird.webp"
+  },
+  {
+    "id": "mv-original-moss-longhorn",
+    "name": "苔灯カミキリ",
+    "rarity": "N",
+    "habitat": "苔の谷",
+    "description": "苔の光を翅や甲殻に宿す。長い触角で樹皮のすき間を探る。",
+    "image": "https://zeazzi244-jpg.github.io/mushiverse/assets/cards/original/moss-longhorn.webp"
+  },
+  {
+    "id": "mv-original-moss-dragonfly",
+    "name": "苔灯トンボ",
+    "rarity": "N",
+    "habitat": "苔の谷",
+    "description": "苔の光を翅や甲殻に宿す。四枚の細い翅で水面をかすめる。",
+    "image": "https://zeazzi244-jpg.github.io/mushiverse/assets/cards/original/moss-dragonfly.webp"
+  },
+  {
+    "id": "mv-original-moss-mantis",
+    "name": "苔灯カマキリ",
+    "rarity": "N",
+    "habitat": "苔の谷",
+    "description": "苔の光を翅や甲殻に宿す。折りたたんだ前脚を静かに伸ばす。",
+    "image": "https://zeazzi244-jpg.github.io/mushiverse/assets/cards/original/moss-mantis.webp"
+  },
+  {
+    "id": "mv-original-moss-bee",
+    "name": "苔灯ハナバチ",
+    "rarity": "N",
+    "habitat": "苔の谷",
+    "description": "苔の光を翅や甲殻に宿す。花から花へ飛びながら花蜜を集める。",
+    "image": "https://zeazzi244-jpg.github.io/mushiverse/assets/cards/original/moss-bee.webp"
+  },
+  {
+    "id": "mv-original-moss-cicada",
+    "name": "苔灯セミ",
+    "rarity": "N",
+    "habitat": "苔の谷",
+    "description": "苔の光を翅や甲殻に宿す。透明な翅を閉じて幹にとまる。",
+    "image": "https://zeazzi244-jpg.github.io/mushiverse/assets/cards/original/moss-cicada.webp"
+  },
+  {
+    "id": "mv-original-moss-grasshopper",
+    "name": "苔灯バッタ",
+    "rarity": "N",
+    "habitat": "苔の谷",
+    "description": "苔の光を翅や甲殻に宿す。太い後脚で葉陰から跳び出す。",
+    "image": "https://zeazzi244-jpg.github.io/mushiverse/assets/cards/original/moss-grasshopper.webp"
+  },
+  {
+    "id": "mv-original-moss-cricket",
+    "name": "苔灯コオロギ",
+    "rarity": "N",
+    "habitat": "苔の谷",
+    "description": "苔の光を翅や甲殻に宿す。長い触角を揺らしながら夜に鳴く。",
+    "image": "https://zeazzi244-jpg.github.io/mushiverse/assets/cards/original/moss-cricket.webp"
+  },
+  {
+    "id": "mv-original-moss-firefly",
+    "name": "苔灯ホタル",
+    "rarity": "N",
+    "habitat": "苔の谷",
+    "description": "苔の光を翅や甲殻に宿す。腹の先にやわらかな灯りをともす。",
+    "image": "https://zeazzi244-jpg.github.io/mushiverse/assets/cards/original/moss-firefly.webp"
+  },
+  {
+    "id": "mv-original-moss-pondskater",
+    "name": "苔灯アメンボ",
+    "rarity": "N",
+    "habitat": "苔の谷",
+    "description": "苔の光を翅や甲殻に宿す。細い脚で波紋のあいだを渡る。",
+    "image": "https://zeazzi244-jpg.github.io/mushiverse/assets/cards/original/moss-pondskater.webp"
+  },
+  {
+    "id": "mv-original-dew-swallowtail",
+    "name": "雫紋アゲハ",
+    "rarity": "N",
+    "habitat": "朝露の原",
+    "description": "朝露の粒が透ける模様を持つ。森の上を弧を描いて飛ぶ。",
+    "image": "https://zeazzi244-jpg.github.io/mushiverse/assets/cards/original/dew-swallowtail.webp"
+  },
+  {
+    "id": "mv-original-dew-moth",
+    "name": "雫紋コガ",
+    "rarity": "N",
+    "habitat": "朝露の原",
+    "description": "朝露の粒が透ける模様を持つ。枝先で翅を重ねて休む。",
+    "image": "https://zeazzi244-jpg.github.io/mushiverse/assets/cards/original/dew-moth.webp"
+  },
+  {
+    "id": "mv-original-dew-stag",
+    "name": "雫紋クワガタ",
+    "rarity": "N",
+    "habitat": "朝露の原",
+    "description": "朝露の粒が透ける模様を持つ。二股の大あごで枯れ枝をつかむ。",
+    "image": "https://zeazzi244-jpg.github.io/mushiverse/assets/cards/original/dew-stag.webp"
+  },
+  {
+    "id": "mv-original-dew-rhinoceros",
+    "name": "雫紋カブト",
+    "rarity": "N",
+    "habitat": "朝露の原",
+    "description": "朝露の粒が透ける模様を持つ。一本の角が葉の間からのぞく。",
+    "image": "https://zeazzi244-jpg.github.io/mushiverse/assets/cards/original/dew-rhinoceros.webp"
+  },
+  {
+    "id": "mv-original-dew-jewel",
+    "name": "雫紋タマムシ",
+    "rarity": "N",
+    "habitat": "朝露の原",
+    "description": "朝露の粒が透ける模様を持つ。細い甲殻の縁が動くたびに光る。",
+    "image": "https://zeazzi244-jpg.github.io/mushiverse/assets/cards/original/dew-jewel.webp"
+  },
+  {
+    "id": "mv-original-dew-ladybird",
+    "name": "雫紋テントウ",
+    "rarity": "N",
+    "habitat": "朝露の原",
+    "description": "朝露の粒が透ける模様を持つ。丸い背が木の実に紛れる。",
+    "image": "https://zeazzi244-jpg.github.io/mushiverse/assets/cards/original/dew-ladybird.webp"
+  },
+  {
+    "id": "mv-original-dew-longhorn",
+    "name": "雫紋カミキリ",
+    "rarity": "N",
+    "habitat": "朝露の原",
+    "description": "朝露の粒が透ける模様を持つ。長い触角で樹皮のすき間を探る。",
+    "image": "https://zeazzi244-jpg.github.io/mushiverse/assets/cards/original/dew-longhorn.webp"
+  },
+  {
+    "id": "mv-original-dew-dragonfly",
+    "name": "雫紋トンボ",
+    "rarity": "N",
+    "habitat": "朝露の原",
+    "description": "朝露の粒が透ける模様を持つ。四枚の細い翅で水面をかすめる。",
+    "image": "https://zeazzi244-jpg.github.io/mushiverse/assets/cards/original/dew-dragonfly.webp"
+  },
+  {
+    "id": "mv-original-dew-mantis",
+    "name": "雫紋カマキリ",
+    "rarity": "N",
+    "habitat": "朝露の原",
+    "description": "朝露の粒が透ける模様を持つ。折りたたんだ前脚を静かに伸ばす。",
+    "image": "https://zeazzi244-jpg.github.io/mushiverse/assets/cards/original/dew-mantis.webp"
+  },
+  {
+    "id": "mv-original-dew-bee",
+    "name": "雫紋ハナバチ",
+    "rarity": "N",
+    "habitat": "朝露の原",
+    "description": "朝露の粒が透ける模様を持つ。花から花へ飛びながら花蜜を集める。",
+    "image": "https://zeazzi244-jpg.github.io/mushiverse/assets/cards/original/dew-bee.webp"
+  },
+  {
+    "id": "mv-original-dew-cicada",
+    "name": "雫紋セミ",
+    "rarity": "N",
+    "habitat": "朝露の原",
+    "description": "朝露の粒が透ける模様を持つ。透明な翅を閉じて幹にとまる。",
+    "image": "https://zeazzi244-jpg.github.io/mushiverse/assets/cards/original/dew-cicada.webp"
+  },
+  {
+    "id": "mv-original-dew-grasshopper",
+    "name": "雫紋バッタ",
+    "rarity": "N",
+    "habitat": "朝露の原",
+    "description": "朝露の粒が透ける模様を持つ。太い後脚で葉陰から跳び出す。",
+    "image": "https://zeazzi244-jpg.github.io/mushiverse/assets/cards/original/dew-grasshopper.webp"
+  },
+  {
+    "id": "mv-original-dew-cricket",
+    "name": "雫紋コオロギ",
+    "rarity": "N",
+    "habitat": "朝露の原",
+    "description": "朝露の粒が透ける模様を持つ。長い触角を揺らしながら夜に鳴く。",
+    "image": "https://zeazzi244-jpg.github.io/mushiverse/assets/cards/original/dew-cricket.webp"
+  },
+  {
+    "id": "mv-original-dew-firefly",
+    "name": "雫紋ホタル",
+    "rarity": "N",
+    "habitat": "朝露の原",
+    "description": "朝露の粒が透ける模様を持つ。腹の先にやわらかな灯りをともす。",
+    "image": "https://zeazzi244-jpg.github.io/mushiverse/assets/cards/original/dew-firefly.webp"
+  },
+  {
+    "id": "mv-original-dew-pondskater",
+    "name": "雫紋アメンボ",
+    "rarity": "N",
+    "habitat": "朝露の原",
+    "description": "朝露の粒が透ける模様を持つ。細い脚で波紋のあいだを渡る。",
+    "image": "https://zeazzi244-jpg.github.io/mushiverse/assets/cards/original/dew-pondskater.webp"
+  },
+  {
+    "id": "mv-original-ember-swallowtail",
+    "name": "火種アゲハ",
+    "rarity": "N",
+    "habitat": "赤土の林道",
+    "description": "小さな火種のような橙色の光を放つ。森の上を弧を描いて飛ぶ。",
+    "image": "https://zeazzi244-jpg.github.io/mushiverse/assets/cards/original/ember-swallowtail.webp"
+  },
+  {
+    "id": "mv-original-ember-moth",
+    "name": "火種コガ",
+    "rarity": "N",
+    "habitat": "赤土の林道",
+    "description": "小さな火種のような橙色の光を放つ。枝先で翅を重ねて休む。",
+    "image": "https://zeazzi244-jpg.github.io/mushiverse/assets/cards/original/ember-moth.webp"
+  },
+  {
+    "id": "mv-original-ember-stag",
+    "name": "火種クワガタ",
+    "rarity": "N",
+    "habitat": "赤土の林道",
+    "description": "小さな火種のような橙色の光を放つ。二股の大あごで枯れ枝をつかむ。",
+    "image": "https://zeazzi244-jpg.github.io/mushiverse/assets/cards/original/ember-stag.webp"
+  },
+  {
+    "id": "mv-original-ember-rhinoceros",
+    "name": "火種カブト",
+    "rarity": "N",
+    "habitat": "赤土の林道",
+    "description": "小さな火種のような橙色の光を放つ。一本の角が葉の間からのぞく。",
+    "image": "https://zeazzi244-jpg.github.io/mushiverse/assets/cards/original/ember-rhinoceros.webp"
+  },
+  {
+    "id": "mv-original-ember-jewel",
+    "name": "火種タマムシ",
+    "rarity": "N",
+    "habitat": "赤土の林道",
+    "description": "小さな火種のような橙色の光を放つ。細い甲殻の縁が動くたびに光る。",
+    "image": "https://zeazzi244-jpg.github.io/mushiverse/assets/cards/original/ember-jewel.webp"
+  },
+  {
+    "id": "mv-original-ember-ladybird",
+    "name": "火種テントウ",
+    "rarity": "N",
+    "habitat": "赤土の林道",
+    "description": "小さな火種のような橙色の光を放つ。丸い背が木の実に紛れる。",
+    "image": "https://zeazzi244-jpg.github.io/mushiverse/assets/cards/original/ember-ladybird.webp"
+  },
+  {
+    "id": "mv-original-ember-longhorn",
+    "name": "火種カミキリ",
+    "rarity": "N",
+    "habitat": "赤土の林道",
+    "description": "小さな火種のような橙色の光を放つ。長い触角で樹皮のすき間を探る。",
+    "image": "https://zeazzi244-jpg.github.io/mushiverse/assets/cards/original/ember-longhorn.webp"
+  },
+  {
+    "id": "mv-original-ember-dragonfly",
+    "name": "火種トンボ",
+    "rarity": "N",
+    "habitat": "赤土の林道",
+    "description": "小さな火種のような橙色の光を放つ。四枚の細い翅で水面をかすめる。",
+    "image": "https://zeazzi244-jpg.github.io/mushiverse/assets/cards/original/ember-dragonfly.webp"
+  },
+  {
+    "id": "mv-original-ember-mantis",
+    "name": "火種カマキリ",
+    "rarity": "N",
+    "habitat": "赤土の林道",
+    "description": "小さな火種のような橙色の光を放つ。折りたたんだ前脚を静かに伸ばす。",
+    "image": "https://zeazzi244-jpg.github.io/mushiverse/assets/cards/original/ember-mantis.webp"
+  },
+  {
+    "id": "mv-original-ember-bee",
+    "name": "火種ハナバチ",
+    "rarity": "N",
+    "habitat": "赤土の林道",
+    "description": "小さな火種のような橙色の光を放つ。花から花へ飛びながら花蜜を集める。",
+    "image": "https://zeazzi244-jpg.github.io/mushiverse/assets/cards/original/ember-bee.webp"
+  },
+  {
+    "id": "mv-original-ember-cicada",
+    "name": "火種セミ",
+    "rarity": "N",
+    "habitat": "赤土の林道",
+    "description": "小さな火種のような橙色の光を放つ。透明な翅を閉じて幹にとまる。",
+    "image": "https://zeazzi244-jpg.github.io/mushiverse/assets/cards/original/ember-cicada.webp"
+  },
+  {
+    "id": "mv-original-ember-grasshopper",
+    "name": "火種バッタ",
+    "rarity": "N",
+    "habitat": "赤土の林道",
+    "description": "小さな火種のような橙色の光を放つ。太い後脚で葉陰から跳び出す。",
+    "image": "https://zeazzi244-jpg.github.io/mushiverse/assets/cards/original/ember-grasshopper.webp"
+  },
+  {
+    "id": "mv-original-ember-cricket",
+    "name": "火種コオロギ",
+    "rarity": "N",
+    "habitat": "赤土の林道",
+    "description": "小さな火種のような橙色の光を放つ。長い触角を揺らしながら夜に鳴く。",
+    "image": "https://zeazzi244-jpg.github.io/mushiverse/assets/cards/original/ember-cricket.webp"
+  },
+  {
+    "id": "mv-original-ember-firefly",
+    "name": "火種ホタル",
+    "rarity": "N",
+    "habitat": "赤土の林道",
+    "description": "小さな火種のような橙色の光を放つ。腹の先にやわらかな灯りをともす。",
+    "image": "https://zeazzi244-jpg.github.io/mushiverse/assets/cards/original/ember-firefly.webp"
+  },
+  {
+    "id": "mv-original-ember-pondskater",
+    "name": "火種アメンボ",
+    "rarity": "N",
+    "habitat": "赤土の林道",
+    "description": "小さな火種のような橙色の光を放つ。細い脚で波紋のあいだを渡る。",
+    "image": "https://zeazzi244-jpg.github.io/mushiverse/assets/cards/original/ember-pondskater.webp"
+  },
+  {
+    "id": "mv-original-frost-swallowtail",
+    "name": "霜玻璃アゲハ",
+    "rarity": "N",
+    "habitat": "霜の高原",
+    "description": "薄い氷のような翅脈がきらめく。森の上を弧を描いて飛ぶ。",
+    "image": "https://zeazzi244-jpg.github.io/mushiverse/assets/cards/original/frost-swallowtail.webp"
+  },
+  {
+    "id": "mv-original-frost-moth",
+    "name": "霜玻璃コガ",
+    "rarity": "N",
+    "habitat": "霜の高原",
+    "description": "薄い氷のような翅脈がきらめく。枝先で翅を重ねて休む。",
+    "image": "https://zeazzi244-jpg.github.io/mushiverse/assets/cards/original/frost-moth.webp"
+  },
+  {
+    "id": "mv-original-frost-stag",
+    "name": "霜玻璃クワガタ",
+    "rarity": "N",
+    "habitat": "霜の高原",
+    "description": "薄い氷のような翅脈がきらめく。二股の大あごで枯れ枝をつかむ。",
+    "image": "https://zeazzi244-jpg.github.io/mushiverse/assets/cards/original/frost-stag.webp"
+  },
+  {
+    "id": "mv-original-frost-rhinoceros",
+    "name": "霜玻璃カブト",
+    "rarity": "N",
+    "habitat": "霜の高原",
+    "description": "薄い氷のような翅脈がきらめく。一本の角が葉の間からのぞく。",
+    "image": "https://zeazzi244-jpg.github.io/mushiverse/assets/cards/original/frost-rhinoceros.webp"
+  },
+  {
+    "id": "mv-original-frost-jewel",
+    "name": "霜玻璃タマムシ",
+    "rarity": "N",
+    "habitat": "霜の高原",
+    "description": "薄い氷のような翅脈がきらめく。細い甲殻の縁が動くたびに光る。",
+    "image": "https://zeazzi244-jpg.github.io/mushiverse/assets/cards/original/frost-jewel.webp"
+  },
+  {
+    "id": "mv-original-frost-ladybird",
+    "name": "霜玻璃テントウ",
+    "rarity": "N",
+    "habitat": "霜の高原",
+    "description": "薄い氷のような翅脈がきらめく。丸い背が木の実に紛れる。",
+    "image": "https://zeazzi244-jpg.github.io/mushiverse/assets/cards/original/frost-ladybird.webp"
+  },
+  {
+    "id": "mv-original-frost-longhorn",
+    "name": "霜玻璃カミキリ",
+    "rarity": "N",
+    "habitat": "霜の高原",
+    "description": "薄い氷のような翅脈がきらめく。長い触角で樹皮のすき間を探る。",
+    "image": "https://zeazzi244-jpg.github.io/mushiverse/assets/cards/original/frost-longhorn.webp"
+  },
+  {
+    "id": "mv-original-frost-dragonfly",
+    "name": "霜玻璃トンボ",
+    "rarity": "N",
+    "habitat": "霜の高原",
+    "description": "薄い氷のような翅脈がきらめく。四枚の細い翅で水面をかすめる。",
+    "image": "https://zeazzi244-jpg.github.io/mushiverse/assets/cards/original/frost-dragonfly.webp"
+  },
+  {
+    "id": "mv-original-frost-mantis",
+    "name": "霜玻璃カマキリ",
+    "rarity": "N",
+    "habitat": "霜の高原",
+    "description": "薄い氷のような翅脈がきらめく。折りたたんだ前脚を静かに伸ばす。",
+    "image": "https://zeazzi244-jpg.github.io/mushiverse/assets/cards/original/frost-mantis.webp"
+  },
+  {
+    "id": "mv-original-frost-bee",
+    "name": "霜玻璃ハナバチ",
+    "rarity": "N",
+    "habitat": "霜の高原",
+    "description": "薄い氷のような翅脈がきらめく。花から花へ飛びながら花蜜を集める。",
+    "image": "https://zeazzi244-jpg.github.io/mushiverse/assets/cards/original/frost-bee.webp"
+  },
+  {
+    "id": "mv-original-frost-cicada",
+    "name": "霜玻璃セミ",
+    "rarity": "N",
+    "habitat": "霜の高原",
+    "description": "薄い氷のような翅脈がきらめく。透明な翅を閉じて幹にとまる。",
+    "image": "https://zeazzi244-jpg.github.io/mushiverse/assets/cards/original/frost-cicada.webp"
+  },
+  {
+    "id": "mv-original-frost-grasshopper",
+    "name": "霜玻璃バッタ",
+    "rarity": "N",
+    "habitat": "霜の高原",
+    "description": "薄い氷のような翅脈がきらめく。太い後脚で葉陰から跳び出す。",
+    "image": "https://zeazzi244-jpg.github.io/mushiverse/assets/cards/original/frost-grasshopper.webp"
+  },
+  {
+    "id": "mv-original-frost-cricket",
+    "name": "霜玻璃コオロギ",
+    "rarity": "N",
+    "habitat": "霜の高原",
+    "description": "薄い氷のような翅脈がきらめく。長い触角を揺らしながら夜に鳴く。",
+    "image": "https://zeazzi244-jpg.github.io/mushiverse/assets/cards/original/frost-cricket.webp"
+  },
+  {
+    "id": "mv-original-frost-firefly",
+    "name": "霜玻璃ホタル",
+    "rarity": "N",
+    "habitat": "霜の高原",
+    "description": "薄い氷のような翅脈がきらめく。腹の先にやわらかな灯りをともす。",
+    "image": "https://zeazzi244-jpg.github.io/mushiverse/assets/cards/original/frost-firefly.webp"
+  },
+  {
+    "id": "mv-original-frost-pondskater",
+    "name": "霜玻璃アメンボ",
+    "rarity": "N",
+    "habitat": "霜の高原",
+    "description": "薄い氷のような翅脈がきらめく。細い脚で波紋のあいだを渡る。",
+    "image": "https://zeazzi244-jpg.github.io/mushiverse/assets/cards/original/frost-pondskater.webp"
+  },
+  {
+    "id": "mv-original-berry-swallowtail",
+    "name": "木苺アゲハ",
+    "rarity": "N",
+    "habitat": "木苺の茂み",
+    "description": "熟した木苺のような赤紫の模様を持つ。森の上を弧を描いて飛ぶ。",
+    "image": "https://zeazzi244-jpg.github.io/mushiverse/assets/cards/original/berry-swallowtail.webp"
+  },
+  {
+    "id": "mv-original-berry-moth",
+    "name": "木苺コガ",
+    "rarity": "N",
+    "habitat": "木苺の茂み",
+    "description": "熟した木苺のような赤紫の模様を持つ。枝先で翅を重ねて休む。",
+    "image": "https://zeazzi244-jpg.github.io/mushiverse/assets/cards/original/berry-moth.webp"
+  },
+  {
+    "id": "mv-original-berry-stag",
+    "name": "木苺クワガタ",
+    "rarity": "N",
+    "habitat": "木苺の茂み",
+    "description": "熟した木苺のような赤紫の模様を持つ。二股の大あごで枯れ枝をつかむ。",
+    "image": "https://zeazzi244-jpg.github.io/mushiverse/assets/cards/original/berry-stag.webp"
+  },
+  {
+    "id": "mv-original-berry-rhinoceros",
+    "name": "木苺カブト",
+    "rarity": "N",
+    "habitat": "木苺の茂み",
+    "description": "熟した木苺のような赤紫の模様を持つ。一本の角が葉の間からのぞく。",
+    "image": "https://zeazzi244-jpg.github.io/mushiverse/assets/cards/original/berry-rhinoceros.webp"
+  },
+  {
+    "id": "mv-original-berry-jewel",
+    "name": "木苺タマムシ",
+    "rarity": "N",
+    "habitat": "木苺の茂み",
+    "description": "熟した木苺のような赤紫の模様を持つ。細い甲殻の縁が動くたびに光る。",
+    "image": "https://zeazzi244-jpg.github.io/mushiverse/assets/cards/original/berry-jewel.webp"
+  },
+  {
+    "id": "mv-original-berry-ladybird",
+    "name": "木苺テントウ",
+    "rarity": "N",
+    "habitat": "木苺の茂み",
+    "description": "熟した木苺のような赤紫の模様を持つ。丸い背が木の実に紛れる。",
+    "image": "https://zeazzi244-jpg.github.io/mushiverse/assets/cards/original/berry-ladybird.webp"
+  },
+  {
+    "id": "mv-original-berry-longhorn",
+    "name": "木苺カミキリ",
+    "rarity": "N",
+    "habitat": "木苺の茂み",
+    "description": "熟した木苺のような赤紫の模様を持つ。長い触角で樹皮のすき間を探る。",
+    "image": "https://zeazzi244-jpg.github.io/mushiverse/assets/cards/original/berry-longhorn.webp"
+  },
+  {
+    "id": "mv-original-berry-dragonfly",
+    "name": "木苺トンボ",
+    "rarity": "N",
+    "habitat": "木苺の茂み",
+    "description": "熟した木苺のような赤紫の模様を持つ。四枚の細い翅で水面をかすめる。",
+    "image": "https://zeazzi244-jpg.github.io/mushiverse/assets/cards/original/berry-dragonfly.webp"
+  },
+  {
+    "id": "mv-original-berry-mantis",
+    "name": "木苺カマキリ",
+    "rarity": "N",
+    "habitat": "木苺の茂み",
+    "description": "熟した木苺のような赤紫の模様を持つ。折りたたんだ前脚を静かに伸ばす。",
+    "image": "https://zeazzi244-jpg.github.io/mushiverse/assets/cards/original/berry-mantis.webp"
+  },
+  {
+    "id": "mv-original-berry-bee",
+    "name": "木苺ハナバチ",
+    "rarity": "N",
+    "habitat": "木苺の茂み",
+    "description": "熟した木苺のような赤紫の模様を持つ。花から花へ飛びながら花蜜を集める。",
+    "image": "https://zeazzi244-jpg.github.io/mushiverse/assets/cards/original/berry-bee.webp"
+  },
+  {
+    "id": "mv-original-berry-cicada",
+    "name": "木苺セミ",
+    "rarity": "N",
+    "habitat": "木苺の茂み",
+    "description": "熟した木苺のような赤紫の模様を持つ。透明な翅を閉じて幹にとまる。",
+    "image": "https://zeazzi244-jpg.github.io/mushiverse/assets/cards/original/berry-cicada.webp"
+  },
+  {
+    "id": "mv-original-berry-grasshopper",
+    "name": "木苺バッタ",
+    "rarity": "N",
+    "habitat": "木苺の茂み",
+    "description": "熟した木苺のような赤紫の模様を持つ。太い後脚で葉陰から跳び出す。",
+    "image": "https://zeazzi244-jpg.github.io/mushiverse/assets/cards/original/berry-grasshopper.webp"
+  },
+  {
+    "id": "mv-original-berry-cricket",
+    "name": "木苺コオロギ",
+    "rarity": "N",
+    "habitat": "木苺の茂み",
+    "description": "熟した木苺のような赤紫の模様を持つ。長い触角を揺らしながら夜に鳴く。",
+    "image": "https://zeazzi244-jpg.github.io/mushiverse/assets/cards/original/berry-cricket.webp"
+  },
+  {
+    "id": "mv-original-berry-firefly",
+    "name": "木苺ホタル",
+    "rarity": "N",
+    "habitat": "木苺の茂み",
+    "description": "熟した木苺のような赤紫の模様を持つ。腹の先にやわらかな灯りをともす。",
+    "image": "https://zeazzi244-jpg.github.io/mushiverse/assets/cards/original/berry-firefly.webp"
+  },
+  {
+    "id": "mv-original-berry-pondskater",
+    "name": "木苺アメンボ",
+    "rarity": "N",
+    "habitat": "木苺の茂み",
+    "description": "熟した木苺のような赤紫の模様を持つ。細い脚で波紋のあいだを渡る。",
+    "image": "https://zeazzi244-jpg.github.io/mushiverse/assets/cards/original/berry-pondskater.webp"
+  },
+  {
+    "id": "mv-original-tide-swallowtail",
+    "name": "潮玉アゲハ",
+    "rarity": "N",
+    "habitat": "潮風の湿原",
+    "description": "海辺の青い小石のような色をまとう。森の上を弧を描いて飛ぶ。",
+    "image": "https://zeazzi244-jpg.github.io/mushiverse/assets/cards/original/tide-swallowtail.webp"
+  },
+  {
+    "id": "mv-original-tide-moth",
+    "name": "潮玉コガ",
+    "rarity": "N",
+    "habitat": "潮風の湿原",
+    "description": "海辺の青い小石のような色をまとう。枝先で翅を重ねて休む。",
+    "image": "https://zeazzi244-jpg.github.io/mushiverse/assets/cards/original/tide-moth.webp"
+  },
+  {
+    "id": "mv-original-tide-stag",
+    "name": "潮玉クワガタ",
+    "rarity": "N",
+    "habitat": "潮風の湿原",
+    "description": "海辺の青い小石のような色をまとう。二股の大あごで枯れ枝をつかむ。",
+    "image": "https://zeazzi244-jpg.github.io/mushiverse/assets/cards/original/tide-stag.webp"
+  },
+  {
+    "id": "mv-original-tide-rhinoceros",
+    "name": "潮玉カブト",
+    "rarity": "N",
+    "habitat": "潮風の湿原",
+    "description": "海辺の青い小石のような色をまとう。一本の角が葉の間からのぞく。",
+    "image": "https://zeazzi244-jpg.github.io/mushiverse/assets/cards/original/tide-rhinoceros.webp"
+  },
+  {
+    "id": "mv-original-tide-jewel",
+    "name": "潮玉タマムシ",
+    "rarity": "N",
+    "habitat": "潮風の湿原",
+    "description": "海辺の青い小石のような色をまとう。細い甲殻の縁が動くたびに光る。",
+    "image": "https://zeazzi244-jpg.github.io/mushiverse/assets/cards/original/tide-jewel.webp"
+  },
+  {
+    "id": "mv-original-tide-ladybird",
+    "name": "潮玉テントウ",
+    "rarity": "N",
+    "habitat": "潮風の湿原",
+    "description": "海辺の青い小石のような色をまとう。丸い背が木の実に紛れる。",
+    "image": "https://zeazzi244-jpg.github.io/mushiverse/assets/cards/original/tide-ladybird.webp"
+  },
+  {
+    "id": "mv-original-tide-longhorn",
+    "name": "潮玉カミキリ",
+    "rarity": "N",
+    "habitat": "潮風の湿原",
+    "description": "海辺の青い小石のような色をまとう。長い触角で樹皮のすき間を探る。",
+    "image": "https://zeazzi244-jpg.github.io/mushiverse/assets/cards/original/tide-longhorn.webp"
+  },
+  {
+    "id": "mv-original-tide-dragonfly",
+    "name": "潮玉トンボ",
+    "rarity": "N",
+    "habitat": "潮風の湿原",
+    "description": "海辺の青い小石のような色をまとう。四枚の細い翅で水面をかすめる。",
+    "image": "https://zeazzi244-jpg.github.io/mushiverse/assets/cards/original/tide-dragonfly.webp"
+  },
+  {
+    "id": "mv-original-tide-mantis",
+    "name": "潮玉カマキリ",
+    "rarity": "N",
+    "habitat": "潮風の湿原",
+    "description": "海辺の青い小石のような色をまとう。折りたたんだ前脚を静かに伸ばす。",
+    "image": "https://zeazzi244-jpg.github.io/mushiverse/assets/cards/original/tide-mantis.webp"
+  },
+  {
+    "id": "mv-original-tide-bee",
+    "name": "潮玉ハナバチ",
+    "rarity": "N",
+    "habitat": "潮風の湿原",
+    "description": "海辺の青い小石のような色をまとう。花から花へ飛びながら花蜜を集める。",
+    "image": "https://zeazzi244-jpg.github.io/mushiverse/assets/cards/original/tide-bee.webp"
+  },
+  {
+    "id": "mv-original-tide-cicada",
+    "name": "潮玉セミ",
+    "rarity": "N",
+    "habitat": "潮風の湿原",
+    "description": "海辺の青い小石のような色をまとう。透明な翅を閉じて幹にとまる。",
+    "image": "https://zeazzi244-jpg.github.io/mushiverse/assets/cards/original/tide-cicada.webp"
+  },
+  {
+    "id": "mv-original-tide-grasshopper",
+    "name": "潮玉バッタ",
+    "rarity": "N",
+    "habitat": "潮風の湿原",
+    "description": "海辺の青い小石のような色をまとう。太い後脚で葉陰から跳び出す。",
+    "image": "https://zeazzi244-jpg.github.io/mushiverse/assets/cards/original/tide-grasshopper.webp"
+  },
+  {
+    "id": "mv-original-tide-cricket",
+    "name": "潮玉コオロギ",
+    "rarity": "N",
+    "habitat": "潮風の湿原",
+    "description": "海辺の青い小石のような色をまとう。長い触角を揺らしながら夜に鳴く。",
+    "image": "https://zeazzi244-jpg.github.io/mushiverse/assets/cards/original/tide-cricket.webp"
+  },
+  {
+    "id": "mv-original-tide-firefly",
+    "name": "潮玉ホタル",
+    "rarity": "N",
+    "habitat": "潮風の湿原",
+    "description": "海辺の青い小石のような色をまとう。腹の先にやわらかな灯りをともす。",
+    "image": "https://zeazzi244-jpg.github.io/mushiverse/assets/cards/original/tide-firefly.webp"
+  },
+  {
+    "id": "mv-original-tide-pondskater",
+    "name": "潮玉アメンボ",
+    "rarity": "N",
+    "habitat": "潮風の湿原",
+    "description": "海辺の青い小石のような色をまとう。細い脚で波紋のあいだを渡る。",
+    "image": "https://zeazzi244-jpg.github.io/mushiverse/assets/cards/original/tide-pondskater.webp"
+  },
+  {
+    "id": "mv-original-fern-swallowtail",
+    "name": "羊歯影アゲハ",
+    "rarity": "N",
+    "habitat": "羊歯の小径",
+    "description": "羊歯の葉脈に似たすじが走る。森の上を弧を描いて飛ぶ。",
+    "image": "https://zeazzi244-jpg.github.io/mushiverse/assets/cards/original/fern-swallowtail.webp"
+  },
+  {
+    "id": "mv-original-fern-moth",
+    "name": "羊歯影コガ",
+    "rarity": "N",
+    "habitat": "羊歯の小径",
+    "description": "羊歯の葉脈に似たすじが走る。枝先で翅を重ねて休む。",
+    "image": "https://zeazzi244-jpg.github.io/mushiverse/assets/cards/original/fern-moth.webp"
+  },
+  {
+    "id": "mv-original-fern-stag",
+    "name": "羊歯影クワガタ",
+    "rarity": "N",
+    "habitat": "羊歯の小径",
+    "description": "羊歯の葉脈に似たすじが走る。二股の大あごで枯れ枝をつかむ。",
+    "image": "https://zeazzi244-jpg.github.io/mushiverse/assets/cards/original/fern-stag.webp"
+  },
+  {
+    "id": "mv-original-fern-rhinoceros",
+    "name": "羊歯影カブト",
+    "rarity": "N",
+    "habitat": "羊歯の小径",
+    "description": "羊歯の葉脈に似たすじが走る。一本の角が葉の間からのぞく。",
+    "image": "https://zeazzi244-jpg.github.io/mushiverse/assets/cards/original/fern-rhinoceros.webp"
+  },
+  {
+    "id": "mv-original-fern-jewel",
+    "name": "羊歯影タマムシ",
+    "rarity": "N",
+    "habitat": "羊歯の小径",
+    "description": "羊歯の葉脈に似たすじが走る。細い甲殻の縁が動くたびに光る。",
+    "image": "https://zeazzi244-jpg.github.io/mushiverse/assets/cards/original/fern-jewel.webp"
+  },
+  {
+    "id": "mv-original-fern-ladybird",
+    "name": "羊歯影テントウ",
+    "rarity": "N",
+    "habitat": "羊歯の小径",
+    "description": "羊歯の葉脈に似たすじが走る。丸い背が木の実に紛れる。",
+    "image": "https://zeazzi244-jpg.github.io/mushiverse/assets/cards/original/fern-ladybird.webp"
+  },
+  {
+    "id": "mv-original-fern-longhorn",
+    "name": "羊歯影カミキリ",
+    "rarity": "N",
+    "habitat": "羊歯の小径",
+    "description": "羊歯の葉脈に似たすじが走る。長い触角で樹皮のすき間を探る。",
+    "image": "https://zeazzi244-jpg.github.io/mushiverse/assets/cards/original/fern-longhorn.webp"
+  },
+  {
+    "id": "mv-original-fern-dragonfly",
+    "name": "羊歯影トンボ",
+    "rarity": "N",
+    "habitat": "羊歯の小径",
+    "description": "羊歯の葉脈に似たすじが走る。四枚の細い翅で水面をかすめる。",
+    "image": "https://zeazzi244-jpg.github.io/mushiverse/assets/cards/original/fern-dragonfly.webp"
+  },
+  {
+    "id": "mv-original-fern-mantis",
+    "name": "羊歯影カマキリ",
+    "rarity": "N",
+    "habitat": "羊歯の小径",
+    "description": "羊歯の葉脈に似たすじが走る。折りたたんだ前脚を静かに伸ばす。",
+    "image": "https://zeazzi244-jpg.github.io/mushiverse/assets/cards/original/fern-mantis.webp"
+  },
+  {
+    "id": "mv-original-fern-bee",
+    "name": "羊歯影ハナバチ",
+    "rarity": "N",
+    "habitat": "羊歯の小径",
+    "description": "羊歯の葉脈に似たすじが走る。花から花へ飛びながら花蜜を集める。",
+    "image": "https://zeazzi244-jpg.github.io/mushiverse/assets/cards/original/fern-bee.webp"
+  },
+  {
+    "id": "mv-original-fern-cicada",
+    "name": "羊歯影セミ",
+    "rarity": "N",
+    "habitat": "羊歯の小径",
+    "description": "羊歯の葉脈に似たすじが走る。透明な翅を閉じて幹にとまる。",
+    "image": "https://zeazzi244-jpg.github.io/mushiverse/assets/cards/original/fern-cicada.webp"
+  },
+  {
+    "id": "mv-original-fern-grasshopper",
+    "name": "羊歯影バッタ",
+    "rarity": "N",
+    "habitat": "羊歯の小径",
+    "description": "羊歯の葉脈に似たすじが走る。太い後脚で葉陰から跳び出す。",
+    "image": "https://zeazzi244-jpg.github.io/mushiverse/assets/cards/original/fern-grasshopper.webp"
+  },
+  {
+    "id": "mv-original-fern-cricket",
+    "name": "羊歯影コオロギ",
+    "rarity": "N",
+    "habitat": "羊歯の小径",
+    "description": "羊歯の葉脈に似たすじが走る。長い触角を揺らしながら夜に鳴く。",
+    "image": "https://zeazzi244-jpg.github.io/mushiverse/assets/cards/original/fern-cricket.webp"
+  },
+  {
+    "id": "mv-original-fern-firefly",
+    "name": "羊歯影ホタル",
+    "rarity": "N",
+    "habitat": "羊歯の小径",
+    "description": "羊歯の葉脈に似たすじが走る。腹の先にやわらかな灯りをともす。",
+    "image": "https://zeazzi244-jpg.github.io/mushiverse/assets/cards/original/fern-firefly.webp"
+  },
+  {
+    "id": "mv-original-fern-pondskater",
+    "name": "羊歯影アメンボ",
+    "rarity": "N",
+    "habitat": "羊歯の小径",
+    "description": "羊歯の葉脈に似たすじが走る。細い脚で波紋のあいだを渡る。",
+    "image": "https://zeazzi244-jpg.github.io/mushiverse/assets/cards/original/fern-pondskater.webp"
+  },
+  {
+    "id": "mv-original-honey-swallowtail",
+    "name": "蜜雲アゲハ",
+    "rarity": "N",
+    "habitat": "花蜜の丘",
+    "description": "雲を透かした蜜色の光を帯びる。森の上を弧を描いて飛ぶ。",
+    "image": "https://zeazzi244-jpg.github.io/mushiverse/assets/cards/original/honey-swallowtail.webp"
+  },
+  {
+    "id": "mv-original-honey-moth",
+    "name": "蜜雲コガ",
+    "rarity": "N",
+    "habitat": "花蜜の丘",
+    "description": "雲を透かした蜜色の光を帯びる。枝先で翅を重ねて休む。",
+    "image": "https://zeazzi244-jpg.github.io/mushiverse/assets/cards/original/honey-moth.webp"
+  },
+  {
+    "id": "mv-original-honey-stag",
+    "name": "蜜雲クワガタ",
+    "rarity": "N",
+    "habitat": "花蜜の丘",
+    "description": "雲を透かした蜜色の光を帯びる。二股の大あごで枯れ枝をつかむ。",
+    "image": "https://zeazzi244-jpg.github.io/mushiverse/assets/cards/original/honey-stag.webp"
+  },
+  {
+    "id": "mv-original-honey-rhinoceros",
+    "name": "蜜雲カブト",
+    "rarity": "N",
+    "habitat": "花蜜の丘",
+    "description": "雲を透かした蜜色の光を帯びる。一本の角が葉の間からのぞく。",
+    "image": "https://zeazzi244-jpg.github.io/mushiverse/assets/cards/original/honey-rhinoceros.webp"
+  },
+  {
+    "id": "mv-original-honey-jewel",
+    "name": "蜜雲タマムシ",
+    "rarity": "N",
+    "habitat": "花蜜の丘",
+    "description": "雲を透かした蜜色の光を帯びる。細い甲殻の縁が動くたびに光る。",
+    "image": "https://zeazzi244-jpg.github.io/mushiverse/assets/cards/original/honey-jewel.webp"
+  },
+  {
+    "id": "mv-original-honey-ladybird",
+    "name": "蜜雲テントウ",
+    "rarity": "N",
+    "habitat": "花蜜の丘",
+    "description": "雲を透かした蜜色の光を帯びる。丸い背が木の実に紛れる。",
+    "image": "https://zeazzi244-jpg.github.io/mushiverse/assets/cards/original/honey-ladybird.webp"
+  },
+  {
+    "id": "mv-original-honey-longhorn",
+    "name": "蜜雲カミキリ",
+    "rarity": "N",
+    "habitat": "花蜜の丘",
+    "description": "雲を透かした蜜色の光を帯びる。長い触角で樹皮のすき間を探る。",
+    "image": "https://zeazzi244-jpg.github.io/mushiverse/assets/cards/original/honey-longhorn.webp"
+  },
+  {
+    "id": "mv-original-honey-dragonfly",
+    "name": "蜜雲トンボ",
+    "rarity": "N",
+    "habitat": "花蜜の丘",
+    "description": "雲を透かした蜜色の光を帯びる。四枚の細い翅で水面をかすめる。",
+    "image": "https://zeazzi244-jpg.github.io/mushiverse/assets/cards/original/honey-dragonfly.webp"
+  },
+  {
+    "id": "mv-original-honey-mantis",
+    "name": "蜜雲カマキリ",
+    "rarity": "N",
+    "habitat": "花蜜の丘",
+    "description": "雲を透かした蜜色の光を帯びる。折りたたんだ前脚を静かに伸ばす。",
+    "image": "https://zeazzi244-jpg.github.io/mushiverse/assets/cards/original/honey-mantis.webp"
+  },
+  {
+    "id": "mv-original-honey-bee",
+    "name": "蜜雲ハナバチ",
+    "rarity": "N",
+    "habitat": "花蜜の丘",
+    "description": "雲を透かした蜜色の光を帯びる。花から花へ飛びながら花蜜を集める。",
+    "image": "https://zeazzi244-jpg.github.io/mushiverse/assets/cards/original/honey-bee.webp"
+  },
+  {
+    "id": "mv-original-honey-cicada",
+    "name": "蜜雲セミ",
+    "rarity": "N",
+    "habitat": "花蜜の丘",
+    "description": "雲を透かした蜜色の光を帯びる。透明な翅を閉じて幹にとまる。",
+    "image": "https://zeazzi244-jpg.github.io/mushiverse/assets/cards/original/honey-cicada.webp"
+  },
+  {
+    "id": "mv-original-honey-grasshopper",
+    "name": "蜜雲バッタ",
+    "rarity": "N",
+    "habitat": "花蜜の丘",
+    "description": "雲を透かした蜜色の光を帯びる。太い後脚で葉陰から跳び出す。",
+    "image": "https://zeazzi244-jpg.github.io/mushiverse/assets/cards/original/honey-grasshopper.webp"
+  },
+  {
+    "id": "mv-original-honey-cricket",
+    "name": "蜜雲コオロギ",
+    "rarity": "N",
+    "habitat": "花蜜の丘",
+    "description": "雲を透かした蜜色の光を帯びる。長い触角を揺らしながら夜に鳴く。",
+    "image": "https://zeazzi244-jpg.github.io/mushiverse/assets/cards/original/honey-cricket.webp"
+  },
+  {
+    "id": "mv-original-honey-firefly",
+    "name": "蜜雲ホタル",
+    "rarity": "N",
+    "habitat": "花蜜の丘",
+    "description": "雲を透かした蜜色の光を帯びる。腹の先にやわらかな灯りをともす。",
+    "image": "https://zeazzi244-jpg.github.io/mushiverse/assets/cards/original/honey-firefly.webp"
+  },
+  {
+    "id": "mv-original-honey-pondskater",
+    "name": "蜜雲アメンボ",
+    "rarity": "N",
+    "habitat": "花蜜の丘",
+    "description": "雲を透かした蜜色の光を帯びる。細い脚で波紋のあいだを渡る。",
+    "image": "https://zeazzi244-jpg.github.io/mushiverse/assets/cards/original/honey-pondskater.webp"
+  },
+  {
+    "id": "mv-original-mist-swallowtail",
+    "name": "薄霧アゲハ",
+    "rarity": "N",
+    "habitat": "霧の森",
+    "description": "薄霧に溶け込む淡い翅を持つ。森の上を弧を描いて飛ぶ。",
+    "image": "https://zeazzi244-jpg.github.io/mushiverse/assets/cards/original/mist-swallowtail.webp"
+  },
+  {
+    "id": "mv-original-mist-moth",
+    "name": "薄霧コガ",
+    "rarity": "N",
+    "habitat": "霧の森",
+    "description": "薄霧に溶け込む淡い翅を持つ。枝先で翅を重ねて休む。",
+    "image": "https://zeazzi244-jpg.github.io/mushiverse/assets/cards/original/mist-moth.webp"
+  },
+  {
+    "id": "mv-original-mist-stag",
+    "name": "薄霧クワガタ",
+    "rarity": "N",
+    "habitat": "霧の森",
+    "description": "薄霧に溶け込む淡い翅を持つ。二股の大あごで枯れ枝をつかむ。",
+    "image": "https://zeazzi244-jpg.github.io/mushiverse/assets/cards/original/mist-stag.webp"
+  },
+  {
+    "id": "mv-original-mist-rhinoceros",
+    "name": "薄霧カブト",
+    "rarity": "N",
+    "habitat": "霧の森",
+    "description": "薄霧に溶け込む淡い翅を持つ。一本の角が葉の間からのぞく。",
+    "image": "https://zeazzi244-jpg.github.io/mushiverse/assets/cards/original/mist-rhinoceros.webp"
+  },
+  {
+    "id": "mv-original-mist-jewel",
+    "name": "薄霧タマムシ",
+    "rarity": "N",
+    "habitat": "霧の森",
+    "description": "薄霧に溶け込む淡い翅を持つ。細い甲殻の縁が動くたびに光る。",
+    "image": "https://zeazzi244-jpg.github.io/mushiverse/assets/cards/original/mist-jewel.webp"
+  },
+  {
+    "id": "mv-original-mist-ladybird",
+    "name": "薄霧テントウ",
+    "rarity": "N",
+    "habitat": "霧の森",
+    "description": "薄霧に溶け込む淡い翅を持つ。丸い背が木の実に紛れる。",
+    "image": "https://zeazzi244-jpg.github.io/mushiverse/assets/cards/original/mist-ladybird.webp"
+  },
+  {
+    "id": "mv-original-mist-longhorn",
+    "name": "薄霧カミキリ",
+    "rarity": "N",
+    "habitat": "霧の森",
+    "description": "薄霧に溶け込む淡い翅を持つ。長い触角で樹皮のすき間を探る。",
+    "image": "https://zeazzi244-jpg.github.io/mushiverse/assets/cards/original/mist-longhorn.webp"
+  },
+  {
+    "id": "mv-original-mist-dragonfly",
+    "name": "薄霧トンボ",
+    "rarity": "N",
+    "habitat": "霧の森",
+    "description": "薄霧に溶け込む淡い翅を持つ。四枚の細い翅で水面をかすめる。",
+    "image": "https://zeazzi244-jpg.github.io/mushiverse/assets/cards/original/mist-dragonfly.webp"
+  },
+  {
+    "id": "mv-original-mist-mantis",
+    "name": "薄霧カマキリ",
+    "rarity": "N",
+    "habitat": "霧の森",
+    "description": "薄霧に溶け込む淡い翅を持つ。折りたたんだ前脚を静かに伸ばす。",
+    "image": "https://zeazzi244-jpg.github.io/mushiverse/assets/cards/original/mist-mantis.webp"
+  },
+  {
+    "id": "mv-original-mist-bee",
+    "name": "薄霧ハナバチ",
+    "rarity": "N",
+    "habitat": "霧の森",
+    "description": "薄霧に溶け込む淡い翅を持つ。花から花へ飛びながら花蜜を集める。",
+    "image": "https://zeazzi244-jpg.github.io/mushiverse/assets/cards/original/mist-bee.webp"
+  },
+  {
+    "id": "mv-original-mist-cicada",
+    "name": "薄霧セミ",
+    "rarity": "N",
+    "habitat": "霧の森",
+    "description": "薄霧に溶け込む淡い翅を持つ。透明な翅を閉じて幹にとまる。",
+    "image": "https://zeazzi244-jpg.github.io/mushiverse/assets/cards/original/mist-cicada.webp"
+  },
+  {
+    "id": "mv-original-mist-grasshopper",
+    "name": "薄霧バッタ",
+    "rarity": "N",
+    "habitat": "霧の森",
+    "description": "薄霧に溶け込む淡い翅を持つ。太い後脚で葉陰から跳び出す。",
+    "image": "https://zeazzi244-jpg.github.io/mushiverse/assets/cards/original/mist-grasshopper.webp"
+  },
+  {
+    "id": "mv-original-mist-cricket",
+    "name": "薄霧コオロギ",
+    "rarity": "N",
+    "habitat": "霧の森",
+    "description": "薄霧に溶け込む淡い翅を持つ。長い触角を揺らしながら夜に鳴く。",
+    "image": "https://zeazzi244-jpg.github.io/mushiverse/assets/cards/original/mist-cricket.webp"
+  },
+  {
+    "id": "mv-original-mist-firefly",
+    "name": "薄霧ホタル",
+    "rarity": "N",
+    "habitat": "霧の森",
+    "description": "薄霧に溶け込む淡い翅を持つ。腹の先にやわらかな灯りをともす。",
+    "image": "https://zeazzi244-jpg.github.io/mushiverse/assets/cards/original/mist-firefly.webp"
+  },
+  {
+    "id": "mv-original-mist-pondskater",
+    "name": "薄霧アメンボ",
+    "rarity": "N",
+    "habitat": "霧の森",
+    "description": "薄霧に溶け込む淡い翅を持つ。細い脚で波紋のあいだを渡る。",
+    "image": "https://zeazzi244-jpg.github.io/mushiverse/assets/cards/original/mist-pondskater.webp"
+  },
+  {
+    "id": "mv-original-amethyst-swallowtail",
+    "name": "紫晶アゲハ",
+    "rarity": "N",
+    "habitat": "紫晶の林",
+    "description": "紫水晶の断面のような模様が浮かぶ。森の上を弧を描いて飛ぶ。",
+    "image": "https://zeazzi244-jpg.github.io/mushiverse/assets/cards/original/amethyst-swallowtail.webp"
+  },
+  {
+    "id": "mv-original-amethyst-moth",
+    "name": "紫晶コガ",
+    "rarity": "N",
+    "habitat": "紫晶の林",
+    "description": "紫水晶の断面のような模様が浮かぶ。枝先で翅を重ねて休む。",
+    "image": "https://zeazzi244-jpg.github.io/mushiverse/assets/cards/original/amethyst-moth.webp"
+  },
+  {
+    "id": "mv-original-amethyst-stag",
+    "name": "紫晶クワガタ",
+    "rarity": "N",
+    "habitat": "紫晶の林",
+    "description": "紫水晶の断面のような模様が浮かぶ。二股の大あごで枯れ枝をつかむ。",
+    "image": "https://zeazzi244-jpg.github.io/mushiverse/assets/cards/original/amethyst-stag.webp"
+  },
+  {
+    "id": "mv-original-amethyst-rhinoceros",
+    "name": "紫晶の林カブト",
+    "rarity": "N",
+    "habitat": "紫晶の林",
+    "description": "紫水晶の断面のような模様が浮かぶ。一本の角が葉の間からのぞく。",
+    "image": "https://zeazzi244-jpg.github.io/mushiverse/assets/cards/original/amethyst-rhinoceros.webp"
+  },
+  {
+    "id": "mv-original-amethyst-jewel",
+    "name": "紫晶タマムシ",
+    "rarity": "N",
+    "habitat": "紫晶の林",
+    "description": "紫水晶の断面のような模様が浮かぶ。細い甲殻の縁が動くたびに光る。",
+    "image": "https://zeazzi244-jpg.github.io/mushiverse/assets/cards/original/amethyst-jewel.webp"
+  },
+  {
+    "id": "mv-original-amethyst-ladybird",
+    "name": "紫晶テントウ",
+    "rarity": "N",
+    "habitat": "紫晶の林",
+    "description": "紫水晶の断面のような模様が浮かぶ。丸い背が木の実に紛れる。",
+    "image": "https://zeazzi244-jpg.github.io/mushiverse/assets/cards/original/amethyst-ladybird.webp"
+  },
+  {
+    "id": "mv-original-amethyst-longhorn",
+    "name": "紫晶カミキリ",
+    "rarity": "N",
+    "habitat": "紫晶の林",
+    "description": "紫水晶の断面のような模様が浮かぶ。長い触角で樹皮のすき間を探る。",
+    "image": "https://zeazzi244-jpg.github.io/mushiverse/assets/cards/original/amethyst-longhorn.webp"
+  },
+  {
+    "id": "mv-original-amethyst-dragonfly",
+    "name": "紫晶トンボ",
+    "rarity": "N",
+    "habitat": "紫晶の林",
+    "description": "紫水晶の断面のような模様が浮かぶ。四枚の細い翅で水面をかすめる。",
+    "image": "https://zeazzi244-jpg.github.io/mushiverse/assets/cards/original/amethyst-dragonfly.webp"
+  },
+  {
+    "id": "mv-original-amethyst-mantis",
+    "name": "紫晶カマキリ",
+    "rarity": "N",
+    "habitat": "紫晶の林",
+    "description": "紫水晶の断面のような模様が浮かぶ。折りたたんだ前脚を静かに伸ばす。",
+    "image": "https://zeazzi244-jpg.github.io/mushiverse/assets/cards/original/amethyst-mantis.webp"
+  },
+  {
+    "id": "mv-original-amethyst-bee",
+    "name": "紫晶ハナバチ",
+    "rarity": "N",
+    "habitat": "紫晶の林",
+    "description": "紫水晶の断面のような模様が浮かぶ。花から花へ飛びながら花蜜を集める。",
+    "image": "https://zeazzi244-jpg.github.io/mushiverse/assets/cards/original/amethyst-bee.webp"
+  },
+  {
+    "id": "mv-original-amethyst-cicada",
+    "name": "紫晶セミ",
+    "rarity": "N",
+    "habitat": "紫晶の林",
+    "description": "紫水晶の断面のような模様が浮かぶ。透明な翅を閉じて幹にとまる。",
+    "image": "https://zeazzi244-jpg.github.io/mushiverse/assets/cards/original/amethyst-cicada.webp"
+  },
+  {
+    "id": "mv-original-amethyst-grasshopper",
+    "name": "紫晶バッタ",
+    "rarity": "N",
+    "habitat": "紫晶の林",
+    "description": "紫水晶の断面のような模様が浮かぶ。太い後脚で葉陰から跳び出す。",
+    "image": "https://zeazzi244-jpg.github.io/mushiverse/assets/cards/original/amethyst-grasshopper.webp"
+  },
+  {
+    "id": "mv-original-amethyst-cricket",
+    "name": "紫晶コオロギ",
+    "rarity": "N",
+    "habitat": "紫晶の林",
+    "description": "紫水晶の断面のような模様が浮かぶ。長い触角を揺らしながら夜に鳴く。",
+    "image": "https://zeazzi244-jpg.github.io/mushiverse/assets/cards/original/amethyst-cricket.webp"
+  },
+  {
+    "id": "mv-original-amethyst-firefly",
+    "name": "紫晶ホタル",
+    "rarity": "N",
+    "habitat": "紫晶の林",
+    "description": "紫水晶の断面のような模様が浮かぶ。腹の先にやわらかな灯りをともす。",
+    "image": "https://zeazzi244-jpg.github.io/mushiverse/assets/cards/original/amethyst-firefly.webp"
+  },
+  {
+    "id": "mv-original-amethyst-pondskater",
+    "name": "紫晶アメンボ",
+    "rarity": "N",
+    "habitat": "紫晶の林",
+    "description": "紫水晶の断面のような模様が浮かぶ。細い脚で波紋のあいだを渡る。",
+    "image": "https://zeazzi244-jpg.github.io/mushiverse/assets/cards/original/amethyst-pondskater.webp"
+  },
+  {
+    "id": "mv-original-auspice-swallowtail",
+    "name": "朱砂アゲハ",
+    "rarity": "N",
+    "habitat": "朱砂の岩棚",
+    "description": "朱色の鉱石を思わせる斑紋がある。森の上を弧を描いて飛ぶ。",
+    "image": "https://zeazzi244-jpg.github.io/mushiverse/assets/cards/original/auspice-swallowtail.webp"
+  },
+  {
+    "id": "mv-original-auspice-moth",
+    "name": "朱砂コガ",
+    "rarity": "N",
+    "habitat": "朱砂の岩棚",
+    "description": "朱色の鉱石を思わせる斑紋がある。枝先で翅を重ねて休む。",
+    "image": "https://zeazzi244-jpg.github.io/mushiverse/assets/cards/original/auspice-moth.webp"
+  },
+  {
+    "id": "mv-original-auspice-stag",
+    "name": "朱砂クワガタ",
+    "rarity": "N",
+    "habitat": "朱砂の岩棚",
+    "description": "朱色の鉱石を思わせる斑紋がある。二股の大あごで枯れ枝をつかむ。",
+    "image": "https://zeazzi244-jpg.github.io/mushiverse/assets/cards/original/auspice-stag.webp"
+  },
+  {
+    "id": "mv-original-auspice-rhinoceros",
+    "name": "朱砂カブト",
+    "rarity": "N",
+    "habitat": "朱砂の岩棚",
+    "description": "朱色の鉱石を思わせる斑紋がある。一本の角が葉の間からのぞく。",
+    "image": "https://zeazzi244-jpg.github.io/mushiverse/assets/cards/original/auspice-rhinoceros.webp"
+  },
+  {
+    "id": "mv-original-auspice-jewel",
+    "name": "朱砂タマムシ",
+    "rarity": "N",
+    "habitat": "朱砂の岩棚",
+    "description": "朱色の鉱石を思わせる斑紋がある。細い甲殻の縁が動くたびに光る。",
+    "image": "https://zeazzi244-jpg.github.io/mushiverse/assets/cards/original/auspice-jewel.webp"
+  },
+  {
+    "id": "mv-original-auspice-ladybird",
+    "name": "朱砂テントウ",
+    "rarity": "N",
+    "habitat": "朱砂の岩棚",
+    "description": "朱色の鉱石を思わせる斑紋がある。丸い背が木の実に紛れる。",
+    "image": "https://zeazzi244-jpg.github.io/mushiverse/assets/cards/original/auspice-ladybird.webp"
+  },
+  {
+    "id": "mv-original-auspice-longhorn",
+    "name": "朱砂カミキリ",
+    "rarity": "N",
+    "habitat": "朱砂の岩棚",
+    "description": "朱色の鉱石を思わせる斑紋がある。長い触角で樹皮のすき間を探る。",
+    "image": "https://zeazzi244-jpg.github.io/mushiverse/assets/cards/original/auspice-longhorn.webp"
+  },
+  {
+    "id": "mv-original-auspice-dragonfly",
+    "name": "朱砂トンボ",
+    "rarity": "N",
+    "habitat": "朱砂の岩棚",
+    "description": "朱色の鉱石を思わせる斑紋がある。四枚の細い翅で水面をかすめる。",
+    "image": "https://zeazzi244-jpg.github.io/mushiverse/assets/cards/original/auspice-dragonfly.webp"
+  },
+  {
+    "id": "mv-original-auspice-mantis",
+    "name": "朱砂カマキリ",
+    "rarity": "N",
+    "habitat": "朱砂の岩棚",
+    "description": "朱色の鉱石を思わせる斑紋がある。折りたたんだ前脚を静かに伸ばす。",
+    "image": "https://zeazzi244-jpg.github.io/mushiverse/assets/cards/original/auspice-mantis.webp"
+  },
+  {
+    "id": "mv-original-auspice-bee",
+    "name": "朱砂ハナバチ",
+    "rarity": "N",
+    "habitat": "朱砂の岩棚",
+    "description": "朱色の鉱石を思わせる斑紋がある。花から花へ飛びながら花蜜を集める。",
+    "image": "https://zeazzi244-jpg.github.io/mushiverse/assets/cards/original/auspice-bee.webp"
+  },
+  {
+    "id": "mv-original-auspice-cicada",
+    "name": "朱砂セミ",
+    "rarity": "N",
+    "habitat": "朱砂の岩棚",
+    "description": "朱色の鉱石を思わせる斑紋がある。透明な翅を閉じて幹にとまる。",
+    "image": "https://zeazzi244-jpg.github.io/mushiverse/assets/cards/original/auspice-cicada.webp"
+  },
+  {
+    "id": "mv-original-auspice-grasshopper",
+    "name": "朱砂バッタ",
+    "rarity": "N",
+    "habitat": "朱砂の岩棚",
+    "description": "朱色の鉱石を思わせる斑紋がある。太い後脚で葉陰から跳び出す。",
+    "image": "https://zeazzi244-jpg.github.io/mushiverse/assets/cards/original/auspice-grasshopper.webp"
+  },
+  {
+    "id": "mv-original-auspice-cricket",
+    "name": "朱砂コオロギ",
+    "rarity": "N",
+    "habitat": "朱砂の岩棚",
+    "description": "朱色の鉱石を思わせる斑紋がある。長い触角を揺らしながら夜に鳴く。",
+    "image": "https://zeazzi244-jpg.github.io/mushiverse/assets/cards/original/auspice-cricket.webp"
+  },
+  {
+    "id": "mv-original-auspice-firefly",
+    "name": "朱砂ホタル",
+    "rarity": "N",
+    "habitat": "朱砂の岩棚",
+    "description": "朱色の鉱石を思わせる斑紋がある。腹の先にやわらかな灯りをともす。",
+    "image": "https://zeazzi244-jpg.github.io/mushiverse/assets/cards/original/auspice-firefly.webp"
+  },
+  {
+    "id": "mv-original-auspice-pondskater",
+    "name": "朱砂アメンボ",
+    "rarity": "N",
+    "habitat": "朱砂の岩棚",
+    "description": "朱色の鉱石を思わせる斑紋がある。細い脚で波紋のあいだを渡る。",
+    "image": "https://zeazzi244-jpg.github.io/mushiverse/assets/cards/original/auspice-pondskater.webp"
+  },
+  {
+    "id": "mv-original-dusk-swallowtail",
+    "name": "宵藍アゲハ",
+    "rarity": "N",
+    "habitat": "夕暮れの河原",
+    "description": "日暮れの空に似た藍色に染まる。森の上を弧を描いて飛ぶ。",
+    "image": "https://zeazzi244-jpg.github.io/mushiverse/assets/cards/original/dusk-swallowtail.webp"
+  },
+  {
+    "id": "mv-original-dusk-moth",
+    "name": "宵藍コガ",
+    "rarity": "N",
+    "habitat": "夕暮れの河原",
+    "description": "日暮れの空に似た藍色に染まる。枝先で翅を重ねて休む。",
+    "image": "https://zeazzi244-jpg.github.io/mushiverse/assets/cards/original/dusk-moth.webp"
+  },
+  {
+    "id": "mv-original-dusk-stag",
+    "name": "宵藍クワガタ",
+    "rarity": "N",
+    "habitat": "夕暮れの河原",
+    "description": "日暮れの空に似た藍色に染まる。二股の大あごで枯れ枝をつかむ。",
+    "image": "https://zeazzi244-jpg.github.io/mushiverse/assets/cards/original/dusk-stag.webp"
+  },
+  {
+    "id": "mv-original-dusk-rhinoceros",
+    "name": "宵藍カブト",
+    "rarity": "N",
+    "habitat": "夕暮れの河原",
+    "description": "日暮れの空に似た藍色に染まる。一本の角が葉の間からのぞく。",
+    "image": "https://zeazzi244-jpg.github.io/mushiverse/assets/cards/original/dusk-rhinoceros.webp"
+  },
+  {
+    "id": "mv-original-dusk-jewel",
+    "name": "宵藍タマムシ",
+    "rarity": "N",
+    "habitat": "夕暮れの河原",
+    "description": "日暮れの空に似た藍色に染まる。細い甲殻の縁が動くたびに光る。",
+    "image": "https://zeazzi244-jpg.github.io/mushiverse/assets/cards/original/dusk-jewel.webp"
+  },
+  {
+    "id": "mv-original-dusk-ladybird",
+    "name": "宵藍テントウ",
+    "rarity": "N",
+    "habitat": "夕暮れの河原",
+    "description": "日暮れの空に似た藍色に染まる。丸い背が木の実に紛れる。",
+    "image": "https://zeazzi244-jpg.github.io/mushiverse/assets/cards/original/dusk-ladybird.webp"
+  },
+  {
+    "id": "mv-original-dusk-longhorn",
+    "name": "宵藍カミキリ",
+    "rarity": "N",
+    "habitat": "夕暮れの河原",
+    "description": "日暮れの空に似た藍色に染まる。長い触角で樹皮のすき間を探る。",
+    "image": "https://zeazzi244-jpg.github.io/mushiverse/assets/cards/original/dusk-longhorn.webp"
+  },
+  {
+    "id": "mv-original-dusk-dragonfly",
+    "name": "宵藍トンボ",
+    "rarity": "N",
+    "habitat": "夕暮れの河原",
+    "description": "日暮れの空に似た藍色に染まる。四枚の細い翅で水面をかすめる。",
+    "image": "https://zeazzi244-jpg.github.io/mushiverse/assets/cards/original/dusk-dragonfly.webp"
+  },
+  {
+    "id": "mv-original-dusk-mantis",
+    "name": "宵藍カマキリ",
+    "rarity": "N",
+    "habitat": "夕暮れの河原",
+    "description": "日暮れの空に似た藍色に染まる。折りたたんだ前脚を静かに伸ばす。",
+    "image": "https://zeazzi244-jpg.github.io/mushiverse/assets/cards/original/dusk-mantis.webp"
+  },
+  {
+    "id": "mv-original-dusk-bee",
+    "name": "宵藍ハナバチ",
+    "rarity": "N",
+    "habitat": "夕暮れの河原",
+    "description": "日暮れの空に似た藍色に染まる。花から花へ飛びながら花蜜を集める。",
+    "image": "https://zeazzi244-jpg.github.io/mushiverse/assets/cards/original/dusk-bee.webp"
+  },
+  {
+    "id": "mv-original-dusk-cicada",
+    "name": "宵藍セミ",
+    "rarity": "N",
+    "habitat": "夕暮れの河原",
+    "description": "日暮れの空に似た藍色に染まる。透明な翅を閉じて幹にとまる。",
+    "image": "https://zeazzi244-jpg.github.io/mushiverse/assets/cards/original/dusk-cicada.webp"
+  },
+  {
+    "id": "mv-original-dusk-grasshopper",
+    "name": "宵藍バッタ",
+    "rarity": "N",
+    "habitat": "夕暮れの河原",
+    "description": "日暮れの空に似た藍色に染まる。太い後脚で葉陰から跳び出す。",
+    "image": "https://zeazzi244-jpg.github.io/mushiverse/assets/cards/original/dusk-grasshopper.webp"
+  },
+  {
+    "id": "mv-original-dusk-cricket",
+    "name": "宵藍コオロギ",
+    "rarity": "N",
+    "habitat": "夕暮れの河原",
+    "description": "日暮れの空に似た藍色に染まる。長い触角を揺らしながら夜に鳴く。",
+    "image": "https://zeazzi244-jpg.github.io/mushiverse/assets/cards/original/dusk-cricket.webp"
+  },
+  {
+    "id": "mv-original-dusk-firefly",
+    "name": "宵藍ホタル",
+    "rarity": "N",
+    "habitat": "夕暮れの河原",
+    "description": "日暮れの空に似た藍色に染まる。腹の先にやわらかな灯りをともす。",
+    "image": "https://zeazzi244-jpg.github.io/mushiverse/assets/cards/original/dusk-firefly.webp"
+  },
+  {
+    "id": "mv-original-dusk-pondskater",
+    "name": "宵藍アメンボ",
+    "rarity": "N",
+    "habitat": "夕暮れの河原",
+    "description": "日暮れの空に似た藍色に染まる。細い脚で波紋のあいだを渡る。",
+    "image": "https://zeazzi244-jpg.github.io/mushiverse/assets/cards/original/dusk-pondskater.webp"
+  },
+  {
+    "id": "mv-original-lichen-swallowtail",
+    "name": "石花アゲハ",
+    "rarity": "N",
+    "habitat": "地衣の石垣",
+    "description": "石垣に広がる地衣のような模様を持つ。森の上を弧を描いて飛ぶ。",
+    "image": "https://zeazzi244-jpg.github.io/mushiverse/assets/cards/original/lichen-swallowtail.webp"
+  },
+  {
+    "id": "mv-original-lichen-moth",
+    "name": "石花コガ",
+    "rarity": "N",
+    "habitat": "地衣の石垣",
+    "description": "石垣に広がる地衣のような模様を持つ。枝先で翅を重ねて休む。",
+    "image": "https://zeazzi244-jpg.github.io/mushiverse/assets/cards/original/lichen-moth.webp"
+  },
+  {
+    "id": "mv-original-lichen-stag",
+    "name": "石花クワガタ",
+    "rarity": "N",
+    "habitat": "地衣の石垣",
+    "description": "石垣に広がる地衣のような模様を持つ。二股の大あごで枯れ枝をつかむ。",
+    "image": "https://zeazzi244-jpg.github.io/mushiverse/assets/cards/original/lichen-stag.webp"
+  },
+  {
+    "id": "mv-original-lichen-rhinoceros",
+    "name": "石花カブト",
+    "rarity": "N",
+    "habitat": "地衣の石垣",
+    "description": "石垣に広がる地衣のような模様を持つ。一本の角が葉の間からのぞく。",
+    "image": "https://zeazzi244-jpg.github.io/mushiverse/assets/cards/original/lichen-rhinoceros.webp"
+  },
+  {
+    "id": "mv-original-lichen-jewel",
+    "name": "石花タマムシ",
+    "rarity": "N",
+    "habitat": "地衣の石垣",
+    "description": "石垣に広がる地衣のような模様を持つ。細い甲殻の縁が動くたびに光る。",
+    "image": "https://zeazzi244-jpg.github.io/mushiverse/assets/cards/original/lichen-jewel.webp"
+  },
+  {
+    "id": "mv-original-lichen-ladybird",
+    "name": "石花テントウ",
+    "rarity": "N",
+    "habitat": "地衣の石垣",
+    "description": "石垣に広がる地衣のような模様を持つ。丸い背が木の実に紛れる。",
+    "image": "https://zeazzi244-jpg.github.io/mushiverse/assets/cards/original/lichen-ladybird.webp"
+  },
+  {
+    "id": "mv-original-lichen-longhorn",
+    "name": "石花カミキリ",
+    "rarity": "N",
+    "habitat": "地衣の石垣",
+    "description": "石垣に広がる地衣のような模様を持つ。長い触角で樹皮のすき間を探る。",
+    "image": "https://zeazzi244-jpg.github.io/mushiverse/assets/cards/original/lichen-longhorn.webp"
+  },
+  {
+    "id": "mv-original-lichen-dragonfly",
+    "name": "石花トンボ",
+    "rarity": "N",
+    "habitat": "地衣の石垣",
+    "description": "石垣に広がる地衣のような模様を持つ。四枚の細い翅で水面をかすめる。",
+    "image": "https://zeazzi244-jpg.github.io/mushiverse/assets/cards/original/lichen-dragonfly.webp"
+  },
+  {
+    "id": "mv-original-lichen-mantis",
+    "name": "石花カマキリ",
+    "rarity": "N",
+    "habitat": "地衣の石垣",
+    "description": "石垣に広がる地衣のような模様を持つ。折りたたんだ前脚を静かに伸ばす。",
+    "image": "https://zeazzi244-jpg.github.io/mushiverse/assets/cards/original/lichen-mantis.webp"
+  },
+  {
+    "id": "mv-original-lichen-bee",
+    "name": "石花ハナバチ",
+    "rarity": "N",
+    "habitat": "地衣の石垣",
+    "description": "石垣に広がる地衣のような模様を持つ。花から花へ飛びながら花蜜を集める。",
+    "image": "https://zeazzi244-jpg.github.io/mushiverse/assets/cards/original/lichen-bee.webp"
+  },
+  {
+    "id": "mv-original-lichen-cicada",
+    "name": "石花セミ",
+    "rarity": "N",
+    "habitat": "地衣の石垣",
+    "description": "石垣に広がる地衣のような模様を持つ。透明な翅を閉じて幹にとまる。",
+    "image": "https://zeazzi244-jpg.github.io/mushiverse/assets/cards/original/lichen-cicada.webp"
+  },
+  {
+    "id": "mv-original-lichen-grasshopper",
+    "name": "石花バッタ",
+    "rarity": "N",
+    "habitat": "地衣の石垣",
+    "description": "石垣に広がる地衣のような模様を持つ。太い後脚で葉陰から跳び出す。",
+    "image": "https://zeazzi244-jpg.github.io/mushiverse/assets/cards/original/lichen-grasshopper.webp"
+  },
+  {
+    "id": "mv-original-lichen-cricket",
+    "name": "石花コオロギ",
+    "rarity": "N",
+    "habitat": "地衣の石垣",
+    "description": "石垣に広がる地衣のような模様を持つ。長い触角を揺らしながら夜に鳴く。",
+    "image": "https://zeazzi244-jpg.github.io/mushiverse/assets/cards/original/lichen-cricket.webp"
+  },
+  {
+    "id": "mv-original-lichen-firefly",
+    "name": "石花ホタル",
+    "rarity": "N",
+    "habitat": "地衣の石垣",
+    "description": "石垣に広がる地衣のような模様を持つ。腹の先にやわらかな灯りをともす。",
+    "image": "https://zeazzi244-jpg.github.io/mushiverse/assets/cards/original/lichen-firefly.webp"
+  },
+  {
+    "id": "mv-original-lichen-pondskater",
+    "name": "石花アメンボ",
+    "rarity": "N",
+    "habitat": "地衣の石垣",
+    "description": "石垣に広がる地衣のような模様を持つ。細い脚で波紋のあいだを渡る。",
+    "image": "https://zeazzi244-jpg.github.io/mushiverse/assets/cards/original/lichen-pondskater.webp"
+  },
+  {
+    "id": "mv-original-moonblade-stag",
+    "name": "ムーンブレードクワガタ",
+    "rarity": "SR",
+    "habitat": "月輪の樹海",
+    "description": "三日月の刃を思わせる銀の大あごを持つ。",
+    "image": "https://zeazzi244-jpg.github.io/mushiverse/assets/cards/original/moonblade-stag.webp"
+  },
+  {
+    "id": "mv-original-celestial-moon-moth",
+    "name": "セレスティアルムーンガ",
+    "rarity": "SR",
+    "habitat": "星見の林",
+    "description": "翅を開くと夜空の星座が浮かび上がる。",
+    "image": "https://zeazzi244-jpg.github.io/mushiverse/assets/cards/original/celestial-moon-moth.webp"
+  },
+  {
+    "id": "mv-original-sunlight-empress-bee",
+    "name": "サンライトエンプレスビー",
+    "rarity": "SR",
+    "habitat": "陽光の花壇",
+    "description": "陽光を集めた黄金の輪が翅を包む。",
+    "image": "https://zeazzi244-jpg.github.io/mushiverse/assets/cards/original/sunlight-empress-bee.webp"
+  },
+  {
+    "id": "mv-original-emerald-blade-mantis",
+    "name": "エメラルドブレイドカマキリ",
+    "rarity": "SR",
+    "habitat": "翠玉の渓谷",
+    "description": "翡翠の結晶に似た前脚を構える。",
+    "image": "https://zeazzi244-jpg.github.io/mushiverse/assets/cards/original/emerald-blade-mantis.webp"
+  },
+  {
+    "id": "mv-original-prism-star-jewel",
+    "name": "プリズムスタータマムシ",
+    "rarity": "SR",
+    "habitat": "虹晶の洞窟",
+    "description": "虹色の甲殻に星形の光が反射する。",
+    "image": "https://zeazzi244-jpg.github.io/mushiverse/assets/cards/original/prism-star-jewel.webp"
+  },
+  {
+    "id": "albaseraph",
+    "name": "アルバセラフ",
+    "rarity": "LR",
+    "habitat": "",
+    "description": "",
+    "image": "https://zeazzi244-jpg.github.io/mushiverse/assets/cards/albaseraph.webp"
+  }
+]
