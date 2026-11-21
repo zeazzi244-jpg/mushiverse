@@ -1,6 +1,7 @@
 import "jsr:@supabase/functions-js/edge-runtime.d.ts";
 import { createClient } from "npm:@supabase/supabase-js@2";
 import { verifyAppleProductionCoinJws } from "../_shared/apple-production-coin-verifier.ts";
+import { appleCoinPacks, isAppleCoinProduct } from "../_shared/apple-coin-transaction-policy.mjs";
 
 // Production settlement is separate from the existing Sandbox-only endpoint.
 // No balance is touched unless every independent database release gate is open.
@@ -65,15 +66,13 @@ Deno.serve(async (request: Request) => {
     const admin = createClient(endpoint, serviceKey);
 
     // A database gate is authoritative, not client config or a remote flag.
-    const [{data:billing,error:billingError},{data:gate,error:gateError},{data:catalog,error:catalogError}] = await Promise.all([
+    const [{data:billing,error:billingError},{data:gate,error:gateError}] = await Promise.all([
       admin.from("billing_settings").select("billing_mode,checkout_enabled,ios_iap_ready").eq("singleton",true).single(),
       admin.from("apple_iap_verification_gate").select("server_jws_verified,sandbox_purchase_proven").eq("singleton",true).single(),
-      admin.from("apple_coin_pack_catalog").select("coins,is_sale_enabled").eq("product_id","mushiverse.coins.100").single(),
     ]);
-    if (billingError || gateError || catalogError) return reply({error:"unavailable"},503);
+    if (billingError || gateError) return reply({error:"unavailable"},503);
     if (billing.billing_mode !== "live" || billing.checkout_enabled !== true || billing.ios_iap_ready !== true ||
-        gate.server_jws_verified !== true || gate.sandbox_purchase_proven !== true ||
-        catalog.coins !== 100 || catalog.is_sale_enabled !== true)
+        gate.server_jws_verified !== true || gate.sandbox_purchase_proven !== true)
       return reply({error:"production_fulfillment_disabled"},503);
 
     let body: Record<string,unknown>;
@@ -96,11 +95,19 @@ Deno.serve(async (request: Request) => {
     if (!claims || claims.length !== 1) return reply({error:"claim_not_found"},403);
     const claim = claims[0];
     if (claim.user_id !== user.id || claim.transaction_id !== transactionID ||
-        claim.product_id !== "mushiverse.coins.100" ||
+        !isAppleCoinProduct(claim.product_id) ||
         claim.original_transaction_id !== transactionID ||
         !["pending","verified"].includes(claim.status) ||
         (claim.environment !== null && claim.environment !== "Production"))
       return reply({error:"claim_mismatch"},403);
+
+    // Check the catalog for the authenticated, server-stored product only.
+    // Never use a client-supplied product or amount for settlement.
+    const {data:catalog,error:catalogError} = await admin.from("apple_coin_pack_catalog")
+      .select("coins,is_sale_enabled").eq("product_id",claim.product_id).single();
+    if (catalogError || !catalog || catalog.is_sale_enabled !== true ||
+        catalog.coins !== appleCoinPacks[claim.product_id as keyof typeof appleCoinPacks])
+      return reply({error:"production_fulfillment_disabled"},503);
 
     // Public App Store listing ID is fixed to this registered app identity.
     // A misconfigured deployment must fail closed rather than verify another app.
@@ -140,7 +147,7 @@ Deno.serve(async (request: Request) => {
       verification:"production_signature_verified",
       transaction_id:verified.transactionId,
       original_transaction_id:verified.originalTransactionId,
-      product_id:verified.productId, environment:"Production",coins:100,
+      product_id:verified.productId, environment:"Production",coins:verified.coins,
     });
   } catch {
     return reply({error:"unavailable"},503);
