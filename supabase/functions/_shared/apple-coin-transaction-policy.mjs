@@ -12,11 +12,22 @@ export function isAppleCoinProduct(productId) {
   return typeof productId === 'string' && Object.hasOwn(appleCoinPacks, productId);
 }
 
+// Existing Sandbox callers must remain fail-closed for live transactions.
 export function validateVerifiedAppleCoinTransaction(transaction, expected) {
+  if (expected?.environment !== 'Sandbox') throw new Error('production_fulfillment_disabled');
+  return validateSignedAppleCoinTransaction(transaction, expected);
+}
+
+// Independent, post-signature-verification policy for Production preparation.
+// Not called by any purchase or fulfillment endpoint. This validates payload
+// semantics only; it NEVER authorizes a purchase or writes a wallet.
+export function validateProductionAppleCoinTransaction(transaction, expected) {
+  if (expected?.environment !== 'Production') throw new Error('production_environment_required');
+  return validateSignedAppleCoinTransaction(transaction, expected);
+}
+
+function validateSignedAppleCoinTransaction(transaction, expected) {
   if (!transaction || typeof transaction !== 'object' || !expected) throw new Error('invalid_transaction');
-  // Defense in depth: even a valid Production JWS cannot pass this policy
-  // until real Sandbox purchases and atomic fulfillment have been proven.
-  if (expected.environment !== 'Sandbox') throw new Error('production_fulfillment_disabled');
   const { bundleId, productId, environment, transactionId, originalTransactionId,
     revocationDate, revocationReason, isUpgraded, purchaseDate, signedDate, type, appAccountToken, quantity, inAppOwnershipType } = transaction;
   if (bundleId !== 'com.rikuto.mushiverse') throw new Error('bundle_mismatch');
