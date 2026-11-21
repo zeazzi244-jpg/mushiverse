@@ -65,7 +65,36 @@ export async function verifyAppleCoinJws(signedTransaction: string, expected: {
     if (response.status === 422 || response.status === 400)
       throw new Error("invalid_signed_transaction");
     if (!response.ok) throw new Error("apple_verification_not_configured");
-    const { verified } = await response.json();
+    // A verifier is a security boundary: never buffer an unlimited or malformed
+    // upstream response into the Edge Function. Fail closed on protocol errors.
+    const contentType = response.headers.get("content-type") ?? "";
+    if (!/^application\\/json(?:\\s*;|\\s*$)/i.test(contentType))
+      throw new Error("apple_verification_not_configured");
+    const reader = response.body?.getReader();
+    if (!reader) throw new Error("apple_verification_not_configured");
+    const parts: Uint8Array[] = [];
+    let size = 0;
+    try {
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+        size += value.byteLength;
+        if (size > 8192) {
+          await reader.cancel();
+          throw new Error("apple_verification_not_configured");
+        }
+        parts.push(value);
+      }
+    } finally { reader.releaseLock(); }
+    const payload = new Uint8Array(size);
+    let cursor = 0;
+    for (const part of parts) { payload.set(part, cursor); cursor += part.byteLength; }
+    let verified: unknown;
+    try {
+      const parsed = JSON.parse(new TextDecoder("utf-8", { fatal: true }).decode(payload));
+      verified = parsed && typeof parsed === "object" && !Array.isArray(parsed) ? parsed.verified : null;
+    } catch { throw new Error("apple_verification_not_configured"); }
+
     // Treat the remote verifier response as untrusted transport data: bind it
     // to the server-derived claim and the exact approved pack denomination.
     // Never assume every verified purchase is the 100-coin product.
