@@ -1330,3 +1330,18 @@ body #mv134CoinStore .mv134Pack button {
 .mvSharedCardArt[data-card-rarity="LR"]::after { outline: 1px solid #c59145; outline-offset: 1px; }
 .mvSharedCardArt.mvGachaSilhouette::after { display: none; }
 .mv90Unowned .mvSharedCardArt > :is(img, svg) { filter: brightness(0); }
+
+/* V45: Restore the native disclosure marker for odds and audio settings.
+   A previous display:flex override suppressed the <summary> triangle, making
+   expandable controls look like static labels on iOS Safari. */
+#gacha #mv101Machine :is(.mvGachaOdds,.mvWoodAudio) > summary {
+  display:list-item;
+  list-style:disclosure-closed inside;
+  min-height:44px;
+  padding:11px 8px;
+  line-height:1.5;
+  overflow-wrap:anywhere;
+}
+#gacha #mv101Machine :is(.mvGachaOdds,.mvWoodAudio)[open] > summary {
+  list-style-type:disclosure-open;
+}
