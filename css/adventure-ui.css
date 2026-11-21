@@ -1345,3 +1345,26 @@ body #mv134CoinStore .mv134Pack button {
 #gacha #mv101Machine :is(.mvGachaOdds,.mvWoodAudio)[open] > summary {
   list-style-type:disclosure-open;
 }
+
+/* V46: Safari can suppress native summary markers when earlier rules use flex.
+   Draw a consistent disclosure indicator independent of browser marker support. */
+#gacha #mv101Machine :is(.mvGachaOdds,.mvWoodAudio) > summary {
+  position:relative;
+  display:block;
+  list-style:none;
+  padding-inline:12px 34px;
+  cursor:pointer;
+}
+#gacha #mv101Machine :is(.mvGachaOdds,.mvWoodAudio) > summary::-webkit-details-marker { display:none; }
+#gacha #mv101Machine :is(.mvGachaOdds,.mvWoodAudio) > summary::after {
+  content:'+';
+  position:absolute;
+  right:12px;
+  top:50%;
+  transform:translateY(-50%);
+  font-size:20px;
+  font-weight:800;
+  line-height:1;
+  color:#173d2f;
+}
+#gacha #mv101Machine :is(.mvGachaOdds,.mvWoodAudio)[open] > summary::after { content:'−'; }
