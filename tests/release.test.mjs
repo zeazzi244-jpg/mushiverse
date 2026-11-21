@@ -630,6 +630,7 @@ test('startup fetch aborts stalled requests at the network deadline', async () =
   assert.ok(source);
   let deadline, cleared = false;
   const pending = runInNewContext(source + "\nbackendFetch('test')", {
+    SUPABASE_URL:'https://test.invalid',
     AbortController,
     setTimeout(callback, delay) { assert.equal(delay, 12000); deadline = callback; return 1; },
     clearTimeout(id) { assert.equal(id, 1); cleared = true; },
@@ -825,4 +826,20 @@ test('the iOS scene launches the bridge that registers the native coin shop', ()
   const bridge = readFileSync('ios/App/App/MushiverseBridgeViewController.swift', 'utf8');
   assert.match(scene, /rootViewController = MushiverseBridgeViewController\(\)/);
   assert.match(bridge, /registerPluginInstance\(MushiverseCoinPlugin\(\)\)/);
+});
+
+test('password sign-in can finish after the general startup deadline', async () => {
+  const html = readFileSync('www/index.html', 'utf8');
+  const source = html.match(/async function backendFetch[^]*?\n\}/)[0];
+  const origin = 'https://example.invalid';
+  const delays = [];
+  const request = runInNewContext(source + '\nbackendFetch', {
+    SUPABASE_URL:origin, AbortController,
+    setTimeout(_fn, delay) { delays.push(delay); return 1; },
+    clearTimeout() {}, fetch:async () => 'ok'
+  });
+  assert.equal(await request(origin+'/auth/v1/token?grant_type=password'), 'ok');
+  await request(origin+'/auth/v1/token?grant_type=refresh_token');
+  await request(origin+'/rest/v1/records');
+  assert.deepEqual(delays, [45000, 12000, 12000]);
 });

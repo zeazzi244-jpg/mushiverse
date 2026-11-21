@@ -718,11 +718,14 @@ const SUPABASE_URL='https://jhowxtdemlsmetcwhekr.supabase.co';
 const KEY='sb_publishable_b2n0sVChm2zvGQ5qIbz8Cw_B-wCOtVJ';
 async function backendFetch(input,options={}){
   const controller=new AbortController();
-  const signal=options.signal;
+  const signal=options.signal || input?.signal;
   const cancel=()=>controller.abort();
   if(signal?.aborted)cancel();
   else signal?.addEventListener('abort',cancel,{once:true});
-  const timer=setTimeout(cancel,12000);
+  const url=typeof input==='string'?input:String(input?.url || input);
+  const passwordSignIn=url.split('?')[0]===SUPABASE_URL+'/auth/v1/token' &&
+    /[?&]grant_type=password(?:&|$)/.test(url);
+  const timer=setTimeout(cancel,passwordSignIn?45000:12000);
   try{return await fetch(input,{...options,signal:controller.signal})}
   finally{clearTimeout(timer);signal?.removeEventListener('abort',cancel)}
 }
@@ -768,12 +771,12 @@ $('post').querySelector('.hint').textContent='ログインすると写真と昆�
 $('collection').querySelector('.hint').textContent='みんなの投稿から発見した昆虫を種類ごとに表示し、分類傾向やレア度も見られます。';
 $('home').querySelector('.hint').textContent='みんなの採集記録を検索・並び替えしながら、季節のおすすめや人気地域も見られます。';
 function authUI(){
- $('authArea').innerHTML=user?`<h2>👤 ログイン中</h2><p class="fineprint">${esc(user.email||'ユーザー')}</p><button class="btn outline" id="signOut">ログアウト</button>`:`<h2>👤 会員登録・ログイン</h2><label class="field"><span>メールアドレス</span><input type="email" id="authEmail" autocomplete="email" placeholder="メールアドレス"></label><label class="field"><span>パスワード（6文字以上）</span><input type="password" id="authPassword" autocomplete="current-password" placeholder="パスワード"></label><div class="authrow"><button class="btn" id="signUp">新規登録</button><button class="btn outline" id="signIn">ログイン</button></div><p class="fineprint">新規登録後、届いた確認メールのリンクを開いてからログインしてください。</p>`;
+ $('authArea').innerHTML=user?`<h2>👤 ログイン中</h2><p class="fineprint">${esc(user.email||'ユーザー')}</p><button class="btn outline" id="signOut">ログアウト</button>`:`<h2>👤 会員登録・ログイン</h2><label class="field"><span>メールアドレス</span><input type="email" id="authEmail" autocomplete="email" placeholder="メールアドレス"></label><label class="field"><span>パスワード（6文字以上）</span><input type="password" id="authPassword" autocomplete="current-password" placeholder="パスワード"></label><div class="authrow"><button class="btn" id="signUp">新規登録</button><button class="btn outline" id="signIn">ログイン</button></div><p id="authFeedback" role="status" aria-live="polite"></p><p class="fineprint">新規登録後、届いた確認メールのリンクを開いてからログインしてください。</p>`;
  $('postAuthMessage').textContent=user?'写真と昆虫の記録を公開できます。':'発見を投稿するにはログインが必要です。';
  $('mvPostSignIn').hidden=Boolean(user);
  $('recordForm').querySelector('button[type="submit"]').disabled=!user;
  if(user){$('signOut').onclick=async()=>{const {error}=await db.auth.signOut();if(error)toast(error.message)}}
- else {for(const [id,mode] of [['signUp','up'],['signIn','in']]){$(id).disabled=!db;$(id).onclick=async()=>{const email=$('authEmail').value.trim(),password=$('authPassword').value;if(!email||password.length<6){toast('メールアドレスと6文字以上のパスワードを入力してください');return}$(id).disabled=true;try{const {data,error}=mode==='up'?await db.auth.signUp({email,password,emailRedirectTo:location.origin+location.pathname}):await db.auth.signInWithPassword({email,password});if(error)throw error;toast(mode==='up'?'確認メールを送信しました。メールをご確認ください':'ログインしました');if(data?.session)tab('home')}catch(e){toast('認証エラー：'+e.message)}finally{const b=$(id);if(b)b.disabled=false}}}}
+ else {for(const [id,mode] of [['signUp','up'],['signIn','in']]){$(id).disabled=!db;$(id).onclick=async()=>{const email=$('authEmail').value.trim(),password=$('authPassword').value;if(!email||password.length<6){toast('メールアドレスと6文字以上のパスワードを入力してください');return}$(id).disabled=true;const feedback=$('authFeedback');feedback.textContent=mode==='in'?'ログインしています…':'登録しています…';try{const {data,error}=mode==='up'?await db.auth.signUp({email,password,emailRedirectTo:location.origin+location.pathname}):await db.auth.signInWithPassword({email,password});if(error)throw error;feedback.textContent='';toast(mode==='up'?'確認メールを送信しました。メールをご確認ください':'ログインしました');if(data?.session)tab('home')}catch(e){const interrupted=/abort|timed? ?out|failed to fetch|load failed|network/i.test(String(e?.message))||e?.name==='AbortError';const reason=interrupted?'通信が中断されました。接続を確認して、もう一度お試しください。':'認証エラー：'+e.message;feedback.textContent=reason;toast(reason)}finally{const b=$(id);if(b)b.disabled=false}}}}
 }
 const MAP_GEO_CACHE_KEY='mushiverse_map_geocode_v2';
 let mapGeoCache={};
