@@ -1,0 +1,141 @@
+import "jsr:@supabase/functions-js/edge-runtime.d.ts";
+import { createClient } from "npm:@supabase/supabase-js@2";
+import { verifyAppleProductionCoinJws } from "../_shared/apple-production-coin-verifier.ts";
+
+// Production settlement is separate from the existing Sandbox-only endpoint.
+// No balance is touched unless every independent database release gate is open.
+const cors = {
+  "access-control-allow-origin": "*",
+  "access-control-allow-headers": "authorization, apikey, content-type, x-client-info",
+  "access-control-allow-methods": "POST, OPTIONS",
+};
+const headers = { ...cors, "content-type": "application/json; charset=utf-8", "cache-control": "no-store", "x-content-type-options": "nosniff" };
+const reply = (body: Record<string, unknown>, status = 200) => new Response(JSON.stringify(body), { status, headers });
+const appleID = /^\d{6,30}$/;
+
+async function boundedBody(request: Request, max = 20000): Promise<Record<string, unknown>> {
+  const declared = request.headers.get("content-length");
+  if (declared !== null && (!/^(0|[1-9]\d*)$/.test(declared) || Number(declared) > max))
+    throw new Error("invalid_content_length");
+  const reader = request.body?.getReader();
+  if (!reader) throw new Error("invalid_body");
+  const parts: Uint8Array[] = [];
+  let total = 0;
+  try {
+    while (true) {
+      const {done, value} = await reader.read();
+      if (done) break;
+      total += value.byteLength;
+      if (total > max) {
+        await reader.cancel();
+        throw new Error("request_too_large");
+      }
+      parts.push(value);
+    }
+  } finally { reader.releaseLock(); }
+  if (declared !== null && Number(declared) !== total) throw new Error("content_length_mismatch");
+  const bytes = new Uint8Array(total);
+  let offset = 0;
+  for (const part of parts) { bytes.set(part, offset); offset += part.byteLength; }
+  const payload = JSON.parse(new TextDecoder("utf-8", {fatal:true}).decode(bytes));
+  if (!payload || typeof payload !== "object" || Array.isArray(payload)) throw new Error("invalid_body");
+  return payload as Record<string, unknown>;
+}
+
+Deno.serve(async (request: Request) => {
+  if (request.method === "OPTIONS") return new Response(null, {status:204, headers:cors});
+  if (request.method !== "POST") return reply({error:"method_not_allowed"},405);
+  if (!/^Bearer\s+\S+$/i.test(request.headers.get("authorization") ?? ""))
+    return reply({error:"unauthorized"},401);
+  const endpoint = Deno.env.get("SUPABASE_URL");
+  const anonymousKey = Deno.env.get("SUPABASE_ANON_KEY");
+  const serviceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
+  if (!endpoint || !anonymousKey || !serviceKey) return reply({error:"unavailable"},503);
+  try {
+    const token = request.headers.get("authorization")!;
+    const authClient = createClient(endpoint, anonymousKey, {global:{headers:{Authorization:token}}});
+    const {data:{user},error:authError} = await authClient.auth.getUser();
+    if (authError || !user) return reply({error:"unauthorized"},401);
+    const admin = createClient(endpoint, serviceKey);
+
+    // A database gate is authoritative, not client config or a remote flag.
+    const [{data:billing,error:billingError},{data:gate,error:gateError},{data:catalog,error:catalogError}] = await Promise.all([
+      admin.from("billing_settings").select("billing_mode,checkout_enabled,ios_iap_ready").eq("singleton",true).single(),
+      admin.from("apple_iap_verification_gate").select("server_jws_verified,sandbox_purchase_proven").eq("singleton",true).single(),
+      admin.from("apple_coin_pack_catalog").select("coins,is_sale_enabled").eq("product_id","mushiverse.coins.100").single(),
+    ]);
+    if (billingError || gateError || catalogError) return reply({error:"unavailable"},503);
+    if (billing.billing_mode !== "live" || billing.checkout_enabled !== true || billing.ios_iap_ready !== true ||
+        gate.server_jws_verified !== true || gate.sandbox_purchase_proven !== true ||
+        catalog.coins !== 100 || catalog.is_sale_enabled !== true)
+      return reply({error:"production_fulfillment_disabled"},503);
+
+    let body: Record<string,unknown>;
+    try { body = await boundedBody(request); }
+    catch { return reply({error:"invalid_request"},400); }
+    const transactionID = body.transaction_id;
+    const signed = body.signed_transaction;
+    if (typeof transactionID !== "string" || !appleID.test(transactionID) ||
+        typeof signed !== "string" || signed.length > 16384 ||
+        !/^[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+$/.test(signed))
+      return reply({error:"invalid_transaction"},400);
+
+    // The pending claim was created by the authenticated user's native app.
+    // The environment, product, original ID and account token are NOT trusted
+    // from this request; they are matched to the Apple-signed transaction.
+    const {data:claims,error:claimError} = await admin.from("apple_purchase_claims")
+      .select("user_id,transaction_id,original_transaction_id,product_id,status,environment")
+      .eq("transaction_id",transactionID).limit(2);
+    if (claimError) return reply({error:"unavailable"},503);
+    if (!claims || claims.length !== 1) return reply({error:"claim_not_found"},403);
+    const claim = claims[0];
+    if (claim.user_id !== user.id || claim.transaction_id !== transactionID ||
+        claim.product_id !== "mushiverse.coins.100" ||
+        claim.original_transaction_id !== transactionID ||
+        !["pending","verified"].includes(claim.status) ||
+        (claim.environment !== null && claim.environment !== "Production"))
+      return reply({error:"claim_mismatch"},403);
+
+    const appIDRaw = Deno.env.get("APPLE_IAP_APP_APPLE_ID");
+    if (!appIDRaw || !/^[1-9]\d*$/.test(appIDRaw) ||
+        !Number.isSafeInteger(Number(appIDRaw)))
+      return reply({error:"apple_verification_unavailable"},503);
+
+    let verified;
+    try {
+      verified = await verifyAppleProductionCoinJws(signed, {
+        environment:"Production",
+        productId:claim.product_id,
+        transactionId:transactionID,
+        originalTransactionId:claim.original_transaction_id,
+        appAccountToken:user.id,
+      },Number(appIDRaw));
+    } catch {
+      return reply({error:"apple_transaction_verification_failed"},422);
+    }
+
+    // A single Postgres transaction records verified evidence, locks the Apple
+    // transaction, and inserts exactly one credit and wallet delta. No client
+    // ever receives service-role credentials or calls this RPC directly.
+    const {data:settled,error:settleError} = await admin.rpc("settle_verified_apple_coin_production", {
+      p_transaction_id: verified.transactionId,
+      p_original_transaction_id: verified.originalTransactionId,
+      p_user_id:user.id,
+      p_product_id:verified.productId,
+      p_purchase_date:new Date(verified.purchaseDate).toISOString(),
+    });
+    if (settleError || settled !== true) {
+      console.warn("Apple Production credit settlement rejected",settleError?.code ?? "unavailable");
+      return reply({error:"settlement_unavailable"},503);
+    }
+    return reply({
+      ok:true, credited_or_previously_credited:true,
+      verification:"production_signature_verified",
+      transaction_id:verified.transactionId,
+      original_transaction_id:verified.originalTransactionId,
+      product_id:verified.productId, environment:"Production",coins:100,
+    });
+  } catch {
+    return reply({error:"unavailable"},503);
+  }
+});
