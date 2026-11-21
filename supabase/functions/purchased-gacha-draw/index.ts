@@ -80,7 +80,13 @@ Deno.serve(async (req:Request)=>{
       const {data:wallet,error}=await admin.from("gacha_coin_wallets")
         .select("balance").eq("user_id",user.id).maybeSingle();
       if(error) return reply({error:"balance_unavailable"},503);
-      return reply({ok:true,balance:Number(wallet?.balance??0),currency:"purchased_coins"});
+      const {data:history,error:historyError}=await admin.from("gacha_paid_draws")
+        .select("draw_id,draw_count,coins_spent,results,created_at")
+        .eq("user_id",user.id).order("created_at",{ascending:false}).limit(20);
+      if(historyError) return reply({error:"history_unavailable"},503);
+      const balance=Number(wallet?.balance??0);
+      if(!Number.isSafeInteger(balance)||balance<0) return reply({error:"balance_unavailable"},503);
+      return reply({ok:true,balance,currency:"purchased_coins",history:history??[]});
     }
 
     let body:Record<string,unknown>;
