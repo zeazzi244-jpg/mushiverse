@@ -30,6 +30,9 @@ jobs:
         with:
           path: www
           name: github-pages-${{ github.run_attempt }}
+      # GitHub's artifact metadata API can lag behind a successful upload.
+      - name: Allow Pages artifact metadata to propagate
+        run: sleep 30
       - id: deployment
         uses: actions/deploy-pages@v4
         with:
