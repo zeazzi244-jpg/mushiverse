@@ -13,7 +13,7 @@ const source = readFileSync(new URL('../supabase/functions/settle-apple-producti
   .replace('let body: Record<string,unknown>;', 'let body;')
   .replace('request.headers.get("authorization")!', 'request.headers.get("authorization")');
 
-function harness({enabled=false,owner='user-1',validSignature=true,settled=true,claimStatus='pending',claimEnvironment=null,productID='mushiverse.coins.100'}={}) {
+function harness({enabled=false,owner='user-1',validSignature=true,settled=true,claimStatus='pending',claimEnvironment=null,productID='mushiverse.coins.100',appMetadata={}}={}) {
   const calls={auth:0, verify:0, settle:0};
   let handler;
   const Deno={env:{get(key){
@@ -23,7 +23,7 @@ function harness({enabled=false,owner='user-1',validSignature=true,settled=true,
       SUPABASE_SERVICE_ROLE_KEY:'service',
     })[key];
   }},serve(fn){handler=fn;}};
-  const mockUser={auth:{getUser:async()=>{calls.auth++;return {data:{user:{id:'user-1'}},error:null};}}};
+  const mockUser={auth:{getUser:async()=>{calls.auth++;return {data:{user:{id:'user-1',app_metadata:appMetadata}},error:null};}}};
   const tables={
     billing_settings: {billing_mode:enabled?'live':'off',checkout_enabled:enabled,ios_iap_ready:enabled},
     apple_iap_verification_gate: {server_jws_verified:enabled,sandbox_purchase_proven:enabled},
@@ -136,4 +136,20 @@ test('a DB settlement failure cannot be acknowledged as completed payment',async
   assert.equal(r.body.error,'settlement_unavailable');
   assert.equal(h.calls.verify,1);
   assert.equal(h.calls.settle,1);
+});
+
+for(const flag of ['kid_mode','minor','iap_disabled']) {
+  test('server-managed '+flag+' prevents Production settlement before signature verification',async()=>{
+    const h=harness({enabled:true,appMetadata:{[flag]:true}});
+    const result=await h.send();
+    assert.equal(result.status,403);
+    assert.equal(result.body.error,'purchases_restricted');
+    assert.equal(h.calls.verify,0);
+    assert.equal(h.calls.settle,0);
+  });
+}
+test('editable metadata cannot turn off a server-managed purchase restriction',async()=>{
+  const h=harness({enabled:true,appMetadata:{minor:true}});
+  assert.equal((await h.send()).status,403);
+  assert.equal(h.calls.settle,0);
 });
