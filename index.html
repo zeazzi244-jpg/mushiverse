@@ -725,8 +725,30 @@ async function backendFetch(input,options={}){
   const url=typeof input==='string'?input:String(input?.url || input);
   const passwordSignIn=url.split('?')[0]===SUPABASE_URL+'/auth/v1/token' &&
     /[?&]grant_type=password(?:&|$)/.test(url);
+  const bridge=globalThis.Capacitor;
+  const endpoint=url.split('?')[0];
+  const nativeAuth=(endpoint===SUPABASE_URL+'/auth/v1/token' || endpoint===SUPABASE_URL+'/auth/v1/user') &&
+    bridge?.getPlatform?.()==='ios' && typeof bridge.nativePromise==='function';
   const timer=setTimeout(cancel,passwordSignIn?45000:12000);
-  try{return await fetch(input,{...options,signal:controller.signal})}
+  try{
+    if(!nativeAuth)return await fetch(input,{...options,signal:controller.signal});
+    // Keep session storage, refresh and auth callbacks in the Supabase SDK.
+    const request=new Request(input,options);
+    const payload=request.body===null && !options.body ? undefined : await request.text();
+    const data=payload ? JSON.parse(payload) : undefined;
+    const nativeOptions={url,method:request.method,headers:Object.fromEntries(request.headers),
+      data,responseType:'text',connectTimeout:passwordSignIn?45000:12000,
+      readTimeout:passwordSignIn?45000:12000,disableRedirects:true};
+    const result=await new Promise((resolve,reject)=>{
+      const interrupted=()=>reject(new DOMException('Authentication request interrupted','AbortError'));
+      if(controller.signal.aborted){interrupted();return}
+      controller.signal.addEventListener('abort',interrupted,{once:true});
+      bridge.nativePromise('CapacitorHttp','request',nativeOptions).then(resolve,reject)
+        .finally(()=>controller.signal.removeEventListener('abort',interrupted));
+    });
+    const raw=typeof result.data==='string'?result.data:JSON.stringify(result.data);
+    return new Response([204,205,304].includes(result.status)?null:raw,{status:result.status,headers:result.headers});
+  }
   finally{clearTimeout(timer);signal?.removeEventListener('abort',cancel)}
 }
 let db;
