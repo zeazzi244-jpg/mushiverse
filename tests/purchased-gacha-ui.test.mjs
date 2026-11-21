@@ -7,7 +7,7 @@ const html=readFileSync(new URL('../index.html',import.meta.url),'utf8');
 test('paid coin UI is shipped as valid JS in existing app',()=>{
   assert.doesNotThrow(()=>new Function(frontend));
   assert.match(html, /src="js\/purchased-gacha-ui\.js"/);
-  assert.match(frontend,/document\.getElementById\('gacha'\)/);
+  assert.match(frontend,/\$\('gacha'\)/);
 });
 test('paid coin UI does not mix with local free balance',()=>{
   assert.match(frontend,/購入したコインはサーバーに保存され、無料コインとは別/);
