@@ -22,17 +22,7 @@ struct MushiverseCoinShopView: View {
                 .font(.footnote)
 
             Text("ガチャコイン").font(.headline)
-            ForEach(MushiverseCoinStore.coinPacks.indices, id: \.self) { index in
-                let pack = MushiverseCoinStore.coinPacks[index]
-                productRow(id: pack.id, title: "\(pack.coins.formatted()) コイン",
-                           detail: pack.coins == 1200 ? "おすすめ" : nil, canFulfill: true)
-            }
-
-            Text("プレミアム会員").font(.headline)
-            productRow(id: MushiverseCoinStore.premiumID, title: "月額プレミアム",
-                       detail: "自動更新", canFulfill: false)
-
-            // Do not advertise an unconfigured adventure pass in the free release.
+            productRow()
 
             Button("Appleの商品情報を再読み込み") {
                 Task { await store.loadProducts() }
@@ -61,12 +51,12 @@ struct MushiverseCoinShopView: View {
         .onDisappear { store.stop() }
     }
 
-    private func productRow(id: String, title: String, detail: String?, canFulfill: Bool) -> some View {
+    private func productRow() -> some View {
+        let id = MushiverseCoinStore.sandboxProductID
         let product = store.products.first { $0.id == id }
-        let available = store.canOffer(id) && canFulfill && product != nil
+        let available = store.canOffer(id) && product != nil
         return VStack(alignment: .leading, spacing: 8) {
-            Text(title).font(.headline)
-            if let detail { Text(detail).font(.caption.weight(.semibold)).foregroundStyle(gold) }
+            Text("100 コイン").font(.headline)
             if let product {
                 Text(product.displayPrice).font(.subheadline.weight(.semibold))
             } else {

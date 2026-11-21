@@ -455,12 +455,10 @@ test('coin store stays disabled until verified native crediting and spending exi
   const start = html.indexOf('<script id="mv134-coin-store">');
   assert.ok(start >= 0, 'Coin store preview missing');
   const coinStore = html.slice(start, html.indexOf('</script>', start));
-  assert.match(coinStore, /button\.disabled=true/, 'Coin purchases must not be enabled by a preview');
+  assert.match(coinStore, /!nativeShop\(\)/, 'Only the native shop can be opened');
   const store = readFileSync('ios/App/App/MushiverseCoinStore.swift','utf8');
   assert.match(store, /static let purchasesEnabled = false/, 'Native release gate must be closed');
   assert.doesNotMatch(coinStore, /\.purchase\s*\(/, 'Web preview may only open the native viewer');
-  assert.match(coinStore, /現在は購入・請求できません/, 'Users must see clear unavailable status');
-  assert.match(coinStore, /ガチャでの使用は準備中/, 'Purchased coin spending must not be implied ready');
 });
 
 
@@ -544,27 +542,17 @@ test('Apple purchase claims are rate-limited after idempotent replay checks', ()
 });
 
 
-test('coin shop preview shows seven packs and proposed prices', () => {
+test('shop delegates product listings to StoreKit and exposes only the submitted SKU', () => {
   const html = readFileSync('index.html', 'utf8');
   const start = html.indexOf('<script id="mv134-coin-store">');
   const end = html.indexOf('</script>', start);
   assert.ok(start >= 0 && end > start);
-  const store = html.slice(start, end);
-  for (const [id, coins, price] of [
-    ['mushiverse.coins.100', 100, 160],
-    ['mushiverse.coins.300', 300, 320],
-    ['mushiverse.coins.500', 500, 480],
-    ['mushiverse.coins.1200', 1200, 980],
-    ['mushiverse.coins.2500', 2500, 1800],
-    ['mushiverse.coins.5500', 5500, 3600],
-    ['mushiverse.coins.12000', 12000, 7800]
-  ]) {
-    assert.ok(store.includes("id:'" + id + "',coins:" + coins + ",priceYen:" + price),
-      id + ' should have the agreed coin count and proposed yen price');
-  }
-  assert.doesNotMatch(store, /mushiverse\.coins\.550['"]/);
-  assert.match(store, /button\.disabled=true/, 'Purchases stay disabled until Apple verification');
-  assert.match(store, /正式な価格はAppleの商品登録後に確定します/);
+  const entry = html.slice(start, end);
+  assert.match(entry, /Appleの商品情報を見る/);
+  assert.doesNotMatch(entry, /priceYen|mushiverse\.coins\.|プレミアム|冒険パス/);
+  const native = readFileSync('ios/App/App/MushiverseCoinStore.swift', 'utf8');
+  assert.match(native, /sandboxProductID = "mushiverse\.coins\.100"/);
+  assert.match(native, /productIDs: Set<String> = \[sandboxProductID\]/);
 });
 
 test('server accepts the new 500-coin product ID, not the retired 550-coin ID', () => {

@@ -9,23 +9,12 @@ final class MushiverseCoinStore: ObservableObject {
     // Compile-time release gate. Never enable from JavaScript, remote config or localStorage.
     static let purchasesEnabled = false
 
-    // Match the three server-allowlisted products. Unsupported legacy packs must not be offered.
-    static let coinPacks: [(id: String, coins: Int)] = [100, 500, 1200].map {
-        ("mushiverse.coins.\($0)", $0)
-    }
-    static let premiumID = "jp.mushiverse.premium.monthly"
-    static let premiumAnnualID = "jp.mushiverse.premium.annual"
-    static let productIDs = Set(coinPacks.map { $0.id } + [premiumID, premiumAnnualID])
+    static let sandboxProductID = "mushiverse.coins.100"
+    static let productIDs: Set<String> = [sandboxProductID]
 
     private static func expectedType(_ id: String) -> Product.ProductType? {
-        switch id {
-        case premiumID: return .autoRenewable
-        case premiumAnnualID: return .autoRenewable
-        default: return coinPacks.contains(where: { $0.id == id }) ? .consumable : nil
-        }
+        id == sandboxProductID ? .consumable : nil
     }
-
-    static let sandboxProductID = "mushiverse.coins.100"
 
     func canOffer(_ productID: String) -> Bool {
         Self.purchasesEnabled || (sandboxPurchasesEnabled && productID == Self.sandboxProductID)
