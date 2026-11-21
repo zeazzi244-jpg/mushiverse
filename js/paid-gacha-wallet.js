@@ -102,8 +102,8 @@
     let pending=pendingRead();
     if(pending && !retry) { message('未確認の購入コインガチャがあります。再確認を押してください。');render();return; }
     if(!pending) {
-      if(!crypto?.randomUUID) { message('安全な抽選IDを生成できませんでした。');return; }
-      pending={id:crypto.randomUUID(),count};
+      if(!window.crypto?.randomUUID) { message('安全な抽選IDを生成できませんでした。');return; }
+      pending={id:window.crypto.randomUUID(),count};
       pendingSave(pending);
     }
     if(![1,10].includes(pending.count) || typeof pending.id!=='string') { pendingSave(null);return; }
