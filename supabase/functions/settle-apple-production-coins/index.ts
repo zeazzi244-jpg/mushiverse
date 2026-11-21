@@ -56,6 +56,12 @@ Deno.serve(async (request: Request) => {
     const authClient = createClient(endpoint, anonymousKey, {global:{headers:{Authorization:token}}});
     const {data:{user},error:authError} = await authClient.auth.getUser();
     if (authError || !user) return reply({error:"unauthorized"},401);
+    // Server-controlled account restrictions are authoritative; an editable
+    // client kids-mode setting must never authorize paid coin fulfillment.
+    if (user.app_metadata?.kid_mode === true ||
+        user.app_metadata?.minor === true ||
+        user.app_metadata?.iap_disabled === true)
+      return reply({error:"purchases_restricted"},403);
     const admin = createClient(endpoint, serviceKey);
 
     // A database gate is authoritative, not client config or a remote flag.
