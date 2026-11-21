@@ -53,6 +53,25 @@ Deno.serve(async(request: Request)=>{
     let body:Record<string,unknown>;
     try{body=await parseBody(request);}catch{return respond({error:"invalid_request"},400);}
     const admin=createClient(url,service);
+    const [{data:billing,error:billingError},{data:proof,error:proofError},
+           {data:pack,error:packError}] = await Promise.all([
+      admin.from("billing_settings")
+        .select("billing_mode,checkout_enabled,ios_iap_ready")
+        .eq("singleton",true).single(),
+      admin.from("apple_iap_verification_gate")
+        .select("server_jws_verified,sandbox_purchase_proven")
+        .eq("singleton",true).single(),
+      admin.from("apple_coin_pack_catalog")
+        .select("coins,is_sale_enabled")
+        .eq("product_id","mushiverse.coins.100").single()
+    ]);
+    // A missing release gate must fail closed. Read-only wallet/history access
+    // remains available during intentional billing pauses.
+    const drawsEnabled = !billingError && !proofError && !packError &&
+      billing?.billing_mode==="live" && billing?.checkout_enabled===true &&
+      billing?.ios_iap_ready===true && proof?.server_jws_verified===true &&
+      proof?.sandbox_purchase_proven===true &&
+      pack?.coins===100 && pack?.is_sale_enabled===true;
     if(body.action==="status"){
       const page=body.page??0;
       if(!Number.isInteger(page)||Number(page)<0||Number(page)>100)
@@ -64,9 +83,20 @@ Deno.serve(async(request: Request)=>{
           .range(Number(page)*50,Number(page)*50+49),
       ]);
       if(walletError||drawError)return respond({error:"unavailable"},503);
-      return respond({ok:true,balance:Number(wallet?.balance??0),draws:draws??[],page,has_more:(draws?.length??0)===50});
+      const balance=Number(wallet?.balance??0);
+      if(!Number.isSafeInteger(balance)||balance<0)return respond({error:"invalid_balance"},503);
+      return respond({ok:true,balance,draws:draws??[],page,
+        has_more:(draws?.length??0)===50,draws_enabled:drawsEnabled});
     }
     if(body.action!=="draw")return respond({error:"invalid_action"},400);
+    // The native/JS kids toggle is not authorization. Only server-controlled
+    // account flags can forbid a minor/restricted account from paid draws.
+    if(user.app_metadata?.kid_mode===true || user.app_metadata?.minor===true ||
+       user.app_metadata?.iap_disabled===true)
+      return respond({error:"purchases_restricted"},403);
+    if(!drawsEnabled)return respond({error:"paid_draws_disabled"},503);
+    if(Object.keys(body).some(key=>!["action","draw_id","count"].includes(key)))
+      return respond({error:"invalid_draw"},400);
     if(typeof body.draw_id!=="string"||!uuid.test(body.draw_id)||
        ![1,10].includes(body.count as number))
       return respond({error:"invalid_draw"},400);
