@@ -1,7 +1,7 @@
 import { createServer } from 'node:http';
 import { createHash, timingSafeEqual } from 'node:crypto';
 import { Environment, SignedDataVerifier } from '@apple/app-store-server-library';
-import { validateVerifiedAppleCoinTransaction } from '../../supabase/functions/_shared/apple-coin-transaction-policy.mjs';
+import { isAppleCoinProduct, validateVerifiedAppleCoinTransaction } from '../../supabase/functions/_shared/apple-coin-transaction-policy.mjs';
 
 const secret = process.env.APPLE_SANDBOX_VERIFIER_SECRET;
 if (!secret || !/^[a-f0-9]{64}$/.test(secret)) {
@@ -43,7 +43,7 @@ const server = createServer(async (request, response) => {
     const { signedTransaction, expected } = JSON.parse(Buffer.concat(parts).toString('utf8'));
     if (typeof signedTransaction !== 'string' || signedTransaction.length > 16384 ||
         !/^[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+$/.test(signedTransaction) ||
-        expected?.environment !== 'Sandbox' || expected.productId !== 'mushiverse.coins.100' ||
+        expected?.environment !== 'Sandbox' || !isAppleCoinProduct(expected.productId) ||
         !['transactionId', 'originalTransactionId'].every(key =>
           typeof expected[key] === 'string' && /^\d{6,30}$/.test(expected[key])) ||
         typeof expected.appAccountToken !== 'string' ||
@@ -54,7 +54,23 @@ const server = createServer(async (request, response) => {
     if (header?.alg !== 'ES256') return send(422, { error: 'invalid_transaction' });
     const transaction = await verifier.verifyAndDecodeTransaction(signedTransaction);
     const verified = validateVerifiedAppleCoinTransaction(transaction, expected);
-    return send(200, { verified });
+    // Preserve only fields already cryptographically verified and policy checked.
+    // The Edge Function independently revalidates this signed evidence; never
+    // return a stripped policy summary or echo untrusted expected fields.
+    return send(200, { verified: {
+      ...verified,
+      bundleId: transaction.bundleId,
+      appAccountToken: transaction.appAccountToken,
+      revocationDate: transaction.revocationDate ?? null,
+      revocationReason: transaction.revocationReason ?? null,
+      type: transaction.type,
+      quantity: transaction.quantity,
+      inAppOwnershipType: transaction.inAppOwnershipType,
+      purchaseDate: transaction.purchaseDate,
+      signedDate: transaction.signedDate,
+      isUpgraded: transaction.isUpgraded ?? null,
+      transactionReason: transaction.transactionReason ?? null,
+    } });
   } catch {
     return send(422, { error: 'verification_failed' });
   }
