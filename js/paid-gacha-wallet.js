@@ -9,7 +9,10 @@
 
   function pendingKey() { return STORAGE + account; }
   function pendingRead() { try { return JSON.parse(sessionStorage.getItem(pendingKey()) || 'null'); } catch { return null; } }
-  function pendingSave(value) { try { if(value) sessionStorage.setItem(pendingKey(),JSON.stringify(value)); else sessionStorage.removeItem(pendingKey()); } catch {} }
+  function pendingSave(value) {
+    if(value) sessionStorage.setItem(pendingKey(),JSON.stringify(value));
+    else sessionStorage.removeItem(pendingKey());
+  }
   const message = text => { const node = byID('mvPaidCoinMessage'); if (node) node.textContent = text; };
 
   async function sessionUser() {
@@ -31,7 +34,7 @@
     const id = Number(card?.card_id);
     const rarity = String(card?.rarity || 'N');
     const roster = window.mushiverseClassicCards || [];
-    const name = id === 101 ? 'アルバセラフ' : roster[id-1]?.name;
+    const name = id === 101 ? '創世の白蝶・アルバセラフ' : roster[id-1]?.name;
     const row = document.createElement('li');
     row.className = 'mvPaidCoinCard';
     if (!name || !['N','R','SR','SSR','LR'].includes(rarity)) {
@@ -75,6 +78,7 @@
   async function refresh(reset=true) {
     if (busy) return;
     const user = await sessionUser();
+    if (busy) return;
     if(!user) {
       account=''; balance=0; draws=[]; drawsEnabled=false; render(); return;
     }
@@ -103,18 +107,21 @@
   async function draw(count, retry=false) {
     if(busy || kids() || !account || !drawsEnabled) return;
     const user=await sessionUser();
+    if(busy) return;
     if(!user || user.id!==account) { account='';render();return; }
     let pending=pendingRead();
     if(pending && !retry) { message('未確認の購入コインガチャがあります。再確認を押してください。');render();return; }
+    if(!pending && retry) { await refresh(); return; }
     if(!pending) {
       if(!window.crypto?.randomUUID) { message('安全な抽選IDを生成できませんでした。');return; }
       pending={id:window.crypto.randomUUID(),count};
-      pendingSave(pending);
+      try { pendingSave(pending); } catch { message('抽選IDを保存できません。もう一度お試しください。'); return; }
     }
     if(![1,10].includes(pending.count) || typeof pending.id!=='string') { pendingSave(null);return; }
     busy=true;render();
     try {
       const receipt=await invoke({action:'draw',draw_id:pending.id,count:pending.count});
+      if ((await sessionUser())?.id !== user.id || account !== user.id) { account=''; render(); return; }
       if(receipt.error==='insufficient_balance') {
         pendingSave(null); message('購入コインが不足しています。'); return;
       }
@@ -139,6 +146,8 @@
     panel.setAttribute('aria-label','購入コイン専用ガチャ');
     const heading=document.createElement('h2');heading.textContent='購入コイン専用ガチャ';
     const intro=document.createElement('p');intro.textContent='購入コインは無料コインと別管理です。1回50コイン、10回450コイン。抽選と残高の減算はサーバーが行います。';
+    const odds=document.createElement('p');
+    odds.textContent='1枚ごとの排出率：SSR 0.1%、SR 1.9%、R 18%。残り80%はNで、限定LRの在庫がある間はそのうち全抽選の0.01%がLRになります。10回とも同じ条件です。';
     const amount=document.createElement('strong');amount.id='mvPaidCoinBalance';
     const actions=document.createElement('div');actions.className='mvPaidCoinActions';
     const make=(id,label,handler)=>{
@@ -152,7 +161,7 @@
     make('mvPaidCoinMore','過去の有料カードをもっと見る',()=>refresh(false));
     const status=document.createElement('p');status.id='mvPaidCoinMessage';status.setAttribute('role','status');
     const history=document.createElement('ul');history.id='mvPaidCoinHistory';
-    panel.append(heading,intro,amount,actions,status,history);
+    panel.append(heading,intro,odds,amount,actions,status,history);
     const shop=byID('mv134CoinStore');
     if(shop?.parentElement===gacha) shop.insertAdjacentElement('afterend',panel);
     else gacha.append(panel);

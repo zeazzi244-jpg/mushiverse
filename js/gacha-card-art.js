@@ -87,6 +87,7 @@
   window.mushiverseCardArt = (name, rarity, eager = false) => {
     const art = document.createElement('div');
     art.className = 'mvSharedCardArt';
+    if (['N', 'R', 'SR', 'SSR', 'LR'].includes(rarity)) art.setAttribute('data-card-rarity', rarity);
     const showSpeciesFallback = () => {
       try {
         const svg = renderSpecies(name, rarity);

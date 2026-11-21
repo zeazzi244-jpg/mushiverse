@@ -1309,3 +1309,24 @@ body #mv134CoinStore .mv134Pack button {
   outline:3px solid #f5d17b;
   outline-offset:2px;
 }
+
+/* Keep the badge on the frame while photographs load or switch to a fallback. */
+.mvSharedCardArt[data-card-rarity] { position: relative; isolation: isolate; }
+.mvSharedCardArt[data-card-rarity]::after {
+  content: attr(data-card-rarity);
+  position: absolute; top: .35rem; right: .35rem; z-index: 1;
+  padding: .14em .48em; border: 2px solid var(--badge-rim, #bac4cb);
+  border-radius: .35em .35em .65em .65em;
+  color: #fff; background: linear-gradient(148deg, var(--badge-metal, #606d75), #152126 90%);
+  box-shadow: 0 1px 4px #081411; text-shadow: 0 1px 2px #121816;
+  font: 800 clamp(12px, 2.7vw, 17px)/1.3 system-ui, sans-serif;
+  letter-spacing: .04em; pointer-events: none;
+}
+.mvSharedCardArt[data-card-rarity="R"] { --badge-metal: #105a9c; --badge-rim: #97d9ff; }
+.mvSharedCardArt[data-card-rarity="SR"] { --badge-metal: #70439b; --badge-rim: #e4c8ff; }
+.mvSharedCardArt[data-card-rarity="SSR"] { --badge-metal: #815712; --badge-rim: #ffd572; }
+.mvSharedCardArt[data-card-rarity="SSR"]::after { box-shadow: 0 0 0 1px #c5a2f1, 0 0 7px #ffe485; }
+.mvSharedCardArt[data-card-rarity="LR"] { --badge-metal: #69313d; --badge-rim: #fff3b9; }
+.mvSharedCardArt[data-card-rarity="LR"]::after { outline: 1px solid #c59145; outline-offset: 1px; }
+.mvSharedCardArt.mvGachaSilhouette::after { display: none; }
+.mv90Unowned .mvSharedCardArt > :is(img, svg) { filter: brightness(0); }

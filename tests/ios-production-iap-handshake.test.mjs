@@ -11,7 +11,10 @@ test('native Production transactions use dedicated settlement endpoint and do no
   assert.match(store, /transaction\.environment == \.production/);
   assert.match(store, /transaction\.environment == \.sandbox/);
   assert.match(store, /appendingPathComponent\("settle-apple-production-coins"\)/);
-  assert.match(store, /settlementEndpoint = Self\.purchasesEnabled/);
+  assert.match(store, /settlementEndpoint = !isSandbox/);
+  assert.match(store, /transaction\.environment == \.production && Self\.purchasesEnabled/);
+  assert.match(store, /if isSandbox \{/);
+  assert.match(store, /receipt\.creditedOrPreviouslyCredited, receipt\.ok/);
   assert.match(nativePlugin, /credit-apple-gacha-coins/);
 });
 

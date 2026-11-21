@@ -163,14 +163,9 @@ final class MushiverseCoinStore: ObservableObject {
             lastError = "Appleによる購入確認に失敗しました"
             return
         }
-        if Self.purchasesEnabled {
-            // A live build must not treat Sandbox receipts as paid Production coins.
-            guard #available(iOS 16.0, *), transaction.environment == .production else { return }
-        } else {
-            // Recovery relies on the verified transaction even when product loading fails.
-            guard #available(iOS 16.0, *), transaction.environment == .sandbox,
-                  transaction.productID == Self.sandboxProductID else { return }
-        }
+        guard #available(iOS 16.0, *) else { return }
+        let isSandbox = transaction.environment == .sandbox
+        guard isSandbox || (transaction.environment == .production && Self.purchasesEnabled) else { return }
         guard Self.expectedType(transaction.productID) == .consumable,
               transaction.productType == .consumable,
               transaction.revocationDate == nil else { return }
@@ -195,7 +190,7 @@ final class MushiverseCoinStore: ObservableObject {
             )
             guard claimResponse.statusCode == 200 else { throw PurchaseError.serverRejected }
             guard isStarted, lifecycleGeneration == generation, !Task.isCancelled else { return }
-            let settlementEndpoint = Self.purchasesEnabled
+            let settlementEndpoint = !isSandbox
                 ? creditEndpoint.deletingLastPathComponent().appendingPathComponent("settle-apple-production-coins")
                 : creditEndpoint
             let (data, response) = try await post(
@@ -205,7 +200,7 @@ final class MushiverseCoinStore: ObservableObject {
             guard response.statusCode == 200 else { throw PurchaseError.serverRejected }
             guard isStarted, lifecycleGeneration == generation, !Task.isCancelled else { return }
             // Finish only after the isolated Sandbox ledger acknowledges this purchase.
-            if !Self.purchasesEnabled {
+            if isSandbox {
                 guard let proof = try? JSONDecoder().decode(SandboxProof.self, from: data),
                       proof.ok,
                       proof.verification == "sandbox_signature_verified",
@@ -228,7 +223,7 @@ final class MushiverseCoinStore: ObservableObject {
                 return
             }
             let receipt = try JSONDecoder().decode(CreditResponse.self, from: data)
-            guard receipt.creditedOrPreviouslyCredited,
+            guard receipt.creditedOrPreviouslyCredited, receipt.ok,
                   receipt.verification == "production_signature_verified",
                   receipt.environment == "Production",
                   receipt.transactionID == String(transaction.id),
@@ -299,6 +294,7 @@ final class MushiverseCoinStore: ObservableObject {
     }
 
     private struct CreditResponse: Decodable {
+        let ok: Bool
         let creditedOrPreviouslyCredited: Bool
         let verification: String
         let environment: String
@@ -307,7 +303,7 @@ final class MushiverseCoinStore: ObservableObject {
         let productID: String
         let coins: Int
         enum CodingKeys: String, CodingKey {
-            case verification, environment, coins
+            case ok, verification, environment, coins
             case creditedOrPreviouslyCredited = "credited_or_previously_credited"
             case transactionID = "transaction_id"
             case originalTransactionID = "original_transaction_id"
