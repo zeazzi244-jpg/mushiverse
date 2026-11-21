@@ -10,7 +10,7 @@ const credit = readFileSync(new URL('../supabase/functions/credit-apple-gacha-co
 const claim = readFileSync(new URL('../supabase/functions/submit-apple-purchase-claim/index.ts', import.meta.url),'utf8');
 const native = readFileSync(new URL('../ios/App/App/MushiverseCoinStore.swift', import.meta.url),'utf8');
 
-test('staged Production verifier uses Apple's signed verification before policy', () => {
+test("staged Production verifier uses Apple's signed verification before policy", () => {
   assert.match(verifier, /SignedDataVerifier/);
   assert.match(verifier, /Environment\.PRODUCTION/);
   assert.match(verifier, /"com\.rikuto\.mushiverse", appAppleId/);
