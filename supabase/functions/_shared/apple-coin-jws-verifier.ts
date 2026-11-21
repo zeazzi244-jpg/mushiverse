@@ -129,7 +129,11 @@ export async function verifyAppleCoinJws(signedTransaction: string, expected: {
         verified.signedDate > Date.now() + 300000 ||
         !Number.isSafeInteger(verified.coins) || verified.coins !== expectedCoins)
       throw new Error("invalid_signed_transaction");
-    return verified;
+    // Apply the same signed-claim policy used by the local Apple verifier.
+    // This also rejects revoked transactions (including revocationReason),
+    // subscription-only metadata, upgrade flags and mismatched consumable chains.
+    // Never return an unvalidated remote response to the fulfillment handler.
+    return validateVerifiedAppleCoinTransaction(verified, expected);
   }
 
   const bundleId = "com.rikuto.mushiverse";
