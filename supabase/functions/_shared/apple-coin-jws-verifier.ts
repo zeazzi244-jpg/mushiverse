@@ -68,7 +68,7 @@ export async function verifyAppleCoinJws(signedTransaction: string, expected: {
     // A verifier is a security boundary: never buffer an unlimited or malformed
     // upstream response into the Edge Function. Fail closed on protocol errors.
     const contentType = response.headers.get("content-type") ?? "";
-    if (!/^application\\/json(?:\\s*;|\\s*$)/i.test(contentType))
+    if (!/^application\/json(?:\s*;|\s*$)/i.test(contentType))
       throw new Error("apple_verification_not_configured");
     const reader = response.body?.getReader();
     if (!reader) throw new Error("apple_verification_not_configured");
