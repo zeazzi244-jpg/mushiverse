@@ -163,7 +163,10 @@ final class MushiverseCoinStore: ObservableObject {
             lastError = "Appleによる購入確認に失敗しました"
             return
         }
-        if !Self.purchasesEnabled {
+        if Self.purchasesEnabled {
+            // A live build must not treat Sandbox receipts as paid Production coins.
+            guard #available(iOS 16.0, *), transaction.environment == .production else { return }
+        } else {
             // Recovery relies on the verified transaction even when product loading fails.
             guard #available(iOS 16.0, *), transaction.environment == .sandbox,
                   transaction.productID == Self.sandboxProductID else { return }
@@ -192,9 +195,12 @@ final class MushiverseCoinStore: ObservableObject {
             )
             guard claimResponse.statusCode == 200 else { throw PurchaseError.serverRejected }
             guard isStarted, lifecycleGeneration == generation, !Task.isCancelled else { return }
+            let settlementEndpoint = Self.purchasesEnabled
+                ? creditEndpoint.deletingLastPathComponent().appendingPathComponent("settle-apple-production-coins")
+                : creditEndpoint
             let (data, response) = try await post(
                 CreditRequest(transactionID: String(transaction.id), signedTransaction: result.jwsRepresentation),
-                to: creditEndpoint, token: token
+                to: settlementEndpoint, token: token
             )
             guard response.statusCode == 200 else { throw PurchaseError.serverRejected }
             guard isStarted, lifecycleGeneration == generation, !Task.isCancelled else { return }
@@ -223,8 +229,12 @@ final class MushiverseCoinStore: ObservableObject {
             }
             let receipt = try JSONDecoder().decode(CreditResponse.self, from: data)
             guard receipt.creditedOrPreviouslyCredited,
+                  receipt.verification == "production_signature_verified",
+                  receipt.environment == "Production",
                   receipt.transactionID == String(transaction.id),
-                  receipt.productID == transaction.productID else {
+                  receipt.originalTransactionID == String(transaction.originalID),
+                  receipt.productID == transaction.productID,
+                  receipt.coins == 100 else {
                 throw PurchaseError.serverRejected
             }
             await transaction.finish()
@@ -290,11 +300,17 @@ final class MushiverseCoinStore: ObservableObject {
 
     private struct CreditResponse: Decodable {
         let creditedOrPreviouslyCredited: Bool
+        let verification: String
+        let environment: String
         let transactionID: String
+        let originalTransactionID: String
         let productID: String
+        let coins: Int
         enum CodingKeys: String, CodingKey {
+            case verification, environment, coins
             case creditedOrPreviouslyCredited = "credited_or_previously_credited"
             case transactionID = "transaction_id"
+            case originalTransactionID = "original_transaction_id"
             case productID = "product_id"
         }
     }
