@@ -66,10 +66,21 @@ export async function verifyAppleCoinJws(signedTransaction: string, expected: {
       throw new Error("invalid_signed_transaction");
     if (!response.ok) throw new Error("apple_verification_not_configured");
     const { verified } = await response.json();
-    if (!verified || verified.environment !== "Sandbox" ||
-        verified.productId !== "mushiverse.coins.100" || verified.productId !== expected.productId ||
+    // Treat the remote verifier response as untrusted transport data: bind it
+    // to the server-derived claim and the exact approved pack denomination.
+    // Never assume every verified purchase is the 100-coin product.
+    const packCoins = Object.freeze({
+      "mushiverse.coins.100": 100,
+      "mushiverse.coins.500": 500,
+      "mushiverse.coins.1200": 1200,
+    });
+    const expectedCoins = packCoins[expected.productId as keyof typeof packCoins];
+    if (!verified || typeof verified !== "object" ||
+        verified.environment !== expected.environment ||
+        verified.productId !== expected.productId ||
         verified.transactionId !== expected.transactionId ||
-        verified.originalTransactionId !== expected.originalTransactionId || verified.coins !== 100)
+        verified.originalTransactionId !== expected.originalTransactionId ||
+        !Number.isSafeInteger(verified.coins) || verified.coins !== expectedCoins)
       throw new Error("invalid_signed_transaction");
     return verified;
   }
