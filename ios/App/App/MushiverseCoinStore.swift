@@ -111,7 +111,10 @@ final class MushiverseCoinStore: ObservableObject {
                 guard isStarted, productLoadGeneration == generation, !Task.isCancelled else { return }
             }
             if !Self.purchasesEnabled && !sandboxPurchasesEnabled {
-                lastError = "価格は取得できました。Appleのテスト環境を確認できないため、購入は無効です。"
+                // A production App Store install is expected to be non-Sandbox. The real
+                // blocker is the still-disabled production fulfillment path, not a
+                // missing Apple test account or a product metadata failure.
+                lastError = "Appleの商品価格は取得済みです。本番課金の安全確認が完了するまで、このバージョンでは購入できません。"
             } else if !AppStore.canMakePayments {
                 lastError = "この端末の設定ではアプリ内購入が許可されていません。"
             } else {
