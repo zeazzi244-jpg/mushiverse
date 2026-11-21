@@ -983,7 +983,8 @@ body[data-screen="profile"] .wrap > header { display: none; }
   @keyframes mvWoodShake { 25%,75% {transform:translateX(-2px)} 50% {transform:translateX(2px)} }
 }
 #gacha #mv101Machine .mvWoodAudio { margin: .6rem 0; color: #173d2f; text-align: left; }
-#gacha #mv101Machine .mvWoodAudio summary { min-height: 36px; cursor: pointer; font-weight: 700; }
+#gacha #mv101Machine .mvWoodAudio summary { min-height: 44px; display: list-item; padding-block: 10px; cursor: pointer; font-weight: 700; overflow-wrap: anywhere; }
+#gacha #mv101Machine .mvWoodAudio summary:focus-visible { outline: 3px solid #946516; outline-offset: 2px; }
 #gacha #mv101Machine .mvWoodAudio label { display: flex; align-items: center; gap: .65rem; min-height: 44px; }
 #gacha #mv101Machine .mvWoodAudio input[type=range] { flex: 1; min-width: 0; }
 
