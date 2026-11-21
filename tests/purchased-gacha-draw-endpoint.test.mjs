@@ -13,9 +13,9 @@ test('draw API checks authenticated account and child restrictions',()=>{
   assert.match(api,/p_user_id:user\.id/);
 });
 test('production payment safety gates block draws unless validated',()=>{
-  for(const part of ['billing.billing_mode!=="live"','billing.checkout_enabled!==true',
-    'billing.ios_iap_ready!==true','gate.server_jws_verified!==true',
-    'gate.sandbox_purchase_proven!==true','pack.is_sale_enabled!==true'])
+  for(const part of ['billing.billing_mode==="live"','billing.checkout_enabled===true',
+    'billing.ios_iap_ready===true','gate.server_jws_verified===true',
+    'gate.sandbox_purchase_proven===true','pack.is_sale_enabled===true'])
     assert.ok(api.includes(part),part);
   assert.ok(api.indexOf('paid_draws_disabled')<api.indexOf('draw_with_purchased_gacha_coins_and_lr'));
   assert.match(native,/static let purchasesEnabled = false/);
