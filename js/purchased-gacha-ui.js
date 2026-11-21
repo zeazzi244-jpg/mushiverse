@@ -89,9 +89,11 @@
       }
       const coins=result.data.balance;
       if(!Number.isSafeInteger(coins)||coins<0)throw Error('invalid_balance');
-      $('mvPaidBalance').textContent='購入コイン残高：'+coins.toLocaleString('ja-JP')+' コイン';
-      $('mvPaidOne').disabled=coins<50;
-      $('mvPaidTen').disabled=coins<450;
+      const enabled=result.data.draws_enabled===true;
+      $('mvPaidBalance').textContent='購入コイン残高：'+coins.toLocaleString('ja-JP')+' コイン'+
+        (enabled?'':'（有料ガチャは現在停止中）');
+      $('mvPaidOne').disabled=!enabled||coins<50;
+      $('mvPaidTen').disabled=!enabled||coins<450;
       const list=$('mvPaidHistory');list.replaceChildren();
       const history=Array.isArray(result.data.history)?result.data.history:[];
       if(!history.length){const li=document.createElement('li');li.textContent='有料ガチャの履歴はありません。';list.append(li);}
