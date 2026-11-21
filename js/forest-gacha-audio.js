@@ -204,7 +204,9 @@
     // iOS may suspend Web Audio between the prelude and the capsule animation.
     // Resume on this gesture when possible, but never play a stale phase after
     // a newer draw, reveal, close, or visibility change.
-    const current = turn;
+    // Each phase supersedes pending resume callbacks from the prelude or
+    // previous phase. Otherwise iOS can play old cues out of order after resume.
+    const current = ++turn;
     const play = () => {
       if (!drawOpen || current !== turn) return;
       cue(time => {
