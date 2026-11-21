@@ -1249,3 +1249,29 @@ body #mv134CoinStore .mv134Pack button {
   overflow-wrap:anywhere;
   white-space:normal;
 }
+
+/* V43: the fixed bottom tab bar must not cover the last gacha action or
+   result button on short iPhones. Reserve scrollable space, including the
+   home-indicator safe area, without changing the gacha draw handlers. */
+#gacha {
+  scroll-padding-bottom:calc(92px + env(safe-area-inset-bottom, 0px));
+  padding-bottom:max(96px, calc(72px + env(safe-area-inset-bottom, 0px)));
+}
+#gacha #mv101Machine .mvWoodActions,
+#mv88Reveal .mvGachaNext {
+  scroll-margin-bottom:calc(92px + env(safe-area-inset-bottom, 0px));
+}
+/* Keep the actual reveal's next/close actions in view when enlarged text
+   increases their height. Do not make hidden action rows visible. */
+#mv88Reveal .mvGachaNext:not([hidden]) > button {
+  box-sizing:border-box;
+  min-width:0;
+  height:auto;
+  overflow-wrap:anywhere;
+  white-space:normal;
+}
+@media(max-width:320px) {
+  #mv88Reveal .mvGachaNext:not([hidden]) {
+    grid-template-columns:minmax(0,1fr);
+  }
+}
