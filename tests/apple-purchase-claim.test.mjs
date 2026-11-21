@@ -19,6 +19,7 @@ function createHarness() {
   let handler;
   const rows = [];
   let currentUser = 'user-a';
+  let accountFlags = {};
   let insertRace = null;
   const queryFor = (options={}) => {
     const filters = [];
@@ -42,7 +43,7 @@ function createHarness() {
     return q;
   };
   const client = {
-    auth:{getUser:async()=>({data:{user:{id:currentUser}},error:null})},
+    auth:{getUser:async()=>({data:{user:{id:currentUser,app_metadata:accountFlags}},error:null})},
     from:()=>({
       select:(_fields,options)=>queryFor(options),
       insert:row=>({
@@ -78,7 +79,7 @@ function createHarness() {
     const res=await handler(req);
     return {status:res.status,data:await res.json()};
   }
-  return {send,rows,setUser:id=>{currentUser=id},setInsertRace:fn=>{insertRace=fn}};
+  return {send,rows,setUser:id=>{currentUser=id},setFlags:flags=>{accountFlags=flags},setInsertRace:fn=>{insertRace=fn}};
 }
 const coin=(id,product='mushiverse.coins.100',original=id)=>({
   transaction_id:id,original_transaction_id:original,product_id:product,
@@ -175,3 +176,14 @@ test('claim endpoint rejects missing and malformed bearer authorization',async()
   }
   assert.equal(h.rows.length,0);
 });
+
+for(const flag of ['kid_mode','minor','iap_disabled']) {
+  test('restricted account flag '+flag+' blocks new Apple claims',async()=>{
+    const h=createHarness();
+    h.setFlags({[flag]:true});
+    const r=await h.send(coin('123456789'));
+    assert.equal(r.status,403);
+    assert.equal(r.data.error,'purchases_restricted');
+    assert.equal(h.rows.length,0);
+  });
+}
