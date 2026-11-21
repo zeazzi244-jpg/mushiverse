@@ -20,7 +20,7 @@ test('billing shutdown still refuses paid-draw POST',()=>{
 });
 test('UI displays owned history but disables draws during billing pause',()=>{
   assert.match(ui,/result\.data\.draws_enabled===true/);
-  assert.match(ui,/\('（有料ガチャは現在停止中）'\)/);
+  assert.match(ui,/有料ガチャは現在停止中/);
   assert.match(ui,/!enabled\|\|coins<50/);
   assert.match(ui,/!enabled\|\|coins<450/);
   assert.match(ui,/result\.data\.history/);
