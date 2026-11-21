@@ -1164,3 +1164,16 @@ body #mv134CoinStore .mv134Pack button {
     flex-basis: 100%;
   }
 }
+
+/* V40: prevent flex-basis:9rem from wrapping the two draw actions on
+   361–480px iPhones. Both controls must share the row at compact widths;
+   allow wrapping inside each button rather than moving the second below. */
+@media (min-width:301px) and (max-width:480px) {
+  #gacha :is(.gacha-controls,.gacha-actions) > :is(button,[role="button"]) {
+    flex:1 1 0;
+    min-width:0;
+    max-width:100%;
+    white-space:normal;
+    overflow-wrap:anywhere;
+  }
+}
