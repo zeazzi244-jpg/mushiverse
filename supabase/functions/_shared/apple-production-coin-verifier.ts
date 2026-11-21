@@ -45,5 +45,8 @@ export async function verifyAppleProductionCoinJws(
   const transaction = await verifier.verifyAndDecodeTransaction(signedTransaction);
   // Product, owner, nonce-free transaction identity, revocation and consumable
   // metadata are checked independently against authenticated server state.
-  return validateProductionAppleCoinTransaction(transaction, expected);
+  const validated = validateProductionAppleCoinTransaction(transaction, expected);
+  // Settlement records the exact Apple-signed purchase timestamp, not a
+  // client value or the current server time. Preserve it after validation.
+  return Object.freeze({ ...validated, purchaseDate: transaction.purchaseDate as number });
 }
