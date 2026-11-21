@@ -1186,10 +1186,12 @@ body #mv134CoinStore .mv134Pack button {
    leaving little room for the two draw actions above the bottom navigation. */
 @media (max-height:740px) and (orientation:portrait) {
   #gacha #mv101Machine .mvWoodMachine {
+    max-height:34vh;
     max-height:34dvh;
     margin-bottom:4px;
   }
   #gacha #mv101Machine .mvWoodMachine :is(img,video,canvas) {
+    max-height:34vh;
     max-height:34dvh;
     width:auto;
     max-width:100%;
@@ -1283,10 +1285,12 @@ body #mv134CoinStore .mv134Pack button {
    Restrict this to the actual mounted gacha and preserve hidden state. */
 @media (max-height:500px) and (orientation:landscape) {
   #gacha #mv101Machine .mvWoodMachine {
+    max-height:28vh;
     max-height:28dvh;
     margin-bottom:2px;
   }
   #gacha #mv101Machine .mvWoodMachine :is(img,video,canvas) {
+    max-height:28vh;
     max-height:28dvh;
     width:auto;
     max-width:100%;
