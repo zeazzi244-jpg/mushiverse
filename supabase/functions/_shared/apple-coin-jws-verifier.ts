@@ -89,10 +89,10 @@ export async function verifyAppleCoinJws(signedTransaction: string, expected: {
     const payload = new Uint8Array(size);
     let cursor = 0;
     for (const part of parts) { payload.set(part, cursor); cursor += part.byteLength; }
-    let verified: unknown;
+    let verified: Record<string, unknown> | null;
     try {
       const parsed = JSON.parse(new TextDecoder("utf-8", { fatal: true }).decode(payload));
-      verified = parsed && typeof parsed === "object" && !Array.isArray(parsed) ? parsed.verified : null;
+      verified = parsed && typeof parsed === "object" && !Array.isArray(parsed) && parsed.verified && typeof parsed.verified === "object" && !Array.isArray(parsed.verified) ? parsed.verified as Record<string, unknown> : null;
     } catch { throw new Error("apple_verification_not_configured"); }
 
     // Treat the remote verifier response as untrusted transport data: bind it
