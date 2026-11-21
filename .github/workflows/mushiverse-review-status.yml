@@ -1,5 +1,11 @@
 name: MUSHIVERSE private review status
 on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/mushiverse-review-status.yml'
+      - 'services/review-status/**'
+      - 'supabase/functions/mushiverse-guide/**'
   workflow_dispatch:
     inputs:
       public_key:
@@ -9,7 +15,7 @@ permissions:
   contents: read
 jobs:
   lookup:
-    if: github.ref == 'refs/heads/main' && github.actor == github.repository_owner
+    if: github.ref == 'refs/heads/main' && (github.event_name == 'push' || github.actor == github.repository_owner)
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -19,4 +25,17 @@ jobs:
           ASC_ISSUER_ID: ${{ secrets.ASC_ISSUER_ID }}
           ASC_API_KEY_P8_BASE64: ${{ secrets.ASC_API_KEY_P8_BASE64 }}
           REPORT_PUBLIC_KEY: ${{ inputs.public_key }}
-        run: node services/review-status/encrypted-report.mjs
+        run: |
+          if [ "${{ github.event_name }}" = push ]; then
+            export REPORT_PUBLIC_KEY="$(openssl genpkey -algorithm RSA -pkeyopt rsa_keygen_bits:3072 2>/dev/null | openssl pkey -pubout -outform DER | base64 -w0)"
+          fi
+          node services/review-status/encrypted-report.mjs
+  guide:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Verify live public MCP search
+        run: |
+          curl -fsS --retry 2 --max-time 30 'https://jhowxtdemlsmetcwhekr.supabase.co/functions/v1/mushiverse-guide' \
+            -H 'Content-Type: application/json' -H 'Accept: application/json, text/event-stream' \
+            --data '{"jsonrpc":"2.0","id":1,"method":"tools/call","params":{"name":"search_insects","arguments":{"query":"アルバセラフ"}}}' | \
+            jq -e '(.result.content[0].text | fromjson).cards[0].name == "アルバセラフ"'
