@@ -27,3 +27,11 @@ Repository: zeazzi244-jpg/mushiverse, branch main. Supabase: mushi-log (jhowxtde
 - tests/legacy-paid-wallet-gate.test.mjs
 
 All past work is on the existing main branch; this note summarizes work verified in this conversation, not a claim of a completed production launch.
+
+## Subsequent security hardening — confirmed live in Supabase
+- Discovered the legacy permissive RLS policy account_active_v21 FOR ALL OR-combined with owner-select rules, allowing potential cross-account viewing of paid wallet/ledger rows. Removed it on gacha_coin_wallets, gacha_paid_draws and gacha_coin_purchase_credits, leaving only authenticated owner-read policies. All client write privileges on those three tables revoked.
+- Removed the same overbroad RLS policy on gacha_coin_spends, premium_entitlements, premium_waitlist, referral_claims, monetization_events, community_reports; retained their own/related read, own reports and existing event submit rules. Added explicit own-row waiting-status signup policy for premium_waitlist; blocked client UPDATE/DELETE on the sensitive tables.
+- Also removed account_active_v21 from profile_usernames, user_follows, insect_posts, post_comments, post_likes and gacha_collection_leaderboard to prevent the permissive policy bypassing separate owner edit/delete rules. Existing specific social read/write policies were left intact.
+- Relevant migrations: 20261121195500_lock_paid_wallet_owner_rls.sql, 20261121200000_financial_owner_rls_hardening.sql, 20261121201000_stop_cross_user_social_mutation.sql. All applied to live Supabase and inspected via pg_policies. No proof of actual unauthorized access was found/claimed.
+- Regression tests: tests/financial-owner-rls-guard.test.mjs and tests/social-owner-rls-guard.test.mjs. Check CI for latest HEAD before deployment or launch.
+- Work should review all remaining account_active_v21 policies and verify account deactivation enforcement separately; these changes do not certify all RLS policy/security quality.
