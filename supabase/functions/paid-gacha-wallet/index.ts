@@ -75,7 +75,7 @@ Deno.serve(async(request: Request)=>{
     });
     if(drawError)return respond({error:"draw_unavailable"},503);
     if(!draw||draw.ok!==true){
-      if(draw?.reason==="insufficient_balance")return respond({error:"insufficient_balance"},409);
+      if(draw?.reason==="insufficient_balance")return respond({ok:false,error:"insufficient_balance"});
       return respond({error:"draw_unavailable"},503);
     }
     if(!Array.isArray(draw.results)||draw.results.length!==body.count||
