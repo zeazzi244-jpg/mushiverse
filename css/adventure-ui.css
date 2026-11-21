@@ -950,7 +950,8 @@ body[data-screen="profile"] .wrap > header { display: none; }
   background: #162c25;
   color: #f4faf3;
 }
-.mvSharedCardArt img { display: block; width: 100%; height: 100%; object-fit: cover; }
+/* Card illustrations must be shown in full in collection and gacha views. */
+.mvSharedCardArt img { display:block; width:100%; height:100%; object-fit:contain; object-position:center; }
 .mvCardArtUnavailable { display: grid; place-items: center; padding: .3rem; font-size: .8rem; }
 #mv88Reveal .mv88Card:only-child .mvSharedCardArt { width: min(100%, 21rem, 43dvh); }
 #mv88Reveal .mvGachaNext:not([hidden]), #gacha #mv101Machine .mvWoodActions {
