@@ -1,15 +1,11 @@
 name: iOS signed archive (manual)
 on:
   workflow_dispatch:
-  push:
-    branches: [main]
-    paths: ['.github/workflows/ios-signed-archive.yml']
 permissions:
   contents: read
   actions: read
 jobs:
   signed-archive:
-    if: github.event_name == 'workflow_dispatch' || github.event.head_commit.message == 'Build signed iOS archive for the 100-coin App Review fix'
     runs-on: macos-26-intel
     timeout-minutes: 60
     concurrency:
