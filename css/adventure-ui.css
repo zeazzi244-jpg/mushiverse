@@ -1221,3 +1221,31 @@ body #mv134CoinStore .mv134Pack button {
     transform:none!important;
   }
 }
+
+/* V42: Keep real wooden-machine controls usable with enlarged iOS text.
+   The 2-column layout is appropriate at default font sizes, but at 200%
+   Dynamic Type it can clip localized labels and hide the second action. */
+@media (max-width:480px) {
+  #gacha #mv101Machine .mvWoodActions > button {
+    height:auto;
+    min-height:54px;
+    text-overflow:clip;
+    overflow:visible;
+    overflow-wrap:anywhere;
+  }
+}
+@media (max-width:480px) and (prefers-reduced-motion:reduce) {
+  #gacha #mv101Machine .mvWoodActions > button {
+    transition:none;
+  }
+}
+/* The result's accessible text must remain selectable and readable when
+   a large card image or an animation finishes after the reveal. */
+#mv88Reveal :is(.mv88Card,.mvSharedCardArt) {
+  min-width:0;
+  max-width:100%;
+}
+#mv88Reveal .mv88Card :is(h2,h3,p,small,strong) {
+  overflow-wrap:anywhere;
+  white-space:normal;
+}
