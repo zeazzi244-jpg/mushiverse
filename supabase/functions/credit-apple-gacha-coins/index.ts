@@ -126,7 +126,10 @@ Deno.serve(async (request: Request) => {
       const configuredSecret = Deno.env.get("APPLE_SANDBOX_VERIFIER_SECRET");
       const configuredUrl = Deno.env.get("APPLE_SANDBOX_VERIFIER_URL");
       let vaultSecret;
-      if (!configuredSecret && !configuredUrl && claim.product_id === "mushiverse.coins.100") {
+      // The trusted verifier secret is shared by all supported coin packs.
+      // Sandbox verification does not grant spendable coins; only the
+      // separately restricted 100-coin test ledger can record a test credit.
+      if (!configuredSecret && !configuredUrl) {
         const { data, error } = await admin.rpc("get_apple_sandbox_verifier_secret");
         if (error) throw new Error("apple_verification_not_configured");
         if (typeof data === "string") vaultSecret = data;
