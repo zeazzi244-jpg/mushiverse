@@ -17,6 +17,13 @@ Deno.serve(async(req)=>{
     const admin=createClient(url,service);
     const {data:{user},error:uerr}=await userClient.auth.getUser();
     if(uerr||!user) return json({error:"unauthorized"},401);
+    // Match the Production verifier and both paid-draw endpoints: permission
+    // to purchase must come from server-controlled app_metadata, not a
+    // client-side kids-mode switch or user-editable profile fields.
+    if(user.app_metadata?.kid_mode===true ||
+       user.app_metadata?.minor===true ||
+       user.app_metadata?.iap_disabled===true)
+      return json({error:"purchases_restricted"},403);
 
     // Claims are untrusted input: bound request size and validate full values
     // rather than truncating strings into a potentially different transaction.
