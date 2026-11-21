@@ -24,7 +24,7 @@
   };
 
   function mount() {
-    if ($('mvPaidGacha') || !$('gacha')) return;
+    if ($('mvPaidGacha') || $('mvPaidCoinPanel') || !$('gacha')) return;
     const panel = document.createElement('section');
     panel.id = 'mvPaidGacha';
     panel.setAttribute('aria-label','購入コイン専用ガチャ');
