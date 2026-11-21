@@ -71,11 +71,12 @@ Deno.serve(async (req:Request)=>{
         .select("is_sale_enabled,coins").eq("product_id","mushiverse.coins.100").single()
     ]);
     if(billingError||gateError||packError) return reply({error:"service_unavailable"},503);
-    if(billing.billing_mode!=="live"||billing.checkout_enabled!==true||
-       billing.ios_iap_ready!==true||gate.server_jws_verified!==true||
-       gate.sandbox_purchase_proven!==true||pack.is_sale_enabled!==true||
-       pack.coins!==100) return reply({error:"paid_draws_disabled"},503);
+    const drawsEnabled = billing.billing_mode==="live"&&billing.checkout_enabled===true&&
+       billing.ios_iap_ready===true&&gate.server_jws_verified===true&&
+       gate.sandbox_purchase_proven===true&&pack.is_sale_enabled===true&&pack.coins===100;
 
+    // Read-only ownership queries remain available during a billing pause.
+    // A shutdown must never conceal a user's paid balance or past results.
     if(req.method==="GET"){
       const {data:wallet,error}=await admin.from("gacha_coin_wallets")
         .select("balance").eq("user_id",user.id).maybeSingle();
@@ -86,9 +87,11 @@ Deno.serve(async (req:Request)=>{
       if(historyError) return reply({error:"history_unavailable"},503);
       const balance=Number(wallet?.balance??0);
       if(!Number.isSafeInteger(balance)||balance<0) return reply({error:"balance_unavailable"},503);
-      return reply({ok:true,balance,currency:"purchased_coins",history:history??[]});
+      return reply({ok:true,balance,currency:"purchased_coins",history:history??[],
+        draws_enabled:drawsEnabled});
     }
 
+    if(!drawsEnabled) return reply({error:"paid_draws_disabled"},503);
     let body:Record<string,unknown>;
     try{body=await readJson(req);}catch{return reply({error:"invalid_request"},400);}
     const drawID=body.draw_id;
