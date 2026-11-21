@@ -10,7 +10,8 @@ const source = readFileSync(new URL('../supabase/functions/settle-apple-producti
   .replace('const parts: Uint8Array[] = [];', 'const parts = [];')
   .replace('return payload as Record<string, unknown>', 'return payload')
   .replace('Deno.serve(async (request: Request)', 'Deno.serve(async (request)')
-  .replace('let body: Record<string,unknown>;', 'let body;');
+  .replace('let body: Record<string,unknown>;', 'let body;')
+  .replace('request.headers.get("authorization")!', 'request.headers.get("authorization")');
 
 function harness({enabled=false,owner='user-1',validSignature=true,settled=true,claimStatus='pending',claimEnvironment=null,productID='mushiverse.coins.100'}={}) {
   const calls={auth:0, verify:0, settle:0};
