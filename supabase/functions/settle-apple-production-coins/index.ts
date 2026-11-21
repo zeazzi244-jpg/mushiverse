@@ -128,6 +128,22 @@ Deno.serve(async (request: Request) => {
       return reply({error:"apple_transaction_verification_failed"},422);
     }
 
+    // Remote signature verification is asynchronous. Reject a claim reassigned,
+    // canceled, or changed while verification was running. The RPC must still
+    // enforce ownership and uniqueness atomically against concurrent requests.
+    const {data:latestClaims,error:latestError} = await admin.from("apple_purchase_claims")
+      .select("user_id,transaction_id,original_transaction_id,product_id,status,environment")
+      .eq("transaction_id",verified.transactionId).limit(2);
+    if (latestError) return reply({error:"unavailable"},503);
+    if (!latestClaims || latestClaims.length !== 1 ||
+        latestClaims[0].user_id !== user.id ||
+        latestClaims[0].transaction_id !== verified.transactionId ||
+        latestClaims[0].original_transaction_id !== verified.originalTransactionId ||
+        latestClaims[0].product_id !== verified.productId ||
+        !["pending","verified"].includes(latestClaims[0].status) ||
+        (latestClaims[0].environment !== null && latestClaims[0].environment !== "Production"))
+      return reply({error:"claim_changed_during_verification"},409);
+
     // A single Postgres transaction records verified evidence, locks the Apple
     // transaction, and inserts exactly one credit and wallet delta. No client
     // ever receives service-role credentials or calls this RPC directly.
