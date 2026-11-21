@@ -5,7 +5,7 @@
   const byID = id => document.getElementById(id);
   const kids = () => document.body.classList.contains('mv128Kids') ||
     localStorage.getItem('mushiverse-display-mode-v1') === 'kids';
-  let busy = false, account = '', balance = 0, page = 0, hasMore = false, draws = [];
+  let busy = false, account = '', balance = 0, page = 0, hasMore = false, draws = [], drawsEnabled = false;
 
   function pendingKey() { return STORAGE + account; }
   function pendingRead() { try { return JSON.parse(sessionStorage.getItem(pendingKey()) || 'null'); } catch { return null; } }
@@ -50,10 +50,12 @@
     const panel = byID('mvPaidCoinPanel'); if (!panel) return;
     panel.hidden = !account || kids();
     if (panel.hidden) return;
-    byID('mvPaidCoinBalance').textContent = balance.toLocaleString('ja-JP') + ' 購入コイン';
-    byID('mvPaidCoinSingle').disabled = busy || balance < 50 || !!pendingRead();
-    byID('mvPaidCoinTen').disabled = busy || balance < 450 || !!pendingRead();
+    byID('mvPaidCoinBalance').textContent = balance.toLocaleString('ja-JP') + ' 購入コイン' +
+      (drawsEnabled ? '' : '（有料ガチャは現在停止中）');
+    byID('mvPaidCoinSingle').disabled = !drawsEnabled || busy || balance < 50 || !!pendingRead();
+    byID('mvPaidCoinTen').disabled = !drawsEnabled || busy || balance < 450 || !!pendingRead();
     byID('mvPaidCoinRetry').hidden = !pendingRead();
+    byID('mvPaidCoinRetry').disabled = !drawsEnabled || busy;
     byID('mvPaidCoinMore').hidden = !hasMore;
     const list = byID('mvPaidCoinHistory');
     list.replaceChildren();
@@ -74,9 +76,9 @@
     if (busy) return;
     const user = await sessionUser();
     if(!user) {
-      account=''; balance=0; draws=[]; render(); return;
+      account=''; balance=0; draws=[]; drawsEnabled=false; render(); return;
     }
-    if(account !== user.id) { account=user.id; balance=0; draws=[]; page=0; reset=true; }
+    if(account !== user.id) { account=user.id; balance=0; draws=[]; drawsEnabled=false; page=0; reset=true; }
     busy=true; render();
     try {
       const requestPage=reset?0:page+1;
@@ -84,19 +86,22 @@
       if(!result.ok || !Number.isSafeInteger(result.balance) || result.balance<0 || !Array.isArray(result.draws))
         throw Error('残高情報を確認できませんでした。');
       // Never show one user's wallet after an asynchronous account switch.
-      if((await sessionUser())?.id!==user.id) { account=''; balance=0; draws=[]; return; }
+      if((await sessionUser())?.id!==user.id) { account=''; balance=0; draws=[]; drawsEnabled=false; return; }
       balance=result.balance;
+      drawsEnabled=result.draws_enabled===true;
       draws=reset?result.draws:[...draws,...result.draws];
       page=requestPage; hasMore=result.has_more===true;
       const pending=pendingRead();
       if(pending && draws.some(row=>row.draw_id===pending.id)) pendingSave(null);
-      message('購入コインはサーバーで管理されます。無料コインとは別残高です。');
+      message(drawsEnabled
+        ? '購入コインはサーバーで管理されます。無料コインとは別残高です。'
+        : '購入コインの残高と獲得履歴は確認できます。有料ガチャは現在停止中です。');
     } catch(error) { message(error?.message || '残高情報を取得できませんでした。'); }
     finally { busy=false; render(); }
   }
 
   async function draw(count, retry=false) {
-    if(busy || kids() || !account) return;
+    if(busy || kids() || !account || !drawsEnabled) return;
     const user=await sessionUser();
     if(!user || user.id!==account) { account='';render();return; }
     let pending=pendingRead();
