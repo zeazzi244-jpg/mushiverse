@@ -43,7 +43,7 @@ async function readBounded(request: Request): Promise<string> {
 
 // Non-authorizing diagnostics: only report trusted-root match and safe error
 // categories. Never echo the untrusted JWS header, certificates or account data.
-async function rootCategory(signedPayload: string): Promise<string> {
+async function rootCategory(signedPayload) {
   try {
     const header=JSON.parse(atob(signedPayload.split(".")[0].replace(/-/g,"+").replace(/_/g,"/")));
     const chain=header?.x5c;
@@ -57,10 +57,10 @@ async function rootCategory(signedPayload: string): Promise<string> {
     return "unrecognized";
   }catch{return "unreadable";}
 }
-function verificationCauseCategory(error: unknown): string {
+function verificationCauseCategory(error) {
   if(!(error instanceof VerificationException))return "non_verification_error";
-  const cause=(error as {cause?:unknown}).cause;
-  const name=cause && typeof cause==="object" && "name" in cause ? String((cause as {name?:unknown}).name) : "";
+  const cause=error.cause;
+  const name=cause && typeof cause==="object" && "name" in cause ? String(cause.name) : "";
   return ["TypeError","JsonWebTokenError","TokenExpiredError","NotBeforeError","Error"].includes(name) ? name : "no_known_cause";
 }
 
