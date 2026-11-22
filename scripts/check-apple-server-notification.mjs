@@ -10,8 +10,12 @@ const HOSTS = Object.freeze({
 });
 const encode = value => Buffer.from(JSON.stringify(value)).toString('base64url');
 export function tokenForApple({keyId, issuerId, privateKey, now = Math.floor(Date.now() / 1000)}) {
-  if (!/^[A-Za-z0-9]{6,32}$/.test(keyId ?? '') ||
-      !/^[0-9a-f-]{36}$/i.test(issuerId ?? '')) throw Error('invalid_apple_iap_key_metadata');
+  keyId = typeof keyId === 'string' ? keyId.trim() : '';
+  issuerId = typeof issuerId === 'string' ? issuerId.trim() : '';
+  if (!/^[A-Za-z0-9]{6,32}$/.test(keyId))
+    throw Error('invalid_apple_iap_key_id_format');
+  if (!/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(issuerId))
+    throw Error('invalid_apple_iap_issuer_id_format');
   // The .p8 must contain a PEM key, not its filename or the binary preview.
   // Support common GitHub secret pastes where line breaks were escaped.
   const normalized = typeof privateKey === 'string' ? privateKey.trim().replace(/\\n/g, '\n') : '';
