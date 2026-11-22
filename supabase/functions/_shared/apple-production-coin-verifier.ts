@@ -1,8 +1,9 @@
 import { Buffer } from "node:buffer";
+import { X509Certificate } from "node:crypto";
 // Staged Production-only Apple signed coin verification.
 // Imported by the gated Production settlement endpoint; this module never credits a wallet.
 // Keep the independent database release gates closed until Sandbox proof and approval.
-import { Environment, SignedDataVerifier } from "npm:@apple/app-store-server-library@3.1.0";
+import { Environment, SignedDataVerifier, VerificationException, VerificationStatus } from "npm:@apple/app-store-server-library@3.1.0";
 import { isAppleCoinProduct, validateProductionAppleCoinTransaction } from "./apple-coin-transaction-policy.mjs";
 
 // Apple Root CA - G3, pinned, from https://www.apple.com/certificateauthority/
@@ -39,6 +40,17 @@ export async function verifyAppleProductionCoinJws(
   // These roots are pinned in server code and expected values must come from
   // an authenticated server-side purchase claim and fixed app configuration.
   const root = Buffer.from(APPLE_G3_ROOT_DER_BASE64, "base64");
+  // The hosted Edge runtime can expose X509Certificate while lacking the
+  // operations the Apple SDK uses. Keep unfinished StoreKit purchases retryable.
+  try {
+    const certificate = new X509Certificate(root);
+    if (!certificate.raw.byteLength || !certificate.toString().includes("BEGIN CERTIFICATE") ||
+        !certificate.verify(certificate.publicKey)) {
+      throw new Error("apple_certificate_runtime_unsupported");
+    }
+  } catch {
+    throw new VerificationException(VerificationStatus.RETRYABLE_VERIFICATION_FAILURE);
+  }
   const verifier = new SignedDataVerifier(
     [root], true, Environment.PRODUCTION, "com.rikuto.mushiverse", appAppleId,
   );
