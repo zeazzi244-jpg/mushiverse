@@ -23,12 +23,12 @@ struct MushiverseCoinShopView: View {
 
             Text("ガチャコイン").font(.headline)
             productRow(id: MushiverseCoinStore.sandboxProductID, coins: 100)
-            if purchasesEnabled && !store.sandboxPurchasesEnabled {
-                ForEach(store.products.filter { $0.id != MushiverseCoinStore.sandboxProductID }
-                    .sorted { $0.price < $1.price }, id: \.id) { product in
-                    if let coins = MushiverseCoinStore.productionCoinAmounts[product.id] {
-                        productRow(id: product.id, coins: coins)
-                    }
+            ForEach(MushiverseCoinStore.productIDs
+                .filter { $0 != MushiverseCoinStore.sandboxProductID }
+                .sorted { MushiverseCoinStore.productionCoinAmounts[$0, default: 0] <
+                    MushiverseCoinStore.productionCoinAmounts[$1, default: 0] }, id: \.self) { id in
+                if let coins = MushiverseCoinStore.productionCoinAmounts[id] {
+                    productRow(id: id, coins: coins)
                 }
             }
 
