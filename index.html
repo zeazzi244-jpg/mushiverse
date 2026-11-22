@@ -2175,13 +2175,15 @@ function syncStartupBackend(){
   if(!db||!navigator.onLine||backendSync)return backendSync;
   backendSync=(async()=>{
     const revision=authRevision;
-    const {data,error}=await db.auth.getUser();
-    if(error&&error.name!=='AuthSessionMissingError')throw error;
-    if(revision===authRevision)applyStartupUser(data?.user||null);
+    // Subscribe before session restoration so a slow network getUser() cannot
+    // hold the SDK auth lock while the player presses the login button.
     if(!authSubscribed){
       db.auth.onAuthStateChange((event,session)=>{
-        if(event==='INITIAL_SESSION')return;
         const next=session?.user||null;
+        if(event==='INITIAL_SESSION'){
+          if(user?.id!==next?.id)applyStartupUser(next);
+          return;
+        }
         if(user?.id===next?.id)return;
         authRevision++;
         applyStartupUser(next);
@@ -2189,6 +2191,11 @@ function syncStartupBackend(){
       });
       authSubscribed=true;
     }
+    // getSession reads/restores the SDK session; authorization for purchases
+    // and protected backend data remains enforced independently on the server.
+    const {data,error}=await db.auth.getSession();
+    if(error&&error.name!=='AuthSessionMissingError')throw error;
+    if(revision===authRevision)applyStartupUser(data?.session?.user||null);
     await load();
     await syncBillingGuard();
     await syncBillingPlan();
