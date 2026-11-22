@@ -730,7 +730,7 @@ async function backendFetch(input,options={}){
     const abort=()=>controller.abort();
     if(parentSignal?.aborted)abort();
     else parentSignal?.addEventListener('abort',abort,{once:true});
-    const timer=setTimeout(abort,passwordSignIn?18000:15000);
+    const timer=setTimeout(abort,passwordSignIn?45000:12000);
     try{return await fetch(input,{...options,signal:controller.signal})}
     finally{clearTimeout(timer);parentSignal?.removeEventListener('abort',abort)}
   }
