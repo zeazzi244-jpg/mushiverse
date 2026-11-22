@@ -14,7 +14,7 @@ const source = readFileSync(new URL('../supabase/functions/settle-apple-producti
   .replace('claim.product_id as keyof typeof appleCoinPacks', 'claim.product_id')
   .replace('request.headers.get("authorization")!', 'request.headers.get("authorization")');
 
-function harness({enabled=false,owner='user-1',validSignature=true,settled=true,claimStatus='pending',claimEnvironment=null,productID='mushiverse.coins.100',appMetadata={}}={}) {
+function harness({enabled=false,owner='user-1',validSignature=true,transientSignatureFailure=false,settled=true,claimStatus='pending',claimEnvironment=null,productID='mushiverse.coins.100',appMetadata={}}={}) {
   const calls={auth:0, verify:0, settle:0};
   let handler;
   const Deno={env:{get(key){
@@ -61,11 +61,14 @@ function harness({enabled=false,owner='user-1',validSignature=true,settled=true,
     assert.equal(appID,6826061606);
     assert.deepEqual(expected,{environment:'Production',productId:'mushiverse.coins.100',
       transactionId:'123456789',originalTransactionId:'123456789',appAccountToken:'user-1'});
+    if(transientSignatureFailure) throw new VerificationException(VerificationStatus.RETRYABLE_VERIFICATION_FAILURE);
     if(!validSignature) throw Error('bad_signature');
     return {transactionId:'123456789',originalTransactionId:'123456789',productId:'mushiverse.coins.100',coins:100,purchaseDate:1730000000000};
   };
-  new Function('Deno','createClient','verifyAppleProductionCoinJws','Response','appleCoinPacks','isAppleCoinProduct',source)(
-    Deno,createClient,verifier,Response,{'mushiverse.coins.100':100},id=>id==='mushiverse.coins.100'
+  class VerificationException extends Error { constructor(status){ super('redacted'); this.status=status; } }
+  const VerificationStatus = {RETRYABLE_VERIFICATION_FAILURE:'RETRYABLE_VERIFICATION_FAILURE'};
+  new Function('Deno','createClient','verifyAppleProductionCoinJws','Response','appleCoinPacks','isAppleCoinProduct','VerificationException','VerificationStatus',source)(
+    Deno,createClient,verifier,Response,{'mushiverse.coins.100':100},id=>id==='mushiverse.coins.100',VerificationException,VerificationStatus
   );
   assert.equal(typeof handler,'function');
   const send=async({bearer='Bearer token',method='POST',body={transaction_id:'123456789',signed_transaction:'abc.def.ghi'}}={})=>{
@@ -115,6 +118,15 @@ test('invalid Apple signature cannot ever settle a wallet',async()=>{
   const h=harness({enabled:true,validSignature:false});
   const r=await h.send();
   assert.equal(r.status,422);
+  assert.equal(h.calls.verify,1);
+  assert.equal(h.calls.settle,0);
+});
+
+test('temporary Apple verifier outage is retryable and cannot credit coins',async()=>{
+  const h=harness({enabled:true,transientSignatureFailure:true});
+  const r=await h.send();
+  assert.equal(r.status,503);
+  assert.equal(r.body.error,'apple_verification_temporarily_unavailable');
   assert.equal(h.calls.verify,1);
   assert.equal(h.calls.settle,0);
 });
