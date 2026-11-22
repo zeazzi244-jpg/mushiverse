@@ -1,5 +1,6 @@
 import "jsr:@supabase/functions-js/edge-runtime.d.ts";
 import { createClient } from "npm:@supabase/supabase-js@2";
+import { X509Certificate } from "node:crypto";
 import { Environment, SignedDataVerifier, VerificationException, VerificationStatus } from "npm:@apple/app-store-server-library@1.5.0";
 import { APPLE_G3_ROOT_DER_BASE64 } from "../_shared/apple-production-coin-verifier.ts";
 
@@ -18,6 +19,23 @@ const appId = 6826061606;
 const bundleId = "com.rikuto.mushiverse";
 const txId = /^\d{6,30}$/;
 const accountId = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
+// Apple official SignedDataVerifier requires Node's X509Certificate raw,
+// toString() and verify() methods. Some hosted Deno/Edge versions expose the
+// class but throw ERR_NOT_IMPLEMENTED for these operations. Treat that as a
+// retryable infrastructure failure, never as a valid or invalid Apple signature.
+function supportsAppleCertificateVerification(der) {
+  try {
+    const certificate=new X509Certificate(der);
+    const pem=certificate.toString();
+    const raw=certificate.raw;
+    return typeof pem==="string" && pem.includes("BEGIN CERTIFICATE") &&
+      raw?.byteLength>0 && certificate.verify(certificate.publicKey)===true;
+  } catch {
+    return false;
+  }
+}
+
 
 async function readBounded(request: Request): Promise<string> {
   const declared=request.headers.get("content-length");
@@ -86,6 +104,12 @@ Deno.serve(async (request: Request) => {
     const g2Root=Uint8Array.from(atob(APPLE_G2_ROOT_DER_BASE64),c=>c.charCodeAt(0));
     // Both Apple-published trust anchors are pinned. All OCSP and JWS checks remain enabled.
     const roots=[g2Root,root];
+    // This check is NOT authentication. Only a working cryptographic runtime
+    // is allowed to reach Apple's fully enabled JWS + OCSP verifier.
+    if(!supportsAppleCertificateVerification(root)) {
+      console.warn("Apple notification verification runtime unsupported");
+      return response({error:"apple_verifier_runtime_unsupported"},503);
+    }
     const verifier=new SignedDataVerifier(roots,true,Environment.PRODUCTION,bundleId,appId);
     let notification;
     try {
