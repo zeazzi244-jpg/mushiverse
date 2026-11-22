@@ -59,7 +59,21 @@ Deno.serve(async (request: Request) => {
     const der=atob(APPLE_G3_ROOT_DER_BASE64);
     const root=Uint8Array.from(der,c=>c.charCodeAt(0));
     const verifier=new SignedDataVerifier([root],true,Environment.PRODUCTION,bundleId,appId);
-    const notification=await verifier.verifyAndDecodeNotification(signedPayload);
+    let notification;
+    try {
+      notification=await verifier.verifyAndDecodeNotification(signedPayload);
+    } catch {
+      // Apple can forward Sandbox notifications to the Production URL if no
+      // separate Sandbox URL is configured. Authenticate Sandbox signatures
+      // independently; never let test notifications touch a Production wallet.
+      const sandboxVerifier=new SignedDataVerifier([root],true,Environment.SANDBOX,bundleId);
+      try {
+        await sandboxVerifier.verifyAndDecodeNotification(signedPayload);
+        return response({ok:true,ignored_sandbox:true});
+      } catch {
+        return response({error:"notification_verification_failed"},422);
+      }
+    }
     // A signed CONSUMPTION_REQUEST is only a refund request, not a confirmed
     // refund. REFUND_DECLINED is also never authorization to revoke coins.
     if(notification.notificationType!=="REFUND") return response({ok:true,ignored:true});
