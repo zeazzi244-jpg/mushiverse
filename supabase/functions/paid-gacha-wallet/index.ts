@@ -72,6 +72,13 @@ Deno.serve(async(request: Request)=>{
       billing?.ios_iap_ready===true && proof?.server_jws_verified===true &&
       proof?.sandbox_purchase_proven===true &&
       pack?.coins===100 && pack?.is_sale_enabled===true;
+    // Check for a server-recorded, Apple-signed refund. The DB draw RPC
+    // checks the same quarantine after taking its per-user transaction lock,
+    // so a refund racing a draw cannot be bypassed by an old status response.
+    const {count:refundCount,error:refundError}=await admin.from("apple_coin_refund_holds")
+      .select("transaction_id",{count:"exact",head:true}).eq("user_id",user.id);
+    if(refundError)return respond({error:"refund_status_unavailable"},503);
+    const refundHeld=(refundCount??0)>0;
     if(body.action==="status"){
       const page=body.page??0;
       if(!Number.isInteger(page)||Number(page)<0||Number(page)>100)
@@ -86,7 +93,8 @@ Deno.serve(async(request: Request)=>{
       const balance=Number(wallet?.balance??0);
       if(!Number.isSafeInteger(balance)||balance<0)return respond({error:"invalid_balance"},503);
       return respond({ok:true,balance,draws:draws??[],page,
-        has_more:(draws?.length??0)===50,draws_enabled:drawsEnabled});
+        has_more:(draws?.length??0)===50,draws_enabled:drawsEnabled&&!refundHeld,
+        refund_reconciliation_required:refundHeld});
     }
     if(body.action!=="draw")return respond({error:"invalid_action"},400);
     // The native/JS kids toggle is not authorization. Only server-controlled
@@ -94,6 +102,7 @@ Deno.serve(async(request: Request)=>{
     if(user.app_metadata?.kid_mode===true || user.app_metadata?.minor===true ||
        user.app_metadata?.iap_disabled===true)
       return respond({error:"purchases_restricted"},403);
+    if(refundHeld)return respond({error:"refund_reconciliation_required"},409);
     if(!drawsEnabled)return respond({error:"paid_draws_disabled"},503);
     if(Object.keys(body).some(key=>!["action","draw_id","count"].includes(key)))
       return respond({error:"invalid_draw"},400);
