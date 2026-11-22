@@ -5,7 +5,7 @@
   const byID = id => document.getElementById(id);
   const kids = () => document.body.classList.contains('mv128Kids') ||
     localStorage.getItem('mushiverse-display-mode-v1') === 'kids';
-  let busy = false, account = '', balance = 0, page = 0, hasMore = false, draws = [], drawsEnabled = false;
+  let busy = false, account = '', balance = 0, page = 0, hasMore = false, draws = [], drawsEnabled = false, refundHeld = false;
 
   function pendingKey() { return STORAGE + account; }
   function pendingRead() {
@@ -68,7 +68,7 @@
     panel.hidden = !account || kids();
     if (panel.hidden) return;
     byID('mvPaidCoinBalance').textContent = balance.toLocaleString('ja-JP') + ' 購入コイン' +
-      (drawsEnabled ? '' : '（有料ガチャは現在停止中）');
+      (refundHeld ? '（Apple返金の精算確認中）' : drawsEnabled ? '' : '（有料ガチャは現在停止中）');
     let pending, storageFailed = false;
     try { pending = pendingRead(); }
     catch { storageFailed = true; message('未完了の抽選を読み込めません。アプリを開き直してください。'); }
@@ -97,9 +97,9 @@
     const user = await sessionUser();
     if (busy) return;
     if(!user) {
-      account=''; balance=0; draws=[]; drawsEnabled=false; render(); return;
+      account=''; balance=0; draws=[]; drawsEnabled=false; refundHeld=false; render(); return;
     }
-    if(account !== user.id) { account=user.id; balance=0; draws=[]; drawsEnabled=false; page=0; reset=true; }
+    if(account !== user.id) { account=user.id; balance=0; draws=[]; drawsEnabled=false; refundHeld=false; page=0; reset=true; }
     busy=true; render();
     try {
       const requestPage=reset?0:page+1;
@@ -107,16 +107,19 @@
       if(!result.ok || !Number.isSafeInteger(result.balance) || result.balance<0 || !Array.isArray(result.draws))
         throw Error('残高情報を確認できませんでした。');
       // Never show one user's wallet after an asynchronous account switch.
-      if((await sessionUser())?.id!==user.id) { account=''; balance=0; draws=[]; drawsEnabled=false; return; }
+      if((await sessionUser())?.id!==user.id) { account=''; balance=0; draws=[]; drawsEnabled=false; refundHeld=false; return; }
       balance=result.balance;
       drawsEnabled=result.draws_enabled===true;
+      refundHeld=result.refund_reconciliation_required===true;
       draws=reset?result.draws:[...draws,...result.draws];
       page=requestPage; hasMore=result.has_more===true;
       const pending=pendingRead();
       if(pending && draws.some(row=>row.draw_id===pending.id)) pendingSave(null);
-      message(drawsEnabled
-        ? '購入コインはサーバーで管理されます。無料コインとは別残高です。'
-        : '購入コインの残高と獲得履歴は確認できます。有料ガチャは現在停止中です。');
+      message(refundHeld
+        ? 'Appleの返金を確認しました。購入コインの精算が必要なため、有料ガチャは一時停止しています。獲得カードと履歴は残ります。'
+        : drawsEnabled
+          ? '購入コインはサーバーで管理されます。無料コインとは別残高です。'
+          : '購入コインの残高と獲得履歴は確認できます。有料ガチャは現在停止中です。');
     } catch(error) { message(error?.message || '残高情報を取得できませんでした。'); }
     finally { busy=false; render(); }
   }
