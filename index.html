@@ -717,57 +717,22 @@ window.addEventListener('mushiverse:app-ready',function(){booted=true;if(recover
 const SUPABASE_URL='https://jhowxtdemlsmetcwhekr.supabase.co';
 const KEY='sb_publishable_b2n0sVChm2zvGQ5qIbz8Cw_B-wCOtVJ';
 async function backendFetch(input,options={}){
+  // Revert the iOS-only native networking added on 2026-11-22.
+  // Supabase auth and session requests use the same WebKit fetch as the
+  // previously working implementation. Do not silently replay credentials.
   const url=typeof input==='string'?input:String(input?.url||input);
-  const endpoint=url.split('?')[0];
-  const authEndpoint=endpoint===SUPABASE_URL+'/auth/v1/token'||endpoint===SUPABASE_URL+'/auth/v1/user';
-  const isNativeIOS=globalThis.Capacitor?.getPlatform?.()==='ios' &&
-    typeof globalThis.Capacitor?.nativePromise==='function';
-  const parentSignal=options.signal||input?.signal;
-  const passwordSignIn=endpoint===SUPABASE_URL+'/auth/v1/token' &&
+  const passwordSignIn=url.split('?')[0]===SUPABASE_URL+'/auth/v1/token' &&
     /[?&]grant_type=password(?:&|$)/.test(url);
-  async function webAttempt(){
-    const controller=new AbortController();
-    const abort=()=>controller.abort();
-    if(parentSignal?.aborted)abort();
-    else parentSignal?.addEventListener('abort',abort,{once:true});
-    const timer=setTimeout(abort,passwordSignIn?45000:12000);
-    try{return await fetch(input,{...options,signal:controller.signal})}
-    finally{clearTimeout(timer);parentSignal?.removeEventListener('abort',abort)}
-  }
-  // WebKit fetch is the default Supabase SDK transport. Only switch to native
-  // networking after a transport exception, never after HTTP auth rejection.
-  try{return await webAttempt()}
-  catch(webError){
-    if(!authEndpoint||!isNativeIOS||parentSignal?.aborted)throw webError;
-    console.warn('MUSHIVERSE auth WebKit transport unavailable; trying native transport',
-      webError?.name||'Error');
-    const request=new Request(input,options);
-    const payload=request.body===null?undefined:await request.text();
-    const headers=Object.fromEntries(request.headers);
-    let data;
-    if(payload){
-      try{data=JSON.parse(payload)}
-      catch{data=payload}
-    }
-    const nativeOptions={url,method:request.method,headers,data,responseType:'text',
-      connectTimeout:20000,readTimeout:20000,disableRedirects:true};
-    const timerMs=25000;
-    const result=await new Promise((resolve,reject)=>{
-      let settled=false;
-      const cleanup=()=>{clearTimeout(timer);parentSignal?.removeEventListener('abort',interrupt)};
-      const finish=(error,value)=>{if(settled)return;settled=true;cleanup();error?reject(error):resolve(value)};
-      const interrupt=()=>finish(new DOMException('Authentication request interrupted','AbortError'));
-      const timer=setTimeout(()=>finish(new Error('Authentication transport timeout')),timerMs);
-      if(parentSignal?.aborted){interrupt();return}
-      parentSignal?.addEventListener('abort',interrupt,{once:true});
-      Promise.resolve().then(()=>globalThis.Capacitor.nativePromise('CapacitorHttp','request',nativeOptions))
-        .then(value=>finish(null,value),error=>finish(error));
-    });
-    if(!Number.isInteger(result?.status)||result.status<200||result.status>599)
-      throw new Error('Invalid native authentication response');
-    const raw=typeof result.data==='string'?result.data:JSON.stringify(result.data??null);
-    return new Response([204,205,304].includes(result.status)?null:raw,
-      {status:result.status,headers:result.headers});
+  const controller=new AbortController();
+  const parentSignal=options.signal||input?.signal;
+  const abort=()=>controller.abort();
+  if(parentSignal?.aborted)abort();
+  else parentSignal?.addEventListener('abort',abort,{once:true});
+  const timeout=setTimeout(abort,passwordSignIn?45000:12000);
+  try{return await fetch(input,{...options,signal:controller.signal})}
+  finally{
+    clearTimeout(timeout);
+    parentSignal?.removeEventListener('abort',abort);
   }
 }
 let db;
