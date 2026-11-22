@@ -1,7 +1,8 @@
+import { Buffer } from "node:buffer";
 import "jsr:@supabase/functions-js/edge-runtime.d.ts";
 import { createClient } from "npm:@supabase/supabase-js@2";
 import { X509Certificate } from "node:crypto";
-import { Environment, SignedDataVerifier, VerificationException, VerificationStatus } from "npm:@apple/app-store-server-library@1.5.0";
+import { Environment, SignedDataVerifier, VerificationException, VerificationStatus } from "npm:@apple/app-store-server-library@3.1.0";
 import { APPLE_G3_ROOT_DER_BASE64 } from "../_shared/apple-production-coin-verifier.ts";
 
 // Apple App Store Server Notifications V2. This endpoint is public because Apple
@@ -82,6 +83,40 @@ function verificationCauseCategory(error) {
   return ["TypeError","JsonWebTokenError","TokenExpiredError","NotBeforeError","Error"].includes(name) ? name : "no_known_cause";
 }
 
+// Route only a possible Sandbox TEST. Decoding is never authorization.
+// The authenticated Node verifier independently checks the signed values.
+function isPossibleSandboxTest(signedPayload) {
+  try {
+    const payload = JSON.parse(Buffer.from(signedPayload.split(".")[1], "base64url").toString("utf-8"));
+    return payload.notificationType === "TEST" &&
+      payload.data?.environment === Environment.SANDBOX &&
+      payload.data.bundleId === bundleId &&
+      !payload.data.signedTransactionInfo && !payload.data.signedRenewalInfo;
+  } catch {
+    return false;
+  }
+}
+
+async function verifySandboxTestRemotely(signedPayload, endpoint, service) {
+  try {
+    const admin = createClient(endpoint, service);
+    const {data: secret, error} = await admin.rpc("get_apple_sandbox_verifier_secret");
+    if (error || typeof secret !== "string" || !/^[a-f0-9]{64}$/.test(secret)) return 503;
+    const result = await fetch("https://mushiverse-apple-sandbox-verifier.onrender.com/verify-sandbox-test", {
+      method: "POST",
+      redirect: "error",
+      headers: {"content-type": "application/json", authorization: "Bearer " + secret},
+      body: JSON.stringify({signedPayload}),
+      signal: AbortSignal.timeout(33000),
+    });
+    await result.body?.cancel();
+    if (result.status === 204) return 200;
+    return result.status === 422 ? 422 : 503;
+  } catch {
+    return 503;
+  }
+}
+
 Deno.serve(async (request: Request) => {
   if(request.method!=="POST") return response({error:"method_not_allowed"},405);
   const endpoint=Deno.env.get("SUPABASE_URL");
@@ -98,10 +133,18 @@ Deno.serve(async (request: Request) => {
       return response({error:"invalid_notification"},400);
     signedPayload=parsed.signedPayload;
   } catch {return response({error:"invalid_notification"},400);}
+  if (isPossibleSandboxTest(signedPayload)) {
+    const status = await verifySandboxTestRemotely(signedPayload, endpoint, service);
+    if (status === 200) {
+      console.info("Apple Sandbox TEST signature verified");
+      return response({ok:true,ignored_sandbox:true});
+    }
+    return response({error:status === 503 ? "notification_verification_temporarily_unavailable" :
+      "notification_verification_failed"}, status);
+  }
   try {
-    const der=atob(APPLE_G3_ROOT_DER_BASE64);
-    const root=Uint8Array.from(der,c=>c.charCodeAt(0));
-    const g2Root=Uint8Array.from(atob(APPLE_G2_ROOT_DER_BASE64),c=>c.charCodeAt(0));
+    const root=Buffer.from(APPLE_G3_ROOT_DER_BASE64,"base64");
+    const g2Root=Buffer.from(APPLE_G2_ROOT_DER_BASE64,"base64");
     // Both Apple-published trust anchors are pinned. All OCSP and JWS checks remain enabled.
     const roots=[g2Root,root];
     // This check is NOT authentication. Only a working cryptographic runtime

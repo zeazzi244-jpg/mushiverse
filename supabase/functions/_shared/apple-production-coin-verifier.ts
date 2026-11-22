@@ -1,7 +1,8 @@
+import { Buffer } from "node:buffer";
 // Staged Production-only Apple signed coin verification.
 // Imported by the gated Production settlement endpoint; this module never credits a wallet.
 // Keep the independent database release gates closed until Sandbox proof and approval.
-import { Environment, SignedDataVerifier } from "npm:@apple/app-store-server-library@1.5.0";
+import { Environment, SignedDataVerifier } from "npm:@apple/app-store-server-library@3.1.0";
 import { isAppleCoinProduct, validateProductionAppleCoinTransaction } from "./apple-coin-transaction-policy.mjs";
 
 // Apple Root CA - G3, pinned, from https://www.apple.com/certificateauthority/
@@ -37,8 +38,7 @@ export async function verifyAppleProductionCoinJws(
   // Never trust roots/certificates, account IDs or environments from a client.
   // These roots are pinned in server code and expected values must come from
   // an authenticated server-side purchase claim and fixed app configuration.
-  const bytes = atob(APPLE_G3_ROOT_DER_BASE64);
-  const root = Uint8Array.from(bytes, character => character.charCodeAt(0));
+  const root = Buffer.from(APPLE_G3_ROOT_DER_BASE64, "base64");
   const verifier = new SignedDataVerifier(
     [root], true, Environment.PRODUCTION, "com.rikuto.mushiverse", appAppleId,
   );

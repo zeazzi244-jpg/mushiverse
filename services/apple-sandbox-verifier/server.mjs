@@ -15,6 +15,13 @@ if (createHash('sha256').update(root).digest('hex') !==
   throw new Error('Apple Root CA fingerprint mismatch');
 }
 
+const g2Root = Buffer.from('MIIFkjCCA3qgAwIBAgIIAeDltYNno+AwDQYJKoZIhvcNAQEMBQAwZzEbMBkGA1UEAwwSQXBwbGUgUm9vdCBDQSAtIEcyMSYwJAYDVQQLDB1BcHBsZSBDZXJ0aWZpY2F0aW9uIEF1dGhvcml0eTETMBEGA1UECgwKQXBwbGUgSW5jLjELMAkGA1UEBhMCVVMwHhcNMTQwNDMwMTgxMDA5WhcNMzkwNDMwMTgxMDA5WjBnMRswGQYDVQQDDBJBcHBsZSBSb290IENBIC0gRzIxJjAkBgNVBAsMHUFwcGxlIENlcnRpZmljYXRpb24gQXV0aG9yaXR5MRMwEQYDVQQKDApBcHBsZSBJbmMuMQswCQYDVQQGEwJVUzCCAiIwDQYJKoZIhvcNAQEBBQADggIPADCCAgoCggIBANgREkhI2imKScUcx+xuM23+TfvgHN6sXuI2pyT5f1BrTM65MFQn5bPW7SXmMLYFN14UIhHF6Kob0vuy0gmVOKTvKkmMXT5xZgM4+xb1hYjkWpIMBDLyyED7Ul+f9sDx47pFoFDVEovy3d6RhiPw9bZyLgHaC/YuOQhfGaFjQQscp5TBhsRTL3b2CtcM0YM/GlMZ81fVJ3/8E7j4ko380yhDPLVoACVdJ2LT3VXdRCCQgzWTxb+4Gftr49wIQuavbfqeQMpOhYV4SbHXw8EwOTKrfl+q04tvny0aIWhwZ7Oj8ZhBbZF8+NfbqOdfIRqMM78xdLe40fTgIvS/cjTf94FNcX1RoeKz8NMoFnNvzcytN31O661A4T+B/fc9Cj6i8b0xlilZ3MIZgIxbdMYs0xBTJh0UT8TUgWY8h2czJxQI6bR3hDRSj4n4aJgXv8O7qhOTH11UL6jHfPsNFL4VPSQ08prcdUFmIrQB1guvkJ4M6mL4m1k8COKWNORj3rw31OsMiANDC1CvoDTdUE0V+1ok2Az6DGOeHwOx4e7hqkP0ZmUoNwIx7wHHHtHMn23KVDpA287PT0aLSmWaasZobNfMmRtHsHLDd4/E92GcdB/O/WuhwpyUgquUoue9G7q5cDmVF8Up8zlYNPXEpMZ7YLlmQ1A/bmH8DvmGqmAMQ0uVAgMBAAGjQjBAMB0GA1UdDgQWBBTEmRNsGAPCe8CjoA1/coB6HHcmjTAPBgNVHRMBAf8EBTADAQH/MA4GA1UdDwEB/wQEAwIBBjANBgkqhkiG9w0BAQwFAAOCAgEAUabz4vS4PZO/Lc4Pu1vhVRROTtHlznldgX/+tvCHM/jvlOV+3Gp5pxy+8JS3ptEwnMgNCnWefZKVfhidfsJxaXwU6s+DDuQUQp50DhDNqxq6EWGBeNjxtUVAeKuowM77fWM3aPbn+6/Gw0vsHzYmE1SGlHKy6gLti23kDKaQwFd1z4xCfVzmMX3zybKSaUYOiPjjLUKyOKimGY3xn83uamW8GrAlvacp/fQ+onVJv57byfenHmOZ4VxG/5IFjPoeIPmGlFYl5bRXOJ3riGQUIUkhOb9iZqmxospvPyFgxYnURTbImHy99v6ZSYA7LNKmp4gDBDEZt7Y6YUX6yfIjyGNzv1aJMbDZfGKnexWoiIqrOEDCzBL/FePwN983csvMmOa/orz6JopxVtfnJBtIRD6e/J/JzBrsQzwBvDR4yGn1xuZW7AYJNpDrFEobXsmII9oDMJELuDY++ee1KG++P+w8j2Ud5cAeh6Squpj9kuNsJnfdBrRkBof0Tta6SqoWqPQFZ2aWuuJVecMsXUmPgEkrihLHdoBR37q9ZV0+N0djMenl9MU/S60EinpxLK8JQzcPqOMyT/RFtm2XNuyE9QoB6he7hY1Ck3DDUOUUi78/w0EP3SIEIwiKum1xRKtzCTrJ+VKACd+66eYWyi4uTLLT3OUEVLLUNIAytbwPF+E=', 'base64');
+if (createHash('sha256').update(g2Root).digest('hex') !==
+  'c2b9b042dd57830e7d117dac55ac8ae19407d38e41d88f3215bc3a890444a050') {
+  throw new Error('Apple G2 root fingerprint mismatch');
+}
+const testVerifier = new SignedDataVerifier([g2Root, root], true, Environment.SANDBOX, 'com.rikuto.mushiverse');
+
 const verifier = new SignedDataVerifier([root], true, Environment.SANDBOX, 'com.rikuto.mushiverse');
 
 const server = createServer(async (request, response) => {
@@ -26,7 +33,8 @@ const server = createServer(async (request, response) => {
   };
 
   if (request.method === 'GET' && request.url === '/healthz') return send(200, { ok: true });
-  if (request.method !== 'POST' || request.url !== '/verify') return send(404, { error: 'not_found' });
+  const testNotification = request.url === '/verify-sandbox-test';
+  if (request.method !== 'POST' || (!testNotification && request.url !== '/verify')) return send(404, { error: 'not_found' });
   const provided = Buffer.from(request.headers.authorization ?? '');
   if (provided.length !== authorization.length || !timingSafeEqual(provided, authorization)) {
     return send(401, { error: 'unauthorized' });
@@ -37,10 +45,28 @@ const server = createServer(async (request, response) => {
     let length = 0;
     for await (const chunk of request) {
       length += chunk.length;
-      if (length > 18000) return send(413, { error: 'request_too_large' });
+      if (length > (testNotification ? 45000 : 18000)) return send(413, { error: 'request_too_large' });
       parts.push(chunk);
     }
-    const { signedTransaction, expected } = JSON.parse(Buffer.concat(parts).toString('utf8'));
+    const input = JSON.parse(Buffer.concat(parts).toString('utf8'));
+    if (testNotification) {
+      const signedPayload = input?.signedPayload;
+      if (typeof signedPayload !== 'string' || signedPayload.length > 44000 ||
+          !/^[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+$/.test(signedPayload)) {
+        return send(400, { error: 'invalid_request' });
+      }
+      const header = JSON.parse(Buffer.from(signedPayload.split('.')[0], 'base64url'));
+      if (header?.alg !== 'ES256') return send(422, { error: 'invalid_notification' });
+      const notification = await testVerifier.verifyAndDecodeNotification(signedPayload);
+      if (notification.notificationType !== 'TEST' ||
+          notification.data?.environment !== Environment.SANDBOX ||
+          (notification.data.appAppleId != null && notification.data.appAppleId !== 6826061606)) {
+        return send(422, { error: 'invalid_notification' });
+      }
+      response.writeHead(204);
+      return response.end();
+    }
+    const { signedTransaction, expected } = input;
     if (typeof signedTransaction !== 'string' || signedTransaction.length > 16384 ||
         !/^[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+$/.test(signedTransaction) ||
         expected?.environment !== 'Sandbox' || !isAppleCoinProduct(expected.productId) ||

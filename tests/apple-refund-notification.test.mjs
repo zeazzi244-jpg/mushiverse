@@ -11,9 +11,10 @@ const source=readFileSync(new URL('../supabase/functions/apple-refund-notificati
  .replace('let signedPayload: string;','let signedPayload;');
 
 function harness({type='REFUND',verified=true,creditOwner='123e4567-e89b-42d3-a456-426614174000',
-  product='mushiverse.coins.100',environment='Production',held=true,sandboxNotification=false,temporaryNotification=false,temporaryTransaction=false,runtimeUnsupported=false,revocationDate=Date.now()-10000}={}){
+  product='mushiverse.coins.100',environment='Production',held=true,sandboxNotification=false,temporaryNotification=false,temporaryTransaction=false,runtimeUnsupported=false,remoteStatus=503,revocationDate=Date.now()-10000}={}){
   const calls={verify:0,verifyTransaction:0,credits:0,holds:0};
   let handler;
+  let remoteChecks = 0;
   const purchase={bundleId:'com.rikuto.mushiverse',environment,productId:product,
     type:'Consumable',quantity:1,inAppOwnershipType:'PURCHASED',
     transactionId:'123456789',originalTransactionId:'123456789',
@@ -48,6 +49,9 @@ function harness({type='REFUND',verified=true,creditOwner='123e4567-e89b-42d3-a4
       }})})};
     },
     rpc:async(name,args)=>{
+      if (name === 'get_apple_sandbox_verifier_secret') {
+        return {data: '1'.repeat(64),error:null};
+      }
       assert.equal(name,'record_apple_refund_after_verified_jws');
       assert.equal(args.p_transaction_id,purchase.transactionId);
       assert.equal(args.p_user_id,creditOwner);
@@ -65,16 +69,23 @@ function harness({type='REFUND',verified=true,creditOwner='123e4567-e89b-42d3-a4
     verify(){return !runtimeUnsupported;}
   }
   const Environment={PRODUCTION:'Production',SANDBOX:'Sandbox'};
+  const fetch = async (url, options) => {
+    remoteChecks++;
+    assert.match(url, /onrender\.com\/verify-sandbox-test$/);
+    assert.equal(options.redirect, 'error');
+    assert.equal(options.headers.authorization, 'Bearer ' + '1'.repeat(64));
+    return new Response(null, {status:remoteStatus});
+  };
   new Function('Deno','createClient','SignedDataVerifier','Environment',
-    'APPLE_G3_ROOT_DER_BASE64','Response','atob','VerificationException','VerificationStatus','X509Certificate',source)(
-      Deno,createClient,SignedDataVerifier,Environment,'aGk=',Response,atob,VerificationException,VerificationStatus,X509Certificate
+    'APPLE_G3_ROOT_DER_BASE64','Response','atob','VerificationException','VerificationStatus','X509Certificate','fetch',source)(
+      Deno,createClient,SignedDataVerifier,Environment,'aGk=',Response,atob,VerificationException,VerificationStatus,X509Certificate,fetch
     );
   const send=async(signedPayload='aaa.bbb.ccc')=>{
     const result=await handler(new Request('https://example.invalid/apple-refund',{method:'POST',
       body:JSON.stringify({signedPayload}),headers:{'content-type':'application/json'}}));
     return {status:result.status,body:await result.json()};
   };
-  return {send,calls};
+  return {send,calls,get remoteChecks(){return remoteChecks;}};
 }
 
 test('unsupported Supabase Edge X509 runtime returns retryable 503 without verifying or writing',async()=>{
@@ -175,4 +186,25 @@ test('refund RPC rejection remains retryable and never claims the hold succeeded
   const r=await h.send();
   assert.equal(r.status,503);
   assert.equal(r.body.error,'refund_hold_unavailable');
+});
+
+test('Sandbox TEST uses authenticated verification and never touches a wallet', async()=>{
+  const payload = Buffer.from(JSON.stringify({notificationType:'TEST',
+    data:{environment:'Sandbox',bundleId:'com.rikuto.mushiverse'}})).toString('base64url');
+  for (const [remoteStatus, status] of [[204,200], [422,422], [503,503], [404,503]]) {
+    const h = harness({runtimeUnsupported:true,remoteStatus});
+    const result = await h.send(`aaa.${payload}.ccc`);
+    assert.equal(result.status,status);
+    assert.equal(h.remoteChecks,1);
+    assert.deepEqual(h.calls,{verify:0,verifyTransaction:0,credits:0,holds:0});
+  }
+});
+
+test('a Production refund cannot use the Sandbox TEST verifier', async()=>{
+  const h = harness({runtimeUnsupported:true,remoteStatus:204});
+  const payload = Buffer.from(JSON.stringify({notificationType:'REFUND',
+    data:{environment:'Production',bundleId:'com.rikuto.mushiverse'}})).toString('base64url');
+  assert.equal((await h.send(`aaa.${payload}.ccc`)).status,503);
+  assert.equal(h.remoteChecks,0);
+  assert.equal(h.calls.holds,0);
 });
