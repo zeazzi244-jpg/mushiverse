@@ -75,8 +75,8 @@ DECLARE insert_guard text := marker || chr(10) ||
 BEGIN
  SELECT pg_catalog.pg_get_functiondef(
  'public.draw_with_purchased_gacha_coins(text,uuid,integer)'::regprocedure) INTO definition;
- IF pg_catalog.position('apple_refund_reconciliation_required' IN definition)>0 THEN RETURN; END IF;
- IF pg_catalog.position(marker IN definition)=0
+ IF pg_catalog.strpos(definition, 'apple_refund_reconciliation_required')>0 THEN RETURN; END IF;
+ IF pg_catalog.strpos(definition,marker)=0
  THEN RAISE EXCEPTION 'paid_draw_guard_anchor_changed'; END IF;
  EXECUTE pg_catalog.replace(definition,marker,insert_guard);
 END;
