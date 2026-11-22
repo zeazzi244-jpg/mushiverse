@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {generateKeyPairSync,verify} from 'node:crypto';
-import {tokenForApple,requestAndCheckAppleTest} from '../scripts/check-apple-server-notification.mjs';
+import {tokenForApple,requestAndCheckAppleTest,parseApplePrivateKey} from '../scripts/check-apple-server-notification.mjs';
 const {privateKey,publicKey}=generateKeyPairSync('ec',{namedCurve:'prime256v1'});
 const key=privateKey.export({type:'pkcs8',format:'pem'});
 const input={keyId:'ABC123DEF9',issuerId:'123e4567-e89b-42d3-a456-426614174000',privateKey:key,now:1795319999};
@@ -41,4 +41,21 @@ test('unsuccessful Apple delivery cannot be treated as success',async()=>{
 });
 test('API rejection does not pass the notification check',async()=>{
   await assert.rejects(()=>requestAndCheckAppleTest({environment:'Sandbox',authorization:'Bearer a.b.c',fetchImpl:async()=>({status:401})}),/apple_test_request_http_401/);
+});
+
+test('accepts original PEM, Base64 file, twice-encoded Base64 and DER',()=>{
+  const pem=key;
+  const b64=Buffer.from(pem).toString('base64');
+  const twice=Buffer.from(b64).toString('base64');
+  const der=privateKey.export({format:'der',type:'pkcs8'});
+  for(const secret of [{rawKey:pem},{keyBase64:b64},{keyBase64:twice},{keyBase64:der.toString('base64')}]) {
+    const parsed=parseApplePrivateKey(secret);
+    assert.equal(parsed.asymmetricKeyType,'ec');
+    assert.equal(parsed.asymmetricKeyDetails.namedCurve,'prime256v1');
+  }
+});
+test('rejects filenames and other non-key secrets safely',()=>{
+  for(const secret of [{rawKey:'SubscriptionKey_NWG44787M7.p8'},{keyBase64:Buffer.from('fake text').toString('base64')}]){
+    assert.throws(()=>parseApplePrivateKey(secret),/apple_iap_secret_not_valid_es256_private_key/);
+  }
 });
