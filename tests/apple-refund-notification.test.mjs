@@ -85,7 +85,8 @@ test('a signed Sandbox notification forwarded to Production URL is safely ignore
 test('unverified Apple notification can never alter refund holds',async()=>{
   const h=harness({verified:false});
   assert.equal((await h.send()).status,422);
-  assert.equal(h.calls.verify,1);
+  // Both Production and Sandbox signature checks must fail closed.
+  assert.equal(h.calls.verify,2);
   assert.equal(h.calls.credits,0);
   assert.equal(h.calls.holds,0);
 });
