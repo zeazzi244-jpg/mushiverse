@@ -10,3 +10,5 @@ Root-cause transport correction: 3120e21f8537cb75ba64284439bbbe254d875b92; verif
 Session startup lock fix: 4aea1f9fc0f21d82e36e76a1e6eec45415c64047; regression tests f1107d3fd94e696b4544f3a9357bd755f5bfe2d9. Build required to verify iPhone login (6041 still fails).
 
 Native auth regression rollback (commit 335122d8f4fdd819a298aedd89678b304abe6602) with updated transport regression tests (d638a3f519e4538ce4bb202d21254baadadfcd31); release CI 44973565782 and 44973565777 succeeded. iOS TestFlight rebuild requested.
+
+Final current main TestFlight candidate: follow-feed fix a04aac830943537d2ee1b86fc3fc06747bbd71d4, regression test b8630d8354593db3158f2fc31e6474756a9d5f45; previous login native bridge rollback retained. Trigger latest signed iOS build; do not replace existing user data.
