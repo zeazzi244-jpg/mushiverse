@@ -1,5 +1,8 @@
 name: Apple App Store Server TEST delivery
 on:
+  push:
+    paths:
+      - '.github/workflows/apple-server-test-notification.yml'
   workflow_dispatch:
     inputs:
       environment:
@@ -17,7 +20,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 8
     env:
-      APPLE_IAP_TEST_ENVIRONMENT: ${{ inputs.environment }}
+      APPLE_IAP_TEST_ENVIRONMENT: ${{ inputs.environment || 'Sandbox' }}
       # Apple In-App Purchase V2 key ID confirmed in App Store Connect.
       APPLE_IAP_KEY_ID: 597YVFDDN8
       # Non-secret Issuer ID verified in the App Store Connect In-App Purchase API screen.
