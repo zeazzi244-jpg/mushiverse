@@ -72,10 +72,17 @@ final class MushiverseCoinStore: ObservableObject {
         guard isStarted, !isRetrying, !isPurchasing, !Task.isCancelled else { return }
         isRetrying = true
         let generation = lifecycleGeneration
+        lastError = "未完了の購入を再確認しています…"
         defer { isRetrying = false }
+        var foundUnfinished = false
         for await result in Transaction.unfinished {
             if Task.isCancelled || !isStarted || lifecycleGeneration != generation { break }
+            foundUnfinished = true
             await process(result)
+        }
+        guard !Task.isCancelled, isStarted, lifecycleGeneration == generation else { return }
+        if !foundUnfinished {
+            lastError = "再確認が完了しました。未完了の購入はありません。"
         }
     }
 
@@ -197,6 +204,12 @@ final class MushiverseCoinStore: ObservableObject {
                 CreditRequest(transactionID: String(transaction.id), signedTransaction: result.jwsRepresentation),
                 to: settlementEndpoint, token: token
             )
+            if isSandbox && response.statusCode == 422 {
+                // Apple accepted the Sandbox payment, but the server did not
+                // verify the signed evidence. Keep the transaction unfinished.
+                lastError = "Appleのテスト購入は完了しましたが、サーバーの署名確認に失敗しました。追加購入せず再確認してください。"
+                return
+            }
             guard response.statusCode == 200 else { throw PurchaseError.serverRejected }
             guard isStarted, lifecycleGeneration == generation, !Task.isCancelled else { return }
             // Finish only after the isolated Sandbox ledger acknowledges this purchase.
