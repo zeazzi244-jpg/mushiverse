@@ -1,0 +1,51 @@
+name: Gacha V3 iOS release verification
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'index.html'
+      - 'js/gacha-immersive-stage.js'
+      - 'js/gacha-spectacle-effects.js'
+      - 'js/gacha-deluxe-reveal.js'
+      - 'tests/gacha-deluxe-release.test.mjs'
+      - '.github/workflows/gacha-v3-ios-check.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: gacha-v3-release-check-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  release-test:
+    name: npm release tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+      - run: npm ci
+      - run: npm run test:release
+
+  unsigned-ios:
+    name: Compile existing iOS app (unsigned)
+    needs: release-test
+    runs-on: macos-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+      - run: npm ci
+      - run: npm run ios:prepare
+      - name: Compile for iOS simulator without signing
+        run: |
+          xcodebuild -project ios/App/App.xcodeproj -scheme App -configuration Release -destination 'generic/platform=iOS Simulator' CODE_SIGNING_ALLOWED=NO build
