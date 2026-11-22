@@ -1,5 +1,6 @@
 import "jsr:@supabase/functions-js/edge-runtime.d.ts";
 import { createClient } from "npm:@supabase/supabase-js@2";
+import { VerificationException, VerificationStatus } from "npm:@apple/app-store-server-library@1.5.0";
 import { verifyAppleProductionCoinJws } from "../_shared/apple-production-coin-verifier.ts";
 import { appleCoinPacks, isAppleCoinProduct } from "../_shared/apple-coin-transaction-policy.mjs";
 
@@ -124,8 +125,17 @@ Deno.serve(async (request: Request) => {
         originalTransactionId:claim.original_transaction_id,
         appAccountToken:user.id,
       },Number(appIDRaw));
-    } catch {
-      return reply({error:"apple_transaction_verification_failed"},422);
+    } catch (error) {
+      // A transient Apple certificate/OCSP failure is not evidence of a bad
+      // purchase. Never settle a wallet on failure, but allow StoreKit's
+      // unfinished transaction to be retried after the outage.
+      const transient = error instanceof VerificationException &&
+        error.status === VerificationStatus.RETRYABLE_VERIFICATION_FAILURE;
+      // Keep signed purchase details, raw exception messages and JWS out of logs.
+      console.warn("Apple Production verification:", transient ? "retryable_apple_verifier_failure" : "rejected");
+      return transient
+        ? reply({error:"apple_verification_temporarily_unavailable"},503)
+        : reply({error:"apple_transaction_verification_failed"},422);
     }
 
     // Remote signature verification is asynchronous. Reject a claim reassigned,
