@@ -60,7 +60,7 @@ function decorate(overlay){
  const sync=()=>{
   [...results.querySelectorAll('.mv88Card')].forEach((card,i)=>card.style.setProperty('--card-index',String(i)));
   if(!burstDone&&!results.hidden&&!reduce()){
-   burstDone=true;const flash=document.createElement('div');flash.className='mvSpectacleBurst';flash.setAttribute('aria-hidden','true');stage.append(flash);
+   burstDone=true;const flash=document.createElement('div');flash.className='mvSpectacleBurst';flash.setAttribute('aria-hidden','true');overlay.append(flash);
    flash.addEventListener('animationend',()=>flash.remove(),{once:true});
   }
  };
