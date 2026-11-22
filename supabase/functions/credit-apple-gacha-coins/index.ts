@@ -24,6 +24,12 @@ Deno.serve(async (request: Request) => {
     const userClient = createClient(url, anon, { global: { headers: { Authorization: authorization } } });
     const { data: { user }, error: authError } = await userClient.auth.getUser();
     if (authError || !user) return json({ error: "unauthorized" }, 401);
+    // Match Production's server-authoritative purchase restrictions. Sandbox
+    // transactions must not bypass a minor or disabled account's IAP policy.
+    if (user.app_metadata?.kid_mode === true ||
+        user.app_metadata?.minor === true ||
+        user.app_metadata?.iap_disabled === true)
+      return json({ error: "purchases_restricted", credited_or_previously_credited: false }, 403);
     const declaredLength = request.headers.get("content-length");
     if (declaredLength !== null) {
       if (!/^(0|[1-9][0-9]*)$/.test(declaredLength)) return json({ error: "invalid_content_length" }, 400);
