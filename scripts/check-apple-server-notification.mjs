@@ -70,7 +70,8 @@ async function main() {
   const keyBase64=process.env.APPLE_IAP_PRIVATE_KEY_P8_BASE64;
   if (!rawKey && (!keyBase64 || !/^[A-Za-z0-9+/=\s]+$/.test(keyBase64)))
     throw Error('missing_apple_iap_api_key_secret');
-  const privateKey=rawKey || Buffer.from(keyBase64,'base64').toString('utf8');
+  // Prefer file-derived base64 when provided, so a stale malformed raw-paste secret cannot mask it.
+  const privateKey=keyBase64 ? Buffer.from(keyBase64.replace(/\s/g,''),'base64').toString('utf8') : rawKey;
   const jwt=tokenForApple({keyId:process.env.APPLE_IAP_KEY_ID,issuerId:process.env.APPLE_IAP_ISSUER_ID,privateKey});
   const result=await requestAndCheckAppleTest({environment,authorization:`Bearer ${jwt}`});
   console.log(`Apple ${result.environment} TEST delivery attempts: ${result.attempts}; results: ${result.results.join(',')||'unknown'}`);
