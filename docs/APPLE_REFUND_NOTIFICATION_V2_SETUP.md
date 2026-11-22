@@ -9,13 +9,14 @@ Apple numeric app ID: `6826061606`.
 https://jhowxtdemlsmetcwhekr.supabase.co/functions/v1/apple-refund-notifications
 ```
 
-Supabase Edge Function `apple-refund-notifications` v2 runs without Supabase JWT
+Supabase Edge Function `apple-refund-notifications` v3 runs without Supabase JWT
 because Apple does not provide one. It requires Apple-signed outer notification
 AND Apple-signed nested transaction, pinned Apple Root CA G3, the Production
 bundle/app identity, the 100-coin consumable, owner and refund timestamp before
 calling a restricted server-only SQL RPC. Verified Sandbox notifications are
 acknowledged without ever writing to Production. All other invalid signatures
-are rejected.
+are rejected. Transient Apple certificate/OCSP verifier outages return HTTP 503
+so Apple can retry without touching a wallet.
 
 ## Owner action in App Store Connect
 
