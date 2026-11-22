@@ -18,7 +18,8 @@ jobs:
     timeout-minutes: 8
     env:
       APPLE_IAP_TEST_ENVIRONMENT: ${{ inputs.environment }}
-      APPLE_IAP_KEY_ID: ${{ secrets.APPLE_IAP_KEY_ID }}
+      # Apple In-App Purchase V2 key ID confirmed in App Store Connect.
+      APPLE_IAP_KEY_ID: 597YVFDDN8
       # Non-secret Issuer ID verified in the App Store Connect In-App Purchase API screen.
       APPLE_IAP_ISSUER_ID: 8473c9e7-3897-4f00-bb31-a0b188f8a077
       APPLE_IAP_PRIVATE_KEY_P8: ${{ secrets.APPLE_IAP_PRIVATE_KEY_P8 }}
