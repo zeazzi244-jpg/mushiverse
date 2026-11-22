@@ -80,11 +80,29 @@ Deno.serve(async(req)=>{
     // before storing them; the signed JWS verifier independently enforces this.
     if(isAppleCoinProduct(productId) && originalTransactionId!==transactionId)
       return json({error:"consumable_transaction_chain_mismatch"},400);
-    // The downstream JWS verifier is Sandbox-only until real purchase proof.
-    // Reject Production and local StoreKit/Xcode claims before they create
-    // pending records that cannot be verified or safely fulfilled.
-    if(environment!==null&&environment!=="Sandbox")
+    // An environment field is an untrusted routing hint, never Apple proof.
+    // The separate settlement endpoint verifies Apple's signed JWS before
+    // crediting anything. Keep Xcode/local StoreKit claims rejected.
+    if(environment!==null&&environment!=="Sandbox"&&environment!=="Production")
       return json({error:"unsupported_environment"},400);
+    if(environment==="Production"){
+      // Production claims may be staged only after every independent release
+      // gate is open. This must not be a client-controlled feature switch.
+      // Only the reviewed 100-coin consumable is eligible.
+      if(productId!=="mushiverse.coins.100")
+        return json({error:"production_product_not_approved"},403);
+      const [{data:billing,error:billingError},{data:gate,error:gateError},{data:pack,error:packError}]=await Promise.all([
+        admin.from("billing_settings").select("billing_mode,checkout_enabled,ios_iap_ready").eq("singleton",true).single(),
+        admin.from("apple_iap_verification_gate").select("server_jws_verified,sandbox_purchase_proven").eq("singleton",true).single(),
+        admin.from("apple_coin_pack_catalog").select("coins,is_sale_enabled").eq("product_id",productId).single(),
+      ]);
+      if(billingError||gateError||packError)
+        return json({error:"production_claim_unavailable"},503);
+      if(!billing||billing.billing_mode!=="live"||billing.checkout_enabled!==true||billing.ios_iap_ready!==true||
+         !gate||gate.server_jws_verified!==true||gate.sandbox_purchase_proven!==true||
+         !pack||pack.coins!==100||pack.is_sale_enabled!==true)
+        return json({error:"production_fulfillment_disabled"},503);
+    }
 
     // Claims are only unverified reports. Replays must never reset a verified
     // or rejected transaction to pending, nor reassign it to another user.
