@@ -55,7 +55,7 @@ async function main() {
   const environment=process.env.APPLE_IAP_TEST_ENVIRONMENT || 'Sandbox';
   if (!Object.hasOwn(HOSTS, environment)) throw Error('invalid_apple_test_environment');
   const keyBase64=process.env.APPLE_IAP_PRIVATE_KEY_P8_BASE64;
-  if (!keyBase64 || !/^[A-Za-z0-9+/=\\s]+$/.test(keyBase64))
+  if (!keyBase64 || !/^[A-Za-z0-9+/=\s]+$/.test(keyBase64))
     throw Error('missing_apple_iap_api_key_secret');
   const privateKey=Buffer.from(keyBase64,'base64').toString('utf8');
   const jwt=tokenForApple({keyId:process.env.APPLE_IAP_KEY_ID,issuerId:process.env.APPLE_IAP_ISSUER_ID,privateKey});
