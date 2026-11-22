@@ -88,6 +88,9 @@ export async function requestAndCheckAppleTest({environment, authorization, fetc
     const status=await fetchImpl(`${host}/inApps/v1/notifications/test/${encodeURIComponent(notificationToken)}`,{
       method:'GET',headers:common,signal:AbortSignal.timeout(20000),
     });
+    // Apple documents HTTP 404 while the test result is not available yet.
+    // Retry with the same token, rather than requesting another notification.
+    if(status.status === 404) continue;
     if(status.status!==200) throw Error(`apple_test_status_http_${status.status}`);
     const body=await status.json();
     const attempts=body?.sendAttempts;
