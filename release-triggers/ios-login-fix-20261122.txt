@@ -14,3 +14,5 @@ Native auth regression rollback (commit 335122d8f4fdd819a298aedd89678b304abe6602
 Final current main TestFlight candidate: follow-feed fix a04aac830943537d2ee1b86fc3fc06747bbd71d4, regression test b8630d8354593db3158f2fc31e6474756a9d5f45; previous login native bridge rollback retained. Trigger latest signed iOS build; do not replace existing user data.
 
 Production IAP readiness TestFlight candidate (2026-11-22 JST): main 8021a77dcc3d02374427cd185f44f4f8a9440090, successful Verify MUSHIVERSE release scripts 44979546611 and Billing and release regression checks 44979546538. Run new signed iOS archive and upload to TestFlight for device checks. Production purchase gate deliberately remains OFF until real Apple proof and account ownership / refund review.
+
+2026-11-22 Sandbox verification error UX candidate: f0058f5ac3737d0b501e043b851678bf0a8f0ea2; billing/release CI passed 44980802223 and 44980802204. Rebuild signed TestFlight to display verification failures and retry state. Production purchases remain disabled pending signed Sandbox proof.
