@@ -213,14 +213,7 @@
     byName.set(card.name, card);
     // Keep legacy saved-card name lookups working after the display-name migration.
     const legacySuffixes = [["アゲハ","ルミフェル"],["コガ","ノクティル"],["クワガタ","グラディス"],["カブト","アルケロン"],["タマムシ","プリズレア"],["テントウ","ポルミナ"],["カミキリ","アンテリス"],["トンボ","アエリオン"],["カマキリ","セクティラ"],["ハナバチ","メリフィア"],["セミ","シンフォル"],["バッタ","リープラ"],["コオロギ","ノクティア"],["ホタル","ルクシア"],["アメンボ","リプリア"],["ムーンガ","ルナヴェール"]];
-    const originalName = card.name.replace(new RegExp('(' + legacySuffixes.map(pair => pair[1]).join('|') + ')
-    byId.set(card.id, card);
-  }
-  window.mushiverseOriginalCards = Object.freeze(cards);
-  window.mushiverseOriginalCard = name => byName.get(name);
-  window.mushiverseOriginalCardById = id => byId.get(id);
-})();
-), match => legacySuffixes.find(pair => pair[1] === match)?.[0] || match);
+    const originalName = card.name.replace(new RegExp('(' + legacySuffixes.map(pair => pair[1]).join('|') + ')', 'g'), match => legacySuffixes.find(pair => pair[1] === match)?.[0] || match);
     if (originalName !== card.name) byName.set(originalName, card);
     byId.set(card.id, card);
   }
