@@ -4139,10 +4139,65 @@ function showGachaReveal(got){
  btn.focus();
 }
 
+function installGachaCrank(){
+ const turnRequired=Math.PI*100/180;
+ let turn=null;
+
+ function angle(event){
+  const x=event.clientX-turn.x;
+  const y=event.clientY-turn.y;
+  return Math.hypot(x,y)>=turn.minRadius?Math.atan2(y,x):null;
+ }
+
+ document.addEventListener('pointerdown',event=>{
+  const handle=event.target.closest?.('.mvWoodHandle');
+  if(!handle||handle.disabled||turn||event.isPrimary===false||event.button!==0||el('mv88Reveal'))return;
+  const bounds=handle.getBoundingClientRect();
+  handle.setPointerCapture(event.pointerId);
+  turn={handle,id:event.pointerId,x:bounds.left+bounds.width/2,y:bounds.top+bounds.height/2,
+   minRadius:bounds.width*.18,lastAngle:null,rotation:0,ready:false};
+  turn.lastAngle=angle(event);
+ });
+
+ document.addEventListener('pointermove',event=>{
+  if(!turn||event.pointerId!==turn.id||turn.ready)return;
+  const current=angle(event);
+  const previous=turn.lastAngle;
+  turn.lastAngle=current;
+  if(current===null||previous===null)return;
+  const difference=current-previous;
+  const step=Math.atan2(Math.sin(difference),Math.cos(difference));
+  // A straight swipe past the middle can jump by half a revolution.
+  if(Math.abs(step)>Math.PI/2)return;
+  turn.rotation+=step;
+  turn.ready=Math.abs(turn.rotation)>=turnRequired;
+  const degrees=Math.max(-100,Math.min(100,turn.rotation*180/Math.PI));
+  turn.handle.style.setProperty('--crank-turn',degrees+'deg');
+  turn.handle.classList.toggle('is-turned',turn.ready);
+ });
+
+ function finish(event){
+  if(!turn||event.pointerId!==turn.id)return;
+  const {handle,ready}=turn;
+  turn=null;
+  handle.style.removeProperty('--crank-turn');
+  handle.classList.remove('is-turned');
+  if(event.type==='pointerup'&&ready)draw(1);
+ }
+
+ for(const name of ['pointerup','pointercancel','lostpointercapture']){
+  document.addEventListener(name,finish);
+ }
+}
+
 function start(){ensure();render();
+ installGachaCrank();
  document.addEventListener('click',event=>{
   const control=event.target.closest?.('.mvWoodHandle,#mv77Draw,#mv77Ten');
-  if(control&&!control.disabled)draw(control.id==='mv77Ten'?10:1);
+  if(!control||control.disabled)return;
+  // Keyboard and assistive activation can still press the crank as a button.
+  if(control.classList.contains('mvWoodHandle')&&event.detail!==0)return;
+  draw(control.id==='mv77Ten'?10:1);
  });
  document.addEventListener('click',e=>{if(e.target.closest?.('[data-tab="profile"]'))setTimeout(render,30)},true);document.addEventListener('visibilitychange',()=>{if(!document.hidden)render()});window.addEventListener('pageshow',render);setInterval(()=>{if(!document.hidden&&el('profile')&&!el('profile').classList.contains('hide'))render()},10000)}
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',start,{once:true});else start();
@@ -4540,7 +4595,7 @@ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',
 function init(){
  const mount=document.getElementById('mv86GachaMount');if(!mount||document.getElementById('mv101Machine'))return;
  const unit=document.createElement('section');unit.id='mv101Machine';unit.setAttribute('aria-label','ガシャポン筐体イラスト');
- unit.innerHTML='<h2>✦ 幻想昆虫ガチャ</h2><p class="mvWoodBalance" aria-label="所持コイン"></p><details class="mvGachaOdds"><summary>全レア度の排出率（1回あたり）</summary><dl><div><dt>SSR</dt><dd>0.1%</dd></div><div><dt>SR</dt><dd>1.9%</dd></div><div><dt>R</dt><dd>18%</dd></div><div><dt>N</dt><dd>80%</dd></div><div><dt>LR</dt><dd>0%（配信前）</dd></div></dl><p>LRは提供開始後、在庫がある間のみ0.01%。全サーバー合計3枚限定です。</p></details><div class="mvWoodMachine"><img src="assets/gacha/forest-machine.webp" width="720" height="720" alt="森の切り株に作られたガチャ筐体"><button type="button" class="mvWoodHandle" aria-label="ハンドルを回して1回引く" aria-describedby="mvWoodStatus"><span aria-hidden="true">↻</span></button></div><div class="mvWoodActions"></div><p id="mvWoodStatus" role="status">角のハンドルからも1回引けます</p><button type="button" class="mvWoodCollection">所持カード・図鑑を見る</button><details class="mvWoodAudio"><summary>ガチャの音量</summary><label>効果音 <input type="range" class="mvWoodVolume" min="0" max="60" value="35"></label><label><input type="checkbox" class="mvWoodMute"> 消音</label></details><div class="mvGachaRarityHint" aria-label="SSRの紹介"><span class="mvGachaMystery" aria-hidden="true">✦ ? ✦</span><span><strong>SSR · 幻の昆虫</strong><small>出現率 0.1% · 何が出るかはお楽しみ</small></span></div><p class="mvGachaPrice" style="margin:10px 0 0;font-size:13px">1回50コイン · 10連450コイン</p>';
+ unit.innerHTML='<h2>✦ 幻想昆虫ガチャ</h2><p class="mvWoodBalance" aria-label="所持コイン"></p><details class="mvGachaOdds"><summary>全レア度の排出率（1回あたり）</summary><dl><div><dt>SSR</dt><dd>0.1%</dd></div><div><dt>SR</dt><dd>1.9%</dd></div><div><dt>R</dt><dd>18%</dd></div><div><dt>N</dt><dd>80%</dd></div><div><dt>LR</dt><dd>0%（配信前）</dd></div></dl><p>LRは提供開始後、在庫がある間のみ0.01%。全サーバー合計3枚限定です。</p></details><div class="mvWoodMachine"><img src="assets/gacha/forest-machine.webp" width="720" height="720" alt="森の切り株に作られたガチャ筐体"><button type="button" class="mvWoodHandle" aria-label="ハンドルを回して1回引く" aria-describedby="mvWoodStatus"><span aria-hidden="true">↻</span></button></div><div class="mvWoodActions"></div><p id="mvWoodStatus" role="status">指でハンドルを弧を描くように回し、光ったら離すと1回引けます。</p><button type="button" class="mvWoodCollection">所持カード・図鑑を見る</button><details class="mvWoodAudio"><summary>ガチャの音量</summary><label>効果音 <input type="range" class="mvWoodVolume" min="0" max="60" value="35"></label><label><input type="checkbox" class="mvWoodMute"> 消音</label></details><div class="mvGachaRarityHint" aria-label="SSRの紹介"><span class="mvGachaMystery" aria-hidden="true">✦ ? ✦</span><span><strong>SSR · 幻の昆虫</strong><small>出現率 0.1% · 何が出るかはお楽しみ</small></span></div><p class="mvGachaPrice" style="margin:10px 0 0;font-size:13px">1回50コイン · 10連450コイン</p>';
  const volume=unit.querySelector('.mvWoodVolume');
  const mute=unit.querySelector('.mvWoodMute');
  const volumeKey='mushiverse-gacha-volume';
@@ -4637,8 +4692,10 @@ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',
 
 .mvWoodMachine{position:relative;overflow:hidden;border-radius:14px;background:#18291c}
 #gacha #mv101Machine .mvWoodMachine img{width:100%;height:auto;aspect-ratio:1;display:block;object-fit:contain}
-#gacha #mv101Machine .mvWoodHandle{position:absolute;left:56%;top:62%;transform:translate(-50%,-50%);width:20%;height:20%;min-width:44px;min-height:44px;display:grid;place-items:end center;border:2px solid #ffe9ba;border-radius:50%;padding:0;background:transparent;color:#fff2cf;cursor:pointer;touch-action:manipulation;box-shadow:0 0 12px #2b190c}
-#gacha #mv101Machine .mvWoodHandle span{background:#38200f;border-radius:99px;padding:0 .3em;line-height:1.1}
+#gacha #mv101Machine .mvWoodHandle{position:absolute;left:56%;top:62%;transform:translate(-50%,-50%);width:20%;height:20%;min-width:44px;min-height:44px;display:grid;place-items:end center;border:2px solid #ffe9ba;border-radius:50%;padding:0;background:transparent;color:#fff2cf;cursor:grab;touch-action:none;box-shadow:0 0 12px #2b190c}
+#gacha #mv101Machine .mvWoodHandle::before{content:"";position:absolute;inset:0;border-radius:inherit;background:url("assets/gacha/forest-machine.webp") 57.5% 65%/500% 500% no-repeat;transform:rotate(var(--crank-turn,0deg));pointer-events:none}
+#gacha #mv101Machine .mvWoodHandle.is-turned{border-color:#ffd369;box-shadow:0 0 16px #ffd369}
+#gacha #mv101Machine .mvWoodHandle span{z-index:1;pointer-events:none;background:#38200f;border-radius:99px;padding:0 .3em;line-height:1.1}
 #gacha #mv101Machine .mvWoodHandle:focus-visible{outline:3px solid #fff4db;outline-offset:4px}
 #gacha #mv101Machine #mvWoodStatus{margin:.5rem 0;color:#173d2f}
 #mv88Reveal .mvWoodPrelude{position:relative;isolation:isolate;overflow:hidden;width:min(100%,13rem,33vh);aspect-ratio:1;margin:8px auto;border-radius:14px;background:#18291c url("assets/gacha/forest-machine.webp") center/cover}
