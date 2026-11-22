@@ -1,6 +1,6 @@
 import "jsr:@supabase/functions-js/edge-runtime.d.ts";
 import { createClient } from "npm:@supabase/supabase-js@2";
-import { Environment, SignedDataVerifier } from "npm:@apple/app-store-server-library@1.5.0";
+import { Environment, SignedDataVerifier, VerificationException, VerificationStatus } from "npm:@apple/app-store-server-library@1.5.0";
 import { APPLE_G3_ROOT_DER_BASE64 } from "../_shared/apple-production-coin-verifier.ts";
 
 // Apple App Store Server Notifications V2. This endpoint is public because Apple
@@ -62,7 +62,12 @@ Deno.serve(async (request: Request) => {
     let notification;
     try {
       notification=await verifier.verifyAndDecodeNotification(signedPayload);
-    } catch {
+    } catch (error) {
+      // A temporary Apple OCSP/certificate-service outage must be retried.
+      // Never treat it as proof that the signed notification is invalid.
+      if(error instanceof VerificationException &&
+         error.status===VerificationStatus.RETRYABLE_VERIFICATION_FAILURE)
+        return response({error:"notification_verification_temporarily_unavailable"},503);
       // Apple can forward Sandbox notifications to the Production URL if no
       // separate Sandbox URL is configured. Authenticate Sandbox signatures
       // independently; never let test notifications touch a Production wallet.
@@ -70,7 +75,10 @@ Deno.serve(async (request: Request) => {
       try {
         await sandboxVerifier.verifyAndDecodeNotification(signedPayload);
         return response({ok:true,ignored_sandbox:true});
-      } catch {
+      } catch (sandboxError) {
+        if(sandboxError instanceof VerificationException &&
+           sandboxError.status===VerificationStatus.RETRYABLE_VERIFICATION_FAILURE)
+          return response({error:"notification_verification_temporarily_unavailable"},503);
         return response({error:"notification_verification_failed"},422);
       }
     }
@@ -119,7 +127,12 @@ Deno.serve(async (request: Request) => {
       return response({error:"refund_hold_unavailable"},503);
     }
     return response({ok:true,refund_quarantined:true});
-  } catch {
+  } catch (error) {
+    // Retry transient Apple verifier failures, including nested signed
+    // transactions, without acknowledging or modifying a wallet.
+    if(error instanceof VerificationException &&
+       error.status===VerificationStatus.RETRYABLE_VERIFICATION_FAILURE)
+      return response({error:"notification_verification_temporarily_unavailable"},503);
     // Never log raw signed payloads, user IDs, certificate data or exceptions.
     console.warn("Apple notification signature or data rejected");
     return response({error:"notification_verification_failed"},422);
