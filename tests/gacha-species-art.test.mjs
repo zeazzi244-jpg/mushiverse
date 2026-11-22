@@ -44,8 +44,10 @@ test('the offline bundle includes 200 distinct, named originals and keeps the le
     assert.match(card.slug, /^[a-z]+(?:-[a-z]+)+$/);
     assert.equal(card.id, 'mv-original-' + card.slug);
     assert.equal(window.mushiverseOriginalCard(card.name), card);
-    assert.equal(new URL(card.image).pathname, '/assets/cards/original/' + card.slug + '.svg');
-    const svg = readFileSync('www' + new URL(card.image).pathname, 'utf8');
+    assert.equal(new URL(card.image).pathname, '/assets/cards/original/' + card.slug + '.webp');
+    assert.equal(card.photo, card.image);
+    assert.equal(new URL(card.fallbackImage).pathname, '/assets/cards/original/' + card.slug + '.svg');
+    const svg = readFileSync('www' + new URL(card.fallbackImage).pathname, 'utf8');
     // Legacy SVG fallbacks can retain an older accessible title after fictional renaming.
     // Preserve ID, path and unique artwork checks without forcing card names to regress.
     assert.match(svg, /<title>[^<]+<\/title>/u, card.name);
