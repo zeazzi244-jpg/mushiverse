@@ -1,0 +1,40 @@
+name: Apple App Store Server TEST delivery
+on:
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Apple TEST delivery environment (not a purchase)'
+        required: true
+        default: 'Sandbox'
+        type: choice
+        options:
+          - Sandbox
+          - Production
+permissions:
+  contents: read
+jobs:
+  apple-test-notification:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    env:
+      APPLE_IAP_TEST_ENVIRONMENT: ${{ inputs.environment }}
+      APPLE_IAP_KEY_ID: ${{ secrets.APPLE_IAP_KEY_ID }}
+      APPLE_IAP_ISSUER_ID: ${{ secrets.APPLE_IAP_ISSUER_ID }}
+      APPLE_IAP_PRIVATE_KEY_P8_BASE64: ${{ secrets.APPLE_IAP_PRIVATE_KEY_P8_BASE64 }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Check dedicated Apple In-App Purchase API key configuration
+        shell: bash
+        run: |
+          set -euo pipefail
+          for secret in APPLE_IAP_KEY_ID APPLE_IAP_ISSUER_ID APPLE_IAP_PRIVATE_KEY_P8_BASE64; do
+            if [[ -z "${!secret:-}" ]]; then
+              echo "::error::Missing $secret (dedicated Apple In-App Purchase API key; App Store Connect upload key is not interchangeable)"
+              exit 1
+            fi
+          done
+      - name: Run Apple TEST notification check
+        run: node scripts/check-apple-server-notification.mjs
