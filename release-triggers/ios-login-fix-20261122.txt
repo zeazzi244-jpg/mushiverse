@@ -8,3 +8,5 @@ Follow-up: native auth abort recovery commit 9305fd959fb758b3259a262f0c1477fe7a2
 Root-cause transport correction: 3120e21f8537cb75ba64284439bbbe254d875b92; verified regression 44972086452 (success), web integrity 44972086442 (success), safety 44972086454 (success). TestFlight rebuild requested.
 
 Session startup lock fix: 4aea1f9fc0f21d82e36e76a1e6eec45415c64047; regression tests f1107d3fd94e696b4544f3a9357bd755f5bfe2d9. Build required to verify iPhone login (6041 still fails).
+
+Native auth regression rollback (commit 335122d8f4fdd819a298aedd89678b304abe6602) with updated transport regression tests (d638a3f519e4538ce4bb202d21254baadadfcd31); release CI 44973565782 and 44973565777 succeeded. iOS TestFlight rebuild requested.
