@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 // Apple TEST notifications only: no purchases, credits, refunds or release changes.
-import { createPrivateKey, sign } from 'node:crypto';
+import { createPrivateKey, KeyObject, sign } from 'node:crypto';
 import { pathToFileURL } from 'node:url';
 
 const BID = 'com.rikuto.mushiverse';
@@ -62,13 +62,13 @@ export function tokenForApple({keyId, issuerId, privateKey, now = Math.floor(Dat
   if (issuerUuids.length !== 1 || issuerId.length > 500)
     throw Error('invalid_apple_iap_issuer_id_format');
   issuerId = issuerUuids[0];
-  const key = parseApplePrivateKey({rawKey: privateKey});
+  const key = privateKey instanceof KeyObject ? privateKey : parseApplePrivateKey({rawKey: privateKey});
   const signingInput = `${encode({alg:'ES256', kid:keyId, typ:'JWT'})}.${encode({iss:issuerId, iat:now, exp:now+300, aud:'appstoreconnect-v1', bid:BID})}`;
   const signature = sign('sha256', Buffer.from(signingInput), {key, dsaEncoding:'ieee-p1363'}).toString('base64url');
   return `${signingInput}.${signature}`;
 }
 
-export async function requestAndCheckAppleTest({environment, authorization, fetchImpl=fetch, sleep=ms=>new Promise(r=>setTimeout(r,ms)), maxAttempts=8}) {
+export async function requestAndCheckAppleTest({environment, authorization, fetchImpl=fetch, sleep=ms=>new Promise(r=>setTimeout(r,ms)), maxAttempts=8, report=()=>{}}) {
   const host=HOSTS[environment];
   if (!host || !/^Bearer [A-Za-z0-9._-]+$/.test(authorization))
     throw Error('invalid_apple_test_configuration');
@@ -77,6 +77,7 @@ export async function requestAndCheckAppleTest({environment, authorization, fetc
     method:'POST',headers:{...common,'Content-Type':'application/json'},body:'{}',signal:AbortSignal.timeout(20000),
   });
   if (request.status !== 200) throw Error(`apple_test_request_http_${request.status}`);
+  report("request", request.status);
   const created=await request.json();
   const notificationToken=created?.testNotificationToken;
   // Apple documents an opaque string; do not assume a UUID/alphanumeric format.
@@ -88,6 +89,7 @@ export async function requestAndCheckAppleTest({environment, authorization, fetc
     const status=await fetchImpl(`${host}/inApps/v1/notifications/test/${encodeURIComponent(notificationToken)}`,{
       method:'GET',headers:common,signal:AbortSignal.timeout(20000),
     });
+    report("status", status.status);
     // Apple documents HTTP 404 while the test result is not available yet.
     // Retry with the same token, rather than requesting another notification.
     if(status.status === 404) continue;
@@ -97,7 +99,7 @@ export async function requestAndCheckAppleTest({environment, authorization, fetc
     if(!Array.isArray(attempts)) throw Error('invalid_apple_test_status');
     if(attempts.length>0){
       // Never echo signedPayload, transaction data, JWT or the notification token.
-      const results=attempts.map(item=>item?.sendAttemptResult).filter(x=>typeof x==='string');
+      const results=attempts.map(item=>item?.sendAttemptResult).filter(x=>typeof x==='string' && /^[A-Z_]{1,80}$/.test(x));
       return {environment,attempts:attempts.length,results,success:results.includes('SUCCESS')};
     }
   }
@@ -110,12 +112,14 @@ async function main() {
   const rawKey=process.env.APPLE_IAP_PRIVATE_KEY_P8;
   const keyBase64=process.env.APPLE_IAP_PRIVATE_KEY_P8_BASE64;
   const key=parseApplePrivateKey({rawKey,keyBase64});
-  const jwt=tokenForApple({keyId:process.env.APPLE_IAP_KEY_ID,issuerId:process.env.APPLE_IAP_ISSUER_ID,privateKey:key.export({format:'pem',type:'pkcs8'})});
-  const result=await requestAndCheckAppleTest({environment,authorization:`Bearer ${jwt}`});
+  const jwt=tokenForApple({keyId:process.env.APPLE_IAP_KEY_ID,issuerId:process.env.APPLE_IAP_ISSUER_ID,privateKey:key});
+  const result=await requestAndCheckAppleTest({environment,authorization:`Bearer ${jwt}`,
+    report: (operation, status) => console.log(`Apple TEST ${operation} HTTP ${status}`),
+  });
   console.log(`Apple ${result.environment} TEST delivery attempts: ${result.attempts}; results: ${result.results.join(',')||'unknown'}`);
   if (!result.success) throw Error('apple_test_delivery_not_successful');
   console.log('Apple TEST delivery SUCCESS; verify receiving function logs separately.');
 }
 if (process.argv[1] && import.meta.url===pathToFileURL(process.argv[1]).href) {
-  main().catch(error=>{console.error(`Apple TEST check failed: ${error instanceof Error ? error.message.replace(/[^a-zA-Z0-9_-]/g,'_') : 'unknown'}`);process.exitCode=1;});
+  main().catch(error=>{console.error(`Apple TEST check failed: ${error instanceof Error && /^(?:apple|invalid_apple)_[a-z0-9_]+$/.test(error.message) ? error.message : 'unexpected_error'}`);process.exitCode=1;});
 }

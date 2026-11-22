@@ -1,6 +1,7 @@
+import { Buffer } from "node:buffer";
 import "jsr:@supabase/functions-js/edge-runtime.d.ts";
 import { createClient } from "npm:@supabase/supabase-js@2";
-import { Environment, SignedDataVerifier, VerificationException, VerificationStatus } from "npm:@apple/app-store-server-library@1.5.0";
+import { Environment, SignedDataVerifier, VerificationException, VerificationStatus } from "npm:@apple/app-store-server-library@3.1.0";
 import { APPLE_G3_ROOT_DER_BASE64 } from "../_shared/apple-production-coin-verifier.ts";
 
 // Apple App Store Server Notifications V2. This endpoint is public because Apple
@@ -56,8 +57,7 @@ Deno.serve(async (request: Request) => {
     signedPayload=parsed.signedPayload;
   } catch {return response({error:"invalid_notification"},400);}
   try {
-    const der=atob(APPLE_G3_ROOT_DER_BASE64);
-    const root=Uint8Array.from(der,c=>c.charCodeAt(0));
+    const root = Buffer.from(APPLE_G3_ROOT_DER_BASE64, "base64");
     const verifier=new SignedDataVerifier([root],true,Environment.PRODUCTION,bundleId,appId);
     let notification;
     try {
@@ -73,7 +73,10 @@ Deno.serve(async (request: Request) => {
       // independently; never let test notifications touch a Production wallet.
       const sandboxVerifier=new SignedDataVerifier([root],true,Environment.SANDBOX,bundleId);
       try {
-        await sandboxVerifier.verifyAndDecodeNotification(signedPayload);
+        const sandboxNotification = await sandboxVerifier.verifyAndDecodeNotification(signedPayload);
+        if (sandboxNotification.notificationType === "TEST") {
+          console.info("Apple Sandbox TEST signature verified");
+        }
         return response({ok:true,ignored_sandbox:true});
       } catch (sandboxError) {
         if(sandboxError instanceof VerificationException &&
@@ -81,7 +84,17 @@ Deno.serve(async (request: Request) => {
           return response({error:"notification_verification_temporarily_unavailable"},503);
         // Log only verification failure categories, never JWS, certificates,
         // transaction data, user identifiers or notification contents.
-        const code = (e) => e instanceof VerificationException ? String(e.status) : "exception";
+        const code = (e: unknown) => {
+          if (!(e instanceof VerificationException)) return "exception";
+          const cause = e.cause;
+          if (cause instanceof Error) {
+            if (cause.message.includes("not implemented")) return "runtime_unsupported";
+            if (cause.name === "JsonWebTokenError") return "jwt_rejected";
+            if (cause.name === "FetchError") return "ocsp_fetch_error";
+            if (cause.name === "TypeError") return "verifier_type_error";
+          }
+          return VerificationStatus[e.status] ?? "verification_failed";
+        };
         console.warn("Apple notification verification categories", code(error), code(sandboxError));
         return response({error:"notification_verification_failed"},422);
       }

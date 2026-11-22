@@ -1,6 +1,6 @@
 import "jsr:@supabase/functions-js/edge-runtime.d.ts";
 import { createClient } from "npm:@supabase/supabase-js@2";
-import { VerificationException, VerificationStatus } from "npm:@apple/app-store-server-library@1.5.0";
+import { VerificationException, VerificationStatus } from "npm:@apple/app-store-server-library@3.1.0";
 import { verifyAppleProductionCoinJws } from "../_shared/apple-production-coin-verifier.ts";
 import { appleCoinPacks, isAppleCoinProduct } from "../_shared/apple-coin-transaction-policy.mjs";
 
