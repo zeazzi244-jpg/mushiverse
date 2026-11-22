@@ -15,7 +15,7 @@ test('Apple API token is correctly signed ES256 for this app and expires after 5
   assert.ok(verify('sha256',Buffer.from(`${header}.${payload}`),{key:publicKey,dsaEncoding:'ieee-p1363'},Buffer.from(sig,'base64url')));
 });
 test('rejects invalid key metadata and unsupported environments',async()=>{
-  assert.throws(()=>tokenForApple({...input,keyId:'bad'}),/invalid_apple_iap_key_metadata/);
+  assert.throws(()=>tokenForApple({...input,keyId:'bad'}),/invalid_apple_iap_key_id_format/);
   await assert.rejects(()=>requestAndCheckAppleTest({environment:'StoreKit',authorization:'Bearer a.b.c'}),/invalid_apple_test_configuration/);
 });
 test('TEST request and status check target Apple sandbox without leaking the JWS or token',async()=>{
