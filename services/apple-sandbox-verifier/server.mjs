@@ -40,12 +40,14 @@ const server = createServer(async (request, response) => {
   };
 
   if (request.method === 'GET' && request.url === '/healthz') return send(200, { ok: true });
-  const testNotification = request.url === '/verify-sandbox-test';
+  const productionTest = request.url === '/verify-production-test';
+  const testNotification = productionTest || request.url === '/verify-sandbox-test';
   const productionPurchase = request.url === '/verify-production-purchase';
   const productionRefund = request.url === '/verify-production-refund';
   if (request.method !== 'POST' || (!testNotification && !productionPurchase && !productionRefund && request.url !== '/verify')) return send(404, { error: 'not_found' });
   const provided = Buffer.from(request.headers.authorization ?? '');
-  const expectedAuthorization = (productionPurchase || productionRefund) ? productionAuthorization : authorization;
+  const expectedAuthorization = (productionPurchase || productionRefund || productionTest)
+    ? productionAuthorization : authorization;
   if (!expectedAuthorization || provided.length !== expectedAuthorization.length ||
       !timingSafeEqual(provided, expectedAuthorization)) {
     return send(401, { error: 'unauthorized' });
@@ -80,10 +82,14 @@ const server = createServer(async (request, response) => {
         return send(200, {verified:{bundleId, environment, productId, type, quantity, inAppOwnershipType,
           transactionId, originalTransactionId, appAccountToken, purchaseDate, revocationDate}});
       }
-      const notification = await testVerifier.verifyAndDecodeNotification(signedPayload);
+      const notification = await (productionTest ? productionVerifier : testVerifier)
+        .verifyAndDecodeNotification(signedPayload);
+      const expectedEnvironment = productionTest ? Environment.PRODUCTION : Environment.SANDBOX;
       if (notification.notificationType !== 'TEST' ||
-          notification.data?.environment !== Environment.SANDBOX ||
-          (notification.data.appAppleId != null && notification.data.appAppleId !== 6826061606)) {
+          notification.data?.environment !== expectedEnvironment ||
+          notification.data.bundleId !== 'com.rikuto.mushiverse' ||
+          notification.data.signedTransactionInfo || notification.data.signedRenewalInfo ||
+          ((productionTest || notification.data.appAppleId != null) && notification.data.appAppleId !== 6826061606)) {
         return send(422, { error: 'invalid_notification' });
       }
       response.writeHead(204);

@@ -84,26 +84,32 @@ function verificationCauseCategory(error) {
   return ["TypeError","JsonWebTokenError","TokenExpiredError","NotBeforeError","Error"].includes(name) ? name : "no_known_cause";
 }
 
-// Route only a possible Sandbox TEST. Decoding is never authorization.
+// Route only a possible TEST. Decoding is never authorization.
 // The authenticated Node verifier independently checks the signed values.
-function isPossibleSandboxTest(signedPayload) {
+function possibleTestEnvironment(signedPayload) {
   try {
     const payload = JSON.parse(Buffer.from(signedPayload.split(".")[1], "base64url").toString("utf-8"));
-    return payload.notificationType === "TEST" &&
-      payload.data?.environment === Environment.SANDBOX &&
-      payload.data.bundleId === bundleId &&
-      !payload.data.signedTransactionInfo && !payload.data.signedRenewalInfo;
+    const data = payload.data;
+    if (payload.notificationType !== "TEST" || data?.bundleId !== bundleId ||
+        data.signedTransactionInfo || data.signedRenewalInfo) return null;
+    if (data.environment === Environment.SANDBOX) return Environment.SANDBOX;
+    if (data.environment === Environment.PRODUCTION && data.appAppleId === appId) return Environment.PRODUCTION;
+    return null;
   } catch {
-    return false;
+    return null;
   }
 }
 
-async function verifySandboxTestRemotely(signedPayload, endpoint, service) {
+async function verifyTestRemotely(signedPayload, endpoint, service, production) {
   try {
     const admin = createClient(endpoint, service);
-    const {data: secret, error} = await admin.rpc("get_apple_sandbox_verifier_secret");
+    const {data: secret, error} = await admin.rpc(production
+      ? "get_apple_production_verifier_secret" : "get_apple_sandbox_verifier_secret");
     if (error || typeof secret !== "string" || !/^[a-f0-9]{64}$/.test(secret)) return 503;
-    const result = await fetch("https://mushiverse-apple-sandbox-verifier.onrender.com/verify-sandbox-test", {
+    const url = production
+      ? "https://mushiverse-apple-sandbox-verifier.onrender.com/verify-production-test"
+      : "https://mushiverse-apple-sandbox-verifier.onrender.com/verify-sandbox-test";
+    const result = await fetch(url, {
       method: "POST",
       redirect: "error",
       headers: {"content-type": "application/json", authorization: "Bearer " + secret},
@@ -134,11 +140,13 @@ Deno.serve(async (request: Request) => {
       return response({error:"invalid_notification"},400);
     signedPayload=parsed.signedPayload;
   } catch {return response({error:"invalid_notification"},400);}
-  if (isPossibleSandboxTest(signedPayload)) {
-    const status = await verifySandboxTestRemotely(signedPayload, endpoint, service);
+  const testEnvironment = possibleTestEnvironment(signedPayload);
+  if (testEnvironment) {
+    const production = testEnvironment === Environment.PRODUCTION;
+    const status = await verifyTestRemotely(signedPayload, endpoint, service, production);
     if (status === 200) {
-      console.info("Apple Sandbox TEST signature verified");
-      return response({ok:true,ignored_sandbox:true});
+      console.info(production ? "Apple Production TEST signature verified" : "Apple Sandbox TEST signature verified");
+      return response(production ? {ok:true,ignored:true} : {ok:true,ignored_sandbox:true});
     }
     return response({error:status === 503 ? "notification_verification_temporarily_unavailable" :
       "notification_verification_failed"}, status);

@@ -75,7 +75,8 @@ function harness({type='REFUND',verified=true,creditOwner='123e4567-e89b-42d3-a4
   const fetch = async (url, options) => {
     remoteChecks++;
     if (remoteProduction) {
-      assert.match(url, /onrender\.com\/verify-production-refund$/);
+      assert.match(url, new RegExp(JSON.parse(options.body).signedPayload === productionTestPayload
+        ? "/verify-production-test$" : "/verify-production-refund$"));
       assert.equal(options.headers.authorization, 'Bearer ' + '2'.repeat(64));
       return remoteStatus === 200 ? Response.json({verified:purchase}) : new Response(null,{status:remoteStatus});
     }
@@ -206,6 +207,24 @@ test('Sandbox TEST uses authenticated verification and never touches a wallet', 
     assert.equal(h.remoteChecks,1);
     assert.deepEqual(h.calls,{verify:0,verifyTransaction:0,credits:0,holds:0});
   }
+});
+
+const productionTestPayload = 'aaa.' + Buffer.from(JSON.stringify({
+  notificationType:'TEST',
+  data:{environment:'Production',bundleId:'com.rikuto.mushiverse',appAppleId:6826061606}
+})).toString('base64url') + '.ccc';
+
+test('Production TEST requires a verified acknowledgement and leaves the wallet untouched', async()=>{
+  for (const [remoteStatus, status] of [[204,200], [200,503], [422,422], [503,503]]) {
+    const h = harness({runtimeUnsupported:true,remoteProduction:true,remoteStatus});
+    const result = await h.send(productionTestPayload);
+    assert.equal(result.status,status);
+    assert.equal(h.remoteChecks,1);
+    assert.deepEqual(h.calls,{verify:0,verifyTransaction:0,credits:0,holds:0});
+  }
+  const missingSecret = harness({runtimeUnsupported:true,remoteStatus:204});
+  assert.equal((await missingSecret.send(productionTestPayload)).status,503);
+  assert.equal(missingSecret.remoteChecks,0);
 });
 
 test('a Production refund cannot use the Sandbox TEST verifier', async()=>{
