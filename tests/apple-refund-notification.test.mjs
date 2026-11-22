@@ -11,7 +11,7 @@ const source=readFileSync(new URL('../supabase/functions/apple-refund-notificati
  .replace('let signedPayload: string;','let signedPayload;');
 
 function harness({type='REFUND',verified=true,creditOwner='123e4567-e89b-42d3-a456-426614174000',
-  product='mushiverse.coins.100',environment='Production',held=true,sandboxNotification=false,revocationDate=Date.now()-10000}={}){
+  product='mushiverse.coins.100',environment='Production',held=true,sandboxNotification=false,temporaryNotification=false,temporaryTransaction=false,revocationDate=Date.now()-10000}={}){
   const calls={verify:0,verifyTransaction:0,credits:0,holds:0};
   let handler;
   const purchase={bundleId:'com.rikuto.mushiverse',environment,productId:product,
@@ -19,10 +19,13 @@ function harness({type='REFUND',verified=true,creditOwner='123e4567-e89b-42d3-a4
     transactionId:'123456789',originalTransactionId:'123456789',
     appAccountToken:'123e4567-e89b-42d3-a456-426614174000',
     purchaseDate:1730000000000,revocationDate};
+  class VerificationException extends Error {constructor(status){super('redacted');this.status=status;}}
+  const VerificationStatus={RETRYABLE_VERIFICATION_FAILURE:'retryable'};
   class SignedDataVerifier{
     constructor(_root,_online,env){this.verifierEnvironment=env;}
     async verifyAndDecodeNotification(){
       calls.verify++;
+      if(temporaryNotification)throw new VerificationException(VerificationStatus.RETRYABLE_VERIFICATION_FAILURE);
       if(!verified)throw Error('signature_invalid');
       if(sandboxNotification && this.verifierEnvironment!=='Sandbox') throw Error('wrong_environment');
       if(!sandboxNotification && this.verifierEnvironment!=='Production') throw Error('wrong_environment');
@@ -31,7 +34,11 @@ function harness({type='REFUND',verified=true,creditOwner='123e4567-e89b-42d3-a4
         appAppleId:6826061606,signedTransactionInfo:'aaa.bbb.ccc'
       }};
     }
-    async verifyAndDecodeTransaction(){calls.verifyTransaction++;return purchase;}
+    async verifyAndDecodeTransaction(){
+      calls.verifyTransaction++;
+      if(temporaryTransaction)throw new VerificationException(VerificationStatus.RETRYABLE_VERIFICATION_FAILURE);
+      return purchase;
+    }
   }
   const createClient=()=>({
     from:(table)=>{
@@ -53,8 +60,8 @@ function harness({type='REFUND',verified=true,creditOwner='123e4567-e89b-42d3-a4
   })[key];}},serve(fn){handler=fn;}};
   const Environment={PRODUCTION:'Production',SANDBOX:'Sandbox'};
   new Function('Deno','createClient','SignedDataVerifier','Environment',
-    'APPLE_G3_ROOT_DER_BASE64','Response','atob',source)(
-      Deno,createClient,SignedDataVerifier,Environment,'aGk=',Response,atob
+    'APPLE_G3_ROOT_DER_BASE64','Response','atob','VerificationException','VerificationStatus',source)(
+      Deno,createClient,SignedDataVerifier,Environment,'aGk=',Response,atob,VerificationException,VerificationStatus
     );
   const send=async(signedPayload='aaa.bbb.ccc')=>{
     const result=await handler(new Request('https://example.invalid/apple-refund',{method:'POST',
@@ -87,6 +94,26 @@ test('unverified Apple notification can never alter refund holds',async()=>{
   assert.equal((await h.send()).status,422);
   // Both Production and Sandbox signature checks must fail closed.
   assert.equal(h.calls.verify,2);
+  assert.equal(h.calls.credits,0);
+  assert.equal(h.calls.holds,0);
+});
+
+test('transient Apple notification verifier outage returns 503 without touching refunds',async()=>{
+  const h=harness({temporaryNotification:true});
+  const r=await h.send();
+  assert.equal(r.status,503);
+  assert.equal(r.body.error,'notification_verification_temporarily_unavailable');
+  assert.equal(h.calls.verify,1);
+  assert.equal(h.calls.credits,0);
+  assert.equal(h.calls.holds,0);
+});
+
+test('transient nested Apple transaction verifier outage returns 503 without touching refunds',async()=>{
+  const h=harness({temporaryTransaction:true});
+  const r=await h.send();
+  assert.equal(r.status,503);
+  assert.equal(r.body.error,'notification_verification_temporarily_unavailable');
+  assert.equal(h.calls.verifyTransaction,1);
   assert.equal(h.calls.credits,0);
   assert.equal(h.calls.holds,0);
 });
