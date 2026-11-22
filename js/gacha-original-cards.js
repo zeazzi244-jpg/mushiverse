@@ -211,6 +211,7 @@
     // available as a legacy asset, but should not be the default card image.
     card.image = new URL(card.slug + '.webp', artBase).href;
     card.photo = card.image;
+    card.fallbackImage = new URL(card.slug + '.svg', artBase).href;
     Object.freeze(card);
     byName.set(card.name, card);
     // Keep legacy saved-card name lookups working after the display-name migration.
