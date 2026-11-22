@@ -80,7 +80,6 @@ const server = createServer(async (request, response) => {
     if (typeof signedTransaction !== 'string' || signedTransaction.length > 16384 ||
         !/^[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+$/.test(signedTransaction) ||
         expected?.environment !== (productionPurchase ? 'Production' : 'Sandbox') || !isAppleCoinProduct(expected.productId) ||
-        (productionPurchase && expected.productId !== 'mushiverse.coins.100') ||
         !['transactionId', 'originalTransactionId'].every(key =>
           typeof expected[key] === 'string' && /^\d{6,30}$/.test(expected[key])) ||
         typeof expected.appAccountToken !== 'string' ||

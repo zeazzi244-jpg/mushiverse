@@ -1,3 +1,4 @@
+import { appleCoinPacks, isAppleCoinProduct } from "../_shared/apple-coin-transaction-policy.mjs";
 import { Buffer } from "node:buffer";
 import "jsr:@supabase/functions-js/edge-runtime.d.ts";
 import { createClient } from "npm:@supabase/supabase-js@2";
@@ -193,7 +194,7 @@ Deno.serve(async (request: Request) => {
     // A signed refund does not authorize another product, app, family owner,
     // Sandbox transaction or account. Revocation must have a signed date.
     if(purchase.bundleId!==bundleId || purchase.environment!=="Production" ||
-       purchase.productId!=="mushiverse.coins.100" ||
+       !isAppleCoinProduct(purchase.productId) ||
        purchase.type!=="Consumable" || purchase.quantity!==1 ||
        purchase.inAppOwnershipType!=="PURCHASED" ||
        typeof purchase.transactionId!=="string" || !txId.test(purchase.transactionId) ||
@@ -214,7 +215,7 @@ Deno.serve(async (request: Request) => {
     if(!credits || credits.length!==1) return response({error:"credit_not_found"},503);
     const credit=credits[0];
     if(credit.user_id.toLowerCase()!==purchase.appAccountToken.toLowerCase() ||
-       credit.product_id!==purchase.productId || credit.coins!==100)
+       credit.product_id!==purchase.productId || credit.coins!==appleCoinPacks[purchase.productId as keyof typeof appleCoinPacks])
       return response({error:"refund_owner_mismatch"},422);
     const {data:held,error:holdError}=await admin.rpc("record_apple_refund_after_verified_jws",{
       p_transaction_id:purchase.transactionId,

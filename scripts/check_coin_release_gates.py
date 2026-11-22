@@ -20,8 +20,8 @@ checks = {
         "transaction.environment == .sandbox",
     )) and store.count("sandboxPurchasesEnabled = true") == 1,
     "shop shows preparation notice": "現在は販売準備中です" in shop,
-    "shop offers only the submitted 100-coin product": 'static let productIDs: Set<String> = [sandboxProductID]' in store
-        and 'productRow()' in shop and not any(label in shop for label in ('月額プレミアム', '冒険パス')),
+    "sandbox shop is limited to the submitted 100-coin product": 'sandboxPurchasesEnabled && productID == Self.sandboxProductID' in store
+        and 'productRow(id: MushiverseCoinStore.sandboxProductID, coins: 100)' in shop and not any(label in shop for label in ('月額プレミアム', '冒険パス')),
     "payments stay disabled": "static let purchasesEnabled = false" in store,
     "honor Apple payment restrictions": "AppStore.canMakePayments" in store,
     "purchase requires active shop": "guard isStarted, !Task.isCancelled" in store,

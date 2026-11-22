@@ -22,7 +22,15 @@ struct MushiverseCoinShopView: View {
                 .font(.footnote)
 
             Text("ガチャコイン").font(.headline)
-            productRow()
+            productRow(id: MushiverseCoinStore.sandboxProductID, coins: 100)
+            if purchasesEnabled && !store.sandboxPurchasesEnabled {
+                ForEach(store.products.filter { $0.id != MushiverseCoinStore.sandboxProductID }
+                    .sorted { $0.price < $1.price }, id: \.id) { product in
+                    if let coins = MushiverseCoinStore.productionCoinAmounts[product.id] {
+                        productRow(id: product.id, coins: coins)
+                    }
+                }
+            }
 
             Button("Appleの商品情報を再読み込み") {
                 Task { await store.loadProducts() }
@@ -51,12 +59,11 @@ struct MushiverseCoinShopView: View {
         .onDisappear { store.stop() }
     }
 
-    private func productRow() -> some View {
-        let id = MushiverseCoinStore.sandboxProductID
+    private func productRow(id: String, coins: Int) -> some View {
         let product = store.products.first { $0.id == id }
         let available = store.canOffer(id) && product != nil
         return VStack(alignment: .leading, spacing: 8) {
-            Text("100 コイン").font(.headline)
+            Text("\(coins) コイン").font(.headline)
             if let product {
                 Text(product.displayPrice).font(.subheadline.weight(.semibold))
             } else {

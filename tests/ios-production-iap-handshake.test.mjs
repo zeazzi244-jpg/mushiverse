@@ -23,7 +23,7 @@ test('StoreKit transaction is finished only for exact owner, product, original a
   assert.match(store, /receipt\.environment == "Production"/);
   assert.match(store, /receipt\.originalTransactionID == String\(transaction\.originalID\)/);
   assert.match(store, /receipt\.transactionID == String\(transaction\.id\)/);
-  assert.match(store, /receipt\.coins == 100/);
+  assert.match(store, /receipt\.coins == Self\.productionCoinAmounts\[transaction\.productID\]/);
   assert.match(store, /receipt\.creditedOrPreviouslyCredited/);
   assert.match(store, /await transaction\.finish\(\)/);
   assert.match(endpoint, /verification:"production_signature_verified"/);

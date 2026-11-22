@@ -10,14 +10,20 @@ final class MushiverseCoinStore: ObservableObject {
     static let purchasesEnabled = false
 
     static let sandboxProductID = "mushiverse.coins.100"
-    static let productIDs: Set<String> = [sandboxProductID]
+    static let productionCoinAmounts = [
+        sandboxProductID: 100,
+        "mushiverse.coins.500": 500,
+        "mushiverse.coins.1200": 1200
+    ]
+    static let productIDs: Set<String> = Set(productionCoinAmounts.keys)
 
     private static func expectedType(_ id: String) -> Product.ProductType? {
-        id == sandboxProductID ? .consumable : nil
+        productIDs.contains(id) ? .consumable : nil
     }
 
     func canOffer(_ productID: String) -> Bool {
-        Self.purchasesEnabled || (sandboxPurchasesEnabled && productID == Self.sandboxProductID)
+        (Self.purchasesEnabled && Self.productIDs.contains(productID)) ||
+            (sandboxPurchasesEnabled && productID == Self.sandboxProductID)
     }
 
     @Published private(set) var sandboxPurchasesEnabled = false
@@ -244,7 +250,7 @@ final class MushiverseCoinStore: ObservableObject {
                   receipt.transactionID == String(transaction.id),
                   receipt.originalTransactionID == String(transaction.originalID),
                   receipt.productID == transaction.productID,
-                  receipt.coins == 100 else {
+                  receipt.coins == Self.productionCoinAmounts[transaction.productID] else {
                 throw PurchaseError.serverRejected
             }
             await transaction.finish()

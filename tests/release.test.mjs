@@ -552,7 +552,7 @@ test('shop delegates product listings to StoreKit and exposes only the submitted
   assert.doesNotMatch(entry, /priceYen|mushiverse\.coins\.|プレミアム|冒険パス/);
   const native = readFileSync('ios/App/App/MushiverseCoinStore.swift', 'utf8');
   assert.match(native, /sandboxProductID = "mushiverse\.coins\.100"/);
-  assert.match(native, /productIDs: Set<String> = \[sandboxProductID\]/);
+  assert.match(native, /productIDs: Set<String> = Set\(productionCoinAmounts.keys\)/);
 });
 
 test('server accepts the new 500-coin product ID, not the retired 550-coin ID', () => {

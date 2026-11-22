@@ -23,7 +23,7 @@ export async function verifyAppleProductionCoinJws(
 ) {
   if (!expected || expected.environment !== "Production")
     throw new Error("production_environment_required");
-  if (!isAppleCoinProduct(expected.productId) || expected.productId !== "mushiverse.coins.100")
+  if (!isAppleCoinProduct(expected.productId))
     throw new Error("invalid_expected_product");
   if (!Number.isSafeInteger(appAppleId) || appAppleId <= 0)
     throw new Error("apple_app_id_required");

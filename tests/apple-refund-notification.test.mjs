@@ -1,6 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
+import {appleCoinPacks, isAppleCoinProduct} from '../supabase/functions/_shared/apple-coin-transaction-policy.mjs';
 
 const source=readFileSync(new URL('../supabase/functions/apple-refund-notifications/index.ts',import.meta.url),'utf8')
  .replace(/^import .*;\s*$/gm,'')
@@ -8,10 +9,11 @@ const source=readFileSync(new URL('../supabase/functions/apple-refund-notificati
  .replace('async function readBounded(request: Request): Promise<string>','async function readBounded(request)')
  .replace('const chunks: Uint8Array[]=[]','const chunks=[]')
  .replace('Deno.serve(async (request: Request)','Deno.serve(async (request)')
- .replace('let signedPayload: string;','let signedPayload;');
+ .replace('let signedPayload: string;','let signedPayload;')
+ .replace(' as keyof typeof appleCoinPacks','');
 
 function harness({type='REFUND',verified=true,creditOwner='123e4567-e89b-42d3-a456-426614174000',
-  product='mushiverse.coins.100',environment='Production',held=true,sandboxNotification=false,temporaryNotification=false,temporaryTransaction=false,runtimeUnsupported=false,remoteStatus=503,revocationDate=Date.now()-10000}={}){
+  product='mushiverse.coins.100',creditCoins=appleCoinPacks[product],environment='Production',held=true,sandboxNotification=false,temporaryNotification=false,temporaryTransaction=false,runtimeUnsupported=false,remoteStatus=503,revocationDate=Date.now()-10000}={}){
   const calls={verify:0,verifyTransaction:0,credits:0,holds:0};
   let handler;
   let remoteChecks = 0;
@@ -45,7 +47,7 @@ function harness({type='REFUND',verified=true,creditOwner='123e4567-e89b-42d3-a4
     from:(table)=>{
       assert.equal(table,'gacha_coin_purchase_credits');
       return {select:()=>({eq:()=>({limit:async()=>{
-        calls.credits++;return {data:[{user_id:creditOwner,product_id:'mushiverse.coins.100',coins:100}],error:null};
+        calls.credits++;return {data:[{user_id:creditOwner,product_id:product,coins:creditCoins}],error:null};
       }})})};
     },
     rpc:async(name,args)=>{
@@ -77,8 +79,8 @@ function harness({type='REFUND',verified=true,creditOwner='123e4567-e89b-42d3-a4
     return new Response(null, {status:remoteStatus});
   };
   new Function('Deno','createClient','SignedDataVerifier','Environment',
-    'APPLE_G3_ROOT_DER_BASE64','Response','atob','VerificationException','VerificationStatus','X509Certificate','fetch',source)(
-      Deno,createClient,SignedDataVerifier,Environment,'aGk=',Response,atob,VerificationException,VerificationStatus,X509Certificate,fetch
+    'APPLE_G3_ROOT_DER_BASE64','Response','atob','VerificationException','VerificationStatus','X509Certificate','fetch','appleCoinPacks','isAppleCoinProduct',source)(
+      Deno,createClient,SignedDataVerifier,Environment,'aGk=',Response,atob,VerificationException,VerificationStatus,X509Certificate,fetch,appleCoinPacks,isAppleCoinProduct
     );
   const send=async(signedPayload='aaa.bbb.ccc')=>{
     const result=await handler(new Request('https://example.invalid/apple-refund',{method:'POST',
@@ -207,4 +209,15 @@ test('a Production refund cannot use the Sandbox TEST verifier', async()=>{
   assert.equal((await h.send(`aaa.${payload}.ccc`)).status,503);
   assert.equal(h.remoteChecks,0);
   assert.equal(h.calls.holds,0);
+});
+
+test('refunds match the approved pack amount against the original credit', async () => {
+  for (const product of ['mushiverse.coins.500','mushiverse.coins.1200']) {
+    const matching = harness({product});
+    assert.equal((await matching.send()).status, 200);
+    assert.equal(matching.calls.holds, 1);
+    const mismatched = harness({product, creditCoins: 100});
+    assert.equal((await mismatched.send()).status, 422);
+    assert.equal(mismatched.calls.holds, 0);
+  }
 });
