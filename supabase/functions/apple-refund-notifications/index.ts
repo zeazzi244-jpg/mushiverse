@@ -41,6 +41,29 @@ async function readBounded(request: Request): Promise<string> {
   return new TextDecoder("utf-8",{fatal:true}).decode(bytes);
 }
 
+// Non-authorizing diagnostics: only report trusted-root match and safe error
+// categories. Never echo the untrusted JWS header, certificates or account data.
+async function rootCategory(signedPayload: string): Promise<string> {
+  try {
+    const header=JSON.parse(atob(signedPayload.split(".")[0].replace(/-/g,"+").replace(/_/g,"/")));
+    const chain=header?.x5c;
+    if(!Array.isArray(chain) || chain.length!==3 || typeof chain[2]!=="string" ||
+      chain[2].length>12000 || !/^[A-Za-z0-9+/=]+$/.test(chain[2])) return "chain_invalid";
+    const der=Uint8Array.from(atob(chain[2]),c=>c.charCodeAt(0));
+    const digest=new Uint8Array(await crypto.subtle.digest("SHA-256",der));
+    const hash=Array.from(digest,b=>b.toString(16).padStart(2,"0")).join("");
+    if(hash==="c2b9b042dd57830e7d117dac55ac8ae19407d38e41d88f3215bc3a890444a050")return "g2";
+    if(hash==="63343abfb89a6a03ebb57e9b3f5fa7be7c4f5c756f3017b3a8c488c3653e9179")return "g3";
+    return "unrecognized";
+  }catch{return "unreadable";}
+}
+function verificationCauseCategory(error: unknown): string {
+  if(!(error instanceof VerificationException))return "non_verification_error";
+  const cause=(error as {cause?:unknown}).cause;
+  const name=cause && typeof cause==="object" && "name" in cause ? String((cause as {name?:unknown}).name) : "";
+  return ["TypeError","JsonWebTokenError","TokenExpiredError","NotBeforeError","Error"].includes(name) ? name : "no_known_cause";
+}
+
 Deno.serve(async (request: Request) => {
   if(request.method!=="POST") return response({error:"method_not_allowed"},405);
   const endpoint=Deno.env.get("SUPABASE_URL");
@@ -87,7 +110,7 @@ Deno.serve(async (request: Request) => {
         // Log only verification failure categories, never JWS, certificates,
         // transaction data, user identifiers or notification contents.
         const code = (e) => e instanceof VerificationException ? String(e.status) : "exception";
-        console.warn("Apple notification verification categories", code(error), code(sandboxError));
+        console.warn("Apple notification verification categories", code(error), code(sandboxError), "root", await rootCategory(signedPayload), "causes", verificationCauseCategory(error), verificationCauseCategory(sandboxError));
         return response({error:"notification_verification_failed"},422);
       }
     }
