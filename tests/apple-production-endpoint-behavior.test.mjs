@@ -11,6 +11,7 @@ const source = readFileSync(new URL('../supabase/functions/settle-apple-producti
   .replace('return payload as Record<string, unknown>', 'return payload')
   .replace('Deno.serve(async (request: Request)', 'Deno.serve(async (request)')
   .replace('let body: Record<string,unknown>;', 'let body;')
+  .replace('claim.product_id as keyof typeof appleCoinPacks', 'claim.product_id')
   .replace('request.headers.get("authorization")!', 'request.headers.get("authorization")');
 
 function harness({enabled=false,owner='user-1',validSignature=true,settled=true,claimStatus='pending',claimEnvironment=null,productID='mushiverse.coins.100',appMetadata={}}={}) {
@@ -61,10 +62,10 @@ function harness({enabled=false,owner='user-1',validSignature=true,settled=true,
     assert.deepEqual(expected,{environment:'Production',productId:'mushiverse.coins.100',
       transactionId:'123456789',originalTransactionId:'123456789',appAccountToken:'user-1'});
     if(!validSignature) throw Error('bad_signature');
-    return {transactionId:'123456789',originalTransactionId:'123456789',productId:'mushiverse.coins.100',purchaseDate:1730000000000};
+    return {transactionId:'123456789',originalTransactionId:'123456789',productId:'mushiverse.coins.100',coins:100,purchaseDate:1730000000000};
   };
-  new Function('Deno','createClient','verifyAppleProductionCoinJws','Response',source)(
-    Deno,createClient,verifier,Response
+  new Function('Deno','createClient','verifyAppleProductionCoinJws','Response','appleCoinPacks','isAppleCoinProduct',source)(
+    Deno,createClient,verifier,Response,{'mushiverse.coins.100':100},id=>id==='mushiverse.coins.100'
   );
   assert.equal(typeof handler,'function');
   const send=async({bearer='Bearer token',method='POST',body={transaction_id:'123456789',signed_transaction:'abc.def.ghi'}}={})=>{
