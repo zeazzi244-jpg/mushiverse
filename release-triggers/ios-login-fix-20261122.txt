@@ -12,3 +12,5 @@ Session startup lock fix: 4aea1f9fc0f21d82e36e76a1e6eec45415c64047; regression t
 Native auth regression rollback (commit 335122d8f4fdd819a298aedd89678b304abe6602) with updated transport regression tests (d638a3f519e4538ce4bb202d21254baadadfcd31); release CI 44973565782 and 44973565777 succeeded. iOS TestFlight rebuild requested.
 
 Final current main TestFlight candidate: follow-feed fix a04aac830943537d2ee1b86fc3fc06747bbd71d4, regression test b8630d8354593db3158f2fc31e6474756a9d5f45; previous login native bridge rollback retained. Trigger latest signed iOS build; do not replace existing user data.
+
+Production IAP readiness TestFlight candidate (2026-11-22 JST): main 8021a77dcc3d02374427cd185f44f4f8a9440090, successful Verify MUSHIVERSE release scripts 44979546611 and Billing and release regression checks 44979546538. Run new signed iOS archive and upload to TestFlight for device checks. Production purchase gate deliberately remains OFF until real Apple proof and account ownership / refund review.
