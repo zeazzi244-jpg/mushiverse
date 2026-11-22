@@ -1,6 +1,6 @@
 import { createServer } from 'node:http';
 import { createHash, timingSafeEqual } from 'node:crypto';
-import { Environment, SignedDataVerifier } from '@apple/app-store-server-library';
+import { Environment, SignedDataVerifier, VerificationException, VerificationStatus } from '@apple/app-store-server-library';
 import { isAppleCoinProduct, validateVerifiedAppleCoinTransaction } from '../../supabase/functions/_shared/apple-coin-transaction-policy.mjs';
 
 const secret = process.env.APPLE_SANDBOX_VERIFIER_SECRET;
@@ -85,11 +85,27 @@ const server = createServer(async (request, response) => {
       'app_account_token_mismatch', 'consumable_transaction_chain_mismatch',
       'transaction_mismatch', 'original_transaction_mismatch'
     ]);
+    // Classify only Apple's fixed public status enum, never an arbitrary exception
+    // message (which could include sensitive material from a nested library).
+    const appleStatuses = new Map([
+      [VerificationStatus.VERIFICATION_FAILURE, 'apple_signature_or_certificate_failure'],
+      [VerificationStatus.RETRYABLE_VERIFICATION_FAILURE, 'apple_ocsp_temporarily_unavailable'],
+      [VerificationStatus.INVALID_APP_IDENTIFIER, 'apple_app_identifier_mismatch'],
+      [VerificationStatus.INVALID_ENVIRONMENT, 'apple_environment_mismatch'],
+      [VerificationStatus.INVALID_CHAIN_LENGTH, 'apple_certificate_chain_length'],
+      [VerificationStatus.INVALID_CERTIFICATE, 'apple_certificate_invalid'],
+      [VerificationStatus.FAILURE, 'apple_verification_failure'],
+    ]);
     const reason = error instanceof Error && policyRejections.has(error.message)
       ? error.message
-      : 'apple_crypto_or_runtime_rejected';
+      : error instanceof VerificationException
+        ? appleStatuses.get(error.status) ?? 'apple_verification_unknown'
+        : 'apple_crypto_or_runtime_rejected';
+    const retryable = error instanceof VerificationException
+      && error.status === VerificationStatus.RETRYABLE_VERIFICATION_FAILURE;
     console.warn('sandbox verifier rejected:', reason);
-    return send(422, { error: 'verification_failed' });
+    response.setHeader('X-Mushiverse-Verify-Reason', reason);
+    return send(retryable ? 503 : 422, { error: retryable ? 'verification_temporarily_unavailable' : 'verification_failed' });
   }
 });
 server.requestTimeout = 20000;
