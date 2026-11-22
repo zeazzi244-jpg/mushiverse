@@ -37,6 +37,7 @@ export async function verifyAppleProductionCoinJws(
     throw new Error("invalid_expected_account");
 
   const remoteSecret = Deno.env.get("APPLE_PRODUCTION_VERIFIER_SECRET");
+  let transaction;
   if (remoteSecret !== undefined) {
     if (!/^[a-f0-9]{64}$/.test(remoteSecret)) {
       throw new VerificationException(VerificationStatus.RETRYABLE_VERIFICATION_FAILURE);
@@ -59,37 +60,34 @@ export async function verifyAppleProductionCoinJws(
       if (result.status === 422) throw new VerificationException(VerificationStatus.VERIFICATION_FAILURE);
       throw transient();
     }
-    let transaction;
     try {
       transaction = (await result.json())?.verified;
     } catch {
       throw transient();
     }
-    const validated = validateProductionAppleCoinTransaction(transaction, expected);
-    return Object.freeze({ ...validated, purchaseDate: transaction.purchaseDate as number });
-  }
-
-  // Never trust roots/certificates, account IDs or environments from a client.
-  // These roots are pinned in server code and expected values must come from
-  // an authenticated server-side purchase claim and fixed app configuration.
-  const root = Buffer.from(APPLE_G3_ROOT_DER_BASE64, "base64");
-  // The hosted Edge runtime can expose X509Certificate while lacking the
-  // operations the Apple SDK uses. Keep unfinished StoreKit purchases retryable.
-  try {
-    const certificate = new X509Certificate(root);
-    if (!certificate.raw.byteLength || !certificate.toString().includes("BEGIN CERTIFICATE") ||
-        !certificate.verify(certificate.publicKey)) {
-      throw new Error("apple_certificate_runtime_unsupported");
+  } else {
+    // Never trust roots/certificates, account IDs or environments from a client.
+    // These roots are pinned in server code and expected values must come from
+    // an authenticated server-side purchase claim and fixed app configuration.
+    const root = Buffer.from(APPLE_G3_ROOT_DER_BASE64, "base64");
+    // The hosted Edge runtime can expose X509Certificate while lacking the
+    // operations the Apple SDK uses. Keep unfinished StoreKit purchases retryable.
+    try {
+      const certificate = new X509Certificate(root);
+      if (!certificate.raw.byteLength || !certificate.toString().includes("BEGIN CERTIFICATE") ||
+          !certificate.verify(certificate.publicKey)) {
+        throw new Error("apple_certificate_runtime_unsupported");
+      }
+    } catch {
+      throw new VerificationException(VerificationStatus.RETRYABLE_VERIFICATION_FAILURE);
     }
-  } catch {
-    throw new VerificationException(VerificationStatus.RETRYABLE_VERIFICATION_FAILURE);
+    const verifier = new SignedDataVerifier(
+      [root], true, Environment.PRODUCTION, "com.rikuto.mushiverse", appAppleId,
+    );
+    // SignedDataVerifier validates the JWS, certificate chain, app identity,
+    // environment and Apple app ID before exposing its decoded transaction.
+    transaction = await verifier.verifyAndDecodeTransaction(signedTransaction);
   }
-  const verifier = new SignedDataVerifier(
-    [root], true, Environment.PRODUCTION, "com.rikuto.mushiverse", appAppleId,
-  );
-  // SignedDataVerifier validates the JWS, certificate chain, app identity,
-  // environment and Apple app ID before exposing its decoded transaction.
-  const transaction = await verifier.verifyAndDecodeTransaction(signedTransaction);
   // Product, owner, nonce-free transaction identity, revocation and consumable
   // metadata are checked independently against authenticated server state.
   const validated = validateProductionAppleCoinTransaction(transaction, expected);
