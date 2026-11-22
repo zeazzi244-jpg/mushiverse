@@ -44,16 +44,14 @@ test('HTTP 400 incorrect credentials are returned without duplicate native reque
   assert.equal(h.nativeCalls.length,0);
 });
 
-test('iOS WebKit transport exception falls back to Capacitor native HTTP',async()=>{
+test('iOS auth transport failure does not replay password over native bridge',async()=>{
   const h=harness({web:()=>{throw new TypeError('Load failed')},
-    native:()=>({status:200,data:JSON.stringify({access_token:'native-ok'}),headers:{'content-type':'application/json'}})});
-  const r=await h.fn(loginUrl,{method:'POST',headers:{'content-type':'application/json'},
-    body:'{"email":"example@example.org","password":"not-real"}'});
-  assert.equal((await r.json()).access_token,'native-ok');
+    native:()=>{throw Error('must not call native')}});
+  await assert.rejects(h.fn(loginUrl,{method:'POST',headers:{'content-type':'application/json'},
+    body:'{"email":"example@example.org","password":"not-real"}'}),/Load failed/);
   assert.equal(h.webCalls.length,1);
-  assert.equal(h.nativeCalls.length,1);
-  assert.equal(h.nativeCalls[0][0],'CapacitorHttp');
-  assert.equal(h.nativeCalls[0][2].data.email,'example@example.org');
+  assert.equal(h.nativeCalls.length,0);
+  assert.doesNotMatch(source,/nativePromise|CapacitorHttp|nativeOptions/);
 });
 
 test('browser-only WebKit failure does not attempt native transport',async()=>{
