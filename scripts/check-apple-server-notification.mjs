@@ -9,6 +9,45 @@ const HOSTS = Object.freeze({
   Production: 'https://api.storekit.apple.com',
 });
 const encode = value => Buffer.from(JSON.stringify(value)).toString('base64url');
+// GitHub secrets are write-only. Recover only documented encodings of the same
+// EC private key, without logging, exporting or weakening signature validation.
+export function parseApplePrivateKey({rawKey, keyBase64}) {
+  const candidates = [];
+  const seen = new Set();
+  function offer(value, depth=0) {
+    if (depth > 3 || value == null) return;
+    const valueText = Buffer.isBuffer(value) ? value.toString('utf8') : String(value);
+    const normalized = valueText.trim().replace(/\\n/g, '\n');
+    if (normalized.length > 16000 || seen.has(normalized)) return;
+    seen.add(normalized);
+    candidates.push(value);
+    // Some iOS Shortcuts output Base64 encoded text and then Base64-encode
+    // the copied text again; decode conservatively, maximum three levels.
+    if (/^[A-Za-z0-9+/_=-]+(?:\s+[A-Za-z0-9+/_=-]+)*$/.test(normalized) && normalized.length >= 40) {
+      const compact = normalized.replace(/\s/g, '').replace(/-/g,'+').replace(/_/g,'/');
+      if (compact.length % 4 !== 1) {
+        const decoded = Buffer.from(compact, 'base64');
+        if (decoded.length > 0 && decoded.length < 12000) offer(decoded, depth + 1);
+      }
+    }
+    if (normalized.startsWith('"') && normalized.endsWith('"')) {
+      try { offer(JSON.parse(normalized),depth+1); } catch {}
+    }
+  }
+  offer(rawKey);
+  offer(keyBase64);
+  for (const candidate of candidates) {
+    const data = Buffer.isBuffer(candidate) ? candidate : String(candidate).trim().replace(/\\n/g, '\n');
+    for (const options of [{key:data}, {key:Buffer.isBuffer(data)?data:Buffer.from(data),format:'der',type:'pkcs8'}]) {
+      try {
+        const key = createPrivateKey(options);
+        if (key.asymmetricKeyType === 'ec' && key.asymmetricKeyDetails?.namedCurve === 'prime256v1')
+          return key;
+      } catch {}
+    }
+  }
+  throw Error('apple_iap_secret_not_valid_es256_private_key');
+}
 export function tokenForApple({keyId, issuerId, privateKey, now = Math.floor(Date.now() / 1000)}) {
   keyId = typeof keyId === 'string' ? keyId.trim() : '';
   issuerId = typeof issuerId === 'string' ? issuerId.trim() : '';
@@ -23,19 +62,7 @@ export function tokenForApple({keyId, issuerId, privateKey, now = Math.floor(Dat
   if (issuerUuids.length !== 1 || issuerId.length > 500)
     throw Error('invalid_apple_iap_issuer_id_format');
   issuerId = issuerUuids[0];
-  // The .p8 must contain a PEM key, not its filename or the binary preview.
-  // Support common GitHub secret pastes where line breaks were escaped.
-  const normalized = typeof privateKey === 'string' ? privateKey.trim().replace(/\\n/g, '\n') : '';
-  if (!/^-----BEGIN PRIVATE KEY-----[\s\S]+-----END PRIVATE KEY-----$/.test(normalized))
-    throw Error('apple_iap_p8_secret_must_contain_full_pem_text');
-  let key;
-  try {
-    key = createPrivateKey(normalized);
-  } catch {
-    throw Error('apple_iap_p8_secret_is_not_a_valid_private_key');
-  }
-  if (key.asymmetricKeyType !== 'ec' || key.asymmetricKeyDetails?.namedCurve !== 'prime256v1')
-    throw Error('apple_iap_key_must_be_es256');
+  const key = parseApplePrivateKey({rawKey: privateKey});
   const signingInput = `${encode({alg:'ES256', kid:keyId, typ:'JWT'})}.${encode({iss:issuerId, iat:now, exp:now+300, aud:'appstoreconnect-v1', bid:BID})}`;
   const signature = sign('sha256', Buffer.from(signingInput), {key, dsaEncoding:'ieee-p1363'}).toString('base64url');
   return `${signingInput}.${signature}`;
@@ -75,15 +102,10 @@ export async function requestAndCheckAppleTest({environment, authorization, fetc
 async function main() {
   const environment=process.env.APPLE_IAP_TEST_ENVIRONMENT || 'Sandbox';
   if (!Object.hasOwn(HOSTS, environment)) throw Error('invalid_apple_test_environment');
-  // A raw multiline .p8 secret is easier to configure from an iPhone.
-  // Base64 remains supported for existing CI automation.
   const rawKey=process.env.APPLE_IAP_PRIVATE_KEY_P8;
   const keyBase64=process.env.APPLE_IAP_PRIVATE_KEY_P8_BASE64;
-  if (!rawKey && (!keyBase64 || !/^[A-Za-z0-9+/=\s]+$/.test(keyBase64)))
-    throw Error('missing_apple_iap_api_key_secret');
-  // Prefer file-derived base64 when provided, so a stale malformed raw-paste secret cannot mask it.
-  const privateKey=keyBase64 ? Buffer.from(keyBase64.replace(/\s/g,''),'base64').toString('utf8') : rawKey;
-  const jwt=tokenForApple({keyId:process.env.APPLE_IAP_KEY_ID,issuerId:process.env.APPLE_IAP_ISSUER_ID,privateKey});
+  const key=parseApplePrivateKey({rawKey,keyBase64});
+  const jwt=tokenForApple({keyId:process.env.APPLE_IAP_KEY_ID,issuerId:process.env.APPLE_IAP_ISSUER_ID,privateKey:key.export({format:'pem',type:'pkcs8'})});
   const result=await requestAndCheckAppleTest({environment,authorization:`Bearer ${jwt}`});
   console.log(`Apple ${result.environment} TEST delivery attempts: ${result.attempts}; results: ${result.results.join(',')||'unknown'}`);
   if (!result.success) throw Error('apple_test_delivery_not_successful');
