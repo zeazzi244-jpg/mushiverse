@@ -11,7 +11,7 @@ const source=readFileSync(new URL('../supabase/functions/apple-refund-notificati
  .replace('let signedPayload: string;','let signedPayload;');
 
 function harness({type='REFUND',verified=true,creditOwner='123e4567-e89b-42d3-a456-426614174000',
-  product='mushiverse.coins.100',environment='Production',held=true,revocationDate=Date.now()-10000}={}){
+  product='mushiverse.coins.100',environment='Production',held=true,sandboxNotification=false,revocationDate=Date.now()-10000}={}){
   const calls={verify:0,verifyTransaction:0,credits:0,holds:0};
   let handler;
   const purchase={bundleId:'com.rikuto.mushiverse',environment,productId:product,
@@ -20,9 +20,12 @@ function harness({type='REFUND',verified=true,creditOwner='123e4567-e89b-42d3-a4
     appAccountToken:'123e4567-e89b-42d3-a456-426614174000',
     purchaseDate:1730000000000,revocationDate};
   class SignedDataVerifier{
+    constructor(_root,_online,env){this.verifierEnvironment=env;}
     async verifyAndDecodeNotification(){
       calls.verify++;
       if(!verified)throw Error('signature_invalid');
+      if(sandboxNotification && this.verifierEnvironment!=='Sandbox') throw Error('wrong_environment');
+      if(!sandboxNotification && this.verifierEnvironment!=='Production') throw Error('wrong_environment');
       return {notificationType:type,data:{
         bundleId:'com.rikuto.mushiverse',environment:'Production',
         appAppleId:6826061606,signedTransactionInfo:'aaa.bbb.ccc'
@@ -48,7 +51,7 @@ function harness({type='REFUND',verified=true,creditOwner='123e4567-e89b-42d3-a4
     SUPABASE_URL:'https://test.supabase.co',
     SUPABASE_SERVICE_ROLE_KEY:'test-secret',
   })[key];}},serve(fn){handler=fn;}};
-  const Environment={PRODUCTION:'Production'};
+  const Environment={PRODUCTION:'Production',SANDBOX:'Sandbox'};
   new Function('Deno','createClient','SignedDataVerifier','Environment',
     'APPLE_G3_ROOT_DER_BASE64','Response','atob',source)(
       Deno,createClient,SignedDataVerifier,Environment,'aGk=',Response,atob
@@ -66,6 +69,16 @@ test('refund notification rejects malformed payload before any Apple or database
   const r=await h.send('not-jws');
   assert.equal(r.status,400);
   assert.equal(h.calls.verify,0);
+  assert.equal(h.calls.holds,0);
+});
+
+test('a signed Sandbox notification forwarded to Production URL is safely ignored',async()=>{
+  const h=harness({sandboxNotification:true});
+  const r=await h.send();
+  assert.equal(r.status,200);
+  assert.equal(r.body.ignored_sandbox,true);
+  assert.equal(h.calls.verify,2);
+  assert.equal(h.calls.verifyTransaction,0);
   assert.equal(h.calls.holds,0);
 });
 
