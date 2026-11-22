@@ -11,7 +11,7 @@ const source=readFileSync(new URL('../supabase/functions/apple-refund-notificati
  .replace('let signedPayload: string;','let signedPayload;');
 
 function harness({type='REFUND',verified=true,creditOwner='123e4567-e89b-42d3-a456-426614174000',
-  product='mushiverse.coins.100',environment='Production',held=true,sandboxNotification=false,temporaryNotification=false,temporaryTransaction=false,revocationDate=Date.now()-10000}={}){
+  product='mushiverse.coins.100',environment='Production',held=true,sandboxNotification=false,temporaryNotification=false,temporaryTransaction=false,runtimeUnsupported=false,revocationDate=Date.now()-10000}={}){
   const calls={verify:0,verifyTransaction:0,credits:0,holds:0};
   let handler;
   const purchase={bundleId:'com.rikuto.mushiverse',environment,productId:product,
@@ -58,10 +58,16 @@ function harness({type='REFUND',verified=true,creditOwner='123e4567-e89b-42d3-a4
     SUPABASE_URL:'https://test.supabase.co',
     SUPABASE_SERVICE_ROLE_KEY:'test-secret',
   })[key];}},serve(fn){handler=fn;}};
+  class X509Certificate {
+    constructor(){this.publicKey={};}
+    get raw(){if(runtimeUnsupported)throw Object.assign(new Error('Unavailable'),{code:'ERR_NOT_IMPLEMENTED'});return new Uint8Array([1]);}
+    toString(){if(runtimeUnsupported)throw Object.assign(new Error('Unavailable'),{code:'ERR_NOT_IMPLEMENTED'});return '-----BEGIN CERTIFICATE-----';}
+    verify(){return !runtimeUnsupported;}
+  }
   const Environment={PRODUCTION:'Production',SANDBOX:'Sandbox'};
   new Function('Deno','createClient','SignedDataVerifier','Environment',
-    'APPLE_G3_ROOT_DER_BASE64','Response','atob','VerificationException','VerificationStatus',source)(
-      Deno,createClient,SignedDataVerifier,Environment,'aGk=',Response,atob,VerificationException,VerificationStatus
+    'APPLE_G3_ROOT_DER_BASE64','Response','atob','VerificationException','VerificationStatus','X509Certificate',source)(
+      Deno,createClient,SignedDataVerifier,Environment,'aGk=',Response,atob,VerificationException,VerificationStatus,X509Certificate
     );
   const send=async(signedPayload='aaa.bbb.ccc')=>{
     const result=await handler(new Request('https://example.invalid/apple-refund',{method:'POST',
@@ -70,6 +76,16 @@ function harness({type='REFUND',verified=true,creditOwner='123e4567-e89b-42d3-a4
   };
   return {send,calls};
 }
+
+test('unsupported Supabase Edge X509 runtime returns retryable 503 without verifying or writing',async()=>{
+  const h=harness({runtimeUnsupported:true});
+  const r=await h.send();
+  assert.equal(r.status,503);
+  assert.equal(r.body.error,'apple_verifier_runtime_unsupported');
+  assert.equal(h.calls.verify,0);
+  assert.equal(h.calls.credits,0);
+  assert.equal(h.calls.holds,0);
+});
 
 test('refund notification rejects malformed payload before any Apple or database calls',async()=>{
   const h=harness();
