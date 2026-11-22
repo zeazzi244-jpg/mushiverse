@@ -14,8 +14,8 @@ export function tokenForApple({keyId, issuerId, privateKey, now = Math.floor(Dat
       !/^[0-9a-f-]{36}$/i.test(issuerId ?? '')) throw Error('invalid_apple_iap_key_metadata');
   // The .p8 must contain a PEM key, not its filename or the binary preview.
   // Support common GitHub secret pastes where line breaks were escaped.
-  const normalized = typeof privateKey === 'string' ? privateKey.trim().replace(/\\\\n/g, '\\n') : '';
-  if (!/^-----BEGIN PRIVATE KEY-----[\\s\\S]+-----END PRIVATE KEY-----$/.test(normalized))
+  const normalized = typeof privateKey === 'string' ? privateKey.trim().replace(/\\n/g, '\n') : '';
+  if (!/^-----BEGIN PRIVATE KEY-----[\s\S]+-----END PRIVATE KEY-----$/.test(normalized))
     throw Error('apple_iap_p8_secret_must_contain_full_pem_text');
   let key;
   try {
