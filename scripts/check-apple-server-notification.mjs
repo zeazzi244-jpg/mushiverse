@@ -12,6 +12,9 @@ const encode = value => Buffer.from(JSON.stringify(value)).toString('base64url')
 export function tokenForApple({keyId, issuerId, privateKey, now = Math.floor(Date.now() / 1000)}) {
   keyId = typeof keyId === 'string' ? keyId.trim() : '';
   issuerId = typeof issuerId === 'string' ? issuerId.trim() : '';
+  // iPhone copy/paste may include the secret name before the UUID.
+  // Normalize only that exact known two-line label, never arbitrary text.
+  issuerId = issuerId.replace(/^APPLE_IAP_ISSUER_ID\s*[:=]?\s*/i, '');
   if (!/^[A-Za-z0-9]{6,32}$/.test(keyId))
     throw Error('invalid_apple_iap_key_id_format');
   if (!/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(issuerId))
