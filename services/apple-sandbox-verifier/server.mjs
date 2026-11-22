@@ -71,7 +71,24 @@ const server = createServer(async (request, response) => {
       isUpgraded: transaction.isUpgraded ?? null,
       transactionReason: transaction.transactionReason ?? null,
     } });
-  } catch {
+  } catch (error) {
+    // A signed transaction may contain private purchase/account data.
+    // Record only a fixed diagnostic category; never log the JWS, Apple
+    // transaction, request body, secret or arbitrary exception message.
+    const policyRejections = new Set([
+      'invalid_transaction', 'bundle_mismatch', 'environment_mismatch',
+      'product_mismatch', 'type_mismatch', 'subscription_metadata_on_consumable',
+      'invalid_consumable_transaction_reason', 'unsupported_quantity',
+      'unsupported_ownership_type', 'invalid_transaction_id',
+      'invalid_original_transaction_id', 'revoked', 'upgraded_transaction',
+      'invalid_purchase_date', 'invalid_signed_date',
+      'app_account_token_mismatch', 'consumable_transaction_chain_mismatch',
+      'transaction_mismatch', 'original_transaction_mismatch'
+    ]);
+    const reason = error instanceof Error && policyRejections.has(error.message)
+      ? error.message
+      : 'apple_crypto_or_runtime_rejected';
+    console.warn('sandbox verifier rejected:', reason);
     return send(422, { error: 'verification_failed' });
   }
 });
