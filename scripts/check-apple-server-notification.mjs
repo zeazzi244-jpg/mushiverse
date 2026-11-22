@@ -79,7 +79,9 @@ export async function requestAndCheckAppleTest({environment, authorization, fetc
   if (request.status !== 200) throw Error(`apple_test_request_http_${request.status}`);
   const created=await request.json();
   const notificationToken=created?.testNotificationToken;
-  if (typeof notificationToken!=='string'||!/^[A-Za-z0-9-]{16,150}$/.test(notificationToken))
+  // Apple documents an opaque string; do not assume a UUID/alphanumeric format.
+  // Never log or expose the token. URL-encode before placing it in a path.
+  if (typeof notificationToken !== 'string' || notificationToken.length < 1 || notificationToken.length > 4096 || /[\u0000-\u001f\u007f]/.test(notificationToken))
     throw Error('invalid_apple_test_token');
   for(let attempt=1;attempt<=maxAttempts;attempt++){
     if(attempt>1) await sleep(10000);
