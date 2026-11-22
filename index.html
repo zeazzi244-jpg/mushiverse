@@ -717,57 +717,58 @@ window.addEventListener('mushiverse:app-ready',function(){booted=true;if(recover
 const SUPABASE_URL='https://jhowxtdemlsmetcwhekr.supabase.co';
 const KEY='sb_publishable_b2n0sVChm2zvGQ5qIbz8Cw_B-wCOtVJ';
 async function backendFetch(input,options={}){
-  const controller=new AbortController();
-  const signal=options.signal || input?.signal;
-  const cancel=()=>controller.abort();
-  if(signal?.aborted)cancel();
-  else signal?.addEventListener('abort',cancel,{once:true});
-  const url=typeof input==='string'?input:String(input?.url || input);
-  const passwordSignIn=url.split('?')[0]===SUPABASE_URL+'/auth/v1/token' &&
-    /[?&]grant_type=password(?:&|$)/.test(url);
-  const bridge=globalThis.Capacitor;
+  const url=typeof input==='string'?input:String(input?.url||input);
   const endpoint=url.split('?')[0];
-  const nativeAuth=(endpoint===SUPABASE_URL+'/auth/v1/token' || endpoint===SUPABASE_URL+'/auth/v1/user') &&
-    bridge?.getPlatform?.()==='ios' && typeof bridge.nativePromise==='function';
-  const timer=setTimeout(cancel,passwordSignIn?45000:12000);
-  try{
-    if(!nativeAuth)return await fetch(input,{...options,signal:controller.signal});
-    // Keep session storage, refresh and auth callbacks in the Supabase SDK.
-    const request=new Request(input,options);
-    const payload=request.body===null && !options.body ? undefined : await request.text();
-    const data=payload ? JSON.parse(payload) : undefined;
-    const nativeOptions={url,method:request.method,headers:Object.fromEntries(request.headers),
-      data,responseType:'text',connectTimeout:passwordSignIn?45000:12000,
-      readTimeout:passwordSignIn?45000:12000,disableRedirects:true};
-    try{
-      const result=await new Promise((resolve,reject)=>{
-        const interrupted=()=>reject(new DOMException('Authentication request interrupted','AbortError'));
-        if(controller.signal.aborted){interrupted();return}
-        controller.signal.addEventListener('abort',interrupted,{once:true});
-        Promise.resolve().then(()=>bridge.nativePromise('CapacitorHttp','request',nativeOptions))
-          .then(resolve,reject).finally(()=>controller.signal.removeEventListener('abort',interrupted));
-      });
-      const raw=typeof result.data==='string'?result.data:JSON.stringify(result.data);
-      return new Response([204,205,304].includes(result.status)?null:raw,{status:result.status,headers:result.headers});
-    }catch(nativeError){
-      // An iOS native-network timeout must not permanently block password login.
-      // Do not replay token refreshes or /user calls, and respect caller cancellation.
-      if(!passwordSignIn || signal?.aborted)throw nativeError;
-      console.warn('MUSHIVERSE native sign-in failed; trying WebKit networking',nativeError?.name||'Error');
-      const fallbackController=new AbortController();
-      const fallbackTimer=setTimeout(()=>fallbackController.abort(),20000);
-      const abortFallback=()=>fallbackController.abort();
-      signal?.addEventListener('abort',abortFallback,{once:true});
-      try{
-        if(signal?.aborted)abortFallback();
-        return await fetch(input,{...options,signal:fallbackController.signal});
-      }finally{
-        clearTimeout(fallbackTimer);
-        signal?.removeEventListener('abort',abortFallback);
-      }
-    }
+  const authEndpoint=endpoint===SUPABASE_URL+'/auth/v1/token'||endpoint===SUPABASE_URL+'/auth/v1/user';
+  const isNativeIOS=globalThis.Capacitor?.getPlatform?.()==='ios' &&
+    typeof globalThis.Capacitor?.nativePromise==='function';
+  const parentSignal=options.signal||input?.signal;
+  const passwordSignIn=endpoint===SUPABASE_URL+'/auth/v1/token' &&
+    /[?&]grant_type=password(?:&|$)/.test(url);
+  async function webAttempt(){
+    const controller=new AbortController();
+    const abort=()=>controller.abort();
+    if(parentSignal?.aborted)abort();
+    else parentSignal?.addEventListener('abort',abort,{once:true});
+    const timer=setTimeout(abort,passwordSignIn?18000:15000);
+    try{return await fetch(input,{...options,signal:controller.signal})}
+    finally{clearTimeout(timer);parentSignal?.removeEventListener('abort',abort)}
   }
-  finally{clearTimeout(timer);signal?.removeEventListener('abort',cancel)}
+  // WebKit fetch is the default Supabase SDK transport. Only switch to native
+  // networking after a transport exception, never after HTTP auth rejection.
+  try{return await webAttempt()}
+  catch(webError){
+    if(!authEndpoint||!isNativeIOS||parentSignal?.aborted)throw webError;
+    console.warn('MUSHIVERSE auth WebKit transport unavailable; trying native transport',
+      webError?.name||'Error');
+    const request=new Request(input,options);
+    const payload=request.body===null?undefined:await request.text();
+    const headers=Object.fromEntries(request.headers);
+    let data;
+    if(payload){
+      try{data=JSON.parse(payload)}
+      catch{data=payload}
+    }
+    const nativeOptions={url,method:request.method,headers,data,responseType:'text',
+      connectTimeout:20000,readTimeout:20000,disableRedirects:true};
+    const timerMs=25000;
+    const result=await new Promise((resolve,reject)=>{
+      let settled=false;
+      const cleanup=()=>{clearTimeout(timer);parentSignal?.removeEventListener('abort',interrupt)};
+      const finish=(error,value)=>{if(settled)return;settled=true;cleanup();error?reject(error):resolve(value)};
+      const interrupt=()=>finish(new DOMException('Authentication request interrupted','AbortError'));
+      const timer=setTimeout(()=>finish(new Error('Authentication transport timeout')),timerMs);
+      if(parentSignal?.aborted){interrupt();return}
+      parentSignal?.addEventListener('abort',interrupt,{once:true});
+      Promise.resolve().then(()=>globalThis.Capacitor.nativePromise('CapacitorHttp','request',nativeOptions))
+        .then(value=>finish(null,value),error=>finish(error));
+    });
+    if(!Number.isInteger(result?.status)||result.status<200||result.status>599)
+      throw new Error('Invalid native authentication response');
+    const raw=typeof result.data==='string'?result.data:JSON.stringify(result.data??null);
+    return new Response([204,205,304].includes(result.status)?null:raw,
+      {status:result.status,headers:result.headers});
+  }
 }
 let db;
 try{db=window.supabase?.createClient(SUPABASE_URL,KEY,{global:{fetch:backendFetch}})}
