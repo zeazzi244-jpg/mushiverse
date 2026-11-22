@@ -3959,25 +3959,7 @@ setTimeout(render,1200);window.addEventListener('online',()=>setTimeout(render,3
 <!-- v76: membership visibility self-check (no entitlement changes) -->
 <style id="mv-v76-style">
 #profile #mvMembershipStatus{display:block!important;visibility:visible!important;opacity:1!important;margin:16px 0!important;padding:20px!important;border:2px solid #c9ddc5!important;border-radius:18px!important;background:#f5fbef!important;color:#214934!important}
-#mvVersionProof{font-size:12px;color:#476a50;margin-top:8px}
 </style>
-<script id="mv-v76-check">
-(()=>{
- function check(){
-  const profile=document.getElementById('profile');
-  const card=document.getElementById('mvMembershipStatus');
-  if(!profile||!card)return;
-  // The original collector panel must never overwrite the membership panel.
-  if(card.parentElement!==profile){profile.querySelector('h1')?.insertAdjacentElement('afterend',card)}
-  let proof=document.getElementById('mvVersionProof');
-  if(!proof){proof=document.createElement('div');proof.id='mvVersionProof';card.append(proof)}
-  proof.textContent='会員カード表示: '+(card.querySelector('#mvMembershipLabel')?'正常':'内容確認が必要')+' / v'+(document.querySelector('meta[name="mushiverse-version"]')?.content||'不明');
- }
- if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',check,{once:true});else check();
- window.addEventListener('pageshow',check);
- document.addEventListener('click',e=>{if(e.target.closest('[data-tab="profile"]'))setTimeout(check,0)},true);
-})();
-</script>
 <!-- v77: free, device-local daily login and insect gacha beta. No purchases, no premium grants. -->
 <style id="mv-v77-game-style">
 #mvDailyGame{display:block!important;visibility:visible!important;opacity:1!important;margin:16px 0;padding:16px;border:2px solid #b4d6a4;border-radius:20px;background:#f7fcf2;color:#1b4730;box-sizing:border-box}
@@ -4829,9 +4811,6 @@ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',
 #mv105PublicProfile h2{margin:8px 0 16px}
 #mv105PublicProfile button{border:0;background:#226d4a;color:white;padding:10px 16px;border-radius:12px;font-weight:800}
 </style>
-<script id="mv105-publicprofile-placeholder">
-/* Ranking profile interaction is provided inside the v104 leaderboard script. */
-</script>
 <style id="mv106-public-records-style">#mv105PublicProfile{max-height:85vh;overflow-y:auto}#mv105PublicProfile .mv106PublicRecords{padding-left:22px;max-height:300px;overflow:auto}#mv105PublicProfile .mv106PublicRecords li{margin:8px 0;padding-bottom:8px;border-bottom:1px solid #cbe4d0}#mv105PublicProfile .mv106PublicRecords small{display:block;color:#557667}</style>
 <style id="mv108-follows-css">
 #mv108Follows{padding:12px;border:1px solid #c2dec9;border-radius:14px;background:#f6fff6;margin:12px 0;color:#234c36}
