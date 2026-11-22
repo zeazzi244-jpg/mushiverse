@@ -739,15 +739,33 @@ async function backendFetch(input,options={}){
     const nativeOptions={url,method:request.method,headers:Object.fromEntries(request.headers),
       data,responseType:'text',connectTimeout:passwordSignIn?45000:12000,
       readTimeout:passwordSignIn?45000:12000,disableRedirects:true};
-    const result=await new Promise((resolve,reject)=>{
-      const interrupted=()=>reject(new DOMException('Authentication request interrupted','AbortError'));
-      if(controller.signal.aborted){interrupted();return}
-      controller.signal.addEventListener('abort',interrupted,{once:true});
-      bridge.nativePromise('CapacitorHttp','request',nativeOptions).then(resolve,reject)
-        .finally(()=>controller.signal.removeEventListener('abort',interrupted));
-    });
-    const raw=typeof result.data==='string'?result.data:JSON.stringify(result.data);
-    return new Response([204,205,304].includes(result.status)?null:raw,{status:result.status,headers:result.headers});
+    try{
+      const result=await new Promise((resolve,reject)=>{
+        const interrupted=()=>reject(new DOMException('Authentication request interrupted','AbortError'));
+        if(controller.signal.aborted){interrupted();return}
+        controller.signal.addEventListener('abort',interrupted,{once:true});
+        Promise.resolve().then(()=>bridge.nativePromise('CapacitorHttp','request',nativeOptions))
+          .then(resolve,reject).finally(()=>controller.signal.removeEventListener('abort',interrupted));
+      });
+      const raw=typeof result.data==='string'?result.data:JSON.stringify(result.data);
+      return new Response([204,205,304].includes(result.status)?null:raw,{status:result.status,headers:result.headers});
+    }catch(nativeError){
+      // An iOS native-network timeout must not permanently block password login.
+      // Do not replay token refreshes or /user calls, and respect caller cancellation.
+      if(!passwordSignIn || signal?.aborted)throw nativeError;
+      console.warn('MUSHIVERSE native sign-in failed; trying WebKit networking',nativeError?.name||'Error');
+      const fallbackController=new AbortController();
+      const fallbackTimer=setTimeout(()=>fallbackController.abort(),20000);
+      const abortFallback=()=>fallbackController.abort();
+      signal?.addEventListener('abort',abortFallback,{once:true});
+      try{
+        if(signal?.aborted)abortFallback();
+        return await fetch(input,{...options,signal:fallbackController.signal});
+      }finally{
+        clearTimeout(fallbackTimer);
+        signal?.removeEventListener('abort',abortFallback);
+      }
+    }
   }
   finally{clearTimeout(timer);signal?.removeEventListener('abort',cancel)}
 }
