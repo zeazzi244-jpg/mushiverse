@@ -7,7 +7,7 @@ import {isAppleCoinProduct} from '../supabase/functions/_shared/apple-coin-trans
 // Supabase client. This checks request behavior without a real Apple purchase,
 // database writes, or a network dependency.
 const file = 'supabase/functions/submit-apple-purchase-claim/index.ts';
-function createHarness({productionEnabled=false}={}) {
+function createHarness({productionEnabled=false,gateOverrides={}}={}) {
   const source = readFileSync(file, 'utf8')
     .replace(/^import .*;\s*$/gm, '')
     .replace('const json=(b:any,s=200)', 'const json=(b,s=200)')
@@ -41,7 +41,8 @@ function createHarness({productionEnabled=false}={}) {
           apple_iap_verification_gate:{server_jws_verified:productionEnabled,sandbox_purchase_proven:productionEnabled},
           apple_coin_pack_catalog:{coins:100,is_sale_enabled:productionEnabled},
         }[table];
-        return Promise.resolve({data:data??null,error:data?null:{code:'NOT_FOUND'}});
+        const effective=data ? {...data,...(gateOverrides[table]??{})} : null;
+        return Promise.resolve({data:effective,error:effective?null:{code:'NOT_FOUND'}});
       },
       gte(k,v) {
         const count=rows.filter(r=>filters.every(f=>f(r)) && r[k]>=v).length;
@@ -148,6 +149,24 @@ test('Production claims are staged but never credited only when all gates are en
   assert.equal(h.rows.length,1);
   assert.equal(h.rows[0].environment,null);
   assert.equal(Object.hasOwn(r.data,'coins'),false);
+});
+test('Production claims stay closed if any one independent release gate is disabled',async()=>{
+  const failures=[
+    ['billing_settings',{billing_mode:'off'}],
+    ['billing_settings',{checkout_enabled:false}],
+    ['billing_settings',{ios_iap_ready:false}],
+    ['apple_iap_verification_gate',{server_jws_verified:false}],
+    ['apple_iap_verification_gate',{sandbox_purchase_proven:false}],
+    ['apple_coin_pack_catalog',{is_sale_enabled:false}],
+    ['apple_coin_pack_catalog',{coins:500}],
+  ];
+  for(const [table,override] of failures){
+    const h=createHarness({productionEnabled:true,gateOverrides:{[table]:override}});
+    const result=await h.send({...coin('123456789'),environment:'Production'});
+    assert.equal(result.status,503,table+' '+JSON.stringify(override));
+    assert.equal(result.data.error,'production_fulfillment_disabled');
+    assert.equal(h.rows.length,0);
+  }
 });
 test('Production claims reject unapproved packs even if server gates are open',async()=>{
   const h=createHarness({productionEnabled:true});
