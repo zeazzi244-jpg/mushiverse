@@ -1,0 +1,4 @@
+MUSHIVERSE login hotfix TestFlight build trigger
+Date: 2026-11-22
+Release source includes auth fix 4f53ec3878068bca0ff5a62be5c1da7c2e5c42a8 and passing CI 0f8553868b0542ac6ec98c66d927abf0b23f0eec.
+This file triggers the signed archive workflow on main once and does not affect the application bundle.
