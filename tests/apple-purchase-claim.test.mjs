@@ -7,7 +7,7 @@ import {isAppleCoinProduct} from '../supabase/functions/_shared/apple-coin-trans
 // Supabase client. This checks request behavior without a real Apple purchase,
 // database writes, or a network dependency.
 const file = 'supabase/functions/submit-apple-purchase-claim/index.ts';
-function createHarness() {
+function createHarness({productionEnabled=false}={}) {
   const source = readFileSync(file, 'utf8')
     .replace(/^import .*;\s*$/gm, '')
     .replace('const json=(b:any,s=200)', 'const json=(b,s=200)')
@@ -21,7 +21,7 @@ function createHarness() {
   let currentUser = 'user-a';
   let accountFlags = {};
   let insertRace = null;
-  const queryFor = (options={}) => {
+  const queryFor = (options={},table='apple_purchase_claims') => {
     const filters = [];
     const q = {
       eq(k,v) { filters.push(r => r[k]===v); return q; },
@@ -35,6 +35,14 @@ function createHarness() {
         return q;
       },
       limit(n) { return Promise.resolve({data: rows.filter(r=>filters.every(f=>f(r))).slice(0,n),error:null}); },
+      single() {
+        const data={
+          billing_settings:{billing_mode:productionEnabled?'live':'off',checkout_enabled:productionEnabled,ios_iap_ready:productionEnabled},
+          apple_iap_verification_gate:{server_jws_verified:productionEnabled,sandbox_purchase_proven:productionEnabled},
+          apple_coin_pack_catalog:{coins:100,is_sale_enabled:productionEnabled},
+        }[table];
+        return Promise.resolve({data:data??null,error:data?null:{code:'NOT_FOUND'}});
+      },
       gte(k,v) {
         const count=rows.filter(r=>filters.every(f=>f(r)) && r[k]>=v).length;
         return Promise.resolve({count,error:null});
@@ -44,8 +52,8 @@ function createHarness() {
   };
   const client = {
     auth:{getUser:async()=>({data:{user:{id:currentUser,app_metadata:accountFlags}},error:null})},
-    from:()=>({
-      select:(_fields,options)=>queryFor(options),
+    from:(table)=>({
+      select:(_fields,options)=>queryFor(options,table),
       insert:row=>({
         select:()=>({
           single:async()=>{
@@ -118,13 +126,34 @@ test('a subscription original transaction cannot be reused by another account',a
   h.setUser('user-b');
   assert.equal((await h.send(premium('223456789'))).status,409);
 });
-test('rejects unsupported StoreKit and Production claims without creating pending purchases',async()=>{
+test('rejects local StoreKit claims without storing pending purchases',async()=>{
   const h=createHarness();
-  for (const environment of ['storekit', 'Production']) {
-    const r=await h.send({...coin('123456789'),environment});
-    assert.equal(r.status,400,environment);
-    assert.equal(r.data.error,'unsupported_environment');
-  }
+  const r=await h.send({...coin('123456789'),environment:'storekit'});
+  assert.equal(r.status,400);
+  assert.equal(r.data.error,'unsupported_environment');
+  assert.equal(h.rows.length,0);
+});
+test('Production claims remain disabled while the independent server gates are closed',async()=>{
+  const h=createHarness();
+  const r=await h.send({...coin('123456789'),environment:'Production'});
+  assert.equal(r.status,503);
+  assert.equal(r.data.error,'production_fulfillment_disabled');
+  assert.equal(h.rows.length,0);
+});
+test('Production claims are staged but never credited only when all gates are enabled',async()=>{
+  const h=createHarness({productionEnabled:true});
+  const r=await h.send({...coin('123456789'),environment:'Production'});
+  assert.equal(r.status,200);
+  assert.equal(r.data.status,'pending');
+  assert.equal(h.rows.length,1);
+  assert.equal(h.rows[0].environment,null);
+  assert.equal(Object.hasOwn(r.data,'coins'),false);
+});
+test('Production claims reject unapproved packs even if server gates are open',async()=>{
+  const h=createHarness({productionEnabled:true});
+  const r=await h.send({...coin('123456789','mushiverse.coins.500'),environment:'Production'});
+  assert.equal(r.status,403);
+  assert.equal(r.data.error,'production_product_not_approved');
   assert.equal(h.rows.length,0);
 });
 test('disallows unknown products and malformed transaction IDs',async()=>{
