@@ -79,8 +79,8 @@ Deno.serve(async (request: Request) => {
        purchase.originalTransactionId!==purchase.transactionId ||
        typeof purchase.appAccountToken!=="string" ||
        !accountId.test(purchase.appAccountToken) ||
-       !Number.isSafeInteger(purchase.purchaseDate) ||
-       !Number.isSafeInteger(purchase.revocationDate) ||
+       typeof purchase.purchaseDate!=="number" || !Number.isSafeInteger(purchase.purchaseDate) ||
+       typeof purchase.revocationDate!=="number" || !Number.isSafeInteger(purchase.revocationDate) ||
        purchase.revocationDate < purchase.purchaseDate ||
        purchase.revocationDate > Date.now()+300000)
       return response({error:"invalid_refunded_transaction"},422);
