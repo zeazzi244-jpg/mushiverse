@@ -17,8 +17,12 @@ export function tokenForApple({keyId, issuerId, privateKey, now = Math.floor(Dat
   issuerId = issuerId.replace(/^APPLE_IAP_ISSUER_ID\s*[:=]?\s*/i, '');
   if (!/^[A-Za-z0-9]{6,32}$/.test(keyId))
     throw Error('invalid_apple_iap_key_id_format');
-  if (!/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(issuerId))
+  const issuerUuids = issuerId.match(/[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}/gi) || [];
+  // Allow an iPhone clipboard to include a field label or surrounding text,
+  // but only when exactly one well-formed issuer UUID can be identified.
+  if (issuerUuids.length !== 1 || issuerId.length > 500)
     throw Error('invalid_apple_iap_issuer_id_format');
+  issuerId = issuerUuids[0];
   // The .p8 must contain a PEM key, not its filename or the binary preview.
   // Support common GitHub secret pastes where line breaks were escaped.
   const normalized = typeof privateKey === 'string' ? privateKey.trim().replace(/\\n/g, '\n') : '';
