@@ -79,6 +79,10 @@ Deno.serve(async (request: Request) => {
         if(sandboxError instanceof VerificationException &&
            sandboxError.status===VerificationStatus.RETRYABLE_VERIFICATION_FAILURE)
           return response({error:"notification_verification_temporarily_unavailable"},503);
+        // Log only verification failure categories, never JWS, certificates,
+        // transaction data, user identifiers or notification contents.
+        const code = (e: unknown) => e instanceof VerificationException ? String(e.status) : "exception";
+        console.warn("Apple notification verification categories", code(error), code(sandboxError));
         return response({error:"notification_verification_failed"},422);
       }
     }
