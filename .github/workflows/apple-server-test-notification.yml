@@ -3,6 +3,7 @@ on:
   push:
     paths:
       - '.github/workflows/apple-server-test-notification.yml'
+      - 'scripts/check-apple-server-notification.mjs'
   workflow_dispatch:
     inputs:
       environment:
