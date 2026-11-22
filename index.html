@@ -4017,7 +4017,7 @@ window.mushiverseCataloguePage=(select,total)=>{
   return {start:page*size,end:Math.min(total,(page+1)*size)};
 };
 (()=>{'use strict';
-const PREFIX='mushiverse-v77-game:',COST=50,DAILY_LOGIN_COINS=10,BONUS_DAYS=365;
+const PREFIX='mushiverse-v77-game:',COST=50,DAILY_LOGIN_COINS=12,BONUS_DAYS=365;
 const INSECTS=(window.mushiverseClassicCards || []).map(({name, rarity, weight, id}) => [name, rarity, weight, id]);
 const legacyNames = Object.freeze(INSECTS.map(([name]) => name));
 for (const {name, rarity, id} of [...(window.mushiverseOriginalCards || []), ...(window.mushiverseArchivedCards || [])]) {
