@@ -12,7 +12,17 @@ const encode = value => Buffer.from(JSON.stringify(value)).toString('base64url')
 export function tokenForApple({keyId, issuerId, privateKey, now = Math.floor(Date.now() / 1000)}) {
   if (!/^[A-Za-z0-9]{6,32}$/.test(keyId ?? '') ||
       !/^[0-9a-f-]{36}$/i.test(issuerId ?? '')) throw Error('invalid_apple_iap_key_metadata');
-  const key = createPrivateKey(privateKey);
+  // The .p8 must contain a PEM key, not its filename or the binary preview.
+  // Support common GitHub secret pastes where line breaks were escaped.
+  const normalized = typeof privateKey === 'string' ? privateKey.trim().replace(/\\\\n/g, '\\n') : '';
+  if (!/^-----BEGIN PRIVATE KEY-----[\\s\\S]+-----END PRIVATE KEY-----$/.test(normalized))
+    throw Error('apple_iap_p8_secret_must_contain_full_pem_text');
+  let key;
+  try {
+    key = createPrivateKey(normalized);
+  } catch {
+    throw Error('apple_iap_p8_secret_is_not_a_valid_private_key');
+  }
   if (key.asymmetricKeyType !== 'ec' || key.asymmetricKeyDetails?.namedCurve !== 'prime256v1')
     throw Error('apple_iap_key_must_be_es256');
   const signingInput = `${encode({alg:'ES256', kid:keyId, typ:'JWT'})}.${encode({iss:issuerId, iat:now, exp:now+300, aud:'appstoreconnect-v1', bid:BID})}`;
