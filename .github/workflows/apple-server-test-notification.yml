@@ -20,6 +20,7 @@ jobs:
       APPLE_IAP_TEST_ENVIRONMENT: ${{ inputs.environment }}
       APPLE_IAP_KEY_ID: ${{ secrets.APPLE_IAP_KEY_ID }}
       APPLE_IAP_ISSUER_ID: ${{ secrets.APPLE_IAP_ISSUER_ID }}
+      APPLE_IAP_PRIVATE_KEY_P8: ${{ secrets.APPLE_IAP_PRIVATE_KEY_P8 }}
       APPLE_IAP_PRIVATE_KEY_P8_BASE64: ${{ secrets.APPLE_IAP_PRIVATE_KEY_P8_BASE64 }}
     steps:
       - uses: actions/checkout@v4
@@ -30,11 +31,15 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          for secret in APPLE_IAP_KEY_ID APPLE_IAP_ISSUER_ID APPLE_IAP_PRIVATE_KEY_P8_BASE64; do
+          for secret in APPLE_IAP_KEY_ID APPLE_IAP_ISSUER_ID; do
             if [[ -z "${!secret:-}" ]]; then
-              echo "::error::Missing $secret (dedicated Apple In-App Purchase API key; App Store Connect upload key is not interchangeable)"
+              echo "::error::Missing $secret (dedicated Apple In-App Purchase API key)"
               exit 1
             fi
           done
+          if [[ -z "${APPLE_IAP_PRIVATE_KEY_P8:-}" && -z "${APPLE_IAP_PRIVATE_KEY_P8_BASE64:-}" ]]; then
+            echo "::error::Missing APPLE_IAP_PRIVATE_KEY_P8 (paste the .p8 private key as a GitHub Actions secret)."
+            exit 1
+          fi
       - name: Run Apple TEST notification check
         run: node scripts/check-apple-server-notification.mjs
