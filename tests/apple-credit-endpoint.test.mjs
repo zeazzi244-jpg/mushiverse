@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
-import {isAppleCoinProduct} from '../supabase/functions/_shared/apple-coin-transaction-policy.mjs';
+import {isSandboxAppleCoinProduct} from '../supabase/functions/_shared/apple-coin-transaction-policy.mjs';
 
 // Exercise the checked-in fail-closed endpoint, not a mocked replacement response.
 // Only a verified 100-coin purchase by the configured Sandbox tester can reach fulfillment.
@@ -41,7 +41,7 @@ function harness({user = {id:'user-a'}, configured = true, productId = 'mushiver
     }
   };
   const createClient = ()=>{calls.client++; return client};
-  new Function('Deno','createClient','Response','verifyAppleCoinJws','isAppleCoinProduct',source)(
+  new Function('Deno','createClient','Response','verifyAppleCoinJws','isSandboxAppleCoinProduct',source)(
     deno,createClient,Response,async(_jws, expected)=>{
       calls.verifier++;
       assert.equal(expected.environment,'Sandbox');
@@ -49,7 +49,7 @@ function harness({user = {id:'user-a'}, configured = true, productId = 'mushiver
       if (verifierError) throw verifierError;
       if(!validSignature)throw Error('invalid signature');
       return {transactionId:expected.transactionId, originalTransactionId:expected.originalTransactionId, productId:expected.productId, environment:expected.environment};
-    }, isAppleCoinProduct
+    }, isSandboxAppleCoinProduct
   );
   assert.equal(typeof handler,'function');
   const send = async (method='POST', bearer='Bearer valid-token', signedTransaction='fake.payload.signature')=>{

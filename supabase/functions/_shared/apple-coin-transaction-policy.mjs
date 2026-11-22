@@ -1,20 +1,30 @@
 // Validation of claims AFTER cryptographic verification of an Apple signed transaction.
-// Only the three approved IAP coin packs may enter the Sandbox verification path.
+// Sandbox retains its original three-pack allowlist.
 // This module never verifies signatures and MUST NOT be used as proof of purchase.
 // A trusted Apple certificate-chain/JWS verifier must run before this policy.
 export const appleCoinPacks = Object.freeze({
   'mushiverse.coins.100': 100,
   'mushiverse.coins.500': 500,
   'mushiverse.coins.1200': 1200,
+  'mushiverse.coins.300': 300,
+  'mushiverse.coins.2500': 2500,
+  'mushiverse.coins.5500': 5500,
+  'mushiverse.coins.12000': 12000,
 });
 
 export function isAppleCoinProduct(productId) {
   return typeof productId === 'string' && Object.hasOwn(appleCoinPacks, productId);
 }
 
+export function isSandboxAppleCoinProduct(productId) {
+  return ['mushiverse.coins.100', 'mushiverse.coins.500', 'mushiverse.coins.1200'].includes(productId);
+}
+
 // Existing Sandbox callers must remain fail-closed for live transactions.
 export function validateVerifiedAppleCoinTransaction(transaction, expected) {
   if (expected?.environment !== 'Sandbox') throw new Error('production_fulfillment_disabled');
+  if (!isSandboxAppleCoinProduct(expected.productId))
+    throw new Error('product_mismatch');
   return validateSignedAppleCoinTransaction(transaction, expected);
 }
 

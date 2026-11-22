@@ -212,7 +212,7 @@ test('a Production refund cannot use the Sandbox TEST verifier', async()=>{
 });
 
 test('refunds match the approved pack amount against the original credit', async () => {
-  for (const product of ['mushiverse.coins.500','mushiverse.coins.1200']) {
+  for (const product of Object.keys(appleCoinPacks).filter(id => id !== 'mushiverse.coins.100')) {
     const matching = harness({product});
     assert.equal((await matching.send()).status, 200);
     assert.equal(matching.calls.holds, 1);

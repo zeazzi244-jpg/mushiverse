@@ -1,6 +1,6 @@
 import "jsr:@supabase/functions-js/edge-runtime.d.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
-import { isAppleCoinProduct } from "../_shared/apple-coin-transaction-policy.mjs";
+import { appleCoinPacks, isAppleCoinProduct } from "../_shared/apple-coin-transaction-policy.mjs";
 const premiumProducts = new Set(["jp.mushiverse.premium.monthly", "jp.mushiverse.premium.annual"]);
 const cors={"Access-Control-Allow-Origin":"*","Access-Control-Allow-Headers":"authorization, x-client-info, apikey, content-type","Access-Control-Allow-Methods":"POST,OPTIONS"};
 const json=(b:any,s=200)=>new Response(JSON.stringify(b),{status:s,headers:{...cors,"Content-Type":"application/json","Cache-Control":"no-store","X-Content-Type-Options":"nosniff"}});
@@ -88,8 +88,7 @@ Deno.serve(async(req)=>{
     if(environment==="Production"){
       // Production claims may be staged only after every independent release
       // gate is open. This must not be a client-controlled feature switch.
-      // Only the reviewed 100-coin consumable is eligible.
-      if(productId!=="mushiverse.coins.100")
+      if(!isAppleCoinProduct(productId))
         return json({error:"production_product_not_approved"},403);
       const [{data:billing,error:billingError},{data:gate,error:gateError},{data:pack,error:packError}]=await Promise.all([
         admin.from("billing_settings").select("billing_mode,checkout_enabled,ios_iap_ready").eq("singleton",true).single(),
@@ -100,7 +99,7 @@ Deno.serve(async(req)=>{
         return json({error:"production_claim_unavailable"},503);
       if(!billing||billing.billing_mode!=="live"||billing.checkout_enabled!==true||billing.ios_iap_ready!==true||
          !gate||gate.server_jws_verified!==true||gate.sandbox_purchase_proven!==true||
-         !pack||pack.coins!==100||pack.is_sale_enabled!==true)
+         !pack||pack.coins!==appleCoinPacks[productId as keyof typeof appleCoinPacks]||pack.is_sale_enabled!==true)
         return json({error:"production_fulfillment_disabled"},503);
     }
 

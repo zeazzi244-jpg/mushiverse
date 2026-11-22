@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
-import {isAppleCoinProduct} from '../supabase/functions/_shared/apple-coin-transaction-policy.mjs';
+import {appleCoinPacks,isAppleCoinProduct} from '../supabase/functions/_shared/apple-coin-transaction-policy.mjs';
 
 // Execute the deployed Deno handler in an isolated Node harness with a fake
 // Supabase client. This checks request behavior without a real Apple purchase,
@@ -15,6 +15,7 @@ function createHarness({productionEnabled=false,gateOverrides={}}={}) {
     .replace('const chunks:Uint8Array[]=[];', 'const chunks=[];')
     .replace('let rawBody:string;', 'let rawBody;')
     .replaceAll('(row:any)', '(row)')
+    .replace(' as keyof typeof appleCoinPacks', '')
     .replace(/Deno\.env\.get\(("SUPABASE_(?:URL|ANON_KEY|SERVICE_ROLE_KEY)")\)!/g, 'Deno.env.get($1)');
   let handler;
   const rows = [];
@@ -77,7 +78,7 @@ function createHarness({productionEnabled=false,gateOverrides={}}={}) {
     env:{get:()=> 'test-value'},
     serve:fn=>{handler=fn;}
   };
-  new Function('Deno','createClient','Response','isAppleCoinProduct',source)(deno,()=>client,Response,isAppleCoinProduct);
+  new Function('Deno','createClient','Response','isAppleCoinProduct','appleCoinPacks',source)(deno,()=>client,Response,isAppleCoinProduct,appleCoinPacks);
   assert.equal(typeof handler,'function','Deno.serve handler not registered');
   async function send(body,raw=false,bearer='Bearer test') {
     const req=new Request('https://example.invalid/claim',{
@@ -169,10 +170,12 @@ test('Production claims stay closed if any one independent release gate is disab
   }
 });
 test('Production claims reject unapproved packs even if server gates are open',async()=>{
-  const h=createHarness({productionEnabled:true});
+  const h=createHarness({productionEnabled:true,gateOverrides:{
+    apple_coin_pack_catalog:{is_sale_enabled:false,coins:500},
+  }});
   const r=await h.send({...coin('123456789','mushiverse.coins.500'),environment:'Production'});
-  assert.equal(r.status,403);
-  assert.equal(r.data.error,'production_product_not_approved');
+  assert.equal(r.status,503);
+  assert.equal(r.data.error,'production_fulfillment_disabled');
   assert.equal(h.rows.length,0);
 });
 test('disallows unknown products and malformed transaction IDs',async()=>{
@@ -235,3 +238,15 @@ for(const flag of ['kid_mode','minor','iap_disabled']) {
     assert.equal(h.rows.length,0);
   });
 }
+
+test('staged Production packs require the exact catalog amount and an enabled sale', async()=>{
+  for (const coins of [300, 2500, 5500, 12000]) {
+    const product = 'mushiverse.coins.' + coins;
+    const h = createHarness({productionEnabled:true,gateOverrides:{
+      apple_coin_pack_catalog:{is_sale_enabled:true,coins},
+    }});
+    const result = await h.send({...coin('123456789',product),environment:'Production'});
+    assert.equal(result.status,200,product);
+    assert.equal(h.rows[0].product_id,product);
+  }
+});

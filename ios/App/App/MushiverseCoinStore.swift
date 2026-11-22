@@ -13,7 +13,11 @@ final class MushiverseCoinStore: ObservableObject {
     static let productionCoinAmounts = [
         sandboxProductID: 100,
         "mushiverse.coins.500": 500,
-        "mushiverse.coins.1200": 1200
+        "mushiverse.coins.1200": 1200,
+        "mushiverse.coins.300": 300,
+        "mushiverse.coins.2500": 2500,
+        "mushiverse.coins.5500": 5500,
+        "mushiverse.coins.12000": 12000
     ]
     static let productIDs: Set<String> = Set(productionCoinAmounts.keys)
 
