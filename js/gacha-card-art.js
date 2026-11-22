@@ -138,6 +138,7 @@
         archived?.image,
         original?.photo,
         original?.image,
+        original?.fallbackImage,
         isLegendary ? albaseraphUrl.href : null
       ].filter(url => typeof url === 'string')
         .map(url => {
