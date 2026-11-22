@@ -1,5 +1,8 @@
 name: Apple App Store Server TEST delivery
 on:
+  push:
+    paths:
+      - '.github/workflows/apple-server-test-notification.yml'
   workflow_dispatch:
     inputs:
       environment:
@@ -17,7 +20,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 8
     env:
-      APPLE_IAP_TEST_ENVIRONMENT: ${{ inputs.environment }}
+      APPLE_IAP_TEST_ENVIRONMENT: ${{ inputs.environment || 'Sandbox' }}
       APPLE_IAP_KEY_ID: ${{ secrets.APPLE_IAP_KEY_ID }}
       APPLE_IAP_ISSUER_ID: ${{ secrets.APPLE_IAP_ISSUER_ID }}
       APPLE_IAP_PRIVATE_KEY_P8: ${{ secrets.APPLE_IAP_PRIVATE_KEY_P8 }}
