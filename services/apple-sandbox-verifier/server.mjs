@@ -1,7 +1,7 @@
 import { createServer } from 'node:http';
 import { createHash, timingSafeEqual } from 'node:crypto';
 import { Environment, SignedDataVerifier, VerificationException, VerificationStatus } from '@apple/app-store-server-library';
-import { isAppleCoinProduct, validateVerifiedAppleCoinTransaction } from '../../supabase/functions/_shared/apple-coin-transaction-policy.mjs';
+import { isAppleCoinProduct, validateProductionAppleCoinTransaction, validateVerifiedAppleCoinTransaction } from '../../supabase/functions/_shared/apple-coin-transaction-policy.mjs';
 
 const secret = process.env.APPLE_SANDBOX_VERIFIER_SECRET;
 if (!secret || !/^[a-f0-9]{64}$/.test(secret)) {
@@ -22,6 +22,13 @@ if (createHash('sha256').update(g2Root).digest('hex') !==
 }
 const testVerifier = new SignedDataVerifier([g2Root, root], true, Environment.SANDBOX, 'com.rikuto.mushiverse');
 
+const productionSecret = process.env.APPLE_PRODUCTION_VERIFIER_SECRET;
+const productionAuthorization = /^[a-f0-9]{64}$/.test(productionSecret ?? '') && productionSecret !== secret
+  ? Buffer.from('Bearer ' + productionSecret)
+  : null;
+const productionVerifier = new SignedDataVerifier([g2Root, root], true, Environment.PRODUCTION,
+  'com.rikuto.mushiverse', 6826061606);
+
 const verifier = new SignedDataVerifier([root], true, Environment.SANDBOX, 'com.rikuto.mushiverse');
 
 const server = createServer(async (request, response) => {
@@ -34,9 +41,12 @@ const server = createServer(async (request, response) => {
 
   if (request.method === 'GET' && request.url === '/healthz') return send(200, { ok: true });
   const testNotification = request.url === '/verify-sandbox-test';
-  if (request.method !== 'POST' || (!testNotification && request.url !== '/verify')) return send(404, { error: 'not_found' });
+  const productionPurchase = request.url === '/verify-production-purchase';
+  if (request.method !== 'POST' || (!testNotification && !productionPurchase && request.url !== '/verify')) return send(404, { error: 'not_found' });
   const provided = Buffer.from(request.headers.authorization ?? '');
-  if (provided.length !== authorization.length || !timingSafeEqual(provided, authorization)) {
+  const expectedAuthorization = productionPurchase ? productionAuthorization : authorization;
+  if (!expectedAuthorization || provided.length !== expectedAuthorization.length ||
+      !timingSafeEqual(provided, expectedAuthorization)) {
     return send(401, { error: 'unauthorized' });
   }
 
@@ -69,7 +79,8 @@ const server = createServer(async (request, response) => {
     const { signedTransaction, expected } = input;
     if (typeof signedTransaction !== 'string' || signedTransaction.length > 16384 ||
         !/^[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+$/.test(signedTransaction) ||
-        expected?.environment !== 'Sandbox' || !isAppleCoinProduct(expected.productId) ||
+        expected?.environment !== (productionPurchase ? 'Production' : 'Sandbox') || !isAppleCoinProduct(expected.productId) ||
+        (productionPurchase && expected.productId !== 'mushiverse.coins.100') ||
         !['transactionId', 'originalTransactionId'].every(key =>
           typeof expected[key] === 'string' && /^\d{6,30}$/.test(expected[key])) ||
         typeof expected.appAccountToken !== 'string' ||
@@ -78,6 +89,19 @@ const server = createServer(async (request, response) => {
     }
     const header = JSON.parse(Buffer.from(signedTransaction.split('.')[0], 'base64url'));
     if (header?.alg !== 'ES256') return send(422, { error: 'invalid_transaction' });
+    if (productionPurchase) {
+      const transaction = await productionVerifier.verifyAndDecodeTransaction(signedTransaction);
+      validateProductionAppleCoinTransaction(transaction, expected);
+      // Return only signed evidence used by the Edge Function's policy.
+      const { bundleId, environment, productId, transactionId, originalTransactionId, appAccountToken,
+        purchaseDate, signedDate, type, quantity, inAppOwnershipType, revocationDate, revocationReason,
+        isUpgraded, transactionReason, subscriptionGroupIdentifier, expiresDate, webOrderLineItemId,
+        offerType, offerIdentifier, offerDiscountType, offerPeriod } = transaction;
+      return send(200, { verified: { bundleId, environment, productId, transactionId, originalTransactionId,
+        appAccountToken, purchaseDate, signedDate, type, quantity, inAppOwnershipType, revocationDate,
+        revocationReason, isUpgraded, transactionReason, subscriptionGroupIdentifier, expiresDate, webOrderLineItemId,
+        offerType, offerIdentifier, offerDiscountType, offerPeriod } });
+    }
     const transaction = await verifier.verifyAndDecodeTransaction(signedTransaction);
     const verified = validateVerifiedAppleCoinTransaction(transaction, expected);
     // Preserve only fields already cryptographically verified and policy checked.

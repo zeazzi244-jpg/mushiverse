@@ -16,7 +16,7 @@ test("staged Production verifier uses Apple's signed verification before policy"
   assert.match(verifier, /"com\.rikuto\.mushiverse", appAppleId/);
   assert.match(verifier, /verifyAndDecodeTransaction\(signedTransaction\)/);
   assert.ok(verifier.indexOf('verifyAndDecodeTransaction(signedTransaction)') <
-    verifier.indexOf('validateProductionAppleCoinTransaction(transaction, expected)'));
+    verifier.lastIndexOf('validateProductionAppleCoinTransaction(transaction, expected)'));
   assert.match(verifier, /apple_app_id_required/);
   assert.match(verifier, /production_environment_required/);
   assert.match(verifier, /APPLE_G3_ROOT_DER_BASE64/);

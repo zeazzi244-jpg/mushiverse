@@ -23,7 +23,7 @@ export async function verifyAppleProductionCoinJws(
 ) {
   if (!expected || expected.environment !== "Production")
     throw new Error("production_environment_required");
-  if (!isAppleCoinProduct(expected.productId))
+  if (!isAppleCoinProduct(expected.productId) || expected.productId !== "mushiverse.coins.100")
     throw new Error("invalid_expected_product");
   if (!Number.isSafeInteger(appAppleId) || appAppleId <= 0)
     throw new Error("apple_app_id_required");
@@ -35,6 +35,39 @@ export async function verifyAppleProductionCoinJws(
     throw new Error("invalid_expected_transaction");
   if (!/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(expected.appAccountToken))
     throw new Error("invalid_expected_account");
+
+  const remoteSecret = Deno.env.get("APPLE_PRODUCTION_VERIFIER_SECRET");
+  if (remoteSecret !== undefined) {
+    if (!/^[a-f0-9]{64}$/.test(remoteSecret)) {
+      throw new VerificationException(VerificationStatus.RETRYABLE_VERIFICATION_FAILURE);
+    }
+    const transient = () => new VerificationException(VerificationStatus.RETRYABLE_VERIFICATION_FAILURE);
+    let result: Response;
+    try {
+      result = await fetch("https://mushiverse-apple-sandbox-verifier.onrender.com/verify-production-purchase", {
+        method: "POST",
+        redirect: "error",
+        headers: {"content-type": "application/json", authorization: "Bearer " + remoteSecret},
+        body: JSON.stringify({signedTransaction, expected}),
+        signal: AbortSignal.timeout(33000),
+      });
+    } catch {
+      throw transient();
+    }
+    if (result.status !== 200) {
+      await result.body?.cancel();
+      if (result.status === 422) throw new VerificationException(VerificationStatus.VERIFICATION_FAILURE);
+      throw transient();
+    }
+    let transaction;
+    try {
+      transaction = (await result.json())?.verified;
+    } catch {
+      throw transient();
+    }
+    const validated = validateProductionAppleCoinTransaction(transaction, expected);
+    return Object.freeze({ ...validated, purchaseDate: transaction.purchaseDate as number });
+  }
 
   // Never trust roots/certificates, account IDs or environments from a client.
   // These roots are pinned in server code and expected values must come from
