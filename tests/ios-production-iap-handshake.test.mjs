@@ -28,7 +28,7 @@ test('StoreKit transaction is finished only for exact owner, product, original a
   assert.match(store, /await transaction\.finish\(\)/);
   assert.match(endpoint, /verification:"production_signature_verified"/);
   assert.match(endpoint, /original_transaction_id:verified\.originalTransactionId/);
-  assert.match(endpoint, /coins:100/);
+  assert.match(endpoint, /coins:verified\.coins/);
 });
 
 test('failed server settlement leaves StoreKit transaction unfinished for retry',()=>{
