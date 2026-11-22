@@ -1,6 +1,10 @@
 name: iOS signed archive (manual)
 on:
   workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - 'release-triggers/ios-login-fix-20261122.txt'
 permissions:
   contents: read
   actions: read
