@@ -207,8 +207,10 @@
   const scriptUrl = document.currentScript?.src || document.baseURI;
   const artBase = new URL('../assets/cards/original/', scriptUrl);
   for (const card of cards) {
-    card.image = new URL(card.slug + '.svg', artBase).href;
-    card.photo = new URL(card.slug + '.webp', artBase).href;
+    // Prefer the detailed WebP artwork in every card view. The SVG remains
+    // available as a legacy asset, but should not be the default card image.
+    card.image = new URL(card.slug + '.webp', artBase).href;
+    card.photo = card.image;
     Object.freeze(card);
     byName.set(card.name, card);
     // Keep legacy saved-card name lookups working after the display-name migration.
