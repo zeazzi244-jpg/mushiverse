@@ -90,7 +90,10 @@
     oscillator.type = type;
     oscillator.frequency.setValueAtTime(hz, time);
     oscillator.frequency.exponentialRampToValueAtTime(endHz, time + length);
-    start(oscillator, envelope(time, length, level), time, length);
+    const amp = envelope(time, length, level);
+    // Disconnect the envelope after playback: disconnecting only the oscillator
+    // leaves one gain node attached to the shared output for every tone.
+    start(oscillator, amp, time, length, [amp]);
   }
 
   function noise(time, hz, length, level) {
