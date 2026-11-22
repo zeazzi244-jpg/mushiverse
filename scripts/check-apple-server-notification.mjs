@@ -54,10 +54,13 @@ export async function requestAndCheckAppleTest({environment, authorization, fetc
 async function main() {
   const environment=process.env.APPLE_IAP_TEST_ENVIRONMENT || 'Sandbox';
   if (!Object.hasOwn(HOSTS, environment)) throw Error('invalid_apple_test_environment');
+  // A raw multiline .p8 secret is easier to configure from an iPhone.
+  // Base64 remains supported for existing CI automation.
+  const rawKey=process.env.APPLE_IAP_PRIVATE_KEY_P8;
   const keyBase64=process.env.APPLE_IAP_PRIVATE_KEY_P8_BASE64;
-  if (!keyBase64 || !/^[A-Za-z0-9+/=\s]+$/.test(keyBase64))
+  if (!rawKey && (!keyBase64 || !/^[A-Za-z0-9+/=\s]+$/.test(keyBase64)))
     throw Error('missing_apple_iap_api_key_secret');
-  const privateKey=Buffer.from(keyBase64,'base64').toString('utf8');
+  const privateKey=rawKey || Buffer.from(keyBase64,'base64').toString('utf8');
   const jwt=tokenForApple({keyId:process.env.APPLE_IAP_KEY_ID,issuerId:process.env.APPLE_IAP_ISSUER_ID,privateKey});
   const result=await requestAndCheckAppleTest({environment,authorization:`Bearer ${jwt}`});
   console.log(`Apple ${result.environment} TEST delivery attempts: ${result.attempts}; results: ${result.results.join(',')||'unknown'}`);
