@@ -8,7 +8,9 @@ const source=readFileSync(new URL('../supabase/functions/apple-refund-notificati
  .replace('async function readBounded(request: Request): Promise<string>','async function readBounded(request)')
  .replace('const chunks: Uint8Array[]=[]','const chunks=[]')
  .replace('Deno.serve(async (request: Request)','Deno.serve(async (request)')
- .replace('let signedPayload: string;','let signedPayload;');
+ .replace('let signedPayload: string;','let signedPayload;')
+ .replace('(e: unknown)', '(e)')
+ .replace('async function rootCategory(signedPayload: string): Promise<string>', 'async function rootCategory(signedPayload)');
 
 function harness({type='REFUND',verified=true,creditOwner='123e4567-e89b-42d3-a456-426614174000',
   product='mushiverse.coins.100',environment='Production',held=true,sandboxNotification=false,temporaryNotification=false,temporaryTransaction=false,revocationDate=Date.now()-10000}={}){
