@@ -6,3 +6,5 @@ This file triggers the signed archive workflow on main once and does not affect 
 Follow-up: native auth abort recovery commit 9305fd959fb758b3259a262f0c1477fe7a2a6a3b. Rebuild and upload for TestFlight.
 
 Root-cause transport correction: 3120e21f8537cb75ba64284439bbbe254d875b92; verified regression 44972086452 (success), web integrity 44972086442 (success), safety 44972086454 (success). TestFlight rebuild requested.
+
+Session startup lock fix: 4aea1f9fc0f21d82e36e76a1e6eec45415c64047; regression tests f1107d3fd94e696b4544f3a9357bd755f5bfe2d9. Build required to verify iPhone login (6041 still fails).
