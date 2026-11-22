@@ -113,11 +113,11 @@ BEGIN
  SELECT * INTO v_credit FROM public.gacha_coin_purchase_credits
    WHERE transaction_id=p_transaction_id FOR UPDATE;
  IF NOT FOUND OR v_credit.user_id IS DISTINCT FROM p_user_id
-    OR v_credit.coins IS DISTINCT FROM CASE v_credit.product_id
+    OR v_credit.coins IS DISTINCT FROM (CASE v_credit.product_id
       WHEN 'mushiverse.coins.100' THEN 100
       WHEN 'mushiverse.coins.500' THEN 500
       WHEN 'mushiverse.coins.1200' THEN 1200
-    END
+    END)
  THEN RAISE EXCEPTION 'refund_credit_owner_mismatch'; END IF;
  SELECT * INTO v_event FROM public.apple_iap_events
    WHERE transaction_id=p_transaction_id FOR UPDATE;
