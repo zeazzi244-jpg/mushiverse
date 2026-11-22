@@ -62,8 +62,14 @@ export async function verifyAppleCoinJws(signedTransaction: string, expected: {
     } catch {
       throw new Error("apple_verification_not_configured");
     }
-    if (response.status === 422 || response.status === 400)
+    if (response.status === 422 || response.status === 400) {
+      // Render returns only a fixed, non-sensitive diagnostic classification.
+      // Never log the Apple JWS, the request body or an upstream exception.
+      const reason = response.headers.get("x-mushiverse-verify-reason");
+      if (reason && /^[a-z_]{1,64}$/.test(reason))
+        console.warn("apple sandbox verifier rejection category:", reason);
       throw new Error("invalid_signed_transaction");
+    }
     if (!response.ok) throw new Error("apple_verification_not_configured");
     // A verifier is a security boundary: never buffer an unlimited or malformed
     // upstream response into the Edge Function. Fail closed on protocol errors.
