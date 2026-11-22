@@ -44,6 +44,7 @@ function harness({enabled=false,owner='user-1',validSignature=true,transientSign
       };
     },
     rpc:async(name,args)=>{
+      if (name === 'get_apple_production_verifier_secret') return {data:'1'.repeat(64),error:null};
       calls.settle++;
       assert.equal(name,'settle_verified_apple_coin_production');
       assert.equal(args.p_transaction_id,'123456789');

@@ -42,9 +42,10 @@ const server = createServer(async (request, response) => {
   if (request.method === 'GET' && request.url === '/healthz') return send(200, { ok: true });
   const testNotification = request.url === '/verify-sandbox-test';
   const productionPurchase = request.url === '/verify-production-purchase';
-  if (request.method !== 'POST' || (!testNotification && !productionPurchase && request.url !== '/verify')) return send(404, { error: 'not_found' });
+  const productionRefund = request.url === '/verify-production-refund';
+  if (request.method !== 'POST' || (!testNotification && !productionPurchase && !productionRefund && request.url !== '/verify')) return send(404, { error: 'not_found' });
   const provided = Buffer.from(request.headers.authorization ?? '');
-  const expectedAuthorization = productionPurchase ? productionAuthorization : authorization;
+  const expectedAuthorization = (productionPurchase || productionRefund) ? productionAuthorization : authorization;
   if (!expectedAuthorization || provided.length !== expectedAuthorization.length ||
       !timingSafeEqual(provided, expectedAuthorization)) {
     return send(401, { error: 'unauthorized' });
@@ -55,11 +56,11 @@ const server = createServer(async (request, response) => {
     let length = 0;
     for await (const chunk of request) {
       length += chunk.length;
-      if (length > (testNotification ? 45000 : 18000)) return send(413, { error: 'request_too_large' });
+      if (length > ((testNotification || productionRefund) ? 45000 : 18000)) return send(413, { error: 'request_too_large' });
       parts.push(chunk);
     }
     const input = JSON.parse(Buffer.concat(parts).toString('utf8'));
-    if (testNotification) {
+    if (testNotification || productionRefund) {
       const signedPayload = input?.signedPayload;
       if (typeof signedPayload !== 'string' || signedPayload.length > 44000 ||
           !/^[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+$/.test(signedPayload)) {
@@ -67,6 +68,18 @@ const server = createServer(async (request, response) => {
       }
       const header = JSON.parse(Buffer.from(signedPayload.split('.')[0], 'base64url'));
       if (header?.alg !== 'ES256') return send(422, { error: 'invalid_notification' });
+      if (productionRefund) {
+        const notification = await productionVerifier.verifyAndDecodeNotification(signedPayload);
+        if (notification.notificationType !== 'REFUND' || notification.data?.environment !== Environment.PRODUCTION ||
+            typeof notification.data.signedTransactionInfo !== 'string') {
+          return send(422, {error:'invalid_notification'});
+        }
+        const transaction = await productionVerifier.verifyAndDecodeTransaction(notification.data.signedTransactionInfo);
+        const {bundleId, environment, productId, type, quantity, inAppOwnershipType, transactionId,
+          originalTransactionId, appAccountToken, purchaseDate, revocationDate} = transaction;
+        return send(200, {verified:{bundleId, environment, productId, type, quantity, inAppOwnershipType,
+          transactionId, originalTransactionId, appAccountToken, purchaseDate, revocationDate}});
+      }
       const notification = await testVerifier.verifyAndDecodeNotification(signedPayload);
       if (notification.notificationType !== 'TEST' ||
           notification.data?.environment !== Environment.SANDBOX ||

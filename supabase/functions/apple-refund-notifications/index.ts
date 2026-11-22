@@ -150,47 +150,75 @@ Deno.serve(async (request: Request) => {
     const roots=[g2Root,root];
     // This check is NOT authentication. Only a working cryptographic runtime
     // is allowed to reach Apple's fully enabled JWS + OCSP verifier.
-    if(!supportsAppleCertificateVerification(root)) {
-      console.warn("Apple notification verification runtime unsupported");
-      return response({error:"apple_verifier_runtime_unsupported"},503);
-    }
-    const verifier=new SignedDataVerifier(roots,true,Environment.PRODUCTION,bundleId,appId);
-    let notification;
-    try {
-      notification=await verifier.verifyAndDecodeNotification(signedPayload);
-    } catch (error) {
-      // A temporary Apple OCSP/certificate-service outage must be retried.
-      // Never treat it as proof that the signed notification is invalid.
-      if(error instanceof VerificationException &&
-         error.status===VerificationStatus.RETRYABLE_VERIFICATION_FAILURE)
-        return response({error:"notification_verification_temporarily_unavailable"},503);
-      // Apple can forward Sandbox notifications to the Production URL if no
-      // separate Sandbox URL is configured. Authenticate Sandbox signatures
-      // independently; never let test notifications touch a Production wallet.
-      const sandboxVerifier=new SignedDataVerifier(roots,true,Environment.SANDBOX,bundleId);
-      try {
-        await sandboxVerifier.verifyAndDecodeNotification(signedPayload);
-        return response({ok:true,ignored_sandbox:true});
-      } catch (sandboxError) {
-        if(sandboxError instanceof VerificationException &&
-           sandboxError.status===VerificationStatus.RETRYABLE_VERIFICATION_FAILURE)
+    let purchase;
+    if (!supportsAppleCertificateVerification(root)) {
+      let routing;
+      try { routing = JSON.parse(Buffer.from(signedPayload.split(".")[1], "base64url").toString("utf-8")); }
+      catch { routing = null; }
+      const admin = createClient(endpoint, service);
+      const {data: secret, error} = routing?.notificationType === "REFUND" &&
+        routing.data?.environment === Environment.PRODUCTION
+        ? await admin.rpc("get_apple_production_verifier_secret") : {data:null,error:null};
+      if (!error && typeof secret === "string" && /^[a-f0-9]{64}$/.test(secret)) {
+        let result;
+        try {
+          result = await fetch("https://mushiverse-apple-sandbox-verifier.onrender.com/verify-production-refund", {
+            method: "POST",
+            redirect: "error",
+            headers: {"content-type": "application/json", authorization: "Bearer " + secret},
+            body: JSON.stringify({signedPayload}),
+            signal: AbortSignal.timeout(33000),
+          });
+          if (result.status === 200) purchase = (await result.json())?.verified;
+          else await result.body?.cancel();
+        } catch {
           return response({error:"notification_verification_temporarily_unavailable"},503);
-        // Log only verification failure categories, never JWS, certificates,
-        // transaction data, user identifiers or notification contents.
-        const code = (e) => e instanceof VerificationException ? String(e.status) : "exception";
-        console.warn("Apple notification verification categories", code(error), code(sandboxError), "root", await rootCategory(signedPayload), "causes", verificationCauseCategory(error), verificationCauseCategory(sandboxError));
-        return response({error:"notification_verification_failed"},422);
+        }
+        if (result.status === 422) return response({error:"notification_verification_failed"},422);
       }
+      if (!purchase) {
+        console.warn("Apple notification verification runtime unsupported");
+        return response({error:"apple_verifier_runtime_unsupported"},503);
+      }
+    } else {
+      const verifier=new SignedDataVerifier(roots,true,Environment.PRODUCTION,bundleId,appId);
+      let notification;
+      try {
+        notification=await verifier.verifyAndDecodeNotification(signedPayload);
+      } catch (error) {
+        // A temporary Apple OCSP/certificate-service outage must be retried.
+        // Never treat it as proof that the signed notification is invalid.
+        if(error instanceof VerificationException &&
+           error.status===VerificationStatus.RETRYABLE_VERIFICATION_FAILURE)
+          return response({error:"notification_verification_temporarily_unavailable"},503);
+        // Apple can forward Sandbox notifications to the Production URL if no
+        // separate Sandbox URL is configured. Authenticate Sandbox signatures
+        // independently; never let test notifications touch a Production wallet.
+        const sandboxVerifier=new SignedDataVerifier(roots,true,Environment.SANDBOX,bundleId);
+        try {
+          await sandboxVerifier.verifyAndDecodeNotification(signedPayload);
+          return response({ok:true,ignored_sandbox:true});
+        } catch (sandboxError) {
+          if(sandboxError instanceof VerificationException &&
+             sandboxError.status===VerificationStatus.RETRYABLE_VERIFICATION_FAILURE)
+            return response({error:"notification_verification_temporarily_unavailable"},503);
+          // Log only verification failure categories, never JWS, certificates,
+          // transaction data, user identifiers or notification contents.
+          const code = (e) => e instanceof VerificationException ? String(e.status) : "exception";
+          console.warn("Apple notification verification categories", code(error), code(sandboxError), "root", await rootCategory(signedPayload), "causes", verificationCauseCategory(error), verificationCauseCategory(sandboxError));
+          return response({error:"notification_verification_failed"},422);
+        }
+      }
+      // A signed CONSUMPTION_REQUEST is only a refund request, not a confirmed
+      // refund. REFUND_DECLINED is also never authorization to revoke coins.
+      if(notification.notificationType!=="REFUND") return response({ok:true,ignored:true});
+      const data=notification.data;
+      if(!data || data.bundleId!==bundleId ||
+         data.environment!=="Production" || data.appAppleId!==appId ||
+         typeof data.signedTransactionInfo!=="string")
+        return response({error:"invalid_app_notification"},422);
+      purchase=await verifier.verifyAndDecodeTransaction(data.signedTransactionInfo);
     }
-    // A signed CONSUMPTION_REQUEST is only a refund request, not a confirmed
-    // refund. REFUND_DECLINED is also never authorization to revoke coins.
-    if(notification.notificationType!=="REFUND") return response({ok:true,ignored:true});
-    const data=notification.data;
-    if(!data || data.bundleId!==bundleId ||
-       data.environment!=="Production" || data.appAppleId!==appId ||
-       typeof data.signedTransactionInfo!=="string")
-      return response({error:"invalid_app_notification"},422);
-    const purchase=await verifier.verifyAndDecodeTransaction(data.signedTransactionInfo);
     // A signed refund does not authorize another product, app, family owner,
     // Sandbox transaction or account. Revocation must have a signed date.
     if(purchase.bundleId!==bundleId || purchase.environment!=="Production" ||

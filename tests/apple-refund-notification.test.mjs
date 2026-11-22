@@ -13,7 +13,7 @@ const source=readFileSync(new URL('../supabase/functions/apple-refund-notificati
  .replace(' as keyof typeof appleCoinPacks','');
 
 function harness({type='REFUND',verified=true,creditOwner='123e4567-e89b-42d3-a456-426614174000',
-  product='mushiverse.coins.100',creditCoins=appleCoinPacks[product],environment='Production',held=true,sandboxNotification=false,temporaryNotification=false,temporaryTransaction=false,runtimeUnsupported=false,remoteStatus=503,revocationDate=Date.now()-10000}={}){
+  product='mushiverse.coins.100',creditCoins=appleCoinPacks[product],environment='Production',held=true,sandboxNotification=false,temporaryNotification=false,temporaryTransaction=false,runtimeUnsupported=false,remoteStatus=503,remoteProduction=false,revocationDate=Date.now()-10000}={}){
   const calls={verify:0,verifyTransaction:0,credits:0,holds:0};
   let handler;
   let remoteChecks = 0;
@@ -51,6 +51,7 @@ function harness({type='REFUND',verified=true,creditOwner='123e4567-e89b-42d3-a4
       }})})};
     },
     rpc:async(name,args)=>{
+      if (name === 'get_apple_production_verifier_secret') return {data:remoteProduction ? '2'.repeat(64) : null,error:null};
       if (name === 'get_apple_sandbox_verifier_secret') {
         return {data: '1'.repeat(64),error:null};
       }
@@ -73,6 +74,11 @@ function harness({type='REFUND',verified=true,creditOwner='123e4567-e89b-42d3-a4
   const Environment={PRODUCTION:'Production',SANDBOX:'Sandbox'};
   const fetch = async (url, options) => {
     remoteChecks++;
+    if (remoteProduction) {
+      assert.match(url, /onrender\.com\/verify-production-refund$/);
+      assert.equal(options.headers.authorization, 'Bearer ' + '2'.repeat(64));
+      return remoteStatus === 200 ? Response.json({verified:purchase}) : new Response(null,{status:remoteStatus});
+    }
     assert.match(url, /onrender\.com\/verify-sandbox-test$/);
     assert.equal(options.redirect, 'error');
     assert.equal(options.headers.authorization, 'Bearer ' + '1'.repeat(64));
@@ -219,5 +225,16 @@ test('refunds match the approved pack amount against the original credit', async
     const mismatched = harness({product, creditCoins: 100});
     assert.equal((await mismatched.send()).status, 422);
     assert.equal(mismatched.calls.holds, 0);
+  }
+});
+
+test('remote Production signature verification is required before refund quarantine', async()=>{
+  const payload = Buffer.from(JSON.stringify({notificationType:'REFUND',
+    data:{environment:'Production'}})).toString('base64url');
+  for (const status of [200, 422, 503]) {
+    const h = harness({runtimeUnsupported:true,remoteProduction:true,remoteStatus:status});
+    assert.equal((await h.send(`aaa.${payload}.ccc`)).status,status);
+    assert.equal(h.remoteChecks,1);
+    assert.equal(h.calls.holds,status === 200 ? 1 : 0);
   }
 });

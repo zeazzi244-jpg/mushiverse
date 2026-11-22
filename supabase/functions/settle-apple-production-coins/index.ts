@@ -116,6 +116,11 @@ Deno.serve(async (request: Request) => {
     if (appIDRaw !== "6826061606")
       return reply({error:"apple_verification_unavailable"},503);
 
+    const {data: verifierSecret, error: verifierSecretError} =
+      await admin.rpc("get_apple_production_verifier_secret");
+    if (verifierSecretError || typeof verifierSecret !== "string" || !/^[a-f0-9]{64}$/.test(verifierSecret))
+      return reply({error:"apple_verification_temporarily_unavailable"},503);
+
     let verified;
     try {
       verified = await verifyAppleProductionCoinJws(signed, {
@@ -124,7 +129,7 @@ Deno.serve(async (request: Request) => {
         transactionId:transactionID,
         originalTransactionId:claim.original_transaction_id,
         appAccountToken:user.id,
-      },Number(appIDRaw));
+      },Number(appIDRaw),verifierSecret);
     } catch (error) {
       // A transient Apple certificate/OCSP failure is not evidence of a bad
       // purchase. Never settle a wallet on failure, but allow StoreKit's

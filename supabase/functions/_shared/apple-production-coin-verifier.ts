@@ -20,6 +20,7 @@ export async function verifyAppleProductionCoinJws(
     environment: "Production";
   },
   appAppleId: number,
+  configuredSecret?: string,
 ) {
   if (!expected || expected.environment !== "Production")
     throw new Error("production_environment_required");
@@ -36,7 +37,7 @@ export async function verifyAppleProductionCoinJws(
   if (!/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(expected.appAccountToken))
     throw new Error("invalid_expected_account");
 
-  const remoteSecret = Deno.env.get("APPLE_PRODUCTION_VERIFIER_SECRET");
+  const remoteSecret = configuredSecret ?? Deno.env.get("APPLE_PRODUCTION_VERIFIER_SECRET");
   let transaction;
   if (remoteSecret !== undefined) {
     if (!/^[a-f0-9]{64}$/.test(remoteSecret)) {
