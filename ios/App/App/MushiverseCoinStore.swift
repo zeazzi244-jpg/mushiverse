@@ -192,7 +192,9 @@ final class MushiverseCoinStore: ObservableObject {
             let claimEndpoint = creditEndpoint.deletingLastPathComponent().appendingPathComponent("submit-apple-purchase-claim")
             let (_, claimResponse) = try await post(
                 ClaimRequest(transactionID: String(transaction.id),
-                             originalTransactionID: String(transaction.originalID), productID: transaction.productID),
+                             originalTransactionID: String(transaction.originalID),
+                             productID: transaction.productID,
+                             environment: isSandbox ? "Sandbox" : "Production"),
                 to: claimEndpoint, token: token
             )
             guard claimResponse.statusCode == 200 else { throw PurchaseError.serverRejected }
@@ -270,10 +272,13 @@ final class MushiverseCoinStore: ObservableObject {
         let transactionID: String
         let originalTransactionID: String
         let productID: String
+        // Routing hint only. The backend must verify Apple's signed JWS.
+        let environment: String
         enum CodingKeys: String, CodingKey {
             case transactionID = "transaction_id"
             case originalTransactionID = "original_transaction_id"
             case productID = "product_id"
+            case environment
         }
     }
 
