@@ -3,6 +3,11 @@
   const Context = window.AudioContext || window.webkitAudioContext;
   if (!Context) return;
 
+  // WebView navigation can inject this script again without unloading the page.
+  // Duplicate listeners would play overlapping fanfares and leak AudioContexts.
+  if (window.__mvForestGachaAudioInitialized) return;
+  window.__mvForestGachaAudioInitialized = true;
+
   let audio;
   let output;
   let grain;
