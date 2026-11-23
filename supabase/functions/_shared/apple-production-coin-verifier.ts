@@ -4,7 +4,7 @@ import { X509Certificate } from "node:crypto";
 // Imported by the gated Production settlement endpoint; this module never credits a wallet.
 // Keep the independent database release gates closed until Sandbox proof and approval.
 import { Environment, SignedDataVerifier, VerificationException, VerificationStatus } from "npm:@apple/app-store-server-library@3.1.0";
-import { isAppleCoinProduct, validateProductionAppleCoinTransaction } from "./apple-coin-transaction-policy.mjs";
+import { isSandboxAppleCoinProduct, validateProductionAppleCoinTransaction } from "./apple-coin-transaction-policy.mjs";
 
 // Apple Root CA - G3, pinned, from https://www.apple.com/certificateauthority/
 // SHA-256 DER: 63343ABFB89A6A03EBB57E9B3F5FA7BE7C4F5C756F3017B3A8C488C3653E9179
@@ -24,7 +24,7 @@ export async function verifyAppleProductionCoinJws(
 ) {
   if (!expected || expected.environment !== "Production")
     throw new Error("production_environment_required");
-  if (!isAppleCoinProduct(expected.productId))
+  if (!isSandboxAppleCoinProduct(expected.productId))
     throw new Error("invalid_expected_product");
   if (!Number.isSafeInteger(appAppleId) || appAppleId <= 0)
     throw new Error("apple_app_id_required");
