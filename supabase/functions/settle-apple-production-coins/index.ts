@@ -159,6 +159,19 @@ Deno.serve(async (request: Request) => {
         latestClaims[0].environment !== "Production")
       return reply({error:"claim_changed_during_verification"},409);
 
+    // A release can be revoked while remote Apple certificate verification is
+    // pending. Re-read both server-side gates immediately before settlement;
+    // the atomic RPC must independently enforce them under its own lock.
+    const [{data:currentBilling,error:currentBillingError},{data:currentGate,error:currentGateError}] = await Promise.all([
+      admin.from("billing_settings").select("billing_mode,checkout_enabled,ios_iap_ready").eq("singleton",true).single(),
+      admin.from("apple_iap_verification_gate").select("server_jws_verified,sandbox_purchase_proven").eq("singleton",true).single(),
+    ]);
+    if (currentBillingError || currentGateError ||
+        currentBilling?.billing_mode !== "live" || currentBilling?.checkout_enabled !== true ||
+        currentBilling?.ios_iap_ready !== true || currentGate?.server_jws_verified !== true ||
+        currentGate?.sandbox_purchase_proven !== true)
+      return reply({error:"production_fulfillment_disabled"},503);
+
     // A single Postgres transaction records verified evidence, locks the Apple
     // transaction, and inserts exactly one credit and wallet delta. No client
     // ever receives service-role credentials or calls this RPC directly.
