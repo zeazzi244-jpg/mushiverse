@@ -20,6 +20,7 @@ const style=document.createElement('style');style.id='mvGachaSpectacleStyle';sty
 #mv88Reveal .mv88Wait,#mv88Reveal .mvAwakeningLabel{z-index:2}
 #mv88Reveal[hidden] .mvSpectacleParticle,#mv88Reveal[aria-hidden="true"] .mvSpectacleParticle,#mv88Reveal[hidden] .mv88Stage:before,#mv88Reveal[hidden] .mv88Stage:after,#mv88Reveal[aria-hidden="true"] .mv88Stage:before,#mv88Reveal[aria-hidden="true"] .mv88Stage:after,#mv88Reveal[hidden] .mv88Capsule,#mv88Reveal[aria-hidden="true"] .mv88Capsule{animation-play-state:paused!important}
 #mv88Reveal.mvSpectacleSuspended .mvSpectacleParticle,#mv88Reveal.mvSpectacleSuspended .mv88Stage:before,#mv88Reveal.mvSpectacleSuspended .mv88Stage:after,#mv88Reveal.mvSpectacleSuspended .mv88Capsule{animation-play-state:paused!important}
+#mv88Reveal.mvSpectacleHidden .mvSpectacleParticle,#mv88Reveal.mvSpectacleHidden .mv88Stage:before,#mv88Reveal.mvSpectacleHidden .mv88Stage:after,#mv88Reveal.mvSpectacleHidden .mv88Capsule{animation-play-state:paused!important}
 #mv88Reveal .mvSpectacleParticles{position:absolute;inset:0;overflow:hidden;pointer-events:none;z-index:1}
 #mv88Reveal .mvSpectacleParticle{position:absolute;left:var(--x);top:var(--y);width:var(--s);height:var(--s);border-radius:50%;background:var(--mvSpectacleColor);box-shadow:0 0 12px 3px var(--mvSpectacleColor);opacity:0;animation:mvSpectacleFly var(--d) ease-in-out var(--delay) infinite}
 #mv88Reveal .mvSpectacleBurst{position:absolute;inset:10%;border:4px solid var(--mvSpectacleColor);border-radius:50%;box-shadow:0 0 42px var(--mvSpectacleColor);animation:mvSpectacleBurst .75s ease-out both;pointer-events:none}
@@ -83,7 +84,11 @@ function decorate(overlay){
   previousSignature=signature;
   // A hidden reveal can still receive card updates while preparing the next draw.
   // Never flash a closed overlay; let the visible reveal trigger its own burst.
-  if(document.hidden||results.hidden||overlay.hidden||overlay.getAttribute('aria-hidden')==='true'||results.getAttribute('aria-hidden')==='true'||!overlay.getClientRects().length||!results.getClientRects().length||window.getComputedStyle(overlay).visibility==='hidden'||window.getComputedStyle(results).visibility==='hidden'){
+  const concealed=results.hidden||overlay.hidden||overlay.getAttribute('aria-hidden')==='true'||results.getAttribute('aria-hidden')==='true'||!overlay.getClientRects().length||!results.getClientRects().length||window.getComputedStyle(overlay).visibility==='hidden'||window.getComputedStyle(results).visibility==='hidden';
+  // A CSS-hidden overlay still runs infinite particle animations unless paused explicitly.
+  // toggle() is idempotent; the class observer causes at most one additional sync.
+  overlay.classList.toggle('mvSpectacleHidden',concealed);
+  if(document.hidden||concealed){
    // Closing the reveal must cancel an in-flight flash and arm the next visible reveal.
    overlay.querySelectorAll('.mvSpectacleBurst').forEach(node=>node.remove());
    burstDone=false;
@@ -106,7 +111,7 @@ function decorate(overlay){
  const onVisibilityChange=()=>{overlay.classList.toggle('mvSpectacleSuspended',document.hidden);sync();};
  document.addEventListener('visibilitychange',onVisibilityChange);
  onVisibilityChange();
- const cleanup=()=>{document.removeEventListener('visibilitychange',onVisibilityChange);overlay.classList.remove('mvSpectacleSuspended');observer.disconnect();visibilityObserver.disconnect();resultsVisibilityObserver.disconnect();removal.disconnect();mounted.delete(overlay);delete overlay.dataset.spectacleReady;overlay.querySelectorAll('.mvSpectacleParticles,.mvSpectacleBurst').forEach(node=>node.remove());window.removeEventListener('pagehide',cleanup);};
+ const cleanup=()=>{document.removeEventListener('visibilitychange',onVisibilityChange);overlay.classList.remove('mvSpectacleSuspended','mvSpectacleHidden');observer.disconnect();visibilityObserver.disconnect();resultsVisibilityObserver.disconnect();removal.disconnect();mounted.delete(overlay);delete overlay.dataset.spectacleReady;overlay.querySelectorAll('.mvSpectacleParticles,.mvSpectacleBurst').forEach(node=>node.remove());window.removeEventListener('pagehide',cleanup);};
  const removal=new MutationObserver(()=>{if(!overlay.isConnected){cleanup();mounted.delete(overlay)}});// The overlay is nested inside the app root, not a direct body child.
  removal.observe(document.body,{childList:true,subtree:true});
  mounted.set(overlay,{stage,results,cleanup});
