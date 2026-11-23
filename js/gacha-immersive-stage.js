@@ -53,6 +53,10 @@ function init(){
  window.addEventListener('pagehide',()=>setOpen(false));
 }
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init,{once:true});else init();
-const observer=new MutationObserver(()=>{if(document.getElementById('mv101Machine')){init();observer.disconnect()}});
-if(!document.getElementById('mv101Machine')){observer.observe(document.documentElement,{subtree:true,childList:true});window.addEventListener('pagehide',()=>observer.disconnect(),{once:true})}
+const observer=new MutationObserver(()=>{
+ const unit=document.getElementById('mv101Machine');
+ if(unit&&!unit.dataset.immersiveReady)init();
+ if(unit?.dataset.immersiveReady)observer.disconnect();
+});
+if(!document.getElementById('mv101Machine')?.dataset.immersiveReady){observer.observe(document.documentElement,{subtree:true,childList:true});window.addEventListener('pagehide',()=>observer.disconnect(),{once:true})}
 })();
