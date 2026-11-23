@@ -95,7 +95,15 @@ function scan(){const overlay=document.getElementById('mv88Reveal');if(overlay)d
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',start,{once:true});else start();
 function start(){
  scan();
- const observer=new MutationObserver(scan);
+ // DOM updates during a reveal can arrive in large batches (including particles).
+ // Coalesce them so a draw never repeatedly walks the full overlay in one tick.
+ let pending=false;
+ const scheduleScan=()=>{
+  if(pending)return;
+  pending=true;
+  queueMicrotask(()=>{pending=false;scan()});
+ };
+ const observer=new MutationObserver(scheduleScan);
  const observe=()=>{if(document.body)observer.observe(document.body,{childList:true,subtree:true})};
  observe();
  // iOS may restore a suspended WebView from the back-forward cache without reloading scripts.
