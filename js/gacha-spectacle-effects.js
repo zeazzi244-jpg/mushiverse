@@ -69,7 +69,7 @@ function decorate(overlay){
    flash.addEventListener('animationend',()=>flash.remove(),{once:true});
   }
  };
- const observer=new MutationObserver(sync);observer.observe(results,{childList:true,attributes:true,attributeFilter:['hidden']});sync();
+ const observer=new MutationObserver(sync);observer.observe(results,{childList:true,subtree:true,attributes:true,attributeFilter:['hidden']});sync();
  const removal=new MutationObserver(()=>{if(!overlay.isConnected){observer.disconnect();removal.disconnect()}});removal.observe(document.body,{childList:true});
 }
 function scan(){const overlay=document.getElementById('mv88Reveal');if(overlay)decorate(overlay)}
