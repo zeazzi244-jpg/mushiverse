@@ -83,7 +83,7 @@ function decorate(overlay){
   previousSignature=signature;
   // A hidden reveal can still receive card updates while preparing the next draw.
   // Never flash a closed overlay; let the visible reveal trigger its own burst.
-  if(document.hidden||results.hidden||overlay.hidden||overlay.getAttribute('aria-hidden')==='true'){
+  if(document.hidden||results.hidden||overlay.hidden||overlay.getAttribute('aria-hidden')==='true'||!overlay.getClientRects().length||!results.getClientRects().length){
    // Closing the reveal must cancel an in-flight flash and arm the next visible reveal.
    overlay.querySelectorAll('.mvSpectacleBurst').forEach(node=>node.remove());
    burstDone=false;
@@ -99,11 +99,14 @@ function decorate(overlay){
  };
  const observer=new MutationObserver(sync);observer.observe(results,{childList:true,subtree:true,characterData:true,attributes:true,attributeFilter:['hidden','src']});
  // The overlay can become visible without changing the results subtree.
- const visibilityObserver=new MutationObserver(sync);visibilityObserver.observe(overlay,{attributes:true,attributeFilter:['hidden','aria-hidden']});sync();
+ const visibilityObserver=new MutationObserver(sync);visibilityObserver.observe(overlay,{attributes:true,attributeFilter:['hidden','aria-hidden','class','style']});
+ // CSS-driven visibility changes can occur without changing the hidden attribute.
+ const resultsVisibilityObserver=new MutationObserver(sync);
+ resultsVisibilityObserver.observe(results,{attributes:true,attributeFilter:['class','style']});sync();
  const onVisibilityChange=()=>{overlay.classList.toggle('mvSpectacleSuspended',document.hidden);sync();};
  document.addEventListener('visibilitychange',onVisibilityChange);
  onVisibilityChange();
- const cleanup=()=>{document.removeEventListener('visibilitychange',onVisibilityChange);overlay.classList.remove('mvSpectacleSuspended');observer.disconnect();visibilityObserver.disconnect();removal.disconnect();mounted.delete(overlay);delete overlay.dataset.spectacleReady;overlay.querySelectorAll('.mvSpectacleParticles,.mvSpectacleBurst').forEach(node=>node.remove());window.removeEventListener('pagehide',cleanup);};
+ const cleanup=()=>{document.removeEventListener('visibilitychange',onVisibilityChange);overlay.classList.remove('mvSpectacleSuspended');observer.disconnect();visibilityObserver.disconnect();resultsVisibilityObserver.disconnect();removal.disconnect();mounted.delete(overlay);delete overlay.dataset.spectacleReady;overlay.querySelectorAll('.mvSpectacleParticles,.mvSpectacleBurst').forEach(node=>node.remove());window.removeEventListener('pagehide',cleanup);};
  const removal=new MutationObserver(()=>{if(!overlay.isConnected){cleanup();mounted.delete(overlay)}});// The overlay is nested inside the app root, not a direct body child.
  removal.observe(document.body,{childList:true,subtree:true});
  mounted.set(overlay,{stage,results,cleanup});
