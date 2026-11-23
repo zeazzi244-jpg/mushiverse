@@ -33,6 +33,9 @@ export function validateVerifiedAppleCoinTransaction(transaction, expected) {
 // semantics only; it NEVER authorizes a purchase or writes a wallet.
 export function validateProductionAppleCoinTransaction(transaction, expected) {
   if (expected?.environment !== 'Production') throw new Error('production_environment_required');
+  // Production launch is approved for these three packs only. Legacy catalog
+  // entries must never become purchasable merely by flipping a DB sale flag.
+  if (!isSandboxAppleCoinProduct(expected.productId)) throw new Error('product_mismatch');
   return validateSignedAppleCoinTransaction(transaction, expected);
 }
 
