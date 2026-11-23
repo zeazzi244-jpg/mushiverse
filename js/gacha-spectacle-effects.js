@@ -72,10 +72,14 @@ function decorate(overlay){
   if(!burstDone&&cards.length&&!reduce()){
    burstDone=true;const flash=document.createElement('div');flash.className='mvSpectacleBurst';flash.setAttribute('aria-hidden','true');overlay.append(flash);
    flash.addEventListener('animationend',()=>flash.remove(),{once:true});
+   // Backgrounded WebViews may suppress animationend; never leave a stale flash.
+   window.setTimeout(()=>flash.remove(),1500);
   }
  };
  const observer=new MutationObserver(sync);observer.observe(results,{childList:true,subtree:true,attributes:true,attributeFilter:['hidden']});sync();
- const removal=new MutationObserver(()=>{if(!overlay.isConnected){observer.disconnect();removal.disconnect()}});removal.observe(document.body,{childList:true});
+ const removal=new MutationObserver(()=>{if(!overlay.isConnected){observer.disconnect();removal.disconnect()}});// The overlay is nested inside the app root, not a direct body child.
+ removal.observe(document.body,{childList:true,subtree:true});
+ window.addEventListener('pagehide',()=>{observer.disconnect();removal.disconnect()},{once:true});
 }
 function scan(){const overlay=document.getElementById('mv88Reveal');if(overlay)decorate(overlay)}
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',start,{once:true});else start();
