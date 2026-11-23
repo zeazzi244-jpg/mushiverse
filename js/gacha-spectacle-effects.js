@@ -37,7 +37,7 @@ const style=document.createElement('style');style.id='mvGachaSpectacleStyle';sty
 @media(max-width:390px){#mv88Reveal .mv88Results{grid-template-columns:repeat(2,minmax(0,1fr))}}
 @media(prefers-reduced-motion:reduce){#mv88Reveal .mv88Stage:before,#mv88Reveal .mv88Stage:after,#mv88Reveal .mv88Capsule,#mv88Reveal .mvSpectacleParticle,#mv88Reveal .mvSpectacleBurst,#mv88Reveal .mv88Card,#mv88Reveal .mv88Card::before,#mv88Reveal .mv88Results{animation:none!important;transition:none!important}}
 `;document.head.append(style);
-const reduce=()=>window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
+const reduce=()=>typeof window.matchMedia==='function'&&window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 const mounted=new WeakMap();
 function decorate(overlay){
  const stage=overlay.querySelector('.mv88Stage'),results=overlay.querySelector('.mv88Results');
@@ -101,7 +101,9 @@ function start(){
  const scheduleScan=()=>{
   if(pending)return;
   pending=true;
-  queueMicrotask(()=>{pending=false;scan()});
+  // Older embedded WebViews may not expose queueMicrotask. A resolved promise
+  // still coalesces mutations without waiting for another animation frame.
+  Promise.resolve().then(()=>{pending=false;scan()});
  };
  const observer=new MutationObserver(scheduleScan);
  const observe=()=>{if(document.body)observer.observe(document.body,{childList:true,subtree:true})};
