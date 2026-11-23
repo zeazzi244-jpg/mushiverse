@@ -59,12 +59,17 @@ function decorate(overlay){
   stage.prepend(field);
  }
  let burstDone=false;
+ let previousCards=[];
  const sync=()=>{
-  [...results.querySelectorAll('.mv88Card')].forEach((card,i)=>card.style.setProperty('--card-index',String(i)));
-  // Re-arm the reveal when the same overlay is reused for another draw.
-  if(results.hidden){burstDone=false;return;}
+  const cards=[...results.querySelectorAll('.mv88Card')];
+  cards.forEach((card,i)=>card.style.setProperty('--card-index',String(i)));
+  // Some draw paths replace cards without hiding the results container first.
+  // Treat an empty result set or a wholly replaced card set as a new reveal.
+  if(results.hidden||cards.length===0|| (previousCards.length>0&&cards.length>0&&!cards.some(card=>previousCards.includes(card))))burstDone=false;
+  previousCards=cards;
+  if(results.hidden)return;
   // Do not fire before any cards have actually been rendered.
-  if(!burstDone&&results.querySelector('.mv88Card')&&!reduce()){
+  if(!burstDone&&cards.length&&!reduce()){
    burstDone=true;const flash=document.createElement('div');flash.className='mvSpectacleBurst';flash.setAttribute('aria-hidden','true');overlay.append(flash);
    flash.addEventListener('animationend',()=>flash.remove(),{once:true});
   }
