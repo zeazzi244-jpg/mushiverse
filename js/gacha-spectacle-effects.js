@@ -38,9 +38,13 @@ const style=document.createElement('style');style.id='mvGachaSpectacleStyle';sty
 @media(prefers-reduced-motion:reduce){#mv88Reveal .mv88Stage:before,#mv88Reveal .mv88Stage:after,#mv88Reveal .mv88Capsule,#mv88Reveal .mvSpectacleParticle,#mv88Reveal .mvSpectacleBurst,#mv88Reveal .mv88Card,#mv88Reveal .mv88Card::before,#mv88Reveal .mv88Results{animation:none!important;transition:none!important}}
 `;document.head.append(style);
 const reduce=()=>window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
+const mounted=new WeakMap();
 function decorate(overlay){
- if(overlay.dataset.spectacleReady)return;
  const stage=overlay.querySelector('.mv88Stage'),results=overlay.querySelector('.mv88Results');
+ const prior=mounted.get(overlay);
+ if(prior&&prior.stage===stage&&prior.results===results)return;
+ if(prior){prior.cleanup();mounted.delete(overlay);overlay.querySelectorAll('.mvSpectacleParticles,.mvSpectacleBurst').forEach(node=>node.remove());}
+ delete overlay.dataset.spectacleReady;
  // The reveal can mount in stages; retry on the next DOM mutation until both nodes exist.
  if(!stage||!results)return;
  overlay.dataset.spectacleReady='true';
@@ -77,9 +81,11 @@ function decorate(overlay){
   }
  };
  const observer=new MutationObserver(sync);observer.observe(results,{childList:true,subtree:true,attributes:true,attributeFilter:['hidden']});sync();
- const removal=new MutationObserver(()=>{if(!overlay.isConnected){observer.disconnect();removal.disconnect()}});// The overlay is nested inside the app root, not a direct body child.
+ const cleanup=()=>{observer.disconnect();removal.disconnect();window.removeEventListener('pagehide',cleanup);};
+ const removal=new MutationObserver(()=>{if(!overlay.isConnected){cleanup();mounted.delete(overlay)}});// The overlay is nested inside the app root, not a direct body child.
  removal.observe(document.body,{childList:true,subtree:true});
- window.addEventListener('pagehide',()=>{observer.disconnect();removal.disconnect()},{once:true});
+ mounted.set(overlay,{stage,results,cleanup});
+ window.addEventListener('pagehide',cleanup,{once:true});
 }
 function scan(){const overlay=document.getElementById('mv88Reveal');if(overlay)decorate(overlay)}
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',start,{once:true});else start();
