@@ -2,7 +2,7 @@ import "jsr:@supabase/functions-js/edge-runtime.d.ts";
 import { createClient } from "npm:@supabase/supabase-js@2";
 import { VerificationException, VerificationStatus } from "npm:@apple/app-store-server-library@3.1.0";
 import { verifyAppleProductionCoinJws } from "../_shared/apple-production-coin-verifier.ts";
-import { appleCoinPacks, isAppleCoinProduct } from "../_shared/apple-coin-transaction-policy.mjs";
+import { appleCoinPacks, isSandboxAppleCoinProduct } from "../_shared/apple-coin-transaction-policy.mjs";
 
 // Production settlement is separate from the existing Sandbox-only endpoint.
 // No balance is touched unless every independent database release gate is open.
@@ -96,7 +96,7 @@ Deno.serve(async (request: Request) => {
     if (!claims || claims.length !== 1) return reply({error:"claim_not_found"},403);
     const claim = claims[0];
     if (claim.user_id !== user.id || claim.transaction_id !== transactionID ||
-        !isAppleCoinProduct(claim.product_id) ||
+        !isSandboxAppleCoinProduct(claim.product_id) ||
         claim.original_transaction_id !== transactionID ||
         !["pending","verified"].includes(claim.status) ||
         (claim.environment !== null && claim.environment !== "Production"))
