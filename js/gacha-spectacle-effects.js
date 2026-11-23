@@ -1,5 +1,9 @@
 /* Presentation effects for MUSHIVERSE gacha. Never determines results or charges coins. */
 (()=>{'use strict';
+// Script injection can happen more than once during WebView navigation or hot reload.
+// A second observer would duplicate particle layers and reveal bursts.
+if(window.__mvGachaSpectacleInitialized)return;
+window.__mvGachaSpectacleInitialized=true;
 const style=document.createElement('style');style.id='mvGachaSpectacleStyle';style.textContent=`
 #mv88Reveal{--mvSpectacleColor:#83e9b8}
 #mv88Reveal[data-phase="2"]{--mvSpectacleColor:#9cdeff}
@@ -36,7 +40,7 @@ const style=document.createElement('style');style.id='mvGachaSpectacleStyle';sty
 @keyframes mvSpectacleResult{from{opacity:.45;transform:scale(.94)}to{opacity:1;transform:scale(1)}}
 @media(max-width:390px){#mv88Reveal .mv88Results{grid-template-columns:repeat(2,minmax(0,1fr))}}
 @media(prefers-reduced-motion:reduce){#mv88Reveal .mv88Stage:before,#mv88Reveal .mv88Stage:after,#mv88Reveal .mv88Capsule,#mv88Reveal .mvSpectacleParticle,#mv88Reveal .mvSpectacleBurst,#mv88Reveal .mv88Card,#mv88Reveal .mv88Card::before,#mv88Reveal .mv88Results{animation:none!important;transition:none!important}}
-`;document.head.append(style);
+`;if(!document.getElementById(style.id))document.head.append(style);
 const reduce=()=>typeof window.matchMedia==='function'&&window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 const mounted=new WeakMap();
 function decorate(overlay){
