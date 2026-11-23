@@ -81,7 +81,7 @@ function decorate(overlay){
   }
  };
  const observer=new MutationObserver(sync);observer.observe(results,{childList:true,subtree:true,attributes:true,attributeFilter:['hidden']});sync();
- const cleanup=()=>{observer.disconnect();removal.disconnect();window.removeEventListener('pagehide',cleanup);};
+ const cleanup=()=>{observer.disconnect();removal.disconnect();mounted.delete(overlay);delete overlay.dataset.spectacleReady;window.removeEventListener('pagehide',cleanup);};
  const removal=new MutationObserver(()=>{if(!overlay.isConnected){cleanup();mounted.delete(overlay)}});// The overlay is nested inside the app root, not a direct body child.
  removal.observe(document.body,{childList:true,subtree:true});
  mounted.set(overlay,{stage,results,cleanup});
@@ -89,5 +89,14 @@ function decorate(overlay){
 }
 function scan(){const overlay=document.getElementById('mv88Reveal');if(overlay)decorate(overlay)}
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',start,{once:true});else start();
-function start(){scan();const observer=new MutationObserver(scan);observer.observe(document.body,{childList:true,subtree:true});window.addEventListener('pagehide',()=>observer.disconnect(),{once:true})}
+function start(){
+ scan();
+ const observer=new MutationObserver(scan);
+ const observe=()=>{if(document.body)observer.observe(document.body,{childList:true,subtree:true})};
+ observe();
+ // iOS may restore a suspended WebView from the back-forward cache without reloading scripts.
+ // Reconnect observers and recreate effects after pagehide cleanup.
+ window.addEventListener('pagehide',()=>observer.disconnect());
+ window.addEventListener('pageshow',()=>{observe();scan()});
+}
 })();
