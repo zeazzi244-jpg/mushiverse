@@ -81,7 +81,7 @@ function decorate(overlay){
   }
  };
  const observer=new MutationObserver(sync);observer.observe(results,{childList:true,subtree:true,attributes:true,attributeFilter:['hidden']});sync();
- const cleanup=()=>{observer.disconnect();removal.disconnect();mounted.delete(overlay);delete overlay.dataset.spectacleReady;window.removeEventListener('pagehide',cleanup);};
+ const cleanup=()=>{observer.disconnect();removal.disconnect();mounted.delete(overlay);delete overlay.dataset.spectacleReady;overlay.querySelectorAll('.mvSpectacleParticles,.mvSpectacleBurst').forEach(node=>node.remove());window.removeEventListener('pagehide',cleanup);};
  const removal=new MutationObserver(()=>{if(!overlay.isConnected){cleanup();mounted.delete(overlay)}});// The overlay is nested inside the app root, not a direct body child.
  removal.observe(document.body,{childList:true,subtree:true});
  mounted.set(overlay,{stage,results,cleanup});
