@@ -65,9 +65,9 @@ export async function verifyAppleProductionCoinJws(
     // an upstream error or compromised service must not exhaust Edge memory.
     try {
       const contentType = result.headers.get("content-type") ?? "";
-      if (!/^application\\/json(?:\\s*;|\\s*$)/i.test(contentType)) throw transient();
+      if (!/^application\/json(?:\s*;|\s*$)/i.test(contentType)) throw transient();
       const declared = result.headers.get("content-length");
-      if (declared !== null && (!/^\\d+$/.test(declared) || Number(declared) > 8192)) throw transient();
+      if (declared !== null && (!/^\d+$/.test(declared) || Number(declared) > 8192)) throw transient();
       const reader = result.body?.getReader();
       if (!reader) throw transient();
       const chunks: Uint8Array[] = [];
