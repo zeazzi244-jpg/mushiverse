@@ -83,7 +83,7 @@ function decorate(overlay){
   previousSignature=signature;
   // A hidden reveal can still receive card updates while preparing the next draw.
   // Never flash a closed overlay; let the visible reveal trigger its own burst.
-  if(document.hidden||results.hidden||overlay.hidden||overlay.getAttribute('aria-hidden')==='true'||!overlay.getClientRects().length||!results.getClientRects().length){
+  if(document.hidden||results.hidden||overlay.hidden||overlay.getAttribute('aria-hidden')==='true'||results.getAttribute('aria-hidden')==='true'||!overlay.getClientRects().length||!results.getClientRects().length||window.getComputedStyle(overlay).visibility==='hidden'||window.getComputedStyle(results).visibility==='hidden'){
    // Closing the reveal must cancel an in-flight flash and arm the next visible reveal.
    overlay.querySelectorAll('.mvSpectacleBurst').forEach(node=>node.remove());
    burstDone=false;
