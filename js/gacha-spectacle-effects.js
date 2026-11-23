@@ -64,13 +64,17 @@ function decorate(overlay){
  }
  let burstDone=false;
  let previousCards=[];
+ let previousSignature='';
  const sync=()=>{
   const cards=[...results.querySelectorAll('.mv88Card')];
   cards.forEach((card,i)=>card.style.setProperty('--card-index',String(i)));
+  // Reused card elements may receive new image/text content for the next draw.
+  const signature=cards.map(card=>[card.textContent, ...[...card.querySelectorAll('img')].map(img=>img.getAttribute('src')||'')].join('|')).join('||');
   // Some draw paths replace cards without hiding the results container first.
   // Treat an empty result set or a wholly replaced card set as a new reveal.
-  if(results.hidden||cards.length===0|| (previousCards.length>0&&cards.length>0&&!cards.some(card=>previousCards.includes(card))))burstDone=false;
+  if(results.hidden||cards.length===0|| (previousCards.length>0&&cards.length>0&&!cards.some(card=>previousCards.includes(card))) || (previousSignature&&signature!==previousSignature))burstDone=false;
   previousCards=cards;
+  previousSignature=signature;
   if(results.hidden)return;
   // Do not fire before any cards have actually been rendered.
   if(!burstDone&&cards.length&&!reduce()){
@@ -80,7 +84,7 @@ function decorate(overlay){
    window.setTimeout(()=>flash.remove(),1500);
   }
  };
- const observer=new MutationObserver(sync);observer.observe(results,{childList:true,subtree:true,attributes:true,attributeFilter:['hidden']});sync();
+ const observer=new MutationObserver(sync);observer.observe(results,{childList:true,subtree:true,characterData:true,attributes:true,attributeFilter:['hidden','src']});sync();
  const cleanup=()=>{observer.disconnect();removal.disconnect();mounted.delete(overlay);delete overlay.dataset.spectacleReady;overlay.querySelectorAll('.mvSpectacleParticles,.mvSpectacleBurst').forEach(node=>node.remove());window.removeEventListener('pagehide',cleanup);};
  const removal=new MutationObserver(()=>{if(!overlay.isConnected){cleanup();mounted.delete(overlay)}});// The overlay is nested inside the app root, not a direct body child.
  removal.observe(document.body,{childList:true,subtree:true});
