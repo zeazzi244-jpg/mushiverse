@@ -61,8 +61,35 @@ export async function verifyAppleProductionCoinJws(
       if (result.status === 422) throw new VerificationException(VerificationStatus.VERIFICATION_FAILURE);
       throw transient();
     }
+    // A remote verifier is a trust boundary. Bound the response before parsing;
+    // an upstream error or compromised service must not exhaust Edge memory.
     try {
-      transaction = (await result.json())?.verified;
+      const contentType = result.headers.get("content-type") ?? "";
+      if (!/^application\\/json(?:\\s*;|\\s*$)/i.test(contentType)) throw transient();
+      const declared = result.headers.get("content-length");
+      if (declared !== null && (!/^\\d+$/.test(declared) || Number(declared) > 8192)) throw transient();
+      const reader = result.body?.getReader();
+      if (!reader) throw transient();
+      const chunks: Uint8Array[] = [];
+      let size = 0;
+      try {
+        while (true) {
+          const { done, value } = await reader.read();
+          if (done) break;
+          size += value.byteLength;
+          if (size > 8192) { await reader.cancel(); throw transient(); }
+          chunks.push(value);
+        }
+      } finally { reader.releaseLock(); }
+      if (declared !== null && size !== Number(declared)) throw transient();
+      const bytes = new Uint8Array(size);
+      let offset = 0;
+      for (const chunk of chunks) { bytes.set(chunk, offset); offset += chunk.byteLength; }
+      const parsed = JSON.parse(new TextDecoder("utf-8", { fatal: true }).decode(bytes));
+      if (!parsed || typeof parsed !== "object" || Array.isArray(parsed) ||
+          !parsed.verified || typeof parsed.verified !== "object" || Array.isArray(parsed.verified))
+        throw transient();
+      transaction = parsed.verified;
     } catch {
       throw transient();
     }
