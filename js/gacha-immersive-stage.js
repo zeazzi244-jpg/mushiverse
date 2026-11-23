@@ -27,9 +27,9 @@ const css=`
 `;
 function init(){
  const unit=document.getElementById('mv101Machine');if(!unit||unit.dataset.immersiveReady)return;
+ const machine=unit.querySelector('.mvWoodMachine');if(!machine)return;
  unit.dataset.immersiveReady='true';
  const style=document.createElement('style');style.id='mvImmersiveStyle';style.textContent=css;document.head.append(style);
- const machine=unit.querySelector('.mvWoodMachine');if(!machine)return;
  const open=document.createElement('button');open.type='button';open.id='mvImmersiveOpen';open.textContent='✦ 大画面でガチャを回す';open.setAttribute('aria-label','ガチャ筐体を全画面で開く');
  machine.before(open);
  const close=document.createElement('button');close.type='button';close.id='mvImmersiveClose';close.textContent='× 閉じる';close.hidden=true;
