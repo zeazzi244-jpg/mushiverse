@@ -99,7 +99,7 @@ Deno.serve(async (request: Request) => {
         !isSandboxAppleCoinProduct(claim.product_id) ||
         claim.original_transaction_id !== transactionID ||
         !["pending","verified"].includes(claim.status) ||
-        (claim.environment !== null && claim.environment !== "Production"))
+        claim.environment !== "Production")
       return reply({error:"claim_mismatch"},403);
 
     // Check the catalog for the authenticated, server-stored product only.
@@ -156,7 +156,7 @@ Deno.serve(async (request: Request) => {
         latestClaims[0].original_transaction_id !== verified.originalTransactionId ||
         latestClaims[0].product_id !== verified.productId ||
         !["pending","verified"].includes(latestClaims[0].status) ||
-        (latestClaims[0].environment !== null && latestClaims[0].environment !== "Production"))
+        latestClaims[0].environment !== "Production")
       return reply({error:"claim_changed_during_verification"},409);
 
     // A single Postgres transaction records verified evidence, locks the Apple
