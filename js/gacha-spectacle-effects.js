@@ -39,9 +39,11 @@ const style=document.createElement('style');style.id='mvGachaSpectacleStyle';sty
 `;document.head.append(style);
 const reduce=()=>window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
 function decorate(overlay){
- if(overlay.dataset.spectacleReady)return;overlay.dataset.spectacleReady='true';
+ if(overlay.dataset.spectacleReady)return;
  const stage=overlay.querySelector('.mv88Stage'),results=overlay.querySelector('.mv88Results');
+ // The reveal can mount in stages; retry on the next DOM mutation until both nodes exist.
  if(!stage||!results)return;
+ overlay.dataset.spectacleReady='true';
  if(!reduce()){
   const field=document.createElement('div');field.className='mvSpectacleParticles';field.setAttribute('aria-hidden','true');
   for(let i=0;i<24;i++){
