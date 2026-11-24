@@ -778,7 +778,7 @@ $('collection').querySelector('.hint').textContent='みんなの投稿から発�
 $('home').querySelector('.hint').textContent='みんなの採集記録を検索・並び替えしながら、季節のおすすめや人気地域も見られます。';
 function authUI(){
  $('authArea').innerHTML=user?`<h2 data-en="👤 Signed in">👤 ログイン中</h2><p class="fineprint">${esc(user.email||'ユーザー')}</p><button class="btn outline" id="signOut" data-en="Sign out">ログアウト</button>`:`<h2 data-en="👤 Create an account or sign in">👤 会員登録・ログイン</h2><label class="field"><span data-en="Email address">メールアドレス</span><input type="email" id="authEmail" autocomplete="email" placeholder="メールアドレス" data-en-placeholder="Email address"></label><label class="field"><span data-en="Password (at least 6 characters)">パスワード（6文字以上）</span><input type="password" id="authPassword" autocomplete="current-password" placeholder="パスワード" data-en-placeholder="Password"></label><div class="authrow"><button class="btn" id="signUp" data-en="Create account">新規登録</button><button class="btn outline" id="signIn" data-en="Sign in">ログイン</button></div><p id="authFeedback" role="status" aria-live="polite"></p><p class="fineprint" data-en="After registering, open the confirmation link in your email before signing in.">新規登録後、届いた確認メールのリンクを開いてからログインしてください。</p>`;
- translateGlobalAuth();applyInlineTranslations();
+ applyInlineTranslations();translateGlobalAuth();
  $('mvPostSignIn').hidden=Boolean(user);
  $('recordForm').querySelector('button[type="submit"]').disabled=!user;
  if(user){$('signOut').onclick=async()=>{const {error}=await db.auth.signOut();if(error)toast(error.message)}}
@@ -1827,32 +1827,67 @@ function renderSpeciesPassport(){
 const GLOBAL_LANG_KEY='mushiverse-language-v1';
 const GLOBAL_LOCALE_KEY='mushiverse-global-locale-v1';
 function globalLang(){
-  // An explicit user choice always wins; otherwise use the device language.
-  try{const saved=localStorage.getItem(GLOBAL_LANG_KEY);if(saved==='ja'||saved==='en')return saved}catch{}
-  const preferred=String(navigator.languages?.[0]||navigator.language||'ja').toLowerCase();
-  return /^ja(?:-|$)/.test(preferred)?'ja':'en';
+  // Legacy screens remain Japanese/English until their translations are ready.
+  return globalPreferredLanguage()==='ja'?'ja':'en';
+}
+function normalizeGlobalLanguage(value){
+  const tag=String(value||'').toLowerCase().replace(/_/g,'-');
+  if(/^zh(?:-|$)/.test(tag))return /(?:^|-)hans(?:-|$)/.test(tag)?'zh-Hans':/(?:^|-)(?:hant|tw|hk|mo)(?:-|$)/.test(tag)?'zh-Hant':'zh-Hans';
+  const prefix=tag.split('-')[0];return ['ja','en','ko','es'].includes(prefix)?prefix:null;
+}
+function globalPreferredLanguage(){
+  try{const saved=normalizeGlobalLanguage(localStorage.getItem(GLOBAL_LANG_KEY));if(saved)return saved}catch{}
+  return normalizeGlobalLanguage(navigator.languages?.[0]||navigator.language||'ja')||'en';
+}
+function globalLanguageOptions(){
+  return [['ja','日本語'],['en','English'],['ko','한국어'],['zh-Hans','简体中文'],['zh-Hant','繁體中文'],['es','Español']];
+}
+function configureGlobalLanguageSelect(select){
+  if(!select)return;
+  select.replaceChildren(...globalLanguageOptions().map(([value,label])=>new Option(label,value)));
+  select.value=globalPreferredLanguage();
 }
 function translateGlobalNavigation(lang){
-  const labels={home:['ホーム','Home'],post:['記録','Record'],gacha:['ガチャ','Gacha'],collection:['図鑑','Collection'],map:['マップ','Map'],profile:['マイページ','Profile']};
-  const en=lang==='en';
+  const labels={home:['ホーム','Home','홈','首页','首頁','Inicio'],post:['記録','Record','기록','记录','紀錄','Registro'],gacha:['ガチャ','Gacha','뽑기','抽卡','抽卡','Gacha'],collection:['図鑑','Collection','도감','图鉴','圖鑑','Colección'],map:['マップ','Map','지도','地图','地圖','Mapa'],profile:['マイページ','Profile','프로필','个人','個人','Perfil']};
+  const index=Math.max(0,globalLanguageOptions().findIndex(([value])=>value===lang));
   const nav=document.querySelector('nav.nav');
   if(nav){
-    nav.setAttribute('aria-label',en?'Main navigation':'メインメニュー');
+    nav.setAttribute('aria-label',['メインメニュー','Main navigation','주 메뉴','主菜单','主選單','Navegación principal'][index]);nav.setAttribute('lang',lang);
     for(const button of nav.querySelectorAll('button[data-tab]')){
       const pair=labels[button.dataset.tab];if(!pair)continue;
       // Preserve the icon, event handlers and live notification badge.
       const label=[...button.childNodes].find(node=>node.nodeType===3&&pair.includes(node.textContent.trim()));
-      if(label)label.textContent=pair[en?1:0];
-      button.setAttribute('aria-label',pair[en?1:0]);
+      if(label)label.textContent=pair[index];
+      button.setAttribute('aria-label',pair[index]);
     }
   }
-  const skip=document.querySelector('.skipLink');if(skip)skip.textContent=en?'Skip to main content':'メインコンテンツへ移動';
+  const skip=document.querySelector('.skipLink');if(skip){skip.textContent=['メインコンテンツへ移動','Skip to main content','본문으로 이동','跳至主要内容','跳至主要內容','Ir al contenido principal'][index];skip.setAttribute?.('lang',lang)}
 }
 function authText(ja,en){return globalLang()==='en'?en:ja}
 function translateGlobalAuth(){
-  const en=globalLang()==='en';
-  const message=$('postAuthMessage');if(message)message.textContent=user?(en?'You can publish photos and insect observations.':'写真と昆虫の記録を公開できます。'):(en?'Sign in to publish your discoveries.':'発見を投稿するにはログインが必要です。');
-  for(const id of ['mvPostSignIn','mvStartSignIn']){const button=$(id);if(button)button.textContent=en?'Create account / Sign in':'登録・ログイン'}
+  const lang=globalPreferredLanguage(),index=Math.max(0,globalLanguageOptions().findIndex(([value])=>value===lang));
+  const messages=user?['写真と昆虫の記録を公開できます。','You can publish photos and insect observations.','사진과 곤충 관찰 기록을 게시할 수 있습니다.','可以发布照片和昆虫观察记录。','可以發布照片和昆蟲觀察紀錄。','Puedes publicar fotos y observaciones de insectos.']:['発見を投稿するにはログインが必要です。','Sign in to publish your discoveries.','발견을 게시하려면 로그인하세요.','登录后发布你的发现。','登入後發布你的發現。','Inicia sesión para publicar tus descubrimientos.'];
+  const message=$('postAuthMessage');if(message){message.textContent=messages[index];message.setAttribute?.('lang',lang)}
+  for(const id of ['mvPostSignIn','mvStartSignIn']){const button=$(id);if(button){button.textContent=['登録・ログイン','Create account / Sign in','가입 / 로그인','注册 / 登录','註冊 / 登入','Registrarse / Iniciar sesión'][index];button.setAttribute?.('lang',lang)}}
+  const copy={
+    '👤 Signed in':['👤 로그인 중','👤 已登录','👤 已登入','👤 Sesión iniciada'],
+    'Sign out':['로그아웃','退出登录','登出','Cerrar sesión'],
+    '👤 Create an account or sign in':['👤 가입 또는 로그인','👤 注册或登录','👤 註冊或登入','👤 Crear cuenta o iniciar sesión'],
+    'Email address':['이메일 주소','电子邮箱','電子郵件','Correo electrónico'],
+    'Password (at least 6 characters)':['비밀번호(6자 이상)','密码（至少6个字符）','密碼（至少6個字元）','Contraseña (mínimo 6 caracteres)'],
+    'Password':['비밀번호','密码','密碼','Contraseña'],
+    'Create account':['가입','注册','註冊','Crear cuenta'],
+    'Sign in':['로그인','登录','登入','Iniciar sesión'],
+    'After registering, open the confirmation link in your email before signing in.':['가입 후 이메일의 확인 링크를 열고 로그인하세요.','注册后，请打开邮件中的确认链接再登录。','註冊後，請開啟電子郵件中的確認連結再登入。','Después de registrarte, abre el enlace de confirmación del correo antes de iniciar sesión.']
+  };
+  const area=$('authArea');if(!area)return;
+  for(const node of area.querySelectorAll('[data-en],[data-en-placeholder]')){
+    const placeholder=node.dataset.enPlaceholder,english=placeholder||node.dataset.en;
+    const japanese=placeholder?node.dataset.jaPlaceholder:node.dataset.ja;
+    const value=index===0?japanese:index===1?english:copy[english]?.[index-2]||english;if(value==null)continue;
+    if(placeholder)node.setAttribute('placeholder',value);else node.textContent=value;
+    node.setAttribute('lang',lang);
+  }
 }
 // v67: make the language helper accessible from later standalone scripts.
 Object.defineProperty(window,'globalLang',{configurable:true,value:globalLang});
@@ -1860,10 +1895,10 @@ function globalPrefs(){try{return JSON.parse(localStorage.getItem(GLOBAL_LOCALE_
 function saveGlobalPrefs(v){try{localStorage.setItem(GLOBAL_LOCALE_KEY,JSON.stringify(v))}catch{}}
 function applyGlobalLanguage(){
   const lang=globalLang()==='en'?'en':'ja';document.documentElement.lang=lang;document.body?.classList.toggle('lang-en',lang==='en');
-  const sel=$('globalLanguage');if(sel)sel.value=lang;
-  document.title=lang==='en'?'MUSHIVERSE | Insect Discovery Community':'ムシバース | 昆虫発見・交流SNS';applyInlineTranslations();translateGlobalNavigation(lang);translateGlobalAuth();
+  configureGlobalLanguageSelect($('globalLanguage'));
+  document.title=lang==='en'?'MUSHIVERSE | Insect Discovery Community':'ムシバース | 昆虫発見・交流SNS';applyInlineTranslations();translateGlobalNavigation(globalPreferredLanguage());translateGlobalAuth();
 }
-function setGlobalLanguage(lang){try{localStorage.setItem(GLOBAL_LANG_KEY,lang==='en'?'en':'ja')}catch{}applyGlobalLanguage();renderGlobalWelcome();renderGlobalDiscovery();renderGlobalSettings();renderSpeciesPassport();renderGlobalRecordPassport();renderGlobalMigrationCenter();renderGlobalSchemaPlan();renderGlobalLaunchLab();renderTranslationCoverage();renderGlobalRoadmap();ensureV28UI();renderGlobalCompatibility();renderWorldPreview();toast(lang==='en'?'Language: English':'表示言語：日本語')}
+function setGlobalLanguage(lang){const selected=normalizeGlobalLanguage(lang);if(!selected)return;try{localStorage.setItem(GLOBAL_LANG_KEY,selected)}catch{}applyGlobalLanguage();renderGlobalWelcome();renderGlobalDiscovery();renderGlobalSettings();renderSpeciesPassport();renderGlobalRecordPassport();renderGlobalMigrationCenter();renderGlobalSchemaPlan();renderGlobalLaunchLab();renderTranslationCoverage();renderGlobalRoadmap();ensureV28UI();renderGlobalCompatibility();renderWorldPreview();toast(selected==='ja'?'表示言語：日本語':'Language: '+globalLanguageOptions().find(([value])=>value===selected)[1])}
 function renderGlobalWelcome(){
  const el=$('globalWelcome');if(!el)return;const en=globalLang()==='en';
  const countries=new Set(records.map(r=>r.country).filter(Boolean)).size;
@@ -1876,7 +1911,8 @@ function renderGlobalSettings(){
  el.querySelector('#globalLocale')?.addEventListener('change',e=>{const x=globalPrefs();x.locale=e.target.value;saveGlobalPrefs(x);renderGlobalSettings()});
  el.querySelector('#globalUnits')?.addEventListener('change',e=>{const x=globalPrefs();x.units=e.target.value;saveGlobalPrefs(x);renderGlobalSettings()});
  el.querySelector('#globalCurrency')?.addEventListener('change',e=>{const x=globalPrefs();x.currency=e.target.value;saveGlobalPrefs(x);renderGlobalSettings()});
- el.querySelector('#profileGlobalLanguage')?.addEventListener('change',e=>setGlobalLanguage(e.target.value));
+ const languageSelect=el.querySelector('#profileGlobalLanguage');configureGlobalLanguageSelect(languageSelect);languageSelect?.addEventListener('change',e=>setGlobalLanguage(e.target.value));
+ if(!['ja','en'].includes(globalPreferredLanguage())){const notice=document.createElement('p');notice.className='muted';notice.textContent='Navigation and account forms are translated. Other screens use English where translations are not yet available.';notice.lang='en';el.append(notice)}
 }
 function renderGlobalRoadmap(){
  const el=$('globalRoadmap');if(!el)return;const en=globalLang()==='en';

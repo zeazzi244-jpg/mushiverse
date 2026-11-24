@@ -20,6 +20,16 @@ test('global language uses device preference on first launch and preserves expli
   assert.equal(language('invalid',{language:'ja-JP'}),'ja');
   assert.equal(language(null,{language:'en-GB'},true),'en');
 });
+test('all six supported preferences are selected without mislabeling untranslated screens',()=>{
+  const resolve=(saved,locale)=>runInNewContext(source+'\nglobalPreferredLanguage()',{
+    GLOBAL_LANG_KEY:'language',navigator:{language:locale},localStorage:{getItem:()=>saved}
+  });
+  for(const [tag,expected] of [['ja-JP','ja'],['en-GB','en'],['ko-KR','ko'],['zh-CN','zh-Hans'],['zh-TW','zh-Hant'],['zh-Hans-TW','zh-Hans'],['zh-Hant-CN','zh-Hant'],['es-MX','es'],['fr-FR','en']])assert.equal(resolve(null,tag),expected);
+  assert.equal(resolve('zh-Hant','ja-JP'),'zh-Hant');
+  assert.equal(resolve('es','ja-JP'),'es');
+  assert.equal(resolve('ja','ko-KR'),'ja');
+  assert.equal(language('es',{language:'ja-JP'}),'en');
+});
 test('English navigation preserves icons and badges and can switch back to Japanese',()=>{
   const icon={nodeType:1},badge={nodeType:1,textContent:'7'};
   const label={nodeType:3,textContent:'ホーム'};
@@ -37,6 +47,12 @@ test('English navigation preserves icons and badges and can switch back to Japan
   runInNewContext('translateGlobalNavigation("ja")',context);
   assert.equal(label.textContent,'ホーム');
   assert.equal(badge.textContent,'7');
+  for(const [lang,expected] of [['ko','홈'],['zh-Hans','首页'],['zh-Hant','首頁'],['es','Inicio'],['ja','ホーム']]){
+    runInNewContext(`translateGlobalNavigation("${lang}")`,context);
+    assert.equal(label.textContent,expected);
+    assert.equal(nav.lang,lang);
+    assert.equal(badge.textContent,'7');
+  }
 });
 
 test('account language changes preserve login fields and existing authentication calls',()=>{
@@ -55,4 +71,12 @@ test('account language changes preserve login fields and existing authentication
   context.user={id:'test'};
   runInNewContext('translateGlobalAuth()',context);
   assert.equal(messages.postAuthMessage.textContent,'You can publish photos and insect observations.');
+  const input={dataset:{enPlaceholder:'Email address',jaPlaceholder:'メールアドレス'},value:'KEEP',setAttribute(k,v){this[k]=v}};
+  const label={dataset:{en:'Sign in',ja:'ログイン'},setAttribute(k,v){this[k]=v}};
+  messages.authArea={querySelectorAll:()=>[input,label]};
+  context.navigator.language='es-MX';
+  runInNewContext('translateGlobalAuth()',context);
+  assert.equal(input.placeholder,'Correo electrónico');assert.equal(input.value,'KEEP');assert.equal(label.textContent,'Iniciar sesión');
+  context.navigator.language='zh-TW';runInNewContext('translateGlobalAuth()',context);
+  assert.equal(input.placeholder,'電子郵件');assert.equal(label.textContent,'登入');
 });
