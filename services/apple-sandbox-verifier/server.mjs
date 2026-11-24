@@ -121,7 +121,21 @@ const server = createServer(async (request, response) => {
         offerType, offerIdentifier, offerDiscountType, offerPeriod } });
     }
     const transaction = await verifier.verifyAndDecodeTransaction(signedTransaction);
-    const verified = validateVerifiedAppleCoinTransaction(transaction, expected);
+    let verified;
+    try {
+      verified = validateVerifiedAppleCoinTransaction(transaction, expected);
+    } catch (error) {
+      if (error instanceof Error && error.message === 'invalid_signed_date') {
+        // Log only a fixed category, never signed payloads or account identifiers.
+        const signed = transaction.signedDate;
+        const category = !Number.isSafeInteger(signed) ? 'missing_or_invalid'
+          : signed < transaction.purchaseDate ? 'before_purchase'
+          : signed > Date.now() + 300000 ? 'future'
+          : 'unclassified';
+        console.warn('Sandbox signed date diagnostic:', category);
+      }
+      throw error;
+    }
     // Preserve only fields already cryptographically verified and policy checked.
     // The Edge Function independently revalidates this signed evidence; never
     // return a stripped policy summary or echo untrusted expected fields.
