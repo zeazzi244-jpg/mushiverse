@@ -1826,7 +1826,28 @@ function renderSpeciesPassport(){
 
 const GLOBAL_LANG_KEY='mushiverse-language-v1';
 const GLOBAL_LOCALE_KEY='mushiverse-global-locale-v1';
-function globalLang(){try{return localStorage.getItem(GLOBAL_LANG_KEY)||'ja'}catch{return 'ja'}}
+function globalLang(){
+  // An explicit user choice always wins; otherwise use the device language.
+  try{const saved=localStorage.getItem(GLOBAL_LANG_KEY);if(saved==='ja'||saved==='en')return saved}catch{}
+  const preferred=String(navigator.languages?.[0]||navigator.language||'ja').toLowerCase();
+  return /^ja(?:-|$)/.test(preferred)?'ja':'en';
+}
+function translateGlobalNavigation(lang){
+  const labels={home:['ホーム','Home'],post:['記録','Record'],gacha:['ガチャ','Gacha'],collection:['図鑑','Collection'],map:['マップ','Map'],profile:['マイページ','Profile']};
+  const en=lang==='en';
+  const nav=document.querySelector('nav.nav');
+  if(nav){
+    nav.setAttribute('aria-label',en?'Main navigation':'メインメニュー');
+    for(const button of nav.querySelectorAll('button[data-tab]')){
+      const pair=labels[button.dataset.tab];if(!pair)continue;
+      // Preserve the icon, event handlers and live notification badge.
+      const label=[...button.childNodes].find(node=>node.nodeType===3&&pair.includes(node.textContent.trim()));
+      if(label)label.textContent=pair[en?1:0];
+      button.setAttribute('aria-label',pair[en?1:0]);
+    }
+  }
+  const skip=document.querySelector('.skipLink');if(skip)skip.textContent=en?'Skip to main content':'メインコンテンツへ移動';
+}
 // v67: make the language helper accessible from later standalone scripts.
 Object.defineProperty(window,'globalLang',{configurable:true,value:globalLang});
 function globalPrefs(){try{return JSON.parse(localStorage.getItem(GLOBAL_LOCALE_KEY)||'{}')||{}}catch{return {}}}
@@ -1834,7 +1855,7 @@ function saveGlobalPrefs(v){try{localStorage.setItem(GLOBAL_LOCALE_KEY,JSON.stri
 function applyGlobalLanguage(){
   const lang=globalLang()==='en'?'en':'ja';document.documentElement.lang=lang;document.body?.classList.toggle('lang-en',lang==='en');
   const sel=$('globalLanguage');if(sel)sel.value=lang;
-  document.title=lang==='en'?'MUSHIVERSE | Insect Discovery Community':'ムシバース | 昆虫発見・交流SNS';applyInlineTranslations();
+  document.title=lang==='en'?'MUSHIVERSE | Insect Discovery Community':'ムシバース | 昆虫発見・交流SNS';applyInlineTranslations();translateGlobalNavigation(lang);
 }
 function setGlobalLanguage(lang){try{localStorage.setItem(GLOBAL_LANG_KEY,lang==='en'?'en':'ja')}catch{}applyGlobalLanguage();renderGlobalWelcome();renderGlobalDiscovery();renderGlobalSettings();renderSpeciesPassport();renderGlobalRecordPassport();renderGlobalMigrationCenter();renderGlobalSchemaPlan();renderGlobalLaunchLab();renderTranslationCoverage();renderGlobalRoadmap();ensureV28UI();renderGlobalCompatibility();renderWorldPreview();toast(lang==='en'?'Language: English':'表示言語：日本語')}
 function renderGlobalWelcome(){
@@ -4234,7 +4255,6 @@ document.addEventListener('visibilitychange',()=>{if(document.hidden)stop()});
 .nav{display:grid!important;grid-template-columns:repeat(6,minmax(0,1fr))!important;gap:2px!important;padding-left:3px!important;padding-right:3px!important}
 .nav button{min-width:0!important;padding:7px 1px!important;font-size:10px!important;letter-spacing:-.5px!important}
 .nav button b{font-size:22px!important;display:block!important;margin-bottom:3px}
-.lang-en .nav button[data-tab="gacha"]:after{content:"Gacha"}
 #profile:not(.mv86Expanded)>:not(h1):not(#mv86ProfileCard):not(#mv86AdvancedToggle):not(#mvMembershipStatus){display:none!important}
 #profile #mv86ProfileCard{display:block!important;border-radius:18px;overflow:hidden;background:#fff;box-shadow:0 4px 18px #25432b1a;margin:10px 0 16px}
 #mv86Cover{height:160px;background:linear-gradient(135deg,#176c54,#81b966);background-size:cover;background-position:center;position:relative}
