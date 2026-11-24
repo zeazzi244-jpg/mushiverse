@@ -90,9 +90,10 @@ function decorate(overlay){
   // toggle() is idempotent; the class observer causes at most one additional sync.
   overlay.classList.toggle('mvSpectacleHidden',overlayConcealed);
   if(document.hidden||concealed){
-   // Closing the reveal must cancel an in-flight flash and arm the next visible reveal.
+   // Cancel the transient flash, but keep its consumed state on backgrounding.
+   // Only a new result or a closed reveal should arm another burst.
    overlay.querySelectorAll('.mvSpectacleBurst').forEach(node=>node.remove());
-   burstDone=false;
+   if(overlayConcealed||results.hidden||cards.length===0)burstDone=false;
    return;
   }
   // Do not fire before any cards have actually been rendered.
