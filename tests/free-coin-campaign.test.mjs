@@ -28,3 +28,8 @@ test('campaign does not credit guests, unselected accounts or failed local write
 test('a persisted campaign receipt prevents another credit on the same local wallet',()=>{
   const f=fixture({mushiverse_free_coin_grant_v2:1000},{coins:777,freeCoinGrantV2:true});f.run('applyFreeCoinGrant()');assert.equal(f.run('state.coins'),777);
 });
+test('individual 10000-coin grant is independent from the earlier campaign',()=>{
+  const f=fixture({mushiverse_free_coin_grant_v2:1000,mushiverse_free_coin_grant_v3:10000},{coins:2000,freeCoinGrantV2:true});
+  f.run('applyFreeCoinGrant();applyFreeCoinGrant()');assert.equal(f.run('state.coins'),12000);assert.equal(f.run('state.freeCoinGrantV3'),true);
+  const previous=fixture({mushiverse_free_coin_grant_v3:10000},{coins:3000,freeCoinGrantV3:true});previous.run('applyFreeCoinGrant()');assert.equal(previous.run('state.coins'),3000);
+});

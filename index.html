@@ -4100,13 +4100,14 @@ const dayNumber=s=>{const a=s.split('-').map(Number);return Math.floor(Date.UTC(
 const userKey=()=>window.user?.id?'user:'+window.user.id:'guest';
 const storageKey=()=>PREFIX+userKey();
 function empty(){return {coins:0,tickets:0,streak:0,bonusDay:0,lastClaim:'',cards:[],history:[]}}
-function read(){try{const v=JSON.parse(localStorage.getItem(storageKey()));if(!v||typeof v!=='object')return empty();return {coins:Math.max(0,Math.floor(Number(v.coins)||0)),tickets:Math.max(0,Math.floor(Number(v.tickets)||0)),streak:Math.max(0,Math.floor(Number(v.streak)||0)),bonusDay:Math.min(BONUS_DAYS,Math.max(0,Math.floor(Number(v.bonusDay)||0))),lastClaim:typeof v.lastClaim==='string'?v.lastClaim:'',cards:Array.isArray(v.cards)?v.cards:[],history:Array.isArray(v.history)?v.history.slice(-50):[],freeCoinGrantV1:v.freeCoinGrantV1===true,freeCoinGrantV2:v.freeCoinGrantV2===true}}catch{return empty()}}
+function read(){try{const v=JSON.parse(localStorage.getItem(storageKey()));if(!v||typeof v!=='object')return empty();return {coins:Math.max(0,Math.floor(Number(v.coins)||0)),tickets:Math.max(0,Math.floor(Number(v.tickets)||0)),streak:Math.max(0,Math.floor(Number(v.streak)||0)),bonusDay:Math.min(BONUS_DAYS,Math.max(0,Math.floor(Number(v.bonusDay)||0))),lastClaim:typeof v.lastClaim==='string'?v.lastClaim:'',cards:Array.isArray(v.cards)?v.cards:[],history:Array.isArray(v.history)?v.history.slice(-50):[],freeCoinGrantV1:v.freeCoinGrantV1===true,freeCoinGrantV2:v.freeCoinGrantV2===true,freeCoinGrantV3:v.freeCoinGrantV3===true}}catch{return empty()}}
 function applyFreeCoinGrant(){
   const account=window.user;
   if(!account?.id)return;
   const before=state;
   if(account.app_metadata?.mushiverse_free_coin_grant_v1===1000000&&!state.freeCoinGrantV1)state={...state,coins:state.coins+1000000,freeCoinGrantV1:true};
   if(account.app_metadata?.mushiverse_free_coin_grant_v2===1000&&!state.freeCoinGrantV2)state={...state,coins:state.coins+1000,freeCoinGrantV2:true};
+  if(account.app_metadata?.mushiverse_free_coin_grant_v3===10000&&!state.freeCoinGrantV3)state={...state,coins:state.coins+10000,freeCoinGrantV3:true};
   if(state!==before&&!save())state=before;
 }
 function save(){try{localStorage.setItem(storageKey(),JSON.stringify(state));return true}catch{drawStatus('保存に失敗しました。ブラウザの保存設定を確認してください。');return false}}

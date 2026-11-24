@@ -28,3 +28,5 @@ Production IAP readiness TestFlight candidate (2026-11-22 JST): main 8021a77dcc3
 2026-11-24 GLOBAL TestFlight candidate: main 21f2e7215041d86701440c44d1a1504a36c1b5b6; six-language navigation and account forms, English native shop and gacha presentation. 299 release tests passed; 400 unique card IDs, names and WebP files verified. Production purchases remain disabled. TestFlight only; not a world distribution release.
 
 2026-11-24 existing-account free coin campaign: credit 1000 free coins from a server-controlled campaign flag to the existing device-local free wallet, with a persisted local receipt. All 302 release tests passed. No paid balance or billing gate change.
+
+2026-11-24 individual free coin grant support: independently acknowledge a server-controlled 10000-coin gift once per local wallet, retaining earlier receipts. All 303 release tests passed. No paid balance or billing gate change.
