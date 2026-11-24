@@ -1,5 +1,6 @@
 /* Deluxe reveal layer. Effects only: cannot charge, select rarities or change rewards. */
 (()=>{'use strict';
+const tr=(ja,en)=>document.documentElement.lang==='en'?en:ja;
 const CSS=`
 #mv88Reveal{--deluxe:#7affe3}
 #mv88Reveal[data-variant="0"]{--deluxe:#86ffb1}
@@ -82,8 +83,8 @@ function build(overlay){
    if(completed)return;completed=true;
    const cards=[...result.querySelectorAll('.mv88Card')];
    const rarity=cards.some(x=>x.classList.contains('mv88Card-SSR'))?'SSR':cards.some(x=>x.classList.contains('mv88Card-SR'))?'SR':cards.some(x=>x.classList.contains('mv88Card-R'))?'R':'N';
-   final.textContent=rarity==='SSR'?'✦ 幻の存在、降臨 ✦':rarity==='SR'?'✦ 希少な輝きを発見 ✦':cards.length===10?'✦ 10連召喚、完了 ✦':'✦ 新たな仲間を発見 ✦';
-   count.textContent=cards.length+'枚のカードを獲得';
+   final.textContent=rarity==='SSR'?tr('✦ 幻の存在、降臨 ✦','✦ A legendary presence awakens ✦'):rarity==='SR'?tr('✦ 希少な輝きを発見 ✦','✦ A rare brilliance discovered ✦'):cards.length===10?tr('✦ 10連召喚、完了 ✦','✦ Ten summons complete ✦'):tr('✦ 新たな仲間を発見 ✦','✦ A new companion discovered ✦');
+   count.textContent=tr(cards.length+'枚のカードを獲得',cards.length+(cards.length===1?' card obtained':' cards obtained'));
    final.hidden=false;count.hidden=false;chapter.hidden=true;label.hidden=true;
    if(!reduced){
     const flash=document.createElement('div');flash.className='mvDeluxeSpotlight';flash.setAttribute('aria-hidden','true');overlay.append(flash);
@@ -95,7 +96,7 @@ function build(overlay){
   chapter.hidden=false;label.hidden=false;
   const current=Math.min(3,Math.max(1,Number(phase)||1));
   [...chapter.children].forEach((dot,i)=>{dot.className=i+1<current?'mvDeluxeDone':i+1===current?'mvDeluxeActive':''});
-  label.textContent=current===1?'Ⅰ · 森の扉、起動':current===2?'Ⅱ · 星のエネルギー集中':'Ⅲ · 幻想昆虫の羽化';
+  label.textContent=current===1?tr('Ⅰ · 森の扉、起動','Ⅰ · The forest gate opens'):current===2?tr('Ⅱ · 星のエネルギー集中','Ⅱ · Starlight gathers'):tr('Ⅲ · 幻想昆虫の羽化','Ⅲ · A mythical insect emerges');
  }
  rootObserver.observe(overlay,{subtree:true,attributes:true,attributeFilter:['data-phase','hidden'],childList:true});
  sync();

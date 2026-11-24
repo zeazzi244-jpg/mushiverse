@@ -1,5 +1,6 @@
 /* MUSHIVERSE: immersive gacha stage (presentation only; draw and wallet logic remain unchanged). */
 (()=>{'use strict';
+const tr=(ja,en)=>document.documentElement.lang==='en'?en:ja;
 const css=`
 #mv101Machine.mvImmersive{position:fixed!important;inset:0!important;width:100vw!important;max-width:none!important;height:100dvh!important;margin:0!important;padding:calc(env(safe-area-inset-top) + 56px) 14px calc(env(safe-area-inset-bottom) + 14px)!important;border-radius:0!important;z-index:2147483500!important;overflow-y:auto!important;overscroll-behavior:contain;background:radial-gradient(ellipse at 50% 30%,#295d3c 0%,#09251e 55%,#04130f 100%)!important;color:#f7f2d8!important;box-shadow:none!important;display:flex;flex-direction:column;align-items:center;gap:10px;isolation:isolate}
 #mv101Machine.mvImmersive:before{content:"";position:fixed;inset:0;pointer-events:none;background:repeating-conic-gradient(from 0deg at 50% 42%,#eac2680b 0 9deg,transparent 9deg 21deg);animation:mvImmersiveRays 16s linear infinite;z-index:-1}
@@ -30,14 +31,26 @@ function init(){
  const machine=unit.querySelector('.mvWoodMachine');if(!machine)return;
  unit.dataset.immersiveReady='true';
  const style=document.createElement('style');style.id='mvImmersiveStyle';style.textContent=css;document.head.append(style);
- const open=document.createElement('button');open.type='button';open.id='mvImmersiveOpen';open.textContent='✦ 大画面でガチャを回す';open.setAttribute('aria-label','ガチャ筐体を全画面で開く');
+ const open=document.createElement('button');open.type='button';open.id='mvImmersiveOpen';
  machine.before(open);
- const close=document.createElement('button');close.type='button';close.id='mvImmersiveClose';close.textContent='× 閉じる';close.hidden=true;
- const instruction=document.createElement('p');instruction.id='mvImmersiveInstruction';instruction.textContent='✦ ハンドルを回して運命のカプセルを召喚 ✦';instruction.hidden=true;
+ const close=document.createElement('button');close.type='button';close.id='mvImmersiveClose';close.hidden=true;
+ const instruction=document.createElement('p');instruction.id='mvImmersiveInstruction';instruction.hidden=true;
  machine.before(instruction);unit.prepend(close);
+ function localize(){
+  open.textContent=tr('✦ 大画面でガチャを回す','✦ Open full-screen gacha');open.setAttribute('aria-label',tr('ガチャ筐体を全画面で開く','Open the gacha machine full screen'));
+  close.textContent=tr('× 閉じる','× Close');instruction.textContent=tr('✦ ハンドルを回して運命のカプセルを召喚 ✦','✦ Turn the handle to summon a capsule ✦');
+  const texts=[['h2','✦ 幻想昆虫ガチャ','✦ Mythical Insect Gacha'],['.mvGachaOdds summary','全レア度の排出率（1回あたり）','Drop rates per draw'],['.mvGachaOdds p','LRは提供開始後、在庫がある間のみ0.01%。全サーバー合計3枚限定です。','LR: 0.01% after launch, while stock lasts. Only 3 cards worldwide.'],['.mvWoodCollection','所持カード・図鑑を見る','View owned cards'],['.mvWoodAudio summary','ガチャの音量','Gacha audio'],['.mvGachaRarityHint strong','SSR · 幻の昆虫','SSR · Mythical insect'],['.mvGachaRarityHint small','出現率 0.1% · 何が出るかはお楽しみ','Drop rate 0.1% · Discover what awaits'],['.mvGachaPrice','1回50コイン · 10連450コイン','1 draw: 50 coins · 10 draws: 450 coins']];
+  for(const [selector,ja,en] of texts){const node=unit.querySelector(selector);if(node&&[ja,en].includes(node.textContent))node.textContent=tr(ja,en)}
+  for(const [id,ja,en] of [['mv77Draw','1回引く · 50コイン／券1枚','Draw once · 50 coins / 1 ticket'],['mv77Ten','10回引く · 450コイン','Draw 10 · 450 coins'],['mvWoodStatus','指でハンドルを弧を描くように回し、光ったら離すと1回引けます。','Turn the handle in an arc, then release when it glows to draw once.']]){const node=document.getElementById(id);if(node&&[ja,en].includes(node.textContent))node.textContent=tr(ja,en)}
+  unit.setAttribute('aria-label',tr('ガシャポン筐体イラスト','Gacha machine'));
+  unit.querySelector('.mvWoodHandle')?.setAttribute('aria-label',tr('ハンドルを回して1回引く','Turn the handle for one draw'));
+  machine.querySelector('img')?.setAttribute('alt',tr('森の切り株に作られたガチャ筐体','Gacha machine carved into a forest tree stump'));
+ }
+ localize();const languageObserver=new MutationObserver(localize);languageObserver.observe(document.documentElement,{attributes:true,attributeFilter:['lang']});
  let oldOverflow='',lastFocus=null;
  function setOpen(value){
   const was=unit.classList.contains('mvImmersive');if(was===value)return;
+  localize();
   if(value){lastFocus=document.activeElement;oldOverflow=document.body.style.overflow;document.body.style.overflow='hidden';}
   else{document.body.style.overflow=oldOverflow;}
   unit.classList.toggle('mvImmersive',value);close.hidden=!value;instruction.hidden=!value;
@@ -50,7 +63,7 @@ function init(){
  document.addEventListener('keydown',e=>{if(e.key==='Escape'&&unit.classList.contains('mvImmersive')&&!document.getElementById('mv88Reveal'))setOpen(false)});
  document.querySelectorAll('nav [data-tab]').forEach(tab=>tab.addEventListener('click',()=>{if(tab.dataset.tab!=='gacha')setOpen(false)}));
  // Existing draw and result events stay intact: fullscreen stage remains behind the reveal.
- window.addEventListener('pagehide',()=>setOpen(false));
+ window.addEventListener('pagehide',()=>{setOpen(false);languageObserver.disconnect()});
 }
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init,{once:true});else init();
 const observer=new MutationObserver(()=>{

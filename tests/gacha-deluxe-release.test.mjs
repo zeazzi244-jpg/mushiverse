@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync, existsSync } from 'node:fs';
-import { Script } from 'node:vm';
+import { Script, runInNewContext } from 'node:vm';
 
 const scripts = [
   'js/gacha-immersive-stage.js',
@@ -45,4 +45,19 @@ test('fullscreen stage retains an obvious exit and safe focus handling', () => {
   assert.match(stage, /mvImmersiveClose/);
   assert.match(stage, /key==='Escape'/);
   assert.match(stage, /lastFocus/);
+});
+
+test('gacha presentation follows the selected language without changing reward logic',()=>{
+  for(const file of [scripts[0],scripts[2]]){
+    const source=readFileSync(new URL('../'+file,import.meta.url),'utf8');
+    const helper=source.match(/^const tr=.*;$/m)?.[0];
+    assert.ok(helper);
+    for(const lang of ['ja','en'])assert.equal(runInNewContext(helper+"\ntr('日本語','English')",{document:{documentElement:{lang}}}),lang==='en'?'English':'日本語');
+  }
+  const stage=readFileSync(new URL('../'+scripts[0],import.meta.url),'utf8');
+  const reveal=readFileSync(new URL('../'+scripts[2],import.meta.url),'utf8');
+  assert.match(stage,/attributeFilter:\['lang'\]/);
+  assert.match(stage,/Open full-screen gacha/);
+  assert.match(reveal,/Ten summons complete/);
+  assert.match(reveal,/cards.length===1\?' card obtained':' cards obtained'/);
 });
