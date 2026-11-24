@@ -264,19 +264,32 @@
   window.addEventListener('pagehide', cancel);
   // The app can mute gacha sounds mid-animation; silence already queued notes
   // immediately instead of waiting for the next cue to read the new volume.
-  window.addEventListener('storage', event => {
+  function updateVolume(event) {
     // Storage.clear() emits a null key and can reset all audio preferences.
-    if (event.key !== null && !['mushiverse-gacha-mute', 'mushiverse-gacha-volume', 'mushiverse-tap-sounds-enabled'].includes(event.key)) return;
+    if (event.type === 'storage' && event.key !== null && !['mushiverse-gacha-mute', 'mushiverse-gacha-volume', 'mushiverse-tap-sounds-enabled'].includes(event.key)) return;
     // A volume change in another tab must affect sounds already playing, not
     // only the next cue. In particular, lowering the volume must not leave a
     // previously queued SSR fanfare playing at its old level.
     const level = volume();
     if (!level) {
+      turn++; // Invalidate pending resume callbacks when muted.
       stop();
     }
     if (audio?.state === 'running' && output) {
       try { output.gain.setValueAtTime(level, audio.currentTime); }
       catch (error) { console.warn('MUSHIVERSE audio volume update failed:', error); }
     }
+  }
+  window.addEventListener('storage', updateVolume);
+  // Storage events do not fire in the document that writes localStorage.
+  // Listen after the controls' own input/change/click handlers persist values.
+  document.addEventListener('input', event => {
+    if (event.target?.matches?.('.mvWoodVolume')) updateVolume(event);
+  });
+  document.addEventListener('change', event => {
+    if (event.target?.matches?.('.mvWoodMute, .mvWoodVolume')) updateVolume(event);
+  });
+  document.addEventListener('click', event => {
+    if (event.target?.closest?.('#mv100AudioToggle')) updateVolume(event);
   });
 })();
