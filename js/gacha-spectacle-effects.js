@@ -84,10 +84,11 @@ function decorate(overlay){
   previousSignature=signature;
   // A hidden reveal can still receive card updates while preparing the next draw.
   // Never flash a closed overlay; let the visible reveal trigger its own burst.
-  const concealed=results.hidden||overlay.hidden||overlay.getAttribute('aria-hidden')==='true'||results.getAttribute('aria-hidden')==='true'||!overlay.getClientRects().length||!results.getClientRects().length||window.getComputedStyle(overlay).visibility==='hidden'||window.getComputedStyle(results).visibility==='hidden';
+  const overlayConcealed=overlay.hidden||overlay.getAttribute('aria-hidden')==='true'||!overlay.getClientRects().length||window.getComputedStyle(overlay).visibility==='hidden';
+  const concealed=overlayConcealed||results.hidden||results.getAttribute('aria-hidden')==='true'||!results.getClientRects().length||window.getComputedStyle(results).visibility==='hidden';
   // A CSS-hidden overlay still runs infinite particle animations unless paused explicitly.
   // toggle() is idempotent; the class observer causes at most one additional sync.
-  overlay.classList.toggle('mvSpectacleHidden',concealed);
+  overlay.classList.toggle('mvSpectacleHidden',overlayConcealed);
   if(document.hidden||concealed){
    // Closing the reveal must cancel an in-flight flash and arm the next visible reveal.
    overlay.querySelectorAll('.mvSpectacleBurst').forEach(node=>node.remove());
@@ -107,7 +108,7 @@ function decorate(overlay){
  const visibilityObserver=new MutationObserver(sync);visibilityObserver.observe(overlay,{attributes:true,attributeFilter:['hidden','aria-hidden','class','style']});
  // CSS-driven visibility changes can occur without changing the hidden attribute.
  const resultsVisibilityObserver=new MutationObserver(sync);
- resultsVisibilityObserver.observe(results,{attributes:true,attributeFilter:['class','style']});sync();
+ resultsVisibilityObserver.observe(results,{attributes:true,attributeFilter:['class','style','aria-hidden']});sync();
  const onVisibilityChange=()=>{overlay.classList.toggle('mvSpectacleSuspended',document.hidden);sync();};
  document.addEventListener('visibilitychange',onVisibilityChange);
  onVisibilityChange();
