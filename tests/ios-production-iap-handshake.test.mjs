@@ -46,3 +46,16 @@ test('native production payment requires current server availability before Stor
   assert.match(purchase,/guard try await appAccountToken\(\) == accountID/);
   assert.match(store,/availability\.productID == productID && availability\.coins == Self\.productionCoinAmounts\[productID\]/);
 });
+
+test('Sandbox verification retries the same verified unfinished purchase once without charging again',()=>{
+  const process=store.slice(store.indexOf('private func process('),store.indexOf('private func productionAvailable('));
+  assert.match(process,/if isSandbox && \(response.statusCode == 422 \|\| response.statusCode == 503\)/);
+  assert.match(process,/for await retryResult in Transaction\.unfinished/);
+  assert.match(process,/case \.verified\(let retryTransaction\) = retryResult/);
+  assert.match(process,/retryTransaction\.id == transaction\.id/);
+  assert.match(process,/retryTransaction\.appAccountToken == expectedAccount/);
+  assert.match(process,/signedTransaction: retryResult\.jwsRepresentation/);
+  assert.match(process,/break\s*\}\s*\}/);
+  assert.doesNotMatch(process,/product\.purchase\(/);
+  assert.ok(process.indexOf('proof.creditedOrPreviouslyCredited') < process.indexOf('await transaction.finish()'));
+});

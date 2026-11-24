@@ -227,10 +227,33 @@ final class MushiverseCoinStore: ObservableObject {
             let settlementEndpoint = !isSandbox
                 ? creditEndpoint.deletingLastPathComponent().appendingPathComponent("settle-apple-production-coins")
                 : creditEndpoint
-            let (data, response) = try await post(
+            var (data, response) = try await post(
                 CreditRequest(transactionID: String(transaction.id), signedTransaction: result.jwsRepresentation),
                 to: settlementEndpoint, token: token
             )
+            // On Sandbox verification failure, re-read the existing unfinished
+            // transaction once. Never create a second StoreKit purchase, accept
+            // unsigned evidence, or finish before the server acknowledges credit.
+            if isSandbox && (response.statusCode == 422 || response.statusCode == 503) {
+                try await Task.sleep(nanoseconds: 1_000_000_000)
+                guard isStarted, lifecycleGeneration == generation, !Task.isCancelled else { return }
+                guard try await appAccountToken() == expectedAccount else { throw PurchaseError.accountMismatch }
+                for await retryResult in Transaction.unfinished {
+                    guard isStarted, lifecycleGeneration == generation, !Task.isCancelled else { return }
+                    guard case .verified(let retryTransaction) = retryResult,
+                          retryTransaction.id == transaction.id,
+                          retryTransaction.originalID == transaction.originalID,
+                          retryTransaction.productID == transaction.productID,
+                          retryTransaction.environment == .sandbox,
+                          retryTransaction.appAccountToken == expectedAccount,
+                          retryTransaction.revocationDate == nil else { continue }
+                    (data, response) = try await post(
+                        CreditRequest(transactionID: String(retryTransaction.id), signedTransaction: retryResult.jwsRepresentation),
+                        to: settlementEndpoint, token: token
+                    )
+                    break
+                }
+            }
             if isSandbox && response.statusCode == 422 {
                 // Apple accepted the Sandbox payment, but the server did not
                 // verify the signed evidence. Keep the transaction unfinished.
