@@ -44,7 +44,7 @@ final class MushiverseCoinPlugin: CAPPlugin, CAPBridgedPlugin, UIAdaptivePresent
                 ScrollView { MushiverseCoinShopView(store: store, purchasesEnabled: MushiverseCoinStore.purchasesEnabled) }
                     .toolbar {
                         ToolbarItem(placement: .confirmationAction) {
-                            Button("閉じる") { self.dismissShop() }
+                            Button(MushiverseCoinShopView.localized("閉じる", "Close")) { self.dismissShop() }
                         }
                     }
             }

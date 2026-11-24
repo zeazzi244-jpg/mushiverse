@@ -18,3 +18,13 @@ test('Sandbox testing stays isolated and production remains disabled', () => {
   assert.match(store, /proof\.fulfillment == "sandbox_test_wallet"/);
   assert.match(store, /guard canOffer\(product\.id\)/);
 });
+
+test('international shop translates every current purchase status without changing Apple prices', () => {
+  for(const [,message] of store.matchAll(/lastError = "([^"\n]+)"/g)) {
+    assert.ok(shop.includes(`"${message}": "`),`missing English status: ${message}`);
+  }
+  assert.match(shop,/Locale\.preferredLanguages\.first/);
+  assert.match(shop,/Text\(product\.displayPrice\)/);
+  assert.match(shop,/Sandbox test purchases do not affect your regular coin balance/);
+  assert.match(shop,/\.disabled\(!available \|\| !store\.canPurchase\)/);
+});
