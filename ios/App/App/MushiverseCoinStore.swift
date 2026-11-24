@@ -158,6 +158,21 @@ final class MushiverseCoinStore: ObservableObject {
         do {
             let accountID = try await appAccountToken()
             guard isStarted, lifecycleGeneration == generation, !Task.isCancelled else { return }
+            if Self.purchasesEnabled {
+                guard #available(iOS 16.0, *),
+                      case .verified(let app) = try await AppTransaction.shared,
+                      app.bundleID == "com.rikuto.mushiverse" else { throw PurchaseError.serverRejected }
+                if app.environment == .production {
+                    guard try await productionAvailable(product.id) else {
+                        lastError = "現在は販売準備中です。購入はできません。"
+                        return
+                    }
+                } else if app.environment != .sandbox || product.id != Self.sandboxProductID {
+                    throw PurchaseError.serverRejected
+                }
+                guard try await appAccountToken() == accountID else { throw PurchaseError.accountMismatch }
+                guard isStarted, lifecycleGeneration == generation, !Task.isCancelled else { return }
+            }
             switch try await product.purchase(options: [.appAccountToken(accountID)]) {
             case .success(let verification):
                 await process(verification)
@@ -262,6 +277,30 @@ final class MushiverseCoinStore: ObservableObject {
         } catch {
             // Deliberately leave the StoreKit transaction unfinished for retry.
             lastError = "購入の反映を確認できませんでした。未完了の購入を再確認してください。"
+        }
+    }
+
+    private func productionAvailable(_ productID: String) async throws -> Bool {
+        guard creditEndpoint.scheme == "https", creditEndpoint.host?.lowercased() == "jhowxtdemlsmetcwhekr.supabase.co", creditEndpoint.path == "/functions/v1/credit-apple-gacha-coins" else {
+            throw PurchaseError.serverRejected
+        }
+        let token = try await accessToken()
+        guard !token.isEmpty else { throw PurchaseError.unauthorized }
+        let endpoint = creditEndpoint.deletingLastPathComponent().appendingPathComponent("submit-apple-purchase-claim")
+        let (data, response) = try await post(["action": "production_availability", "product_id": productID], to: endpoint, token: token)
+        guard response.statusCode == 200,
+              let availability = try? JSONDecoder().decode(ProductionAvailability.self, from: data) else { return false }
+        return availability.ok && availability.available && availability.productID == productID && availability.coins == Self.productionCoinAmounts[productID]
+    }
+
+    private struct ProductionAvailability: Decodable {
+        let ok: Bool
+        let available: Bool
+        let productID: String
+        let coins: Int
+        enum CodingKeys: String, CodingKey {
+            case ok, available, coins
+            case productID = "product_id"
         }
     }
 

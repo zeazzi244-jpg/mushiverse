@@ -15,7 +15,8 @@ function createHarness({productionEnabled=false,gateOverrides={}}={}) {
     .replace('const chunks:Uint8Array[]=[];', 'const chunks=[];')
     .replace('let rawBody:string;', 'let rawBody;')
     .replaceAll('(row:any)', '(row)')
-    .replace(' as keyof typeof appleCoinPacks', '')
+    .replaceAll(' as keyof typeof appleCoinPacks', '')
+    .replace('productId: string', 'productId')
     .replace(/Deno\.env\.get\(("SUPABASE_(?:URL|ANON_KEY|SERVICE_ROLE_KEY)")\)!/g, 'Deno.env.get($1)');
   let handler;
   const rows = [];
@@ -94,6 +95,20 @@ function createHarness({productionEnabled=false,gateOverrides={}}={}) {
 const coin=(id,product='mushiverse.coins.100',original=id)=>({
   transaction_id:id,original_transaction_id:original,product_id:product,
   environment:'Sandbox'
+});
+test('purchase availability is read-only and respects every production gate',async()=>{
+  const request={action:'production_availability',product_id:'mushiverse.coins.100'};
+  const closed=createHarness();
+  assert.equal((await closed.send(request)).status,503);
+  const open=createHarness({productionEnabled:true});
+  assert.deepEqual(await open.send(request),{status:200,data:{ok:true,available:true,product_id:request.product_id,coins:100}});
+  assert.equal((await open.send(request,false,'')).status,401);
+  assert.equal((await open.send({...request,product_id:'unknown'})).status,403);
+  assert.equal((await open.send({...request,transaction_id:'123456789'})).status,400);
+  open.setFlags({minor:true});
+  assert.equal((await open.send(request)).status,403);
+  assert.equal(open.rows.length,0);
+  assert.equal(closed.rows.length,0);
 });
 test('accepts an allowlisted coin claim as pending, not as a granted reward',async()=>{
   const h=createHarness();

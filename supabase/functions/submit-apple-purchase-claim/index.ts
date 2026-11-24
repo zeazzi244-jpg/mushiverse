@@ -62,6 +62,28 @@ Deno.serve(async(req)=>{
     let body:Record<string,unknown>;
     try{body=JSON.parse(rawBody)}catch{return json({error:"invalid_json"},400)}
     if(!body||typeof body!=="object"||Array.isArray(body))return json({error:"invalid_body"},400);
+    // Use the same read-only release checks before payment and before claim staging.
+    async function productionGate(productId: string) {
+      if(!isAppleCoinProduct(productId)) return json({error:"production_product_not_approved"},403);
+      const [{data:billing,error:billingError},{data:gate,error:gateError},{data:pack,error:packError}]=await Promise.all([
+        admin.from("billing_settings").select("billing_mode,checkout_enabled,ios_iap_ready").eq("singleton",true).single(),
+        admin.from("apple_iap_verification_gate").select("server_jws_verified,sandbox_purchase_proven").eq("singleton",true).single(),
+        admin.from("apple_coin_pack_catalog").select("coins,is_sale_enabled").eq("product_id",productId).single(),
+      ]);
+      if(billingError||gateError||packError) return json({error:"production_claim_unavailable"},503);
+      if(!billing||billing.billing_mode!=="live"||billing.checkout_enabled!==true||billing.ios_iap_ready!==true||
+         !gate||gate.server_jws_verified!==true||gate.sandbox_purchase_proven!==true||
+         !pack||pack.coins!==appleCoinPacks[productId as keyof typeof appleCoinPacks]||pack.is_sale_enabled!==true)
+        return json({error:"production_fulfillment_disabled"},503);
+      return null;
+    }
+    if(body.action!==undefined){
+      if(body.action!=="production_availability"||Object.keys(body).some(key=>key!=="action"&&key!=="product_id")||typeof body.product_id!=="string")
+        return json({error:"invalid_availability_request"},400);
+      const denied=await productionGate(body.product_id);
+      if(denied) return denied;
+      return json({ok:true,available:true,product_id:body.product_id,coins:appleCoinPacks[body.product_id as keyof typeof appleCoinPacks]});
+    }
     const transactionId=body.transaction_id;
     const originalTransactionId=body.original_transaction_id??null;
     const productId=body.product_id;
@@ -88,19 +110,8 @@ Deno.serve(async(req)=>{
     if(environment==="Production"){
       // Production claims may be staged only after every independent release
       // gate is open. This must not be a client-controlled feature switch.
-      if(!isAppleCoinProduct(productId))
-        return json({error:"production_product_not_approved"},403);
-      const [{data:billing,error:billingError},{data:gate,error:gateError},{data:pack,error:packError}]=await Promise.all([
-        admin.from("billing_settings").select("billing_mode,checkout_enabled,ios_iap_ready").eq("singleton",true).single(),
-        admin.from("apple_iap_verification_gate").select("server_jws_verified,sandbox_purchase_proven").eq("singleton",true).single(),
-        admin.from("apple_coin_pack_catalog").select("coins,is_sale_enabled").eq("product_id",productId).single(),
-      ]);
-      if(billingError||gateError||packError)
-        return json({error:"production_claim_unavailable"},503);
-      if(!billing||billing.billing_mode!=="live"||billing.checkout_enabled!==true||billing.ios_iap_ready!==true||
-         !gate||gate.server_jws_verified!==true||gate.sandbox_purchase_proven!==true||
-         !pack||pack.coins!==appleCoinPacks[productId as keyof typeof appleCoinPacks]||pack.is_sale_enabled!==true)
-        return json({error:"production_fulfillment_disabled"},503);
+      const denied=await productionGate(productId);
+      if(denied) return denied;
     }
 
     // Claims are only unverified reports. Replays must never reset a verified

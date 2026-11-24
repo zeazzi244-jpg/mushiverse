@@ -38,3 +38,11 @@ test('failed server settlement leaves StoreKit transaction unfinished for retry'
   assert.ok(store.indexOf('receipt.creditedOrPreviouslyCredited') < store.lastIndexOf('await transaction.finish()'));
   assert.match(store, /購入の反映を確認できませんでした。未完了の購入を再確認してください。/);
 });
+
+test('native production payment requires current server availability before StoreKit',()=>{
+  const purchase=store.slice(store.indexOf('func purchase('),store.indexOf('private func process('));
+  assert.ok(purchase.indexOf('guard try await productionAvailable(product.id)') < purchase.indexOf('product.purchase(options:'));
+  assert.match(purchase,/app\.environment == \.production/);
+  assert.match(purchase,/guard try await appAccountToken\(\) == accountID/);
+  assert.match(store,/availability\.productID == productID && availability\.coins == Self\.productionCoinAmounts\[productID\]/);
+});
