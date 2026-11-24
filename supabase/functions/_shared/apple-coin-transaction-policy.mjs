@@ -28,14 +28,13 @@ export function validateVerifiedAppleCoinTransaction(transaction, expected) {
   return validateSignedAppleCoinTransaction(transaction, expected);
 }
 
-// Independent, post-signature-verification policy for Production preparation.
-// Not called by any purchase or fulfillment endpoint. This validates payload
-// semantics only; it NEVER authorizes a purchase or writes a wallet.
+// Independent, post-signature-verification policy for Production settlement.
+// This validates payload semantics only; it never authorizes a purchase or
+// writes a wallet. The server and database release gates remain authoritative.
 export function validateProductionAppleCoinTransaction(transaction, expected) {
   if (expected?.environment !== 'Production') throw new Error('production_environment_required');
-  // Production launch is approved for these three packs only. Legacy catalog
-  // entries must never become purchasable merely by flipping a DB sale flag.
-  if (!isSandboxAppleCoinProduct(expected.productId)) throw new Error('product_mismatch');
+  // All seven configured consumables were confirmed approved in App Store Connect on 2026-11-24.
+  if (!isAppleCoinProduct(expected.productId)) throw new Error('product_mismatch');
   return validateSignedAppleCoinTransaction(transaction, expected);
 }
 

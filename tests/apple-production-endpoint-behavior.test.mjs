@@ -1,6 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
+import {appleCoinPacks, isAppleCoinProduct} from '../supabase/functions/_shared/apple-coin-transaction-policy.mjs';
 
 const source = readFileSync(new URL('../supabase/functions/settle-apple-production-coins/index.ts',import.meta.url),'utf8')
   .replace(/^import .*;\s*$/gm,'')
@@ -28,7 +29,7 @@ function harness({enabled=false,owner='user-1',validSignature=true,transientSign
   const tables={
     billing_settings: {billing_mode:enabled?'live':'off',checkout_enabled:enabled,ios_iap_ready:enabled},
     apple_iap_verification_gate: {server_jws_verified:enabled,sandbox_purchase_proven:enabled},
-    apple_coin_pack_catalog: {coins:100,is_sale_enabled:enabled},
+    apple_coin_pack_catalog: {coins:appleCoinPacks[productID],is_sale_enabled:enabled},
   };
   const admin={
     from(table) {
@@ -50,7 +51,7 @@ function harness({enabled=false,owner='user-1',validSignature=true,transientSign
       assert.equal(args.p_transaction_id,'123456789');
       assert.equal(args.p_original_transaction_id,'123456789');
       assert.equal(args.p_user_id,'user-1');
-      assert.equal(args.p_product_id,'mushiverse.coins.100');
+      assert.equal(args.p_product_id,productID);
       assert.equal(args.p_purchase_date,'2024-10-27T03:33:20.000Z');
       return settled?{data:true,error:null}:{data:null,error:{code:'FAILED'}};
     }
@@ -60,16 +61,16 @@ function harness({enabled=false,owner='user-1',validSignature=true,transientSign
     calls.verify++;
     assert.equal(signed,'abc.def.ghi');
     assert.equal(appID,6826061606);
-    assert.deepEqual(expected,{environment:'Production',productId:'mushiverse.coins.100',
+    assert.deepEqual(expected,{environment:'Production',productId:productID,
       transactionId:'123456789',originalTransactionId:'123456789',appAccountToken:'user-1'});
     if(transientSignatureFailure) throw new VerificationException(VerificationStatus.RETRYABLE_VERIFICATION_FAILURE);
     if(!validSignature) throw Error('bad_signature');
-    return {transactionId:'123456789',originalTransactionId:'123456789',productId:'mushiverse.coins.100',coins:100,purchaseDate:1730000000000};
+    return {transactionId:'123456789',originalTransactionId:'123456789',productId:productID,coins:appleCoinPacks[productID],purchaseDate:1730000000000};
   };
   class VerificationException extends Error { constructor(status){ super('redacted'); this.status=status; } }
   const VerificationStatus = {RETRYABLE_VERIFICATION_FAILURE:'RETRYABLE_VERIFICATION_FAILURE'};
   new Function('Deno','createClient','verifyAppleProductionCoinJws','Response','appleCoinPacks','isAppleCoinProduct','VerificationException','VerificationStatus',source)(
-    Deno,createClient,verifier,Response,{'mushiverse.coins.100':100},id=>id==='mushiverse.coins.100',VerificationException,VerificationStatus
+    Deno,createClient,verifier,Response,appleCoinPacks,isAppleCoinProduct,VerificationException,VerificationStatus
   );
   assert.equal(typeof handler,'function');
   const send=async({bearer='Bearer token',method='POST',body={transaction_id:'123456789',signed_transaction:'abc.def.ghi'}}={})=>{
@@ -150,6 +151,19 @@ test('a DB settlement failure cannot be acknowledged as completed payment',async
   assert.equal(r.body.error,'settlement_unavailable');
   assert.equal(h.calls.verify,1);
   assert.equal(h.calls.settle,1);
+});
+
+test('each approved pack is acknowledged for its exact verified denomination only when the gates are open',async()=>{
+  for (const [productID,coins] of Object.entries(appleCoinPacks)) {
+    const closed = harness({productID});
+    assert.equal((await closed.send()).status,503);
+    assert.equal(closed.calls.settle,0);
+    const open = harness({productID,enabled:true});
+    const result = await open.send();
+    assert.equal(result.status,200,productID);
+    assert.equal(result.body.coins,coins);
+    assert.equal(open.calls.settle,1);
+  }
 });
 
 for(const flag of ['kid_mode','minor','iap_disabled']) {

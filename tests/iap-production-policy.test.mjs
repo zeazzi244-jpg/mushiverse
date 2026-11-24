@@ -15,13 +15,13 @@ const signed = (productId, environment = 'Production') => ({
   inAppOwnershipType: 'PURCHASED', purchaseDate: now - 5000, signedDate: now - 1000,
 });
 
-for (const [id, coins] of [['mushiverse.coins.100',100], ['mushiverse.coins.500',500], ['mushiverse.coins.1200',1200]]) {
+for (const [id, coins] of [['mushiverse.coins.100',100], ['mushiverse.coins.300',300], ['mushiverse.coins.500',500], ['mushiverse.coins.1200',1200], ['mushiverse.coins.2500',2500], ['mushiverse.coins.5500',5500], ['mushiverse.coins.12000',12000]]) {
   test('Production policy accepts verified '+id, () => {
     assert.equal(validateProductionAppleCoinTransaction(signed(id), expected(id)).coins, coins);
   });
 }
-test('legacy packs cannot be activated by a database sale flag', () => {
-  for (const id of ['mushiverse.coins.300','mushiverse.coins.2500','mushiverse.coins.5500','mushiverse.coins.12000'])
+test('unknown packs cannot be activated by a database sale flag', () => {
+  for (const id of ['mushiverse.coins.1000','mushiverse.coins.99999','other.coins.100'])
     assert.throws(() => validateProductionAppleCoinTransaction(signed(id),expected(id)), /product_mismatch/);
 });
 test('Sandbox cannot be settled through Production policy and vice versa', () => {
