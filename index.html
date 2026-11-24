@@ -777,12 +777,12 @@ $('post').querySelector('.hint').textContent='ログインすると写真と昆�
 $('collection').querySelector('.hint').textContent='みんなの投稿から発見した昆虫を種類ごとに表示し、分類傾向やレア度も見られます。';
 $('home').querySelector('.hint').textContent='みんなの採集記録を検索・並び替えしながら、季節のおすすめや人気地域も見られます。';
 function authUI(){
- $('authArea').innerHTML=user?`<h2>👤 ログイン中</h2><p class="fineprint">${esc(user.email||'ユーザー')}</p><button class="btn outline" id="signOut">ログアウト</button>`:`<h2>👤 会員登録・ログイン</h2><label class="field"><span>メールアドレス</span><input type="email" id="authEmail" autocomplete="email" placeholder="メールアドレス"></label><label class="field"><span>パスワード（6文字以上）</span><input type="password" id="authPassword" autocomplete="current-password" placeholder="パスワード"></label><div class="authrow"><button class="btn" id="signUp">新規登録</button><button class="btn outline" id="signIn">ログイン</button></div><p id="authFeedback" role="status" aria-live="polite"></p><p class="fineprint">新規登録後、届いた確認メールのリンクを開いてからログインしてください。</p>`;
- $('postAuthMessage').textContent=user?'写真と昆虫の記録を公開できます。':'発見を投稿するにはログインが必要です。';
+ $('authArea').innerHTML=user?`<h2 data-en="👤 Signed in">👤 ログイン中</h2><p class="fineprint">${esc(user.email||'ユーザー')}</p><button class="btn outline" id="signOut" data-en="Sign out">ログアウト</button>`:`<h2 data-en="👤 Create an account or sign in">👤 会員登録・ログイン</h2><label class="field"><span data-en="Email address">メールアドレス</span><input type="email" id="authEmail" autocomplete="email" placeholder="メールアドレス" data-en-placeholder="Email address"></label><label class="field"><span data-en="Password (at least 6 characters)">パスワード（6文字以上）</span><input type="password" id="authPassword" autocomplete="current-password" placeholder="パスワード" data-en-placeholder="Password"></label><div class="authrow"><button class="btn" id="signUp" data-en="Create account">新規登録</button><button class="btn outline" id="signIn" data-en="Sign in">ログイン</button></div><p id="authFeedback" role="status" aria-live="polite"></p><p class="fineprint" data-en="After registering, open the confirmation link in your email before signing in.">新規登録後、届いた確認メールのリンクを開いてからログインしてください。</p>`;
+ translateGlobalAuth();applyInlineTranslations();
  $('mvPostSignIn').hidden=Boolean(user);
  $('recordForm').querySelector('button[type="submit"]').disabled=!user;
  if(user){$('signOut').onclick=async()=>{const {error}=await db.auth.signOut();if(error)toast(error.message)}}
- else {for(const [id,mode] of [['signUp','up'],['signIn','in']]){$(id).disabled=!db;$(id).onclick=async()=>{const email=$('authEmail').value.trim(),password=$('authPassword').value;if(!email||password.length<6){toast('メールアドレスと6文字以上のパスワードを入力してください');return}$(id).disabled=true;const feedback=$('authFeedback');feedback.textContent=mode==='in'?'ログインしています…':'登録しています…';try{const {data,error}=mode==='up'?await db.auth.signUp({email,password,emailRedirectTo:location.origin+location.pathname}):await db.auth.signInWithPassword({email,password});if(error)throw error;feedback.textContent='';toast(mode==='up'?'確認メールを送信しました。メールをご確認ください':'ログインしました');if(data?.session?.user){applyStartupUser(data.session.user);tab('home')}}catch(e){console.warn('MUSHIVERSE sign-in failed',e?.name||'Error',String(e?.message||'').slice(0,180));const interrupted=/abort|timed? ?out|failed to fetch|load failed|network/i.test(String(e?.message))||e?.name==='AbortError';const reason=interrupted?'通信が中断されました。接続を確認して、もう一度お試しください。':'認証エラー：'+e.message;feedback.textContent=reason;toast(reason)}finally{const b=$(id);if(b)b.disabled=false}}}}
+ else {for(const [id,mode] of [['signUp','up'],['signIn','in']]){$(id).disabled=!db;$(id).onclick=async()=>{const email=$('authEmail').value.trim(),password=$('authPassword').value;if(!email||password.length<6){toast(authText('メールアドレスと6文字以上のパスワードを入力してください','Enter your email address and a password of at least 6 characters.'));return}$(id).disabled=true;const feedback=$('authFeedback');feedback.textContent=mode==='in'?authText('ログインしています…','Signing in…'):authText('登録しています…','Creating account…');try{const {data,error}=mode==='up'?await db.auth.signUp({email,password,emailRedirectTo:location.origin+location.pathname}):await db.auth.signInWithPassword({email,password});if(error)throw error;feedback.textContent='';toast(mode==='up'?authText('確認メールを送信しました。メールをご確認ください','Confirmation email sent. Check your inbox.'):authText('ログインしました','Signed in'));if(data?.session?.user){applyStartupUser(data.session.user);tab('home')}}catch(e){console.warn('MUSHIVERSE sign-in failed',e?.name||'Error',String(e?.message||'').slice(0,180));const interrupted=/abort|timed? ?out|failed to fetch|load failed|network/i.test(String(e?.message))||e?.name==='AbortError';const reason=interrupted?authText('通信が中断されました。接続を確認して、もう一度お試しください。','Connection interrupted. Check your connection and try again.'):authText('認証エラー：','Authentication error: ')+e.message;feedback.textContent=reason;toast(reason)}finally{const b=$(id);if(b)b.disabled=false}}}}
 }
 const MAP_GEO_CACHE_KEY='mushiverse_map_geocode_v2';
 let mapGeoCache={};
@@ -1848,6 +1848,12 @@ function translateGlobalNavigation(lang){
   }
   const skip=document.querySelector('.skipLink');if(skip)skip.textContent=en?'Skip to main content':'メインコンテンツへ移動';
 }
+function authText(ja,en){return globalLang()==='en'?en:ja}
+function translateGlobalAuth(){
+  const en=globalLang()==='en';
+  const message=$('postAuthMessage');if(message)message.textContent=user?(en?'You can publish photos and insect observations.':'写真と昆虫の記録を公開できます。'):(en?'Sign in to publish your discoveries.':'発見を投稿するにはログインが必要です。');
+  for(const id of ['mvPostSignIn','mvStartSignIn']){const button=$(id);if(button)button.textContent=en?'Create account / Sign in':'登録・ログイン'}
+}
 // v67: make the language helper accessible from later standalone scripts.
 Object.defineProperty(window,'globalLang',{configurable:true,value:globalLang});
 function globalPrefs(){try{return JSON.parse(localStorage.getItem(GLOBAL_LOCALE_KEY)||'{}')||{}}catch{return {}}}
@@ -1855,7 +1861,7 @@ function saveGlobalPrefs(v){try{localStorage.setItem(GLOBAL_LOCALE_KEY,JSON.stri
 function applyGlobalLanguage(){
   const lang=globalLang()==='en'?'en':'ja';document.documentElement.lang=lang;document.body?.classList.toggle('lang-en',lang==='en');
   const sel=$('globalLanguage');if(sel)sel.value=lang;
-  document.title=lang==='en'?'MUSHIVERSE | Insect Discovery Community':'ムシバース | 昆虫発見・交流SNS';applyInlineTranslations();translateGlobalNavigation(lang);
+  document.title=lang==='en'?'MUSHIVERSE | Insect Discovery Community':'ムシバース | 昆虫発見・交流SNS';applyInlineTranslations();translateGlobalNavigation(lang);translateGlobalAuth();
 }
 function setGlobalLanguage(lang){try{localStorage.setItem(GLOBAL_LANG_KEY,lang==='en'?'en':'ja')}catch{}applyGlobalLanguage();renderGlobalWelcome();renderGlobalDiscovery();renderGlobalSettings();renderSpeciesPassport();renderGlobalRecordPassport();renderGlobalMigrationCenter();renderGlobalSchemaPlan();renderGlobalLaunchLab();renderTranslationCoverage();renderGlobalRoadmap();ensureV28UI();renderGlobalCompatibility();renderWorldPreview();toast(lang==='en'?'Language: English':'表示言語：日本語')}
 function renderGlobalWelcome(){
@@ -4308,6 +4314,7 @@ function initProfile(){
  }
  $('mvStartSignIn').onclick=goToAccount;
  $('mvPostSignIn').onclick=goToAccount;
+ if(typeof translateGlobalAuth==='function')translateGlobalAuth();
  $('mvExploreGuide').onclick=()=>document.querySelector('nav [data-tab="collection"]').click();
  const editor=$('mv86ProfileEditor'),edit=$('mv86ProfileEdit');
  let editorKey,editorRevision=0,importedProfile=null;

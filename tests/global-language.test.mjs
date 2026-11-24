@@ -38,3 +38,21 @@ test('English navigation preserves icons and badges and can switch back to Japan
   assert.equal(label.textContent,'ホーム');
   assert.equal(badge.textContent,'7');
 });
+
+test('account language changes preserve login fields and existing authentication calls',()=>{
+  const auth=html.slice(html.indexOf('function authUI(){'),html.indexOf('const MAP_GEO_CACHE_KEY'));
+  assert.match(auth,/id="authEmail"[^>]+data-en-placeholder="Email address"/);
+  assert.match(auth,/id="authPassword"[^>]+data-en-placeholder="Password"/);
+  assert.match(auth,/db\.auth\.signInWithPassword\(\{email,password\}\)/);
+  assert.match(auth,/db\.auth\.signUp\(\{email,password,emailRedirectTo:location\.origin\+location\.pathname\}\)/);
+  assert.match(auth,/Signing in…/);
+  assert.match(auth,/Connection interrupted/);
+  const messages={postAuthMessage:{},mvPostSignIn:{},mvStartSignIn:{}};
+  const context={GLOBAL_LANG_KEY:'language',navigator:{language:'en-US'},localStorage:{getItem:()=>null},user:null,$:id=>messages[id]};
+  runInNewContext(source+'\ntranslateGlobalAuth()',context);
+  assert.equal(messages.postAuthMessage.textContent,'Sign in to publish your discoveries.');
+  assert.equal(messages.mvStartSignIn.textContent,'Create account / Sign in');
+  context.user={id:'test'};
+  runInNewContext('translateGlobalAuth()',context);
+  assert.equal(messages.postAuthMessage.textContent,'You can publish photos and insect observations.');
+});
