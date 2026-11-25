@@ -1957,7 +1957,7 @@ function buildGlobalMigrationPayload(){const mine=user?records.filter(r=>r.user_
 
 function renderGlobalSchemaPlan(){
  const el=$('globalSchemaPlan');if(!el)return;
- const en=(localStorage.getItem('mushiverse_global_language')||'ja')==='en';
+ const en=globalLang()==='en';
  const fields=[
   ['country_code',en?'ISO country code (JP / US / GB...)':'ISO国コード（JP / US / GBなど）'],
   ['region',en?'State / prefecture / province':'都道府県・州・省など'],
@@ -1969,7 +1969,7 @@ function renderGlobalSchemaPlan(){
 }
 function renderGlobalLaunchLab(){
  const el=$('globalLaunchLab');if(!el)return;
- const en=(localStorage.getItem('mushiverse_global_language')||'ja')==='en';
+ const en=globalLang()==='en';
  let passports={};try{passports=JSON.parse(localStorage.getItem('mushiverse_global_record_passport')||'{}')}catch(e){}
  const mine=user?records.filter(r=>r.user_id===user.id):[];
  const staged=mine.filter(r=>passports[r.id]?.country_code||passports[r.id]?.country).length;
@@ -2629,7 +2629,7 @@ setTimeout(()=>{try{v38RestoreUI();renderV38();if(navigator.onLine&&v38IsStale(1
 /* ===== v39 QUALITY GATE / ACCESSIBILITY + PERFORMANCE ===== */
 const V39_LITE_KEY='mushiverse-v39-lite';
 const v39Perf={fcp:null,lcp:null,cls:0,nav:null};
-function v39Lang(){try{return localStorage.getItem('mushiverse-language-v1')==='en'}catch{return false}}
+function v39Lang(){return globalLang()==='en'}
 function v39ApplyLite(){let on=false;try{on=localStorage.getItem(V39_LITE_KEY)==='1'}catch{};document.documentElement.classList.toggle('v39-lite',on);return on}
 function v39ObservePerformance(){
   try{const n=performance.getEntriesByType('navigation')[0];if(n)v39Perf.nav={dcl:Math.round(n.domContentLoadedEventEnd),load:Math.round(n.loadEventEnd||0)}}catch{}
@@ -2685,7 +2685,7 @@ window.addEventListener('load',()=>setTimeout(v39Render,700));
 const V40_SNAPSHOT_KEY='mushiverse-v40-safe-snapshot';
 const V40_ALLOWED_PREFIXES=['mushiverse-','mushiverse_'];
 const V40_DENY_RE=/(auth|token|session|supabase|jwt|secret|password|apikey|api_key|service[_-]?role)/i;
-function v40En(){try{return localStorage.getItem('mushiverse-language-v1')==='en'}catch{return false}}
+function v40En(){return globalLang()==='en'}
 function v40Creator(){return new URLSearchParams(location.search).get('creator')==='1'}
 function v40StorageOK(){try{const k='__mushi_v40_test';localStorage.setItem(k,'1');localStorage.removeItem(k);return true}catch{return false}}
 function v40MetaVersion(){return document.querySelector('meta[name="mushiverse-version"]')?.content||''}
