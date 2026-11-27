@@ -59,3 +59,13 @@ test('Sandbox verification retries the same verified unfinished purchase once wi
   assert.doesNotMatch(process,/product\.purchase\(/);
   assert.ok(process.indexOf('proof.creditedOrPreviouslyCredited') < process.indexOf('await transaction.finish()'));
 });
+
+test('settlement leaves time for upstream verification while ordinary requests remain bounded',()=>{
+  const verifier=readFileSync(new URL('../supabase/functions/_shared/apple-production-coin-verifier.ts',import.meta.url),'utf8');
+  const upstream=Number(verifier.match(/AbortSignal\.timeout\((\d+)\)/)?.[1]);
+  const settlement=[...store.matchAll(/to: settlementEndpoint, token: token, timeout: (\d+)/g)].map(m=>Number(m[1]));
+  assert.equal(settlement.length,2);
+  assert.ok(settlement.every(seconds=>seconds*1000>upstream&&seconds<=60));
+  assert.match(store,/timeout: TimeInterval = 20/);
+  assert.match(store,/request\.timeoutInterval = timeout/);
+});

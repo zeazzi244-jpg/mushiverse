@@ -30,3 +30,5 @@ Production IAP readiness TestFlight candidate (2026-11-22 JST): main 8021a77dcc3
 2026-11-24 existing-account free coin campaign: credit 1000 free coins from a server-controlled campaign flag to the existing device-local free wallet, with a persisted local receipt. All 302 release tests passed. No paid balance or billing gate change.
 
 2026-11-24 individual free coin grant support: independently acknowledge a server-controlled 10000-coin gift once per local wallet, retaining earlier receipts. All 303 release tests passed. No paid balance or billing gate change.
+
+2026-11-27 TestFlight candidate: use a bounded 45-second settlement request timeout to accommodate the 33-second Apple verifier deadline; ordinary requests remain at 20 seconds. All 304 release tests passed. Production sales remain disabled.

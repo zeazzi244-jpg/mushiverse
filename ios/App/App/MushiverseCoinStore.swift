@@ -229,7 +229,7 @@ final class MushiverseCoinStore: ObservableObject {
                 : creditEndpoint
             var (data, response) = try await post(
                 CreditRequest(transactionID: String(transaction.id), signedTransaction: result.jwsRepresentation),
-                to: settlementEndpoint, token: token
+                to: settlementEndpoint, token: token, timeout: 45
             )
             // On Sandbox verification failure, re-read the existing unfinished
             // transaction once. Never create a second StoreKit purchase, accept
@@ -249,7 +249,7 @@ final class MushiverseCoinStore: ObservableObject {
                           retryTransaction.revocationDate == nil else { continue }
                     (data, response) = try await post(
                         CreditRequest(transactionID: String(retryTransaction.id), signedTransaction: retryResult.jwsRepresentation),
-                        to: settlementEndpoint, token: token
+                        to: settlementEndpoint, token: token, timeout: 45
                     )
                     break
                 }
@@ -327,9 +327,11 @@ final class MushiverseCoinStore: ObservableObject {
         }
     }
 
-    private func post<Body: Encodable>(_ body: Body, to endpoint: URL, token: String) async throws -> (Data, HTTPURLResponse) {
+    private func post<Body: Encodable>(_ body: Body, to endpoint: URL, token: String, timeout: TimeInterval = 20) async throws -> (Data, HTTPURLResponse) {
         var request = URLRequest(url: endpoint)
-        request.timeoutInterval = 20
+        // Settlement may wait up to 33 seconds for the upstream Apple verifier.
+        // Keep the request bounded, but do not cut off a valid in-progress credit.
+        request.timeoutInterval = timeout
         request.cachePolicy = .reloadIgnoringLocalCacheData
         request.httpMethod = "POST"
         request.setValue("Bearer " + token, forHTTPHeaderField: "Authorization")
