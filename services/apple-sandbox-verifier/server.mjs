@@ -1,6 +1,7 @@
 import { createServer } from 'node:http';
 import { createHash, timingSafeEqual } from 'node:crypto';
-import { Environment, SignedDataVerifier, VerificationException, VerificationStatus } from '@apple/app-store-server-library';
+import { AppStoreServerAPIClient, Environment, SignedDataVerifier, VerificationException, VerificationStatus } from '@apple/app-store-server-library';
+import { recoverSandboxDate } from './sandbox-date-recovery.mjs';
 import { isAppleCoinProduct, validateProductionAppleCoinTransaction, validateVerifiedAppleCoinTransaction } from '../../supabase/functions/_shared/apple-coin-transaction-policy.mjs';
 
 const secret = process.env.APPLE_SANDBOX_VERIFIER_SECRET;
@@ -30,6 +31,15 @@ const productionVerifier = new SignedDataVerifier([g2Root, root], true, Environm
   'com.rikuto.mushiverse', 6826061606);
 
 const verifier = new SignedDataVerifier([root], true, Environment.SANDBOX, 'com.rikuto.mushiverse');
+// Separate optional server-side credentials. Never print or transfer key material.
+const recoveryKey=process.env.APPLE_IAP_PRIVATE_KEY_P8;
+const recoveryKeyId=process.env.APPLE_IAP_KEY_ID;
+const recoveryIssuer=process.env.APPLE_IAP_ISSUER_ID;
+let sandboxRecoveryClient=null;
+if(recoveryKey&&recoveryKeyId&&recoveryIssuer){
+  try {sandboxRecoveryClient=new AppStoreServerAPIClient(recoveryKey,recoveryKeyId,recoveryIssuer,'com.rikuto.mushiverse',Environment.SANDBOX)}
+  catch {console.warn('Sandbox recovery configuration unavailable')}
+}
 
 const server = createServer(async (request, response) => {
   response.setHeader('Cache-Control', 'no-store');
@@ -120,7 +130,7 @@ const server = createServer(async (request, response) => {
         revocationReason, isUpgraded, transactionReason, subscriptionGroupIdentifier, expiresDate, webOrderLineItemId,
         offerType, offerIdentifier, offerDiscountType, offerPeriod } });
     }
-    const transaction = await verifier.verifyAndDecodeTransaction(signedTransaction);
+    let transaction = await verifier.verifyAndDecodeTransaction(signedTransaction);
     let verified;
     try {
       verified = validateVerifiedAppleCoinTransaction(transaction, expected);
@@ -133,8 +143,16 @@ const server = createServer(async (request, response) => {
           : signed > Date.now() + 300000 ? 'future'
           : 'unclassified';
         console.warn('Sandbox signed date diagnostic:', category);
+        if(sandboxRecoveryClient){
+          const recovered=await recoverSandboxDate(transaction,expected,{
+            fetchTransaction:id=>sandboxRecoveryClient.getTransactionInfo(id),
+            verifyTransaction:jws=>verifier.verifyAndDecodeTransaction(jws)
+          });
+          transaction=recovered.transaction;verified=recovered.verified;
+        } else {throw error}
+      } else {
+        throw error;
       }
-      throw error;
     }
     // Preserve only fields already cryptographically verified and policy checked.
     // The Edge Function independently revalidates this signed evidence; never
@@ -183,8 +201,9 @@ const server = createServer(async (request, response) => {
       : error instanceof VerificationException
         ? appleStatuses.get(error.status) ?? 'apple_verification_unknown'
         : 'apple_crypto_or_runtime_rejected';
-    const retryable = error instanceof VerificationException
-      && error.status === VerificationStatus.RETRYABLE_VERIFICATION_FAILURE;
+    const retryable = (error instanceof VerificationException
+      && error.status === VerificationStatus.RETRYABLE_VERIFICATION_FAILURE) ||
+      (error instanceof Error && error.message === 'apple_recovery_unavailable');
     console.warn('sandbox verifier rejected:', reason);
     response.setHeader('X-Mushiverse-Verify-Reason', reason);
     return send(retryable ? 503 : 422, { error: retryable ? 'verification_temporarily_unavailable' : 'verification_failed' });
