@@ -7,7 +7,7 @@ import {appleCoinPacks,isAppleCoinProduct} from '../supabase/functions/_shared/a
 // Supabase client. This checks request behavior without a real Apple purchase,
 // database writes, or a network dependency.
 const file = 'supabase/functions/submit-apple-purchase-claim/index.ts';
-function createHarness({productionEnabled=false,gateOverrides={}}={}) {
+function createHarness({productionEnabled=false,gateOverrides={},verifierConfigured=true,appAppleId=undefined}={}) {
   const source = readFileSync(file, 'utf8')
     .replace(/^import .*;\s*$/gm, '')
     .replace('const json=(b:any,s=200)', 'const json=(b,s=200)')
@@ -54,6 +54,10 @@ function createHarness({productionEnabled=false,gateOverrides={}}={}) {
     return q;
   };
   const client = {
+    rpc:async name=>{
+      assert.equal(name,"get_apple_production_verifier_secret");
+      return {data:verifierConfigured?"1".repeat(64):null,error:null};
+    },
     auth:{getUser:async()=>({data:{user:{id:currentUser,app_metadata:accountFlags}},error:null})},
     from:(table)=>({
       select:(_fields,options)=>queryFor(options,table),
@@ -76,7 +80,7 @@ function createHarness({productionEnabled=false,gateOverrides={}}={}) {
     })
   };
   const deno = {
-    env:{get:()=> 'test-value'},
+    env:{get:key=>key==='APPLE_IAP_APP_APPLE_ID'?appAppleId:'test-value'},
     serve:fn=>{handler=fn;}
   };
   new Function('Deno','createClient','Response','isAppleCoinProduct','appleCoinPacks',source)(deno,()=>client,Response,isAppleCoinProduct,appleCoinPacks);
@@ -109,6 +113,11 @@ test('purchase availability is read-only and respects every production gate',asy
   assert.equal((await open.send(request)).status,403);
   assert.equal(open.rows.length,0);
   assert.equal(closed.rows.length,0);
+  for(const options of [{verifierConfigured:false},{appAppleId:"123"}]) {
+    const unavailable=createHarness({productionEnabled:true,...options});
+    assert.deepEqual(await unavailable.send(request),{status:503,data:{error:"apple_verification_temporarily_unavailable"}});
+    assert.equal(unavailable.rows.length,0);
+  }
 });
 test('accepts an allowlisted coin claim as pending, not as a granted reward',async()=>{
   const h=createHarness();

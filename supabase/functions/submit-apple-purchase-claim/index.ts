@@ -82,6 +82,13 @@ Deno.serve(async(req)=>{
         return json({error:"invalid_availability_request"},400);
       const denied=await productionGate(body.product_id);
       if(denied) return denied;
+      // Check the same fixed app identity and verifier credential as settlement
+      // before StoreKit can charge the user. Never return the credential.
+      if((Deno.env.get("APPLE_IAP_APP_APPLE_ID") ?? "6826061606") !== "6826061606")
+        return json({error:"apple_verification_temporarily_unavailable"},503);
+      const {data:verifierSecret,error:verifierError}=await admin.rpc("get_apple_production_verifier_secret");
+      if(verifierError || typeof verifierSecret!=="string" || !/^[a-f0-9]{64}$/.test(verifierSecret))
+        return json({error:"apple_verification_temporarily_unavailable"},503);
       return json({ok:true,available:true,product_id:body.product_id,coins:appleCoinPacks[body.product_id as keyof typeof appleCoinPacks]});
     }
     const transactionId=body.transaction_id;
